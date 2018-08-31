@@ -1,0 +1,86 @@
+body {}
+
+/*################################ LOGIN ###############################*/
+
+.login_full {
+  height: 350px;
+  width: 500px;
+  margin: 200px auto;
+}
+
+.login {
+  height: 50px;
+  font-size: 20px;
+  color: #253848;
+  line-height: 80px;
+}
+
+.login_main {
+  background-color: skyblue;
+  background-color: blue;
+  border-radius: 5px;
+}
+
+.login_top {
+  height: 75px;
+  background-color: #253848;
+  color: #FFFFFF;
+  font-size: 30px;
+  text-align: center;
+  line-height: 70px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.login_mid {
+  height: 175px;
+  background-color: #f3f3f4;
+  border-bottom: 1px solid #FFFFFF;
+}
+
+.login_mid input {
+  width: 270px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+.login_mid td {
+  height: 50px;
+}
+
+.login_bot {
+  height: 50px;
+  background-color: #f3f3f4;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.login_bot_left {}
+
+.login_bot_right {}
+
+.table_login {
+  width: 80%;
+  padding-top: 30px;
+  margin: 0 auto;
+}
+
+.button {
+  background-color: #FFFFFF;
+  color: #2f4050;
+  border: 1px solid #253848;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 12px;
+  padding: 6px 20px;
+}
+
+.button:hover {
+  background-color: #2f4050;
+  border: 1px solid #253848;
+  color: #FFFFFF;
+  font-size: 12px;
+  padding: 6px 20px;
+  cursor: pointer;
+}

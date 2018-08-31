@@ -1,0 +1,58 @@
+{
+  "name": "device-boilerplate-web",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "app": "./bin/www"
+  },
+  "pkg": {
+    "assets": "views/**/*"
+  },
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "build": "pkg . --out-path dist",
+    "build:win": "pkg . --out-path dist --targets node8-win-x64",
+    "build:linux": "pkg . --out-path dist --targets node8-linux-x64",
+    "build:macos": "pkg . --out-path dist --targets node8-macos-x64"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.116",
+    "docdash": "^1.0.0",
+    "dotenv": "^6.0.0",
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^3.0.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-plugin-react": "^7.11.1",
+    "jsdoc": "^3.5.5",
+    "pkg": "^4.3.4",
+    "prettier": "^1.14.2"
+  },
+  "dependencies": {
+    "base-model-jh": "^1.2.2",
+    "base-util-jh": "^1.1.14",
+    "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.3",
+    "debug": "^3.1.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "express-async-handler": "^1.1.4",
+    "express-mysql-session": "^2.0.1",
+    "express-session": "^1.15.6",
+    "http-errors": "^1.7.0",
+    "lodash": "^4.17.10",
+    "method-override": "^3.0.0",
+    "moment": "^2.22.2",
+    "morgan": "^1.9.0",
+    "mysql": "^2.16.0",
+    "node-cron": "^1.2.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "request": "^2.88.0",
+    "serve-favicon": "^2.5.0",
+    "xlsx": "^0.13.5"
+  }
+}

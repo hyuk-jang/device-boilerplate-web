@@ -1,0 +1,82 @@
+<!--<script>-->
+<%
+menuNum = 1;
+function matchingMenu(base,target) {
+    return base === target ? 'active' : '';
+}
+%>
+<!--</script>-->
+<div class="wrap">
+  <!--네비-->
+  <nav class="navbar navbar-inverse navbar-inverse_st ">
+    <div class="container-fluid container-fluid_st">
+      <div class="navbar-header">
+        <a class="navbar-brand navbar-brand_st" href="/">
+          <img src="image/kepco-01.png" />
+          <h4> &nbsp;&nbsp; 보일러 플레이트</h4>
+          <!--<img src="image/logo_w-04_180.png" />-->
+        </a>
+      </div>
+
+      <ul class="nav nav-pills navbar-nav_st" role="tablist">
+        <li class="<%= matchingMenu(1,menuNum)%>">
+          <a href="/main">
+            <i class="fa fa-home fa-home_st" aria-hidden="true"></i>홈</a>
+        </li>
+        <li class="<%= matchingMenu(2,menuNum)%>"><a href="/structure"> <i class="fa  fa-sitemap fa-home_st"
+              aria-hidden="true"></i>구성도</a></li>
+        <li class="<%= matchingMenu(3,menuNum)%>">
+          <a href="/connector">
+            <i class="fa fa-object-group fa-home_st" aria-hidden="true"></i>접속반</a>
+        </li>
+        <li class="<%= matchingMenu(4,menuNum)%>">
+          <a href="/inverter">
+            <i class="fa fa-server fa-home_st" aria-hidden="true"></i>인버터</a>
+        </li>
+        <li class="<%= matchingMenu(5,menuNum)%>">
+          <a href="/trend">
+            <i class="fa fa-bar-chart fa-home_st" aria-hidden="true"></i>트렌드</a>
+        </li>
+        <li class="<%= matchingMenu(6,menuNum)%>">
+          <a href="/report">
+            <i class="fa fa-pencil-square-o fa-home_st" aria-hidden="true"></i>보고서</a>
+        </li>
+        <li class="<%= matchingMenu(7,menuNum)%>">
+          <a href="/alarm">
+            <i class="fa fa-bullhorn fa-home_st" aria-hidden="true"></i>경보</a>
+        </li>
+        <li class="<%= matchingMenu(8,menuNum)%>"><a href="http://smtb.iptime.org:7502" target="_blank"> <i class="fa fa-camera-retro fa-home_st"
+              aria-hidden="true"></i>cctv</a></li>
+      </ul>
+
+    </div>
+
+    <div class="row nav_row">
+      <div class="nav_row_st">
+        <div class="nav_row_st_img">
+          <!-- <img src="image/logo.png" /> -->
+          <img src="image/con_p.png" />
+          <span>지점 1</span>
+        </div>
+
+        <div class="nav_row_st_right">
+          <span style="margin-right:40px;" id="today"></span>
+          <script>
+            var today = new Date();
+            var week = new Array('일', '월', '화', '수', '목', '금', '토');
+            $('#today').html(today.getFullYear() + '.' + (today.getMonth() + 1) + '.' + today.getDate() + '(' + week[
+              today.getDay()] + ')');
+
+            
+          </script>
+          <span>날씨</span>
+
+          <img src="image/weather_0.png" />
+          <!-- <img src="image/weather_1.png" /> -->
+
+          <input type="text" class="form-control" style="text-align: center" value="10">
+          <span class="Temperature">℃</span>
+        </div>
+      </div>
+    </div>
+  </nav>

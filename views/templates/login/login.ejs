@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>회원 로그인</title>
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <link href="/css/loginStyle.css" rel="stylesheet" />
+  <style>
+    .login_top b {
+      font-size: 12px;
+    }
+
+    .login_bot {
+      background-color: #f3f3f4;
+      overflow: hidden;
+    }
+
+    .outPutMessage {
+      float: left;
+      width: 350px;
+      height: 50px;
+      font-size: 13px;
+      color: red;
+      font-weight: bold;
+      line-height: 50px;
+    }
+
+    .loginButton {
+      float: left;
+    }
+
+    .loginButton input {
+      float: right;
+      margin: 11px 53px 0 0;
+    }
+
+    table td {
+      text-align: center
+    }
+
+    table td span {
+      font-weight: bold;
+      line-height: 1px;
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+  <form id="form1" action="/auth/login" method="post">
+    <div class="login_full">
+
+      <div class="login_main">
+        <div class="login_top">
+          보일러 플레이트 로그인
+          <b>v1.0</b>
+        </div>
+
+        <div class="login_mid">
+
+          <table class="table_login">
+            <tr>
+              <td class="logLabel" width="25%">
+                <span>아이디</span>
+              </td>
+              <td class="inputLabel" width="75%">
+                <input type="text" maxlength="15" name="userid" id="userid" placeholder="아이디를 입력해주세요" />
+              </td>
+            </tr>
+            <tr>
+              <td class="logLabel">
+                <span>비밀번호</span>
+              </td>
+              <td class="inputLabel">
+                <input type="password" name="password" maxlength="15" onkeypress="loginPress(event)" id="password"
+                  placeholder="비밀번호를 입력해주세요" />
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div id="login_bot" class="login_bot">
+          <div class="inputMessage">
+            <div id="textErrorMessage"></div>
+          </div>
+
+          <div class="loginButton">
+            <input class="button" type="button" value="로그인" onclick="login()" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </form>
+
+
+
+
+  <script>
+    var message = "<%- message %>";
+    console.log(message)
+    if (message.length) {
+      $("#textErrorMessage").html(message);
+    }
+
+    function loginPress(event) {
+      if (event.keyCode == 13) {
+        login()
+      }
+    }
+
+    function login() {
+      var form1 = document.getElementById("form1");
+      var id = form1.id.value;
+      var password = form1.password.value;
+
+      if (id == "") {
+        $("#textErrorMessage").html(
+          "아이디를 입력하세요.");
+        return;
+      }
+
+
+      if (password == "") {
+        $("#textErrorMessage").html(
+          "비밀번호를 입력하세요");
+        return;
+      }
+
+      form1.submit();
+    }
+  </script>
+
+</body>
+
+</html>
