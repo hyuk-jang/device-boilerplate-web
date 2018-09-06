@@ -13,6 +13,7 @@ const {BU} = require('base-util-jh');
 
 const app = require('../app');
 
+global.app = app;
 /**
  * Get port from environment and store in Express.
  */
@@ -45,8 +46,6 @@ app.use(
     },
   }),
 );
-
-global.app = app;
 
 /**
  * Create HTTP server.

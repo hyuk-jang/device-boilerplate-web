@@ -17,9 +17,9 @@ const flash = require('connect-flash');
 const favicon = require('serve-favicon');
 const indexRouter = require('./routes/index');
 
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/users/users');
 
-app.use(favicon(path.join(process.cwd(), 'public/img', 'favicon.ico')));
+app.use(favicon(path.join(process.cwd(), 'public/image', 'favicon.ico')));
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -50,8 +50,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// require('./routes')(app);
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
