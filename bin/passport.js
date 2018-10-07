@@ -4,7 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const {BU} = require('base-util-jh');
 
-const BiAuth = require('../models/auth/BiAuth');
+const BiAuth = require('../../models/auth/BiAuth');
 
 /**
  *

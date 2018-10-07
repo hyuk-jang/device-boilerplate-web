@@ -5,11 +5,13 @@
  */
 
 const debug = require('debug')('device-boilerplate-web:server');
-const http = require('http');
+let http = require('http');
+
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
-const {BU} = require('base-util-jh');
+const { BU } = require('base-util-jh');
+const MainControl = require('../src/MainControl');
 
 const app = require('../app');
 
@@ -18,18 +20,19 @@ global.app = app;
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.WEB_PORT || '3000');
+const port = normalizePort(process.env.WEB_HTTP_PORT || '3000');
 app.set('port', port);
 
 /**
  * Set Customize
  */
+
 const dbInfo = {
-  port: process.env.DB_PORT ? process.env.DB_PORT : '3306',
-  host: process.env.DB_HOST ? process.env.DB_HOST : 'localhost',
-  user: process.env.DB_USER ? process.env.DB_USER : 'root',
-  password: process.env.DB_PW ? process.env.DB_PW : 'test',
-  database: process.env.DB_DB ? process.env.DB_DB : 'test',
+  port: process.env.WEB_DB_PORT ? process.env.WEB_DB_PORT : '3306',
+  host: process.env.WEB_DB_HOST ? process.env.WEB_DB_HOST : 'localhost',
+  user: process.env.WEB_DB_USER ? process.env.WEB_DB_USER : 'root',
+  password: process.env.WEB_DB_PW ? process.env.WEB_DB_PW : 'test',
+  database: process.env.WEB_DB_DB ? process.env.WEB_DB_DB : 'test',
 };
 
 app.set('dbInfo', dbInfo);
@@ -58,10 +61,28 @@ const server = http.createServer(app);
  */
 
 server.listen(port, () => {
+  operationController();
   console.log(`Server ${port} is Listening`);
 });
 server.on('error', onError);
 server.on('listening', onListening);
+
+// 컨트롤러 구동 시작
+async function operationController() {
+  try {
+    BU.CLI(process.env.DEV_MODE);
+    /** Web Socket Binding */
+    http = http.Server(app);
+    const mainControl = new MainControl(dbInfo);
+    await mainControl.init();
+    // mainControl.dataStorageManager.setSocketIO(http);
+    // 전역 변수로 설정
+    global.mainStorageList = mainControl.dataStorageManager.mainStorageList;
+  } catch (error) {
+    BU.CLI(error);
+    BU.errorLog('init', 'mainError', error);
+  }
+}
 
 /**
  * Normalize a port into a number, string, or false.

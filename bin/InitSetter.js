@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 const request = require('request');
 const os = require('os');
-const {BU} = require('base-util-jh');
+const { BU } = require('base-util-jh');
 
 const _ = require('lodash');
 const map = require('../public/Map/map.json');
 
-const {init} = require('../config.js');
+const { init } = require('../config.js');
 
 class InitSetter {
   /**
@@ -23,7 +23,7 @@ class InitSetter {
   // 최초 암호화 알고리즘 설정
   generateAlice() {
     // crypto 설정
-    const {prime_key} = this.config.cryptoInfo;
+    const { prime_key } = this.config.cryptoInfo;
     const alice = crypto.createDiffieHellman(Buffer.from(prime_key, 'hex'));
     alice.generateKeys();
     this.config.cryptoInfo.alicePub = alice.getPublicKey();

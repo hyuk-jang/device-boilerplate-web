@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const router = require('express').Router();
 const _ = require('lodash');
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const BiModule = require('../models/BiModule.js');
 const BiDevice = require('../models/BiDevice');
@@ -33,7 +33,7 @@ module.exports = app => {
       /** @type {V_UPSAS_PROFILE[]} */
       const viewPowerProfile = await biModule.getTable(
         'v_upsas_profile',
-        {main_seq: user.main_seq},
+        { main_seq: user.main_seq },
         false,
       );
       req.locals.viewPowerProfile = viewPowerProfile;
@@ -125,7 +125,7 @@ module.exports = app => {
         2,
       );
 
-      const chartOption = {selectKey: 'interval_power', dateKey: 'view_date', hasArea: true};
+      const chartOption = { selectKey: 'interval_power', dateKey: 'view_date', hasArea: true };
       const chartData = webUtil.makeDynamicChartData(inverterTrend, chartOption);
 
       // BU.CLI(chartData);
@@ -190,12 +190,12 @@ module.exports = app => {
       // BU.CLI(inverterDataList);
 
       const earthModuleTemp = _(inverterDataList)
-        .filter({install_place: '육상'})
+        .filter({ install_place: '육상' })
         .map('moduleRearTemperature')
         .mean();
 
       const waterModuleTemp = _(inverterDataList)
-        .filter({install_place: '수중'})
+        .filter({ install_place: '수중' })
         .map('moduleRearTemperature')
         .mean();
       // BU.CLIS(earthModuleTemp, waterModuleTemp)

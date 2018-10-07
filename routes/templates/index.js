@@ -1,6 +1,6 @@
 const request = require('request');
 const path = require('path');
-const {BU, DU, SU} = require('base-util-jh');
+const { BU, DU, SU } = require('base-util-jh');
 
 const expressApp = require('express')();
 

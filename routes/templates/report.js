@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const router = require('express').Router();
 const _ = require('lodash');
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const webUtil = require('../models/web.util');
 
@@ -31,7 +31,7 @@ module.exports = app => {
       /** @type {V_UPSAS_PROFILE[]} */
       const viewPowerProfile = await powerModel.getTable(
         'v_upsas_profile',
-        {main_seq: user.main_seq},
+        { main_seq: user.main_seq },
         false,
       );
       req.locals.viewPowerProfile = viewPowerProfile;
@@ -57,7 +57,7 @@ module.exports = app => {
       let inverterSeqList = [];
       if (BU.isNumberic(req.query.inverter_seq)) {
         inverterSeqList = Number(req.query.inverter_seq);
-        viewPowerProfileList = _.filter(viewPowerProfileList, {inverter_seq: inverterSeqList});
+        viewPowerProfileList = _.filter(viewPowerProfileList, { inverter_seq: inverterSeqList });
       } else {
         inverterSeqList = _.map(viewPowerProfileList, 'inverter_seq');
       }
@@ -96,7 +96,7 @@ module.exports = app => {
       searchRange.pageListCount = 20;
 
       /** @type {INVERTER[]} */
-      const inverterList = await powerModel.getTable('inverter', {inverter_seq: inverterSeqList});
+      const inverterList = await powerModel.getTable('inverter', { inverter_seq: inverterSeqList });
       const reportList = await powerModel.getInverterReport(searchRange, inverterSeqList);
       // BU.CLI(userInfo);
       const calendarEventList = await powerModel.getCalendarEventList(userInfo);

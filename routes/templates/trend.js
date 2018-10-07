@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const router = require('express').Router();
 const _ = require('lodash');
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 // const BiModule = require('../models/BiModule.js');
 const webUtil = require('../models/web.util');
@@ -32,7 +32,7 @@ module.exports = app => {
       /** @type {V_UPSAS_PROFILE[]} */
       const viewPowerProfile = await powerModel.getTable(
         'v_upsas_profile',
-        {main_seq: user.main_seq},
+        { main_seq: user.main_seq },
         false,
       );
       req.locals.viewPowerProfile = viewPowerProfile;
@@ -62,7 +62,7 @@ module.exports = app => {
       let deviceSeqList = [];
       if (BU.isNumberic(req.query.device_seq)) {
         deviceSeqList = Number(req.query.device_seq);
-        viewPowerProfileList = _.filter(viewPowerProfileList, {inverter_seq: deviceSeqList});
+        viewPowerProfileList = _.filter(viewPowerProfileList, { inverter_seq: deviceSeqList });
       } else {
         deviceSeqList = _.map(viewPowerProfileList, 'inverter_seq');
       }
@@ -154,7 +154,7 @@ module.exports = app => {
       } = await powerModel.getInverterChart(searchOption, searchRange, betweenDatePoint);
       // BU.CLI(inverterTrend);
       // 차트 Range 지정
-      const powerChartData = {range: betweenDatePoint.shortTxtPoint, series: []};
+      const powerChartData = { range: betweenDatePoint.shortTxtPoint, series: [] };
       // 차트 합침
       powerChartData.series = inverterPowerChartData.series;
       // BU.CLI(powerChartData)

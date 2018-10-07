@@ -1,6 +1,6 @@
 const _ = require('lodash');
-const {BM} = require('base-model-jh');
-const {BU} = require('base-util-jh');
+const { BM } = require('base-model-jh');
+const { BU } = require('base-util-jh');
 
 require('../../../module/default-intelligence');
 
@@ -162,7 +162,7 @@ class BiModule extends BM {
   async getModuleStatus(photovoltaic_seq) {
     let returnValue = [];
     if (_.isNumber(photovoltaic_seq) || _.isArray(photovoltaic_seq)) {
-      returnValue = await this.getTable('v_module_status', {photovoltaic_seq}, false);
+      returnValue = await this.getTable('v_module_status', { photovoltaic_seq }, false);
       return returnValue;
     }
     returnValue = await this.getTable('v_module_status');
@@ -379,10 +379,10 @@ class BiModule extends BM {
     // deviceType = deviceType || 'all';
     // if (deviceType === 'all' || deviceType === 'inverter') {
     /** @type {INVERTER[]} */
-    let inverterList = await this.getTable('inverter', {inverter_seq: inverterSeqList});
+    let inverterList = await this.getTable('inverter', { inverter_seq: inverterSeqList });
     inverterList = _.sortBy(inverterList, 'chart_sort_rank');
     _.forEach(inverterList, info => {
-      returnValue.push({type: 'inverter', seq: info.inverter_seq, target_name: info.target_name});
+      returnValue.push({ type: 'inverter', seq: info.inverter_seq, target_name: info.target_name });
     });
     // }
     // 인버터 이름순으로 정렬

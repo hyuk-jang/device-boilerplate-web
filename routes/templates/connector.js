@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const router = require('express').Router();
 const _ = require('lodash');
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const BiModule = require('../models/BiModule.js');
 const BiDevice = require('../models/BiDevice');
@@ -34,7 +34,7 @@ module.exports = app => {
       /** @type {V_UPSAS_PROFILE[]} */
       const viewPowerProfile = await biModule.getTable(
         'v_upsas_profile',
-        {main_seq: user.main_seq},
+        { main_seq: user.main_seq },
         false,
       );
       req.locals.viewPowerProfile = viewPowerProfile;
@@ -91,7 +91,7 @@ module.exports = app => {
       validModuleStatusList.forEach(validInfo => {
         const hasOperation = validInfo.hasValidData;
         // let hasOperation = true;
-        const {amp, vol, moduleRearTemperature, brineTemperature} = validInfo.data;
+        const { amp, vol, moduleRearTemperature, brineTemperature } = validInfo.data;
 
         const findIt = _.find(refinedConnectorList, {
           photovoltaic_seq: validInfo.data.photovoltaic_seq,

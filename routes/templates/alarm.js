@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const router = require('express').Router();
 const _ = require('lodash');
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const BiModule = require('../models/BiModule.js');
 const webUtil = require('../models/web.util');
@@ -27,7 +27,7 @@ module.exports = app => {
       /** @type {V_UPSAS_PROFILE[]} */
       const viewPowerProfile = await biModule.getTable(
         'v_upsas_profile',
-        {main_seq: user.main_seq},
+        { main_seq: user.main_seq },
         false,
       );
       req.locals.viewPowerProfile = viewPowerProfile;
@@ -83,7 +83,7 @@ module.exports = app => {
       searchRange.page = Number(param_page);
       searchRange.pageListCount = 20;
 
-      let troubleReport = {totalCount: 0, report: []};
+      let troubleReport = { totalCount: 0, report: [] };
 
       if (deviceType === 'inverter') {
         troubleReport = await biModule.getAlarmReportForInverter(
@@ -120,15 +120,15 @@ module.exports = app => {
       );
 
       const device_type_list = [
-        {type: 'all', name: '전체'},
-        {type: 'inverter', name: '인버터'},
-        {type: 'connector', name: '접속반'},
+        { type: 'all', name: '전체' },
+        { type: 'inverter', name: '인버터' },
+        { type: 'connector', name: '접속반' },
       ];
 
       const error_status_list = [
-        {type: 'all', name: '전체'},
-        {type: 'deviceError', name: '장치 오류'},
-        {type: 'systemError', name: '시스템 오류'},
+        { type: 'all', name: '전체' },
+        { type: 'deviceError', name: '장치 오류' },
+        { type: 'systemError', name: '시스템 오류' },
       ];
 
       // 차트 제어 및 자질 구래한 데이터 모음

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const _ = require('lodash');
 
-const {BU, DU} = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 module.exports = app => {
   // server middleware

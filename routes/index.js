@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const {BU} = require('base-util-jh');
+const { BU } = require('base-util-jh');
 
 const users = require('./users/users');
 
@@ -20,7 +20,7 @@ router.use(
 /* GET home page. */
 router.get('/', (req, res) => {
   BU.CLI(global.app.get('dbInfo'));
-  res.render('index', {title: 'Express'});
+  res.render('index', { title: 'Express' });
 });
 
 router.get(

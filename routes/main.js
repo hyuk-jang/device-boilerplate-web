@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const {BU} = require('base-util-jh');
+const { BU } = require('base-util-jh');
 
 // server middleware
 // router.use(
@@ -16,7 +16,7 @@ const {BU} = require('base-util-jh');
 router.get('/', (req, res, next) => {
   BU.CLIN(app);
   BU.CLI(app.get('dbInfo'));
-  res.render('index', {title: 'Express'});
+  res.render('index', { title: 'Express' });
 });
 
 router.get(

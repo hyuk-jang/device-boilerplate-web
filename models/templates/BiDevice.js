@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const {BU} = require('base-util-jh');
+const { BU } = require('base-util-jh');
 const moment = require('moment');
 
 const BiModule = require('./BiModule');
@@ -26,7 +26,11 @@ class BiDevice extends BiModule {
     // BU.CLI(placeSeqList);
     // 추출된 seqList를 기준으로 장소 관계를 불러옴
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeList = await this.getTable('v_dv_place_relation', {place_seq: placeSeqList}, false);
+    const placeList = await this.getTable(
+      'v_dv_place_relation',
+      { place_seq: placeSeqList },
+      false,
+    );
     return placeList;
   }
 
@@ -43,7 +47,7 @@ class BiDevice extends BiModule {
       return receiveObjList;
     }
     // 검색 조건에 맞는 데이터
-    const filteringPlaceList = _.filter(placeList, {nd_target_id: pickId});
+    const filteringPlaceList = _.filter(placeList, { nd_target_id: pickId });
     // BU.CLI(filteringPlaceList);
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
@@ -68,17 +72,17 @@ class BiDevice extends BiModule {
     // 검색 결과 노드를 순회
     _.forEach(nodeDataList, nodeInfo => {
       // 장소 정보 테이블 Row 정보
-      const filteringPlaceInfo = _.find(filteringPlaceList, {node_seq: nodeInfo.node_seq});
+      const filteringPlaceInfo = _.find(filteringPlaceList, { node_seq: nodeInfo.node_seq });
       // 수신 받은 데이터 객체 정보
-      const receiveObj = _.find(receiveObjList, {place_seq: filteringPlaceInfo.place_seq});
+      const receiveObj = _.find(receiveObjList, { place_seq: filteringPlaceInfo.place_seq });
 
       const diffNum = now.diff(moment(nodeInfo.writeDate), 'minutes');
       // 10분을 벗어나면 데이터 가치가 없다고 판단
       if (diffNum < 10) {
         // 키 확장
-        _.assign(receiveObj, {[pickId]: _.get(nodeInfo, 'node_data')});
+        _.assign(receiveObj, { [pickId]: _.get(nodeInfo, 'node_data') });
       } else {
-        _.assign(receiveObj, {[pickId]: null});
+        _.assign(receiveObj, { [pickId]: null });
       }
     });
 
@@ -140,7 +144,7 @@ class BiDevice extends BiModule {
       return returnValue;
     }
     // 검색 조건에 맞는 데이터
-    const filterdPlaceRelationList = _.filter(placeRelationList, {nd_target_id: pickId});
+    const filterdPlaceRelationList = _.filter(placeRelationList, { nd_target_id: pickId });
     // BU.CLI(filteringPlaceList);
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
@@ -206,7 +210,7 @@ class BiDevice extends BiModule {
     // return;
     /** Grouping Chart에 의미있는 이름을 부여함. */
     sensorChart.series.forEach(seriesInfo => {
-      const sensorInfo = _.find(sensorTrend, {node_seq: _.toNumber(seriesInfo.name)});
+      const sensorInfo = _.find(sensorTrend, { node_seq: _.toNumber(seriesInfo.name) });
       if (!_.isEmpty(sensorInfo)) {
         seriesInfo.name = _.find(viewUpsasProfileList, {
           inverter_seq: _.get(sensorInfo, 'inverter_seq'),

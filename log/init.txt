@@ -1,0 +1,64 @@
+Info : 2018-10-07 23:48:39
+    at new SocketIoManager (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\src\DataStorageManager\SocketIoManager.js:33:30)
+	err Message : mainError
+
+Info : 2018-10-07 23:49:04
+    at new SocketIoManager (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\src\DataStorageManager\SocketIoManager.js:31:30)
+	err Message : mainError
+
+Info : 2018-10-07 23:49:08
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-07 23:49:53
+    at new SocketIoManager (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\src\DataStorageManager\SocketIoManager.js:31:30)
+	err Message : mainError
+
+Info : 2018-10-07 23:50:29
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-07 23:50:50
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-08 00:11:56
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-08 00:13:05
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-08 00:14:02
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-08 00:15:13
+    at Handshake.Sequence._packetToError (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2018-10-08 00:15:43
+    at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+
+Info : 2018-10-08 00:16:10
+    at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+
+Info : 2018-10-08 00:17:20
+    at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+
+Info : 2018-10-08 00:18:28
+    at MainControl.init (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\src\MainControl.js:15:7)
+	err Message : mainError
+
+Info : 2018-10-08 00:19:14
+    at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+
+Info : 2018-10-08 00:19:25
+    at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+

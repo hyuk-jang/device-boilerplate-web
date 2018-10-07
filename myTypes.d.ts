@@ -1,6 +1,6 @@
 import { CU } from 'base-util-jh';
 import { Moment } from 'moment';
-import express from 'express'
+import express from 'express';
 
 
 const {Timer} = CU;
