@@ -55,14 +55,11 @@ const dbInfo = {
 };
 
 app.set('dbInfo', dbInfo);
-app.set('passport', passport(app, dbInfo));
-
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 
 app.use(
   session({
-    key: 'sid',
     secret: BU.GUID(),
     store: new MySQLStore(dbInfo),
     resave: false,
@@ -72,6 +69,8 @@ app.use(
     },
   }),
 );
+
+app.set('passport', passport(app, dbInfo));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -95,25 +94,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 인증 시행 여부
 app.set('auth', process.env.DEV_MODE);
 
-app.use('/', require('./routes/auth.2')(app));
-// app.use('/', authRouter);
+// app.use('/', require('./routes/auth.2')(app));
+app.use('/', authRouter);
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
-});
-
-// error handler
-app.use((err, req, res, next) => {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
 
 module.exports = app;
