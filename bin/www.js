@@ -27,28 +27,28 @@ app.set('port', port);
  * Set Customize
  */
 
-const dbInfo = {
-  port: process.env.WEB_DB_PORT ? process.env.WEB_DB_PORT : '3306',
-  host: process.env.WEB_DB_HOST ? process.env.WEB_DB_HOST : 'localhost',
-  user: process.env.WEB_DB_USER ? process.env.WEB_DB_USER : 'root',
-  password: process.env.WEB_DB_PW ? process.env.WEB_DB_PW : 'test',
-  database: process.env.WEB_DB_DB ? process.env.WEB_DB_DB : 'test',
-};
+// const dbInfo = {
+//   port: process.env.WEB_DB_PORT || '3306',
+//   host: process.env.WEB_DB_HOST || 'localhost',
+//   user: process.env.WEB_DB_USER || 'root',
+//   password: process.env.WEB_DB_PW || 'test',
+//   database: process.env.WEB_DB_DB || 'test',
+// };
 
-app.set('dbInfo', dbInfo);
+// app.set('dbInfo', dbInfo);
 
-app.use(
-  session({
-    key: 'sid',
-    secret: BU.GUID(),
-    store: new MySQLStore(dbInfo),
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1일
-    },
-  }),
-);
+// app.use(
+//   session({
+//     key: 'sid',
+//     secret: BU.GUID(),
+//     store: new MySQLStore(dbInfo),
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: {
+//       maxAge: 1000 * 60 * 60 * 24, // 1일
+//     },
+//   }),
+// );
 
 /**
  * Create HTTP server.
@@ -70,10 +70,10 @@ server.on('listening', onListening);
 // 컨트롤러 구동 시작
 async function operationController() {
   try {
-    BU.CLI(process.env.DEV_MODE);
+    // BU.CLI(process.env.DEV_MODE);
     /** Web Socket Binding */
     http = http.Server(app);
-    const mainControl = new MainControl(dbInfo);
+    const mainControl = new MainControl(app.get('dbInfo'));
     await mainControl.init();
     // mainControl.dataStorageManager.setSocketIO(http);
     // 전역 변수로 설정

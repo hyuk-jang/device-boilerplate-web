@@ -7,15 +7,21 @@ const { BU } = require('base-util-jh');
 
 const users = require('./users/users');
 
-router.use('/users', users);
+// router.use('/users', users);
 
-// server middleware
-router.use(
-  asyncHandler(async (req, res, next) => {
-    BU.CLI('middile Ware');
-    next();
-  }),
-);
+// // server middleware
+// router.use((req, res, next) => {
+//   BU.CLI(req.user);
+//   // if (global.app.get('auth')) {
+//   //   BU.CLIN(req.user);
+//   //   if (!req.user) {
+//   //     return res.redirect('/auth/login');
+//   //   }
+//   // }
+
+//   BU.CLI('middile Ware');
+//   next();
+// });
 
 /* GET home page. */
 router.get('/', (req, res) => {
@@ -26,7 +32,7 @@ router.get('/', (req, res) => {
 router.get(
   '/main',
   asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
+    BU.CLIN(req.user);
     res.render('./main/index', req.locals);
   }),
 );

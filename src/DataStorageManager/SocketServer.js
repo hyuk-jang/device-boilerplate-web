@@ -17,9 +17,9 @@ class SocketServer extends EventEmitter {
    *
    * @param {socketServerConfig} config
    */
-  constructor(config) {
+  constructor(config = socketServerConfig) {
     super();
-    this.config = config || socketServerConfig;
+    this.config = config;
 
     /** 해당 Socket Serve를 감시하고 있는 객체 */
     this.observerList = [];

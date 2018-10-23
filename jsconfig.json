@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES6"
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["./*"]
+    }
   },
-  "exclude": ["node_modules", "**/node_modules/*"],
-  "typeAcquisition": {
-    "include": ["lodash"]
-  }
+  "exclude": ["node_modules", "**/node_modules/*"]
 }

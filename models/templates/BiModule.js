@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { BM } = require('base-model-jh');
 const { BU } = require('base-util-jh');
 
-require('../../../module/default-intelligence');
+require('../../../default-intelligence');
 
 /**
  * @typedef {Object[]} weatherRowDataPacketList

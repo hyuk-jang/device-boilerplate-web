@@ -37,7 +37,7 @@ class Control {
    * Main Storage List를 설정하고 자식들을 구동
    */
   async init() {
-    BU.CLI('?');
+    // BU.CLI('?');
     await this.setMainStorageByDB();
 
     // BU.CLIN(this.mainStorageList);

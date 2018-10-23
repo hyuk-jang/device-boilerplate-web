@@ -62,3 +62,15 @@ Info : 2018-10-08 00:19:25
     at new PoolConfig (D:\Project\year_2018\upsas\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
 	err Message : mainError
 
+Info : 2018-10-23 11:13:37
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:76:41)
+	err Message : mainError
+
+Info : 2018-10-23 11:14:15
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:76:41)
+	err Message : mainError
+
+Info : 2018-10-23 11:14:28
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:76:41)
+	err Message : mainError
+

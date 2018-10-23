@@ -57,7 +57,6 @@ class BiAuth extends BM {
     // const hashPw = await encryptPbkdf2(loginInfo.userId, memberInfo.pw_salt);
     const hashPw = await EU.encryptPbkdf2(loginInfo.password, memberInfo.pw_salt);
     if (_.isEqual(hashPw, memberInfo.pw_hash)) {
-      // BU.CLI(memberInfo);
       return memberInfo;
     }
     // return {};

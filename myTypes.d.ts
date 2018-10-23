@@ -1,10 +1,7 @@
-import { CU } from 'base-util-jh';
-import { Moment } from 'moment';
-import express from 'express';
+import BiAuth from './models/templates/auth/BiAuth';
+import BiModule from './models/templates/BiModule';
 
-
-const {Timer} = CU;
 declare global {
-  const Timer: Timer;
-  const Moment: Moment;
+  const BiAuth: BiAuth;
+  const BiModule: BiModule;
 }
