@@ -5,33 +5,16 @@ const passport = require('passport');
 const request = require('request');
 const { BU, DU, EU } = require('base-util-jh');
 
-const BiAuth = require('../models/auth/BiAuth');
-
 // const SITE_HEADER = '';
 const SITE_HEADER = 'auth/';
 
-// server middleware
-// router.use(
-//   asyncHandler(async (req, res, next) => {
-//     BU.CLIN(req.user);
-//     if (global.app.get('auth')) {
-//       if (req.user) {
-//         return res.redirect('/main');
-//       }
-//     }
-
-//     next();
-//   }),
-// );
-
-router.get('/auth', (req, res) => {
-  console.dir(req.user);
-  res.send(req.user);
+router.get('/', (req, res) => {
+  res.send('default main');
 });
 
-router.get('/auth/login', (req, res) => {
+router.get('/login', (req, res) => {
   if (global.app.get('auth') === 'dev') {
-    global.app.set('auth', true);
+    // global.app.set('auth', true);
     if (!req.user) {
       request.post(
         {
@@ -42,26 +25,25 @@ router.get('/auth/login', (req, res) => {
             password: 'smsoftware',
           },
         },
-        (err, httpResponse, msg) => res.redirect(`/${process.env.DEV_PAGE}`),
+        (err, httpResponse, msg) => res.redirect('/intersection'),
+        // (err, httpResponse, msg) => res.redirect(`/${process.env.DEV_PAGE}`),
       );
     }
   } else {
-    BU.CLI('???');
-    BU.CLIN(req.user);
     return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error') });
   }
 });
 
 router.post(
-  '/auth/login',
+  '/login',
   passport.authenticate('local', {
-    successRedirect: '/auth',
-    failureRedirect: '/auth/login',
+    successRedirect: '/intersection',
+    failureRedirect: `./${SITE_HEADER}fuck`,
     failureFlash: true,
   }),
 );
 
-router.get('logout', (req, res) => {
+router.get('/logout', (req, res) => {
   req.logOut();
 
   req.session.save(err => {
@@ -75,20 +57,20 @@ router.get('logout', (req, res) => {
 router.post(
   '/temp-join',
   asyncHandler(async (req, res) => {
-    BU.CLIS('tempJoin', req.body, req.query, req.params);
+    // BU.CLIS('tempJoin', req.body, req.query, req.params);
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
-    const { password = '', user_id = '' } = _.pick(req.body, ['user_id', 'password', 'nickname']);
+    const { password = '', userid = '' } = _.pick(req.body, ['userid', 'password', 'nickname']);
 
     // 입력된 id와 pw 가 string이 아닐 경우
-    if (user_id.length === 0 || password.length === 0) {
-      return res.status(500).send(DU.locationAlertGo('입력한 정보를 확인해주세요.', '/auth/login'));
+    if (userid.length === 0 || password.length === 0) {
+      return res.status(500).send(DU.locationAlertGo('입력한 정보를 확인해주세요.', '/login'));
     }
 
     /** @type {MEMBER} */
     const whereInfo = {
-      user_id,
+      user_id: userid,
       is_deleted: 0,
     };
 
@@ -96,7 +78,7 @@ router.post(
     const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
     // BU.CLI(memberInfo);
     if (!_.isEmpty(memberInfo)) {
-      return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/auth/login'));
+      return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/login'));
     }
 
     const salt = BU.genCryptoRandomByte(16);
@@ -109,7 +91,7 @@ router.post(
     }
 
     /** @type {MEMBER} */
-    const newMemberInfo = { user_id };
+    const newMemberInfo = { user_id: userid };
 
     await biAuth.setMember(password, newMemberInfo);
 

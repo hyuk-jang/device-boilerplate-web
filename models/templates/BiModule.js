@@ -251,7 +251,7 @@ class BiModule extends BM {
     const sql = `
       SELECT *, 
               ABS(CURRENT_TIMESTAMP() - applydate) AS cur_interval 
-       FROM kma_data 
+       FROM wc_kma_data 
       WHERE weather_location_seq = ${weatherLocationSeq}
       ORDER BY cur_interval 
       LIMIT 1

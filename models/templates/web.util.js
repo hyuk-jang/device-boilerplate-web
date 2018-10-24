@@ -160,12 +160,22 @@ exports.calcValidDataList = calcValidDataList;
 
 /**
  * 값을 합산
- * @param {Array.<{Object}>} dataList Object List
+ * @param {Object[]} dataList Object List
  * @param {string} key 계산 Key
- * @return {number|string} 계산 결과 값 or ''
+ * @return {number} 계산 결과 값 or ''
  */
 function reduceDataList(dataList, key) {
-  const returnNumber = _.sum(_.map(dataList, key));
+  const returnNumber = _.sum(
+    _.map(dataList, dataInfo => {
+      const data = _.get(dataInfo, key, '');
+
+      if (BU.isNumberic(data)) {
+        return Number(data);
+      }
+      return 0;
+    }),
+  );
+  // BU.CLI(returnNumber);
   return _.isNumber(returnNumber) ? returnNumber : '';
 }
 exports.reduceDataList = reduceDataList;

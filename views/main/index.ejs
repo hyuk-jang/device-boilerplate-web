@@ -3,508 +3,209 @@
 
 <head>
   <%- include("../master/head.ejs") %>
-  <script src="js/hichart/highcharts.src.js"></script>
-  <script src="js/hichart/highcharts-more.js"></script>
-  <script src="js/hichart/solid-gauge.js"></script>
+
 </head>
 
 <body>
+  <div style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+    <div class="warp">
+      <%- include("../master/header.ejs") %>
 
-  <!--네비-->
-  <%- include("../master/header.ejs") %>
-  <!--메인-->
-  <div class="jumbotron text-center jumbotron_st">
-    <div class="row row_st">
+      <!--메인-->
+      <div class="containerb text-center">
 
-      <!--콘텐츠왼쪽-->
-      <div class="col-xs-3 power">
-        <div class="row power_1">
-          <h4>전력 생산 현황</h4>
-        </div>
-
-        <div class="row power_2">
-          <p>현재출력 </p>
-          <input type="text" name="kW" value=<%- powerGenerationInfo.currKw %>>
-          <span>kW</span>
-        </div>
-
-        <div class="row power_2">
-          <p>금일발전량</p>
-          <input type="text" name="kW" value=<%- powerGenerationInfo.dailyPower %>>
-          <span>kWh</span>
-        </div>
-
-        <div class="row power_2">
-          <p>당월발전량</p>
-          <input type="text" name="kW" value=<%- powerGenerationInfo.monthPower %>>
-          <span>kWh</span>
-        </div>
-
-        <div class="row power_2">
-          <p>누적발전량</p>
-          <input type="text" name="kW" value=<%- powerGenerationInfo.cumulativePower %>>
-          <span>MWh</span>
-        </div>
-
-        <div class="row power_2">
-          <p>CO₂ 저감량</p>
-          <input type="text" name="CO₂" value=<%- powerGenerationInfo.co2 %>>
-          <span>Ton</span>
-        </div>
-
-        <div class="row power_3">
-          <div class="col-xs-6 power_3in">
-            <img src="image/sun_06.png" />
-            <p>수중모듈</p>
-            <input type="text" name="℃" readonly value="<%- powerGenerationInfo.waterModuleTemp %> ℃">
-
-          </div>
-          <div class="col-xs-6 power_3in">
-            <img src="image/sun_06.png" />
-            <p>육상모듈</p>
-            <input type="text" name="℃" readonly value="<%- powerGenerationInfo.earthModuleTemp %> ℃">
-          </div>
-          <div class="col-xs-6 power_3in">
-            <img src="image/sun_10.png" />
-            <p>인버터</p>
-            <!--<input type="text" name="Wm" value="RUN">-->
-            <%
-                var hasOperationInverter = powerGenerationInfo.hasOperationInverter;
-                var hasOperationInverterCss = "";
-                var operationTxt = "";
-                if(hasOperationInverter){
-                  hasOperationInverterCss = "btn-primary";
-                  operationTxt = "RUN";
-                } else {
-                  hasOperationInverterCss = "btn-warning";
-                  operationTxt = "STOP";
-                }
-              %>
-            <button type="button" class="btn <%= hasOperationInverterCss %>">
-              <%= operationTxt %>
-            </button>
-          </div>
-          <div class="col-xs-6 power_3in">
-            <img src="image/sun_03.png" />
-            <p>일사량</p>
-            <input type="text" name="W/m²" readonly value="<%- powerGenerationInfo.solarRadiation %> W/m²">
+        <div class="box">
+          <div class="cont-box-rotate_f">
+            <div class="cont-box-rotate"></div>
           </div>
 
+          <div class="deve">
+            <p>발전현황</p>
+            <p>Development status</p>
+          </div>
+
+
+          <div class="deve_1">
+            <p><I>당월발전량</I></p>
+            <input class="wed_1" type="text" value="10000kW">
+          </div>
+
+
         </div>
+
+
+
+        <div class="box_2">
+          <p style="margin-top:10px; font-weight:bold;">통합발전량</p>
+          <div style="width:100%; height:60%; background-color:#e9e9e9;">Graph</div>
+
+          <div> <span>&nbsp&nbsp &nbsp현재발전</span><input class="wed_2" type="text" value="17.7">kW</div>
+          <div> <span>금일발전량</span><input class="wed_2" type="text" value="700">kW</div>
+
+
+
+        </div>
+
+
+
+
+
+        <div class="box_3">
+          <p style="margin-top:10px; font-weight:bold;">현재 발전현황</p>
+
+          <div style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
+
+
+
+        </div>
+
+
       </div>
 
 
 
-
-      <!--콘텐츠중앙-->
-
-      <div class="col-xs-9 col-sm-9_st">
-        <div class="col-xs-6 con_1 con_1_main" style="height: 280px; border-radius: 5px; background-image: url('image/cc_02.png');">
-          <div class="con_1_title" style="width: 180px; height: 50px; margin-top: -20px; margin-left:92px; position:absolute; background-image: url('image/btn_03.png'); ">
-            <h5 style="color:#fff; font-weight:500; margin-top:15px; font-size:16px;">현재 출력</h5>
+      <div class="containerb text-center">
+        <div class="box_4">
+          <div class="cont-box-rotate_s">
+            <div class="cont-box-rotate_1"></div>
           </div>
-          <div class="con_1_con" style="width: 300px; height: 180px;  margin: 0 auto; margin-top:50px;">
-            <div id="chart_div_1" style="width: 300px; height: 180px;"></div>
-          </div>
-          <!-- <div class="con_1_bot" style="width: 180px; height: 70px; margin-left: 90px; margin-top:-5px; background-image: url('image/btn_09.png'); ">
-              <p style="color:#fff; font-weight:500; font-size:16px; padding-top:10px; margin-bottom:5px;">출력량</p>
-              <p style="color:#333; font-weight:500; font-size:16px;  ">2.3kW</p>
-            </div> -->
 
-          <!--<div class="row con_2"><h5>현재 출력</h5></div>
-        <div class="row con_2_1" >
-            <div class="row con_2_2" >
-                <img src="image/chart_1.png" />
+          <div class="deve">
+            <p>상세정보</p>
+            <p>More information</p>
+          </div>
+
+
+          <div class="deve_1">
+            <p><I>기계</I></p>
+            <input class="wed_1" type="text" value="정상">
+          </div>
+
+        </div>
+        <div class="box_5">
+          <p>인버터 전압/전류</p>
+
+          <div class="box_5_bg">
+
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전압</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="300">(v)
             </div>
-            <div class="row con_2_3" >
-                <p style="margin-right:35px;">출력량 </p>
-                <input type="text" name="kW" value="2.0"><span>kW</span>
+
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전압</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="0">(v)
             </div>
-            <div class="row con_2_3" style="margin-left:74px; ">
-                <p>발전효율 </p>
-                <input type="text" name="kW" value="76.66"><span>%</span>
+
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전압</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="0">(v)
             </div>
-            </div>-->
+
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전류</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="300">(v)
+            </div>
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전류</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="0">(v)
+            </div>
+
+            <div class="box_5_in">
+              <div class="box_5_in_sp">
+                <p>AC전류</p>
+
+              </div>
+              <input class="input-tx" type="text">
+              <input class="wed_3" type="text" value="0">(v)
+            </div>
+
+
+
+
+          </div>
+
+
+
         </div>
 
-        <div class="col-xs-6 con_1 con_1_main" style="height: 280px; border-radius: 5px; background-image: url('image/cc_02.png'); margin: 0;">
+        <div class="box_6">
+          <div class="box_6_in">
 
-          <div class="con_1_title" style="width: 180px; height: 50px; margin-top: -20px; margin-left:92px; position:absolute; background-image: url('image/btn_03.png'); ">
-            <h5 style="color:#fff; font-weight:500; margin-top:15px; font-size:16px;">금일 발전량</h5>
+            <div class="box_6_in_4">
+              <img src="image/no1.png" />
+              <p>일사량</p>
+              <input class="wed_4" type="text" value="45.7"><span> W/㎥</span>
+            </div>
+
+
+
+            <div class="box_6_in_4">
+              <img src="image/no2.png" />
+              <p>모듈온도</p>
+              <input class="wed_4" type="text" value="7.1"><span> ℃</span>
+            </div>
+
+
+            <div class="box_6_in_4">
+              <img src="image/no3.png" />
+              <p>인버터</p>
+              <input class="wed_4" type="text" value="RUN">
+            </div>
+
+            <div class="box_6_in_4">
+              <img src="image/no4.png" />
+              <p>경보</p>
+              <input class="wed_4" type="text" value="정상">
+            </div>
           </div>
-          <div class="con_1_con" style="width: 300px; height: 180px;  margin: 0 auto; margin-top:50px;">
-            <div id="chart_div_2" style="width: 300px; height: 180px;"></div>
-          </div>
-          <!-- <div class="con_1_bot" style="width: 180px; height: 70px; margin-left: 90px; margin-top:-5px; background-image: url('image/btn_09.png'); ">
-              <p style="color:#fff; font-weight:500; font-size:16px; padding-top:10px; margin-bottom:5px;">금일 발전량</p>
-              <p style="color:#333; font-weight:500; font-size:16px;  ">14.75kWh</p>
-            </div> -->
         </div>
 
 
-
-
-        <div class="col-xs-12 con_4">
-          <div class="row con_2">
-            <h5 style="float:left; margin-left:20px;">금일 발전 현황 </h5>
-            <span style="float:right; margin-right:20px; font-size:12px; color:#ddd; line-height:4;  color:burlywood;">
-          </div>
-          <div class="row con_2_1" style="height:185px;" id="dailyPowerChart">
-          </div>
-          <p class="re_p" style="margin-top: 10px">※ 발전량(kWh) 데이터는 모든 인버터에서 측정한
-            <span>시간당 발전량의 합 </span> 입니다. </p>
-        </div>
-
-      </div>
-    </div>
-
-
-
-
-    <!--콘텐츠하단-->
-    <div class="row con_b">
-      <div class="col-xs-3 con_b_1">
-        <p style="margin: 20px auto 0px;">
-          실시간
-          <br />태양광
-          <br />모듈 현황
-        </p>
-
-        <img src="image/sol.jpg" style="position:absolute; left:0; top:83px" />
       </div>
 
 
 
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
 
-      <template id="moduleStatusTemplate">
-        <div class="col-xs-3 con_b_c" style="margin-left:5px;">
-          <ul class="con_b_d">
-            <li class="con_b_d_f">
-              <p data-type="name" data-name="">
 
-              </p>
-              <img data-type="operation" src="image/green.png" />
-            </li>
-            <li class="con_b_d_la">
-              <p>전류</p>
-              <input type="text" data-type="amp" name="amp" style="margin-left:10px; margin-right:2px;">
-              <p>A</p>
-            </li>
-            <li class="con_b_d_la">
-              <p>전압</p>
-              <input type="text" data-type="vol" name="vol" style="margin-left:10px; margin-right:2px;">
-              <p>V</p>
-            </li>
-            <li class="con_b_d_la">
-              <p>출력</p>
-              <input type="text" data-type="kw" name="kw" style="margin-left:10px; margin-right:2px;">
-              <p>kW</p>
-            </li>
-            <!-- <li class="con_b_d_la">
-                  <p>모듈온도</p>
-                  <input type="text" name="V" value="" style="margin-left:10px; margin-right:10px;">
-                  <p>℃</p>
-                </li> -->
-          </ul>
-        </div>
-      </template>
-      <div id="moduleStatus">
-      </div>
-      <div class="col-xs-3 con_b_2">
-        <b style="position: absolute; top:22px; left:14px">
-          <span id="pageNumCount" data-count="1"> 1</span>
-          <span>/</span>
-          <span id="pageNumLimit" data-count="<%=  Math.ceil(moduleStatusList.length / 6) %>">
-            <%=  Math.ceil(moduleStatusList.length / 6) %>
-          </span>
-        </b>
-        <i class="fa fa-sort-asc arrow " aria-hidden="true" onclick=changeModuleInfo(-1); id="up"></i>
-        <i class="fa"></i>
-        <i class="fa fa-sort-desc arrow" aria-hidden="true" onclick=changeModuleInfo(1); id="down"></i>
-      </div>
-      <div>
-        <p class="re_p">※ 실시간 태양광 모듈 현황 데이터는 접속반에서 측정한 채널 별
-          <span>실시간 데이터 </span> 입니다.</p>
-      </div>
+
+
+      </div><br>
+
+
+
+
+
+
+      <footer class="container-fluid text-center" style="background-color:rgba(242,242,242,0.9); ">
+        <p>에스엠소프트웨어(주)</p>
+      </footer>
     </div>
   </div>
-  <%- include("../master/footer.ejs") %>
+  </div>
 
-
-  <script>
-    $(document).ready(function () {
-      changeModuleInfo();
-    })
-
-
-    // 수중 태양광 모듈 현황
-    var moduleStatusList = <%- JSON.stringify(moduleStatusList) %>;
-    // 한번에 보여줄려는 갯수
-    var moduleViewSizeCount = 6;
-    // 수중 태양광 목록 updown 이벤트 발생 시
-    function changeModuleInfo(changeValue) {
-      // 목록 리스트 초기화
-      $("#moduleStatus").html("");
-      // page Number 체크
-      changeValue = $.isNumeric(changeValue) ? changeValue : 0;
-      // 현재 페이지 / 총 페이지 값 가져옴
-      var pCount = $("#pageNumCount").data("count");
-      var pLimit = $("#pageNumLimit").data("count");
-      // 바뀌는 현재 페이지 값 계산
-      var changeCount = Number(pCount) + changeValue;
-      console.log('changeCount', changeCount, 'pLimit', pLimit)
-      // 현재 페이지가 총 페이지를 넘어간다면 1Page, 음수 값이라면 총 페이지로 변경
-      if (changeCount <= 0) {
-        changeCount = pLimit;
-      } else if (changeCount > pLimit) {
-        changeCount = 1;
-      }
-      // 현재 페이지 값 세팅
-      $("#pageNumCount").data("count", changeCount);
-      $("#pageNumCount").html(changeCount)
-
-      // 시작해야할 목록 Index 추출
-      var startIndex = (changeCount - 1) * moduleViewSizeCount;
-      // 표현할려는 목록 수 만큼 반복하면서 Template 생성
-      for (var i = 0; i < moduleViewSizeCount; i++) {
-        var currIndex = startIndex + i;
-        var template = null;
-        var clone = null;
-
-        // IE (Html5 제한적 지원)
-        if (navigator.appName === 'Netscape' || navigator.appName === 'Microsoft Internet Explorer') {
-          template = document.querySelector('#moduleStatusTemplate').innerHTML;
-          clone = $.parseHTML(template)
-        } else { // FireFox, Chrome
-          template = document.querySelector('#moduleStatusTemplate');
-          clone = document.importNode(template.content, true);
-        }
-
-        var $findIt = null;
-        if (moduleStatusList[currIndex]) {
-
-          var moduleInfo = moduleStatusList[currIndex];
-          var hasValidData = moduleInfo.hasValidData;
-          var moduleInfo = moduleInfo.data;
-
-          var deviceName = moduleInfo.target_name;
-          // var chName = "CH " + moduleInfo.connector_ch;
-          var chName = moduleInfo.module_name;
-          $findIt = $(clone).find('[data-type=name]');
-          $findIt.html(chName)
-
-          // 만약 유효한 데이터가 아니라면 에러 표현
-          if (!hasValidData) {
-            $findIt = $(clone).find('[data-type=operation]');
-            $findIt.attr('src', 'image/red.png');
-          } else {
-            var amp = moduleInfo.amp;
-            var vol = moduleInfo.vol;
-            var kw = (amp * vol / 1000).toFixed(2);
-
-            $findIt = $(clone).find('[data-type=amp]');
-            $findIt.val(amp)
-            $findIt = $(clone).find('[data-type=vol]');
-            $findIt.val(vol)
-            $findIt = $(clone).find('[data-type=kw]');
-            $findIt.val(kw)
-          }
-        } else {
-          $findIt = $(clone).find('[data-type=operation]');
-          $findIt.remove();
-        }
-        $('#moduleStatus').append(clone)
-      }
-    }
-  </script>
-
-  <script type="text/javascript">
-    var powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-    var gaugeOptions = {
-      chart: {
-        type: 'solidgauge',
-        backgroundColor: 'none'
-      },
-      title: null,
-      pane: {
-        center: ['50%', '85%'],
-        size: '140%',
-        startAngle: -90,
-        endAngle: 90,
-        background: {
-          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#fff',
-          innerRadius: '60%',
-          outerRadius: '100%',
-          shape: 'arc'
-        }
-      },
-      tooltip: {
-        enabled: false
-      },
-      // the value axis
-      yAxis: {
-        stops: [
-          [0.1, '#55BF3B'], // green
-          [0.5, '#DDDF0D'], // yellow
-          [0.9, '#DF5353'] // red
-        ],
-        lineWidth: 0,
-        minorTickInterval: null,
-        tickAmount: 2,
-        title: {
-          y: -70
-        },
-        labels: {
-          y: 16
-        }
-      },
-      plotOptions: {
-        solidgauge: {
-          dataLabels: {
-            y: 10,
-            borderWidth: 0,
-            useHTML: true
-          }
-        }
-      }
-    };
-
-    // The speed gauge
-    var currentPower = Highcharts.chart('chart_div_1', Highcharts.merge(gaugeOptions, {
-      yAxis: {
-        min: 0,
-        max: powerGenerationInfo.currKwYaxisMax,
-        tickPositioner: function () {
-          return [this.min, this.max];
-        },
-        title: {
-          text: '현재 출력'
-        }
-      },
-      credits: {
-        enabled: false
-      },
-      series: [{
-        name: '현재 출력',
-        data: [Number(powerGenerationInfo.currKw.toFixed(2))],
-        dataLabels: {
-          format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-            ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-            '<span style="font-size:12px;color:silver">kW</span></div>'
-        },
-        tooltip: {
-          valueSuffix: 'kW'
-        }
-      }]
-    }));
-
-    var dailyPowerChart = Highcharts.chart('chart_div_2', Highcharts.merge(gaugeOptions, {
-      yAxis: {
-        min: 0,
-        max: powerGenerationInfo.currKwYaxisMax * 6,
-        tickPositioner: function () {
-          return [this.min, this.max];
-        },
-        title: {
-          text: ''
-        }
-      },
-      credits: {
-        enabled: false
-      },
-      series: [{
-        name: '금일 발전량',
-        data: [Number(powerGenerationInfo.dailyPower.toFixed(2))],
-        dataLabels: {
-          format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-            ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-            '<span style="font-size:12px;color:silver">kWh</span></div>'
-        },
-        tooltip: {
-          valueSuffix: 'kWh'
-        }
-      }]
-    }));
-  </script>
-  <!-- Main 하이차트 -->
-  <script type="text/javascript">
-    var chartDataObj = <%- JSON.stringify(dailyPowerChartData) %>;
-    // console.log('chartDataObj', chartDataObj)
-    if (chartDataObj.series.length) {
-      $('#dailyPowerChart').highcharts({
-        chart: {
-          type: "spline",
-          zoomType: 'x',
-        },
-        title: {
-          text: ''
-        },
-        xAxis: {
-          // opposite: true,
-          title: {
-            text: '시간(시)'
-          },
-          // tickInterval: 6
-          categories: chartDataObj.range
-        },
-        yAxis: {
-          min: 0,
-          // max: powerGenerationInfo.currKwYaxisMax,
-          title: {
-            text: '발전량(kWh)'
-          }
-        },
-        plotOptions: {
-          area: {
-            fillColor: {
-              linearGradient: {
-                x1: 0,
-                y1: 0,
-                x2: 0,
-                y2: 1
-              },
-              stops: [
-                [0, Highcharts.getOptions().colors[0]],
-                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-              ]
-            },
-            marker: {
-              radius: 2
-            },
-            lineWidth: 1,
-            states: {
-              hover: {
-                lineWidth: 1
-              }
-            },
-            threshold: null
-          },
-          series: {
-            pointStart: 0
-          }
-        },
-        legend: { //범례
-          itemHoverStyle: {
-            color: '#FF0000'
-          },
-          // layout: 'vertical',
-          align: 'right',
-          floating: true,
-          // verticalAlign: 'middle',
-          // borderWidth: 0,
-        },
-        series: chartDataObj.series,
-        credits: {
-          enabled: false
-        },
-      });
-    } else {
-      $("#dailyPowerChart").html("발전 내역이 존재하지 않습니다.").css({
-        "line-height": "300px",
-        "font-size": "25px"
-      });
-    }
-  </script>
 
 </body>
 

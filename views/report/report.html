@@ -1,0 +1,347 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SM부트스트랩 테마디자인</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 위 3개의 메타 태그는 *반드시* head 태그의 처음에 와야합니다; 어떤 다른 콘텐츠들은 반드시 이 태그들 *다음에* 와야 합니다 -->
+    <!-- 부트스트랩 -->
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.1.1.min.js"></script>
+
+    <link href="css/StyleSheet.css" rel="stylesheet" />
+
+    <style>
+
+@media screen and (max-width: 1024px) {
+.responsive-table {
+display: block;
+width: 100% !important;
+}
+.responsive-image {
+height: auto;
+max-width: 100% !important;
+}
+}
+
+        @media screen and (max-width: 640px) {
+
+            .col-xs-4{width:100%!important; height:20px;}
+}
+          .years{margin:15px 0 15px 0; background-color:#90bfe6; border:1px solid #e9e9e9; border-radius:20px; padding:5px; margin-left:20px;}
+
+    </style>
+
+</head>
+<body>
+    <!-- jQuery (부트스트랩의 자바스크립트 플러그인을 위해 필요합니다) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- 모든 컴파일된 플러그인을 포함합니다 (아래), 원하지 않는다면 필요한 각각의 파일을 포함하세요 -->
+    <script src="js/bootstrap.min.js"></script>
+
+
+    <!--네비-->
+    <div style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+        <div class="warp">
+            <nav class="navbar navbar-inverse">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand tit_1" href="#">
+
+                            농업병행 태양광발전 모니터링
+                        </a>
+                    </div>
+                    <div class="collapse navbar-collapse navbar-right" id="myNavbar">
+                        <ul class="nav navbar-nav">
+                            <li><a href="index.html">Home</a></li>
+                   
+                            <li><a href="trend.html">트랜드</a></li>
+                            <li class="active"><a href="#">보고서</a></li>
+                       
+                        </ul>
+                        <!--<ul class="nav navbar-nav navbar-right">
+                            <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                        </ul>-->
+                    </div>
+                </div>
+            </nav>
+
+            <div class="row" style="height:50px; max-width:1024px; margin:0 auto;">
+                <div class="col-md-6" style="background-image:linear-gradient(#393939,#222222); height:50px;">
+
+
+                    <form>
+                        <select name="city" class="city">
+                            <option value="naju">10kW급 테스트배드(나주)</option>
+                            <option value="Boseong">10kW급 테스트배드(보성)</option>
+                            <option value="gangjin">10kW급 테스트배드(강진)</option>
+                            <option value="ochang">10kW급 테스트배드(오창)</option>
+                            <option value="yeongheung">10kW급 테스트배드(영흥)</option>
+                        </select>
+                    </form>
+
+
+
+                </div>
+
+                <div class="col-md-6" style="background-image:linear-gradient(#393939,#222222); height:50px;">
+
+                    <div class="weder" style="float:right;">
+                        <img style="color:#fff; margin-top:4px; margin-right:10px; float:left;" src="image/con_w.png" />
+                        <p style="color:#fff;  margin-top:15px; float:left; margin-right:10px;">날씨</p>
+
+                        <input style="color:#333; float:left; margin-right:5px;" class="wed" type="text" value="12">
+
+                        <p style="color:#fff; margin-top:15px; float:left; ">℃</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--메인-->
+            <div class="containerb text-center" style="background-color:#fff; height:auto;">
+
+        
+
+
+                <div class="row row_width  top_box" style="padding:5px;">
+
+                    <div class="col-xs-4 years" style="margin:15px 0 15px 0; background-color:#90bfe6; height:30px;">
+                        <div id="sel_type_div_area" class="input_st">
+
+                            <label class="radio-inline">
+                                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="hour">일일
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="day">월간
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="month">년간
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="range">기간선택
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="serch_st sel_box_data" style="margin-top:10px; float:right; margin-right:10px;">
+                        날짜 &nbsp;
+                        <input class="input_tre" name="start" id="start_date_input" type="text" readonly="">
+
+                        <input class="input_tre" name="end" id="end_date_input" type="text" readonly="" hidden="hidden" style="display: none;">
+                        <button type="button" class="btn btn-primary" onclick="searchTrend()" style="margin-bottom:3px; height:28px; margin-right:20px;" id="search">검색</button>
+
+                        <input class="title_trend_exc_in" type="submit" value="Download Excel" onclick="doit('xlsx');">
+                    </div>
+  
+                    </div>
+
+
+                <div class="table-responsive" style="padding:5px; overflow-x:visible;">
+                    <table class="table table-bordered" >
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">강우상황</th>
+                                <th scope="col">외기온도</th>
+                                <th scope="col">외기습도</th>
+                                <th scope="col">풍향</th>
+                                <th scope="col">풍속</th>
+                                <th scope="col">강우량</th>
+                                <th scope="col">외부일사량</th>
+                                <th scope="col">하부일사량</th>
+                                <th scope="col">외부토양온도</th>
+                                <th scope="col">하부토양온도</th>
+                                <th scope="col">외부토양습도</th>
+                                <th scope="col">하부토양습도</th>
+                                <th scope="col">외부EC</th>
+                                <th scope="col">하부EC</th>
+                                <th scope="col">외부CO₂</th>
+                                <th scope="col">외부CO₂</th>
+                                <th scope="col">외부조도</th>
+                                <th scope="col">하부조도</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">나주(배)</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">나주(배추)</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">나주(양파)</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">보성(차)</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">강진(사료)</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">오창</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">영흥</th>
+                                <td> </td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>북서</td>
+                                <td>m/s</td>
+                                <td>mm</td>
+                                <td>W/㎥</td>
+                                <td>W/㎥</td>
+                                <td>℃</td>
+                                <td>℃</td>
+                                <td>%</td>
+                                <td>%</td>
+                                <td>ds/m</td>
+                                <td>ds/m</td>
+                                <td>ppm</td>
+                                <td>ppm</td>
+                                <td>lux</td>
+                                <td>lux</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+          
+
+
+
+
+                <!--하단1-->
+                <div class="container-fluid bg-3 text-center">
+
+
+                </div><br>
+
+
+                <footer class="container-fluid text-center" style="background-color:rgba(242,242,242,0.9); ">
+                    <p>에스엠소프트웨어(주)</p>
+                </footer>
+            </div>
+    </div>
+</body>
+</html>

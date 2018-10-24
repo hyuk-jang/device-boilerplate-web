@@ -12,7 +12,7 @@ const BiAuth = require('../models/templates/auth/BiAuth');
  * @param {dbInfo} dbInfo
  */
 module.exports = (app, dbInfo) => {
-  BU.CLI(dbInfo);
+  // BU.CLI(dbInfo);
   // var FacebookStrategy = require("passport-facebook").Strategy;
   const biAuth = new BiAuth(dbInfo);
   // passport 설정
@@ -42,7 +42,7 @@ module.exports = (app, dbInfo) => {
 
   // Strategy 성공 시 호출됨
   passport.serializeUser((memberInfo, done) => {
-    BU.CLI('serializeUser', memberInfo);
+    // BU.CLI('serializeUser', memberInfo);
     done(null, memberInfo.user_id); // 여기의 user가 deserializeUser의 첫 번째 매개변수로 이동
   });
 
@@ -53,11 +53,11 @@ module.exports = (app, dbInfo) => {
    * 해당하는 유저 정보가 있으면 done의 두 번째 인자를 req.user에 저장하고, 요청을 처리할 때 유저의 정보를 req.user를 통해서 넘겨줍니다
    */
   passport.deserializeUser(async (userId, done) => {
-    BU.CLI('deserializeUser', userId);
+    // BU.CLI('deserializeUser', userId);
     try {
       /** @type {V_MEMBER} */
       const result = await biAuth.getTable('V_MEMBER', { user_id: userId });
-      BU.CLI(result);
+
       if (_.isEmpty(result)) {
         return done(null, false, { message: '아이디와 비밀번호를 확인해주세요.' });
       }
@@ -75,7 +75,7 @@ module.exports = (app, dbInfo) => {
         'main_uuid',
       ]);
 
-      BU.CLI('complete deserializeUser');
+      // BU.CLI('complete deserializeUser', pickedUserInfo);
       return done(null, pickedUserInfo); // 여기의 user가 req.user가 됨
     } catch (error) {
       done(error, false, { message: '아이디와 비밀번호를 확인해주세요.' });
