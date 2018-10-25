@@ -496,7 +496,7 @@ class BiModule extends BM {
     sql += `        
     GROUP BY inverter_seq
     `;
-    return this.db.single(sql, '', true);
+    return this.db.single(sql, '', false);
   }
 
   /**
@@ -534,7 +534,7 @@ class BiModule extends BM {
     LEFT OUTER JOIN pw_inverter ivt
     ON ivt.inverter_seq = main.inverter_seq
     `;
-    return this.db.single(sql, '', true);
+    return this.db.single(sql, '', false);
   }
 
   /**

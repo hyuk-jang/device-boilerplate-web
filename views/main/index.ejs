@@ -2,6 +2,8 @@
 <html>
 
 <head>
+  <!-- Default Js -->
+  <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
   <script src="js/hichart/highcharts.src.js"></script>
   <script src="js/hichart/highcharts-more.js"></script>
@@ -158,6 +160,7 @@
         }
       },
     })
+
     makeGaugeChart({
       domId: 'current-power-graph',
       yAxis: {

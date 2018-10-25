@@ -105,19 +105,18 @@ function makeGaugeChart(
   );
 }
 
-
 /**
- * 
- * @param {*} powerGenerationInfo 
- * @param {*} domId 
+ * @desc hichart gauge 가 안먹힐때 사용함.
+ * @param {*} powerGenerationInfo
+ * @param {*} domId
  */
 function makeGaugeChart2(powerGenerationInfo, domId) {
   // console.dir(powerGenerationInfo);
 
-  let currKw = _.get(powerGenerationInfo, 'out_kw', '');
-  let currKwYaxisMax = _.get(powerGenerationInfo, 'amount',);
-  let percentageKw = _.round(_.multiply(_.divide(currKw, currKwYaxisMax), 100), 2);
-  let maxKw = _.round(_.subtract(100, percentageKw), 2);
+  const currKw = _.get(powerGenerationInfo, 'out_kw', 30);
+  const currKwYaxisMax = _.get(powerGenerationInfo, 'amount', 100);
+  const percentageKw = _.round(_.multiply(_.divide(currKw, currKwYaxisMax), 100), 2);
+  const maxKw = _.round(_.subtract(100, percentageKw), 2);
 
   // let todayMaxKw = _.multiply(currKwYaxisMax, 6);
   // let dailyPower = _.round(_.get(powerGenerationInfo, 'dailyPower'), 2);
@@ -133,20 +132,21 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
       plotShadow: false,
       backgroundColor: 'none',
       // Edit chart spacing
-      spacingBottom: 15,
-      spacingTop: 10,
-      spacingLeft: -100,
-      spacingRight: 10,
+      // spacingBottom: 15,
+      // spacingTop: 10,
+      // spacingLeft: -100,
+      // spacingRight: 10,
     },
+
     title: {
       text: `발전<br/>${currKw} kW`,
       align: 'center',
       verticalAlign: 'middle',
-      y: -20
+      y: -20,
     },
     tooltip: {
       pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>',
-      enabled: false
+      enabled: false,
     },
     plotOptions: {
       pie: {
@@ -155,29 +155,44 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
           distance: -30,
           style: {
             fontWeight: 'bold',
-            color: 'white'
-          }
+            color: 'white',
+          },
         },
         startAngle: -90,
         endAngle: 90,
         center: ['50%', '50%'],
-      }
+      },
     },
-    colors: ['#f45b5b', '#8085e9', '#8d4654', '#7798BF', '#aaeeee',
-      '#ff0066', '#eeaaee', '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'],    
-    series: [{
-      type: 'pie',
-      name: 'Browser share',
-      innerSize: '50%',
-      data: [
-        [`${percentageKw}%`, percentageKw],
-        ['', maxKw],
-        
-      ]
-    }],
+    colors: [
+      '#f45b5b',
+      '#8085e9',
+      '#8d4654',
+      '#7798BF',
+      '#aaeeee',
+      '#ff0066',
+      '#eeaaee',
+      '#55BF3B',
+      '#DF5353',
+      '#7798BF',
+      '#aaeeee',
+    ],
+    series: [
+      {
+        type: 'pie',
+        name: 'Browser share',
+        innerSize: '50%',
+        data: [[`${percentageKw}%`, percentageKw], ['', maxKw]],
+        dataLabels: {
+          format: `<div style="text-align:center"><span style="font-size:15px;color:${(Highcharts.theme &&
+            Highcharts.theme.contrastTextColor) ||
+            'black'}">{y}</span>
+            <span style="font-size:12px;color:silver">%</span></div>`,
+        },
+      },
+    ],
     credits: {
       enabled: false,
-    }
+    },
   });
 
   // Highcharts.chart('chart_div_2', {
@@ -239,7 +254,6 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
   //   }
   // });
 
-  
   // var dailyPowerChart = Highcharts.chart('chart_div_2', Highcharts.merge(gaugeOptions, {
   //   yAxis: {
   //     min: 0,
