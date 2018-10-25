@@ -78,7 +78,8 @@ app.set('view engine', 'ejs');
 if (app.get('env') === 'development') {
   // app.use(logger('dev'));
   app.use(
-    logger(':method :url :status :response-time ms - :res[content-length]'),
+    logger('dev'),
+    // logger(':method :url :status :response-time ms - :res[content-length]'),
     (req, res, next) => {
       next();
     },

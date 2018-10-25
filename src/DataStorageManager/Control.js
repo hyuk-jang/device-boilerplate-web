@@ -9,16 +9,16 @@ const SocketServer = require('./SocketServer');
 
 const dsmConfig = require('./config');
 
-// const SocketIoManager = require('./SocketIoManager');
+const SocketIoManager = require('./SocketIoManager');
 
 class Control {
   /**
    *
    * @param {dsmConfig} config
    */
-  constructor(config) {
+  constructor(config = dsmConfig) {
     BU.CLI(config);
-    this.config = config || dsmConfig;
+    this.config = config;
 
     // this.map = this.controller.map;
 
@@ -30,7 +30,7 @@ class Control {
     this.mainStorageList = [];
 
     // SocketIO를 관리하는 객체 생성
-    // this.socketIoManager = new SocketIoManager(this);
+    this.socketIoManager = new SocketIoManager(this);
   }
 
   /**
@@ -49,26 +49,22 @@ class Control {
    * Main Storage List를 초기화
    * @param {dbInfo=} dbInfo
    */
-  async setMainStorageByDB(dbInfo) {
-    dbInfo = dbInfo || this.config.dbInfo;
-
-    BU.CLI(dbInfo);
-    this.BM = new BM(dbInfo);
+  async setMainStorageByDB(dbInfo = this.config.dbInfo) {
+    // BU.CLI(dbInfo);
+    this.biModule = new BM(dbInfo);
 
     // DB에서 main 정보를 가져옴
     /** @type {MAIN[]} */
-    let mainList = await this.BM.getTable('main', { is_deleted: 0 });
+    const mainList = await this.biModule.getTable('main', { is_deleted: 0 });
 
     /** @type {dataLoggerInfo[]} */
-    const dataLoggerList = await this.BM.getTable('v_dv_data_logger');
+    const dataLoggerList = await this.biModule.getTable('v_dv_data_logger');
     /** @type {nodeInfo[]} */
-    const nodeList = await this.BM.getTable('v_dv_node');
+    const nodeList = await this.biModule.getTable('v_dv_node');
 
     /** @type {placeInfo[]} */
-    const placeRelationList = await this.BM.getTable('v_dv_place_relation');
+    const placeRelationList = await this.biModule.getTable('v_dv_place_relation');
 
-    // TEST: main Seq 1번에 강제로 데이터를 넣으므로 정렬 시킴
-    mainList = _.sortBy(mainList, 'main_seq');
     // Main 정보 만큼 List 생성
     mainList.forEach(mainInfo => {
       const filterDataLoggerList = _.filter(dataLoggerList, {

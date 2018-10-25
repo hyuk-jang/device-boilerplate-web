@@ -10,6 +10,8 @@ const { BaseModel } = require('../../../../module/device-protocol-converter-jh')
 
 const { dcmWsModel } = require('../../../../module/default-intelligence');
 
+const Control = require('./Control');
+
 const socketServerConfig = require('./config');
 
 class SocketServer extends EventEmitter {
@@ -21,19 +23,22 @@ class SocketServer extends EventEmitter {
     super();
     this.config = config;
 
-    /** 해당 Socket Serve를 감시하고 있는 객체 */
+    /**
+     * 해당 Socket Serve를 감시하고 있는 객체
+     * @type {Control[]}
+     */
     this.observerList = [];
 
     this.defaultConverter = BaseModel.defaultModule;
     /**
      * Main Storage List에서 각각의 거점 별 모든 정보를 가지고 있을 객체 정보 목록
-     * @type {Array.<msInfo>}
+     * @type {msInfo[]}
      */
     this.mainStorageList = [];
 
     /**
      * Socket Server에 접속하는 거점 Socket Client 목록
-     * @type {Array.<net.Socket>}
+     * @type {net.Socket[]}
      */
     this.clientList = [];
   }
@@ -53,18 +58,18 @@ class SocketServer extends EventEmitter {
    * @param {string} mainUuid main UUID
    */
   async setMainStorageByDB(dbInfo) {
-    this.BM = new BM(dbInfo);
+    this.biModule = new BM(dbInfo);
 
     // DB에서 main 정보를 가져옴
     /** @type {MAIN[]} */
-    let mainList = await this.BM.getTable('main', { is_deleted: 0 });
+    const mainList = await this.biModule.getTable('main', { is_deleted: 0 });
 
     /** @type {dataLoggerInfo[]} */
-    const dataLoggerList = await this.BM.getTable('v_dv_data_logger');
+    const dataLoggerList = await this.biModule.getTable('v_dv_data_logger');
     /** @type {nodeInfo[]} */
-    const nodeList = await this.BM.getTable('v_dv_node');
+    const nodeList = await this.biModule.getTable('v_dv_node');
 
-    mainList = _.sortBy(mainList, 'main_seq');
+    // mainList = _.sortBy(mainList, 'main_seq');
     // Main 정보 만큼 List 생성
     mainList.forEach(mainInfo => {
       const filterDataLoggerList = _.filter(dataLoggerList, {
@@ -100,7 +105,7 @@ class SocketServer extends EventEmitter {
       .createServer(socket => {
         // socket.end('goodbye\n');
         console.log(
-          `client is Connected ${process.env.SOCKET_UPSAS_PORT}\n addressInfo: ${
+          `client is Connected ${this.config.socketServerPort}\n addressInfo: ${
             socket.remoteAddress
           }`,
         );
@@ -183,8 +188,8 @@ class SocketServer extends EventEmitter {
       });
 
     // grab an arbitrary unused port.
-    server.listen(process.env.SOCKET_UPSAS_PORT, () => {
-      console.log('opened server on', server.address());
+    server.listen(this.config.socketServerPort, () => {
+      console.log('Opend socket server on', server.address());
     });
 
     server.on('close', () => {

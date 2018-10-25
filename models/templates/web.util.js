@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const moment = require('moment')
 const BU = require('base-util-jh').baseUtil;
 
 /**
@@ -186,10 +187,10 @@ exports.reduceDataList = reduceDataList;
  * @param {number} scale 게산 식 etc: 0.001, 100, 10, 20
  * @param {number|string} toFixedNumber 소수 점 자리
  */
-function calcValue(value, scale, toFixedNumber) {
+function calcValue(value, scale = 1, toFixedNumber = 1) {
   // BU.CLIS(value, scale, toFixedNumber);
   if (_.isNumber(value) && _.isNumber(scale) && _.isNumber(toFixedNumber)) {
-    return Number((value * scale).toFixed(toFixedNumber));
+    return _.round(_.multiply(value, scale), toFixedNumber);
   }
   return '';
   // throw Error('argument 중 숫자가 아닌것이 있습니다.');
@@ -459,9 +460,12 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
   // BU.CLI(chartOption);
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
+  // 데이터를 정리할 X 축 시간
+  const range = _.sortBy(_.union(_.map(rowDataPacketList, dateKey)));
+
   // 반환 데이터 유형
   const returnValue = {
-    range: _.sortBy(_.union(_.map(rowDataPacketList, dateKey))),
+    range: range.map(d => moment(d).toDate()),
     series: [],
   };
 
@@ -489,7 +493,7 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
       }
 
       _.forEach(groupObj, gInfo => {
-        const index = _.indexOf(returnValue.range, gInfo[dateKey]);
+        const index = _.indexOf(range, gInfo[dateKey]);
         addObj.data[index] = gInfo[selectKey];
       });
       returnValue.series.push(addObj);

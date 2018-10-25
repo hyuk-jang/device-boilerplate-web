@@ -74,3 +74,15 @@ Info : 2018-10-23 11:14:28
     at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:76:41)
 	err Message : mainError
 
+Info : 2018-10-25 09:36:42
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:83:61)
+	err Message : mainError
+
+Info : 2018-10-25 09:38:24
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:83:61)
+	err Message : mainError
+
+Info : 2018-10-25 11:18:58
+    at new SocketIoManager (D:\200_Project\uwps\module\module\device-boilerplate-web\src\DataStorageManager\SocketIoManager.js:31:30)
+	err Message : mainError
+

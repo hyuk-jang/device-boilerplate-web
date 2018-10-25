@@ -16,6 +16,9 @@ const MainControl = require('../src/MainControl');
 const app = require('../app');
 
 global.app = app;
+
+// require('../../default-intelligence');
+
 /**
  * Get port from environment and store in Express.
  */
@@ -61,7 +64,7 @@ const server = http.createServer(app);
  */
 
 server.listen(port, () => {
-  // operationController();
+  operationController();
   console.log(`Server ${port} is Listening`);
 });
 server.on('error', onError);
@@ -77,7 +80,7 @@ async function operationController() {
     await mainControl.init();
     // mainControl.dataStorageManager.setSocketIO(http);
     // 전역 변수로 설정
-    global.mainStorageList = mainControl.dataStorageManager.mainStorageList;
+    // global.mainStorageList = mainControl.dataStorageManager.mainStorageList;
   } catch (error) {
     BU.CLI(error);
     BU.errorLog('init', 'mainError', error);

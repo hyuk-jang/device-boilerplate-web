@@ -7,7 +7,7 @@ const Server = require('socket.io');
 const net = require('net');
 
 // const BiModule = require('../../../models/BiModule');
-const webUtil = require('../../models/web.util.js');
+// const webUtil = require('../../models/web.util.js');
 
 const Control = require('./Control');
 
@@ -25,10 +25,10 @@ class SocketIoManager {
     this.defaultConverter = controller.defaultConverter;
     this.mainStorageList = controller.mainStorageList;
 
-    this.webUtil = webUtil;
+    // this.webUtil = webUtil;
 
     // FIXME: 임시로 자동 명령 리스트 넣어둠. DB에서 가져오는 걸로 수정해야함(2018-07-30)
-    this.excuteControlList = map.controlList;
+    // this.excuteControlList = [];
   }
 
   /**

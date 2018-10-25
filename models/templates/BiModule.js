@@ -245,7 +245,7 @@ class BiModule extends BM {
   /**
    * 기상청 날씨를 가져옴
    * @param {number} weatherLocationSeq 기상청 동네 예보 위치 seq
-   * @return {KMA_DATA} 날씨 정보
+   * @return {WC_KMA_DATA} 날씨 정보
    */
   async getCurrWeatherCast(weatherLocationSeq) {
     const sql = `
@@ -481,62 +481,60 @@ class BiModule extends BM {
 
   /**
    * 인버터 총 누적 발전량을 구함
-   * @param {number[]=} inverter_seq_list
+   * @param {number[]=} inverterSeqList
    */
-  getInverterCumulativePower(inverter_seq_list) {
+  getInverterCumulativePower(inverterSeqList) {
     let sql = `
       SELECT
         inverter_seq,
-        ROUND(MAX(c_wh) / 10, 1) AS max_c_wh
-      FROM inverter_data
+        ROUND(MAX(power_total_kwh), 1) AS max_c_kwh
+      FROM pw_inverter_data
       `;
-    if (typeof inverter_seq_list === 'number' || Array.isArray(inverter_seq_list)) {
-      sql += ` WHERE inverter_seq IN (${inverter_seq_list})`;
+    if (typeof inverterSeqList === 'number' || Array.isArray(inverterSeqList)) {
+      sql += ` WHERE inverter_seq IN (${inverterSeqList})`;
     }
     sql += `        
     GROUP BY inverter_seq
     `;
-    return this.db.single(sql, '', false);
+    return this.db.single(sql, '', true);
   }
 
   /**
    * 인버터 발전량 구해옴
    * @param {searchRange} searchRange  검색 옵션
-   * @param {number[]=} inverter_seq_list
-   * @return {{inverter_seq: number, group_date: string, }}
+   * @param {number[]=} inverterSeqList
+   * @return {{inverter_seq: number, interval_power: number, target_id: string }[]}
    */
-  getInverterPower(searchRange, inverter_seq_list) {
-    searchRange = searchRange || this.getSearchRange();
+  getInverterPower(searchRange = this.getSearchRange(), inverterSeqList) {
     // let dateFormat = this.convertSearchType2DateFormat(searchRange.searchType);
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
     // BU.CLI(dateFormat);
     let sql = `
     SELECT
-			main.*,
-			 (SELECT iv.target_id FROM inverter iv WHERE iv.inverter_seq = main.inverter_seq LIMIT 1) AS ivt_target_id,
-       ivt.chart_color, ivt.chart_sort_rank
+          main.*,
+          ivt.target_id, ivt.chart_color, ivt.chart_sort_rank
     FROM
       (
       SELECT
-        inverter_seq,
-        writedate, 
-        ${dateFormat.selectViewDate},
-        ROUND(AVG(out_w) / 10, 1) AS out_w,
-        ROUND(MAX(c_wh) / 10, 1) AS max_c_wh,
-        ROUND((MAX(c_wh) - MIN(c_wh)) / 10, 1) AS interval_power
-        FROM inverter_data
+            inverter_seq,
+            writedate, 
+            ${dateFormat.selectViewDate},
+            MAX(power_total_kwh) AS max_c_kwh,
+            MIN(power_total_kwh) AS min_c_kwh,       
+            ROUND((MAX(power_total_kwh) - MIN(power_total_kwh)), 1) AS interval_power
+        FROM pw_inverter_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         `;
-    if (Array.isArray(inverter_seq_list)) {
-      sql += ` AND inverter_seq IN (${inverter_seq_list})`;
+    if (Array.isArray(inverterSeqList)) {
+      sql += ` AND inverter_seq IN (${inverterSeqList})`;
     }
     sql += `        
-    GROUP BY ${dateFormat.firstGroupByFormat}, inverter_seq
+    GROUP BY  inverter_seq
     ) AS main
-    LEFT OUTER JOIN inverter ivt
+    LEFT OUTER JOIN pw_inverter ivt
     ON ivt.inverter_seq = main.inverter_seq
     `;
-    return this.db.single(sql, '', false);
+    return this.db.single(sql, '', true);
   }
 
   /**
@@ -587,10 +585,10 @@ class BiModule extends BM {
   /**
    * 인버터 발전량 구해옴
    * @param {searchRange} searchRange  검색 옵션
-   * @param {number[]} inverter_seq
+   * @param {number[]} inverterSeqList
    * @return {{inverter_seq: number, group_date: string, avg_in_a: number, avg_in_v: number, avg_in_w: number, avg_out_a: number, avg_out_v: number, avg_out_w: number, avg_p_f: number, max_c_wh: number, min_c_wh: number, interval_power: number, chart_color: string, chart_sort_rank: number, total_count: number}[]}
    */
-  getInverterTrend(searchRange, inverter_seq) {
+  getInverterTrend(searchRange, inverterSeqList) {
     // BU.CLI(searchRange);
     searchRange = searchRange || this.getSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
@@ -600,16 +598,21 @@ class BiModule extends BM {
           id_group.inverter_seq,
           ${dateFormat.selectViewDate},
           ${dateFormat.selectGroupDate},
-          ROUND(AVG(avg_in_a) / 10, 1) AS avg_in_a,
-          ROUND(AVG(avg_in_v) / 10, 1) AS avg_in_v,
-          ROUND(AVG(avg_in_w) / 10, 1) AS avg_in_w,
-          ROUND(AVG(avg_out_a) / 10, 1) AS avg_out_a,
-          ROUND(AVG(avg_out_v) / 10, 1) AS avg_out_v,
-          ROUND(AVG(avg_out_w) / 10, 1) AS avg_out_w,
-          ROUND(AVG(avg_p_f) / 10, 1) AS avg_p_f,
-          ROUND(MAX(max_c_wh) / 10, 1) AS max_c_wh,
-          ROUND(MIN(min_c_wh) / 10, 1) AS min_c_wh,
-          ROUND((MAX(max_c_wh) - MIN(min_c_wh)) / 10, 1) AS interval_power,
+          ROUND(AVG(avg_pv_v), 1) AS avg_pv_v,
+          ROUND(AVG(avg_pv_a), 1) AS avg_pv_a,
+          ROUND(AVG(avg_pv_kw), 1) AS avg_pv_kw,
+          ROUND(AVG(avg_grid_rs_v), 1) AS avg_grid_rs_v,
+          ROUND(AVG(avg_grid_st_v), 1) AS avg_grid_st_v,
+          ROUND(AVG(avg_grid_tr_v), 1) AS avg_grid_tr_v,
+          ROUND(AVG(avg_grid_r_a), 1) AS avg_grid_r_a,
+          ROUND(AVG(avg_grid_s_a), 1) AS avg_grid_s_a,
+          ROUND(AVG(avg_grid_t_a), 1) AS avg_grid_t_a,
+          ROUND(AVG(avg_line_f), 1) AS avg_line_f,
+          ROUND(AVG(avg_p_f), 1) AS avg_p_f,
+          ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
+          ROUND(MIN(min_c_kwh), 3) AS min_c_kwh,
+          ROUND(MAX(max_c_kwh), 3) AS max_c_kwh,
+          ROUND(MAX(max_c_kwh) - MIN(max_c_kwh), 3) AS interval_power,
           ivt.chart_color, ivt.chart_sort_rank,
           SUM(first_count) as total_count
     FROM
@@ -617,24 +620,29 @@ class BiModule extends BM {
               id.inverter_seq,
               writedate,
               DATE_FORMAT(writedate,"%H") AS hour_time,
-              AVG(in_a) AS avg_in_a,
-              AVG(in_v) AS avg_in_v,
-              AVG(in_w) AS avg_in_w,
-              AVG(out_a) AS avg_out_a,
-              AVG(out_v) AS avg_out_v,
-              AVG(out_w) AS avg_out_w,
-              AVG(CASE WHEN p_f > 0 THEN p_f END) AS avg_p_f,
-              MAX(c_wh) AS max_c_wh,
-              MIN(c_wh) AS min_c_wh,
+              AVG(pv_v) AS avg_pv_v,
+              AVG(pv_a) AS avg_pv_a,
+              AVG(pv_kw) AS avg_pv_kw,
+              AVG(grid_rs_v) AS avg_grid_rs_v,
+              AVG(grid_st_v) AS avg_grid_st_v,
+              AVG(grid_tr_v) AS avg_grid_tr_v,
+              AVG(grid_r_a) AS avg_grid_r_a,
+              AVG(grid_s_a) AS avg_grid_s_a,
+              AVG(grid_t_a) AS avg_grid_t_a,
+              AVG(line_f) AS avg_line_f,
+              AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
+              AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
+              MIN(power_total_kwh) AS min_c_kwh,
+              MAX(power_total_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
-      FROM inverter_data id
+      FROM pw_inverter_data id
             WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
       searchRange.strEndDate
     }"
-    AND id.inverter_seq IN (${inverter_seq})
+    AND id.inverter_seq IN (${inverterSeqList})
       GROUP BY ${dateFormat.firstGroupByFormat}, id.inverter_seq
       ORDER BY id.inverter_seq, writedate) AS id_group
-      LEFT OUTER JOIN inverter ivt
+      LEFT OUTER JOIN pw_inverter ivt
       ON ivt.inverter_seq = id_group.inverter_seq
     GROUP BY id_group.inverter_seq, ${dateFormat.groupByFormat}
     `;
