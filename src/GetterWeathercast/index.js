@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { BU } = require('base-util-jh');
 const { BM } = require('base-model-jh');
 
-// const Weathercast = require('../../../weather-cast');
+const Weathercast = require('../../../weather-cast');
 
 module.exports = class {
   /**
@@ -18,7 +18,7 @@ module.exports = class {
    * 기상청 동네예보 계측 동작
    */
   async init() {
-    BU.CLI(this.dbInfo);
+    // BU.CLI(this.dbInfo);
     const biModule = new BM(this.dbInfo);
     const sql = `
     select wl.* from (

@@ -1,1 +1,1 @@
-console.log('hi', powerGenerationInfo);
+// console.log('hi', powerGenerationInfo);

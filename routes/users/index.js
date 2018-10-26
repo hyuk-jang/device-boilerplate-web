@@ -7,30 +7,23 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const main = require('./main');
+const trend = require('./trend');
 const users = require('./users');
 
 const webUtil = require('../../models/templates/web.util');
 
 router.use('/main', main);
+router.use('/trend', trend);
+
 router.use('/users', users);
 
 // server middleware
-router.use(
-  asyncHandler(async (req, res, next) => {
-    const user = _.get(req, 'user', {});
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
-    _.set(req, 'locals.menuNum', 1);
-
-    // 로그인 한 사용자가 관리하는 염전의 동네예보 위치 정보에 맞는 현재 날씨 데이터를 추출
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
-    req.locals.weatherCastInfo = webUtil.convertWeatherCast(currWeatherCastInfo);
-
-    // BU.CLI(req.locals);
-    next();
-  }),
-);
+// router.use(
+//   asyncHandler(async (req, res, next) => {
+//     const user = _.get(req, 'user', {});
+//     next();
+//   }),
+// );
 
 // router.use((req, res, next) => {
 //   BU.CLI('hi');
@@ -40,9 +33,12 @@ router.use(
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
-  BU.CLI('hi', req.locals);
-  // res.send('respond with a resource');
-  res.redirect('/main');
+  BU.CLI(process.env.DEV_PAGE);
+  if (_.isString(process.env.DEV_PAGE)) {
+    res.redirect(`/${process.env.DEV_PAGE}`);
+  } else {
+    res.redirect('/main');
+  }
 });
 
 module.exports = router;

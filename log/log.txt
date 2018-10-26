@@ -158,3 +158,143 @@ Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
 
 2018-10-25 09:54:09
 Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined

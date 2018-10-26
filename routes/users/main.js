@@ -26,19 +26,26 @@ router.use(
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
-    _.set(req, 'locals.menuNum', 1);
+    _.set(req, 'locals.menuNum', 0);
 
     /** @type {V_PW_PROFILE[]} */
-    const viewPowerProfileRows = await biModule.getTable(
-      'v_pw_profile',
-      user.main_seq && { main_seq: user.main_seq },
-      false,
-    );
-    req.locals.viewPowerProfileRows = viewPowerProfileRows;
+    const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
-    // 로그인 한 사용자가 관리하는 염전의 동네예보 위치 정보에 맞는 현재 날씨 데이터를 추출
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
-    req.locals.weatherCastInfo = webUtil.convertWeatherCast(currWeatherCastInfo);
+    const siteList = _(viewPowerProfileRows)
+      .groupBy('main_seq')
+      .map((profileRows, strMainSeq) => {
+        // BU.CLI(profileRows);
+        const totalAmount = _.round(
+          _(profileRows)
+            .map('ivt_amount')
+            .sum(),
+        );
+        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
+        const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
+        return { siteid: strMainSeq, name: siteName };
+      });
+
+    _.set(req, 'locals.siteList', siteList);
 
     // BU.CLI(req.locals);
     next();
@@ -49,15 +56,15 @@ router.use(
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    BU.CLI(req.user);
+    // BU.CLI(req.user);
 
     const user = _.get(req, 'user', {});
 
     // 지점 Id를 불러옴
-    const { selectSiteId = req.user.main_seq } = req.query;
+    const { siteid = req.user.main_seq } = req.query;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const pwProfileWhereInfo = _.eq(selectSiteId, 'all') ? null : { main_seq: selectSiteId };
+    const pwProfileWhereInfo = _.eq(siteid, 'all') ? null : { main_seq: siteid };
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -65,19 +72,21 @@ router.get(
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile', pwProfileWhereInfo, false);
     const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
-    BU.CLI(viewPowerProfileRows.length);
+    // BU.CLI(viewPowerProfileRows.length);
 
-    // TODO: Site 기상청 날씨 정보 구성
-    // 로그인 한 사용자가 관리하는 Site의 동네예보 위치 정보에 맞는 현재 날씨 데이터를 추출
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
+    // Site 기상청 날씨 정보 구성
+    const currWeatherCastInfo = await biModule.getCurrWeatherCast(
+      _.head(viewPowerProfileRows).weather_location_seq,
+    );
     // BU.CLI(currWeatherCastInfo);
 
-    // TODO: Site 발전 현황 구성.
-    // 인버터 총합 발전현황 그래프2개 (현재, 누적),
+    // Site 발전 현황 구성.
+    // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
     let searchRange = biModule.getSearchRange('day');
     // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
     searchRange.searchType = 'month';
     const inverterMonthRows = await biModule.getInverterPower(searchRange, inverterSeqList);
+    // BU.CLIN(inverterMonthRows);
     // 금월 발전량
     const monthPower = webUtil.reduceDataList(inverterMonthRows, 'interval_power');
     // 누적 발전량
@@ -89,8 +98,8 @@ router.get(
     // BU.CLIS(monthPower, cumulativPower);
 
     // 금일 발전 현황 데이터
-    searchRange = biModule.getSearchRange('min10');
-    // searchRange = biModule.getSearchRange('min10', '2018-08-12');
+    // searchRange = biModule.getSearchRange('min10');
+    searchRange = biModule.getSearchRange('min10', '2018-10-25');
 
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
 
@@ -135,7 +144,7 @@ router.get(
       0.001,
       2,
     );
-    BU.CLI(dailyPower);
+    // BU.CLI(dailyPower);
 
     const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
     // BU.CLI(inverterTrend)
@@ -180,7 +189,10 @@ router.get(
       hasAlarm: false, // TODO 알람 정보 작업 필요
     };
     // BU.CLI(chartData);
+
+    req.locals.siteId = siteid;
     req.locals.dailyPowerChartData = chartData;
+    req.locals.currWeatherCastInfo = currWeatherCastInfo;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
 

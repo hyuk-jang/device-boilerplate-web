@@ -40,7 +40,9 @@ router.get('/intersection', (req, res) => {
       break;
     default:
       router.use('/', users);
-      res.redirect('/main');
+      _.isString(process.env.DEV_PAGE)
+        ? res.redirect(`/${process.env.DEV_PAGE}`)
+        : res.redirect('/main');
       break;
   }
 });

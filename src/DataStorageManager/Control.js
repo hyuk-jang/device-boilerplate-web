@@ -17,7 +17,7 @@ class Control {
    * @param {dsmConfig} config
    */
   constructor(config = dsmConfig) {
-    BU.CLI(config);
+    // BU.CLI(config);
     this.config = config;
 
     // this.map = this.controller.map;
