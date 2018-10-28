@@ -56,7 +56,7 @@ router.get(
     // 지점 Id를 불러옴
 
     // BU.CLIN(req.locals);
-    res.render('./trend/trend', req.locals);
+    res.render('./inverter/inverter', req.locals);
   }),
 );
 

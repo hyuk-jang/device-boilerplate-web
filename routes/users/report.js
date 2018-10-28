@@ -15,9 +15,9 @@ router.use(
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
-    _.set(req, 'locals.menuNum', 1);
+    _.set(req, 'locals.menuNum', 2);
     _.set(req, 'locals.siteId', user.main_seq);
-    // BU.CLI(user.main_seq);
+    BU.CLI(user.main_seq);
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
     req.locals.currWeatherCastInfo = currWeatherCastInfo;
 
@@ -56,7 +56,7 @@ router.get(
     // 지점 Id를 불러옴
 
     // BU.CLIN(req.locals);
-    res.render('./trend/trend', req.locals);
+    res.render('./report/report', req.locals);
   }),
 );
 

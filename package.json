@@ -31,7 +31,7 @@
     "prettier": "^1.14.3"
   },
   "dependencies": {
-    "base-model-jh": "^1.2.3",
+    "base-model-jh": "^1.2.4",
     "base-util-jh": "^1.1.16",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
@@ -48,7 +48,6 @@
     "moment": "^2.22.2",
     "morgan": "^1.9.1",
     "mysql": "^2.16.0",
-    "node-cron": "^2.0.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "request": "^2.88.0",

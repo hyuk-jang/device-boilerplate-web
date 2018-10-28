@@ -9,43 +9,9 @@ const { BU } = require('base-util-jh');
 const webUtil = require('../../models/templates/web.util');
 
 // server middleware
-// router.use(
-//   asyncHandler(async (req, res, next) => {
-//     BU.CLI('main Middle ware');
-//     _.set(req, 'locals.menuNum', 1);
-
-//     // 로그인 한 사용자가 관리하는 염전의 동네예보 위치 정보에 맞는 현재 날씨 데이터를 추출
-//     next();
-//   }),
-// );
-
-// server middleware
 router.use(
   asyncHandler(async (req, res, next) => {
-    const user = _.get(req, 'user', {});
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
     _.set(req, 'locals.menuNum', 0);
-
-    /** @type {V_PW_PROFILE[]} */
-    const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
-
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        // BU.CLI(profileRows);
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
-        return { siteid: strMainSeq, name: siteName };
-      });
-
-    _.set(req, 'locals.siteList', siteList);
 
     // BU.CLI(req.locals);
     next();
@@ -56,29 +22,18 @@ router.use(
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    // BU.CLI(req.user);
-
-    const user = _.get(req, 'user', {});
-
-    // 지점 Id를 불러옴
-    const { siteid = req.user.main_seq } = req.query;
-
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const pwProfileWhereInfo = _.eq(siteid, 'all') ? null : { main_seq: siteid };
-
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+
+    // 지점 Id를 불러옴
+    const { siteId } = req.locals;
+
+    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    const pwProfileWhereInfo = _.eq(siteId, 'all') ? null : { main_seq: siteId };
 
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile', pwProfileWhereInfo, false);
     const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
-    // BU.CLI(viewPowerProfileRows.length);
-
-    // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(
-      _.head(viewPowerProfileRows).weather_location_seq,
-    );
-    // BU.CLI(currWeatherCastInfo);
 
     // Site 발전 현황 구성.
     // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
@@ -95,7 +50,6 @@ router.get(
       0.001,
       3,
     );
-    // BU.CLIS(monthPower, cumulativPower);
 
     // 금일 발전 현황 데이터
     // searchRange = biModule.getSearchRange('min10');
@@ -146,11 +100,12 @@ router.get(
     );
     // BU.CLI(dailyPower);
 
+    // 차트를 생성하기 위한 옵션.
     const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
-    // BU.CLI(inverterTrend)
+    // 데이터 현황에 따라 동적 차트 궝
     const chartData = webUtil.makeDynamicChartData(inverterTrend, chartOption);
-    // BU.CLI(chartData);
 
+    // 일별 차트로 구성
     webUtil.applyScaleChart(chartData, 'day');
     webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
 
@@ -190,9 +145,9 @@ router.get(
     };
     // BU.CLI(chartData);
 
-    req.locals.siteId = siteid;
+    // BU.CLI(powerGenerationInfo);
+
     req.locals.dailyPowerChartData = chartData;
-    req.locals.currWeatherCastInfo = currWeatherCastInfo;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
 

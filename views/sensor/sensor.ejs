@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+  <script src="js/lodash.min.js"></script>
+  <%- include("../master/head.ejs") %>
+  <script src="js/hichart/highcharts.src.js"></script>
+  <script src="js/hichart/highcharts-more.js"></script>
+  <script src="js/hichart/solid-gauge.js"></script>
+  <script src="js/contents/main/powerstatus.js"></script>
+  <script src="js/contents/main/makeGaugeChart.js"></script>
+  <script src="js/contents/main/setMenu.js"></script>
+</head>
+
+<body>
+  <!--네비-->
+  <div style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+    <div class="warp">
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="containerb text-center" style="background-color:#fff; height:auto; padding:5px; background-color: rgba(242,242,242,0.9);">
+        <div class="title" style="float: left; margin-bottom: 10px; display:inline-block;">
+          태양광발전 현황
+        </div>
+        <p style="color: black; text-align: right; display:block;">
+          측정시간:
+          2018-10-17 10:27:00
+        </p>
+        <div class="table-responsive" style="overflow-x:visible;">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">일사량</th>
+                <th scope="col">외부온도</th>
+                <th scope="col">풍향</th>
+                <th scope="col">풍속</th>
+                <th scope="col">현재출력</th>
+                <th scope="col">누적발전량</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">나주(배)</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">나주(배추)</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">나주(양파)</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">보성(차)</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">강진(사료)</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">오창</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+              <tr>
+                <th scope="row">영흥</th>
+                <td>W/㎥</td>
+                <td>℃</td>
+                <td>북동</td>
+                <td>m/s</td>
+                <td>kW</td>
+                <td>kwh</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="containerb text-center" style="background-color:#fff; height:auto;">
+        <div class="row row_width  top_box">
+          <div class="col-xs-4 years">
+            <div id="sel_type_div_area" class="input_st">
+              <label class="radio-inline">
+                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="hour">일일
+              </label>
+              <label class="radio-inline">
+                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="day">월간
+              </label>
+              <label class="radio-inline">
+                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="month">년간
+              </label>
+              <label class="radio-inline">
+                <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="range">기간선택
+              </label>
+            </div>
+          </div>
+          <div class="serch_st sel_box_data" style="margin-top:10px; float:right; margin-right:10px;">
+            날짜 &nbsp;
+            <input class="input_tre" name="start" id="start_date_input" type="text" readonly="">
+            <input class="input_tre" name="end" id="end_date_input" type="text" readonly="" hidden="hidden" style="display: none;">
+            <button type="button" class="btn btn-primary" onclick="searchTrend()" style="margin-bottom:3px; height:28px; margin-right:20px;"
+              id="search">검색</button>
+            <input class="title_trend_exc_in" type="submit" value="Download Excel" onclick="doit('xlsx');">
+          </div>
+          <div style="width:100%; height:300px; background-color:#fff;"></div>
+        </div>
+      </div>
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
+      </div><br>
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </div>
+</body>
+
+</html>

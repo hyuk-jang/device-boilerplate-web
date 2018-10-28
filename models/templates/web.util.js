@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const moment = require('moment')
+const moment = require('moment');
 const BU = require('base-util-jh').baseUtil;
 
 /**
@@ -381,70 +381,59 @@ exports.convertColumn2Rows = convertColumn2Rows;
 //
 /**
  * 인버터 메뉴에서 사용될 데이터 선언 및 부분 정의
- * @param {V_UPSAS_PROFILE[]} viewInverterStatus DB에서
+ * @param {{hasValidData: boolean, data: INVERTER}[]} validInverterStatus DB에서
  * @return {{totalInfo: {in_kw: number=, out_kw: number=, d_kwh: number=, c_mwh: number=}, dataList: Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, hasOperation: boolean }>}}
  */
-function refineSelectedInverterStatus(viewInverterStatus) {
+function refineSelectedInverterStatus(validInverterStatus) {
   const returnValue = {
     totalInfo: {},
     dataList: [],
   };
   const currInverterDataList = [];
-  _.forEach(viewInverterStatus, info => {
+  _.forEach(validInverterStatus, info => {
     // BU.CLI(info)
-    const { hasValidData, data } = info;
-    const addObj = {
-      inverter_seq: data.inverter_seq,
-      target_id: data.target_id,
-      target_name: data.target_name,
-      in_a: '',
-      in_v: '',
-      in_w: '',
-      in_kw: '',
-      out_a: '',
-      out_v: '',
-      out_w: '',
-      out_kw: '',
-      p_f: '',
-      d_wh: '',
-      d_kwh: '',
-      c_kwh: '',
-      compareEfficiency: '',
-      waterLevel: '',
-      writedate: data.writedate,
-      hasOperation: false,
-    };
 
-    // if (true) {
-    if (hasValidData) {
-      addObj.in_a = data.in_a;
-      addObj.in_v = data.in_v;
-      addObj.in_w = data.in_w;
-      addObj.in_kw = _.isNumber(data.in_w) ? calcValue(data.in_w, 0.001, 3) : '';
-      addObj.out_a = data.out_a;
-      addObj.out_v = data.out_v;
-      addObj.out_w = data.out_w;
-      addObj.out_kw = _.isNumber(data.out_w) ? calcValue(data.out_w, 0.001, 3) : '';
-      addObj.p_f = data.p_f;
-      addObj.d_wh = data.d_wh;
-      addObj.compareEfficiency = data.compareEfficiency;
-      addObj.waterLevel = data.waterLevel;
-      addObj.modulePowerEfficiency = data.modulePowerEfficiency;
-      addObj.d_kwh = _.isNumber(data.daily_power_wh)
-        ? calcValue(data.daily_power_wh, 0.001, 3)
-        : '';
-      addObj.c_kwh = _.isNumber(data.c_wh) ? calcValue(data.c_wh, 0.001, 2) : '';
-      addObj.hasOperation = true;
+    const { hasValidData, data } = info;
+
+    if (true) {
+      // if (hasValidData) {
+      data.hasOperation = true;
+      data.power_f = _.round(_.divide(data.power_kw, data.pv_kw) * 100, 1);
+    } else {
+      data.pv_a = '';
+      data.pv_v = '';
+      data.pv_kw = '';
+      data.grid_r_a = '';
+      data.grid_rs_v = '';
+      data.grid_s_a = '';
+      data.grid_st_v = '';
+      data.grid_t_a = '';
+      data.grid_tr_v = '';
+      data.line_f = '';
+      data.power_f = '';
+      data.power_kw = '';
+      data.daily_power_kwh = '';
+      data.power_total_kwh = '';
+      data.hasOperation = false;
     }
-    currInverterDataList.push(addObj);
+
+    currInverterDataList.push(data);
   });
   // currInverterDataList = _.sortBy(currInverterDataList, 'target_name');
   // 인버터 실시간 데이터 테이블
   returnValue.dataList = currInverterDataList;
-  returnValue.totalInfo.in_kw = calcValue(reduceDataList(currInverterDataList, 'in_kw'), 1, 3);
-  returnValue.totalInfo.out_kw = calcValue(reduceDataList(currInverterDataList, 'out_kw'), 1, 3);
-  returnValue.totalInfo.d_kwh = calcValue(reduceDataList(currInverterDataList, 'd_kwh'), 1, 3);
-  returnValue.totalInfo.c_kwh = calcValue(reduceDataList(currInverterDataList, 'c_kwh'), 1, 3);
+  returnValue.totalInfo.pv_kw = calcValue(reduceDataList(currInverterDataList, 'pv_kw'), 1, 3);
+  returnValue.totalInfo.grid_kw = calcValue(reduceDataList(currInverterDataList, 'grid_kw'), 1, 3);
+  returnValue.totalInfo.d_kwh = calcValue(
+    reduceDataList(currInverterDataList, 'daily_power_kwh'),
+    1,
+    3,
+  );
+  returnValue.totalInfo.c_kwh = calcValue(
+    reduceDataList(currInverterDataList, 'power_total_kwh'),
+    1,
+    3,
+  );
 
   return returnValue;
 }

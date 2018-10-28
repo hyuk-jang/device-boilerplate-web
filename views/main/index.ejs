@@ -9,9 +9,9 @@
   <script src="js/hichart/highcharts-more.js"></script>
   <script src="js/hichart/solid-gauge.js"></script>
 
+  <script src="js/contents/master/setMenu.js"></script>
   <script src="js/contents/main/powerstatus.js"></script>
   <script src="js/contents/main/makeGaugeChart.js"></script>
-  <script src="js/contents/main/setMenu.js"></script>
 </head>
 
 
@@ -143,7 +143,7 @@
   </div>
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-    console.log(powerGenerationInfo)
+    // console.log(powerGenerationInfo)
 
     // 금일 발전량 차트
     makeGaugeChart({
@@ -182,7 +182,7 @@
 
 
     // 현재 날짜 세팅
-    writeDateText(document.querySelector('#currDate'))
+    writeDateText(document.getElementById('currDate'))
   </script>
 </body>
 

@@ -23,24 +23,11 @@ function writeDateText(domElement) {
  */
 function matchingMenu(parentDom, selectedIndex, className) {
   selectedIndex = Number(selectedIndex);
-  console.log(selectedIndex);
-  console.log(parentDom);
+  // console.log(selectedIndex);
   _.forEach(parentDom.children, (child, index) => {
-    console.log(child);
-
     if (selectedIndex === index) {
-      console.log(selectedIndex, index);
-      // child.getElementsByTagName('a')[0].classList.remove(className);
-      // const foundIt = $(child).find('a:first-child');
-      // foundIt.removeClass(className);
-      // $(`${child} > a`).removeClass(className);
       child.classList.add(className);
     } else {
-      console.log(selectedIndex, index);
-      // child.getElementsByTagName('a')[0].classList.add(className);
-      // const foundIt = $(child).find('a:first-child');
-      // foundIt.addClass(className);
-      // $(`${child} > a`).addClass(className);
       child.classList.remove(className);
     }
   });
@@ -77,7 +64,7 @@ function setSiteList(domElement, siteList, siteId) {
   const optionList = siteList.map(siteInfo => {
     const { siteid, name } = siteInfo;
     let isSelected = '';
-    if (siteId === siteid) {
+    if (siteId.toString() === siteid) {
       isSelected = 'selected';
     }
     return siteOptionTemplate({ siteid, name, isSelected });
