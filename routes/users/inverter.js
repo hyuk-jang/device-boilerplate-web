@@ -66,35 +66,4 @@ router.get(
   }),
 );
 
-router.get(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    res.render('./main/index', req.locals);
-  }),
-);
-
-router.get(
-  '/ess',
-  asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
-    return res.render('./templates/ESS/index.ejs', req.locals);
-  }),
-);
-
 module.exports = router;
-
-// router.get('/intersection', (req, res) => {
-//   const grade = _.get(req, 'user.grade');
-//   switch (grade) {
-//     case 'admin':
-//       router.use('/admin', admin);
-//       res.redirect('/admin');
-//       break;
-//     case 'manager':
-//       router.use('/manager', manager);
-//       res.redirect('/manager');
-//       break;
-//     default:
-//       break;
-//   }
-// });
