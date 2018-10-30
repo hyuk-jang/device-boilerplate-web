@@ -36,58 +36,76 @@ class BiDevice extends BiModule {
 
   /**
    * 장소 시퀀스를 기준으로 관련된 현재 데이터를 모두 가져옴
-   * @param {{place_seq: number}[]} receiveObjList
+   * @param {{place_seq: number}[]} containedPlaceSeqRows
    * @param {string} pickId nd_target_id 입력
+   * @return {{place_seq: number, *: number=}[]}
    */
-  async extendsPlaceDeviceData(receiveObjList, pickId) {
-    const placeList = await this.getPlaceRelation(receiveObjList);
-    // BU.CLI(placeList);
+  async extendsPlaceDeviceData(containedPlaceSeqRows, pickId) {
+    const relationPlaceRows = await this.getPlaceRelation(containedPlaceSeqRows);
     // 장소 관계에 관련된 내용이 없다면 그냥 반환
-    if (_.isEmpty(placeList)) {
-      return receiveObjList;
+    if (_.isEmpty(relationPlaceRows)) {
+      return containedPlaceSeqRows;
     }
     // 검색 조건에 맞는 데이터
-    const filteringPlaceList = _.filter(placeList, { nd_target_id: pickId });
-    // BU.CLI(filteringPlaceList);
+    const containedPickIdRelationPlaceRows = _.filter(relationPlaceRows, { nd_target_id: pickId });
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
-    if (_.isEmpty(filteringPlaceList)) {
-      return receiveObjList;
+    if (_.isEmpty(containedPickIdRelationPlaceRows)) {
+      return containedPlaceSeqRows;
     }
 
     // 검색 조건에 맞는 Node Seq 목록을 만듬
-    const nodeSeqList = _.map(filteringPlaceList, 'node_seq');
-    // BU.CLI(nodeSeqList);
+    const nodeSeqList = _.map(containedPickIdRelationPlaceRows, 'node_seq');
 
     // 장소 관계 리스트에서 nodeSeq 리스트를 추출하고 해당 장치의 최신 데이터를 가져옴
-    const nodeDataList = await this.getTable('v_dv_sensor_profile', {
+    /** @type {V_DV_SENSOR_PROFILE[]} */
+    const dvSensorProfileRows = await this.getTable('v_dv_sensor_profile', {
       node_seq: nodeSeqList,
     });
     // 검색된 노드가 없다면 그냥 반환
-    if (_.isEmpty(nodeDataList)) {
-      return receiveObjList;
+    if (_.isEmpty(dvSensorProfileRows)) {
+      return containedPlaceSeqRows;
     }
 
     const now = moment();
     // 검색 결과 노드를 순회
-    _.forEach(nodeDataList, nodeInfo => {
-      // 장소 정보 테이블 Row 정보
-      const filteringPlaceInfo = _.find(filteringPlaceList, { node_seq: nodeInfo.node_seq });
-      // 수신 받은 데이터 객체 정보
-      const receiveObj = _.find(receiveObjList, { place_seq: filteringPlaceInfo.place_seq });
+    _.forEach(dvSensorProfileRows, sensorProfile => {
+      // 해당 장치가 속해있는 장소 목록 구성
+      const containedNodeSeqRelationPlaceRows = _.filter(containedPickIdRelationPlaceRows, {
+        node_seq: sensorProfile.node_seq,
+      });
 
-      const diffNum = now.diff(moment(nodeInfo.writeDate), 'minutes');
+      // Node Seq를 가진 장소 목록이 없을 경우 종료
+      if (_.isEmpty(containedNodeSeqRelationPlaceRows)) return false;
+
+      // Node Seq를 가지고 있는 장소 목록의 Seq 목록 구성
+      const foundPlaceSeqList = _.map(containedNodeSeqRelationPlaceRows, 'place_seq');
+
+      // 요청받은 containedPlaceSeqRows 중 실제 해당 장치가 사용중인 목록 필터링
+      const filterdPlaceSeqRows = _.filter(containedPlaceSeqRows, placeSeqRow =>
+        _.includes(foundPlaceSeqList, placeSeqRow.place_seq),
+      );
+
+      const diffNum = now.diff(moment(sensorProfile.writedate), 'minutes');
       // 10분을 벗어나면 데이터 가치가 없다고 판단
       if (diffNum < 10) {
         // 키 확장
-        _.assign(receiveObj, { [pickId]: _.get(nodeInfo, 'node_data') });
+        filterdPlaceSeqRows.forEach(row => {
+          _.assign(row, {
+            [pickId]: _.get(sensorProfile, 'node_data'),
+          });
+        });
       } else {
-        _.assign(receiveObj, { [pickId]: null });
+        filterdPlaceSeqRows.forEach(row => {
+          _.assign(row, {
+            [pickId]: null,
+          });
+        });
       }
     });
 
     // BU.CLI(receiveObjList);
-    return receiveObjList;
+    return containedPlaceSeqRows;
   }
 
   /**

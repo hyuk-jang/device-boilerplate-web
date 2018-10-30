@@ -385,6 +385,7 @@ exports.convertColumn2Rows = convertColumn2Rows;
  * @return {{totalInfo: {in_kw: number=, out_kw: number=, d_kwh: number=, c_mwh: number=}, dataList: Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, hasOperation: boolean }>}}
  */
 function refineSelectedInverterStatus(validInverterStatus) {
+  const INCLINED_SOLAR = 'inclinedSolar';
   const returnValue = {
     totalInfo: {},
     dataList: [],
@@ -399,6 +400,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
       // if (hasValidData) {
       data.hasOperation = true;
       data.power_f = _.round(_.divide(data.power_kw, data.pv_kw) * 100, 1);
+      _.set(data, INCLINED_SOLAR, _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '');
     } else {
       data.pv_a = '';
       data.pv_v = '';
@@ -415,6 +417,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
       data.daily_power_kwh = '';
       data.power_total_kwh = '';
       data.hasOperation = false;
+      data[INCLINED_SOLAR] = '';
     }
 
     currInverterDataList.push(data);

@@ -28,6 +28,7 @@ const passport = require('./bin/passport');
 
 const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
+const BiDevice = require('./models/templates/BiDevice');
 
 app.use(favicon(path.join(process.cwd(), 'public/image', 'favicon.ico')));
 app.use(bodyParser.json());
@@ -56,6 +57,7 @@ const dbInfo = {
 app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
+app.set('biDevice', new BiDevice(dbInfo));
 
 app.use(
   session({

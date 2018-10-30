@@ -7,7 +7,8 @@
 function setInverterList(domElement, inverterStatusList) {
   const inverterStatusTemplate = _.template(`
     <tr class="sel">
-    <td class="td1"> <%= pv_a %> </td>
+    <td class="td1"> <%= inclinedSolar %> </td>
+    <td> <%= pv_a %> </td>
     <td> <%= pv_v %> </td>
     <td> <%= pv_kw %> </td>
     <td> <%= grid_r_a %> </td>
