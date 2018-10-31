@@ -1,12 +1,5 @@
-<!--<script>-->
-<%
-menuNum = 1;
-function matchingMenu(base,target) {
-    return base === target ? 'active' : '';
-}
-%>
-<!--</script>-->
 <nav class="navbar navbar-inverse">
+  <div class="header_top"><a href="login.html">login</a></div>
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -15,16 +8,16 @@ function matchingMenu(base,target) {
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand tit_1" href="#">
-
         농업병행 태양광발전 모니터링
       </a>
     </div>
     <div class="collapse navbar-collapse navbar-right" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
-
-        <li><a href="trend.html">트랜드</a></li>
-        <li><a href="report.html">보고서</a></li>
+      <ul id="navigation" class="nav navbar-nav">
+        <li><a href="main">메인</a></li>
+        <li><a href="inverter">인버터</a></li>
+        <li><a href="sensor">생육센서</a></li>
+        <li><a href="trend">트렌드</a></li>
+        <li><a href="report">보고서</a></li>
 
       </ul>
       <!--<ul class="nav navbar-nav navbar-right">
@@ -39,12 +32,12 @@ function matchingMenu(base,target) {
 
 
     <form>
-      <select name="city" class="city">
-        <option value="naju">10kW급 테스트배드(나주)</option>
-        <option value="Boseong">10kW급 테스트배드(보성)</option>
-        <option value="gangjin">10kW급 테스트배드(강진)</option>
-        <option value="ochang">10kW급 테스트배드(오창)</option>
-        <option value="yeongheung">10kW급 테스트배드(영흥)</option>
+      <select id="sel_city" name="city" class="city">
+        <!-- <option value="1">10kW급 테스트배드(나주)</option>
+        <option value="2">10kW급 테스트배드(보성)</option>
+        <option value="3">10kW급 테스트배드(강진)</option>
+        <option value="4">10kW급 테스트배드(오창)</option>
+        <option value="5">10kW급 테스트배드(영흥)</option> -->
       </select>
     </form>
 
@@ -55,87 +48,32 @@ function matchingMenu(base,target) {
   <div class="col-md-6" style="background-image:linear-gradient(#393939,#222222); height:50px;">
 
     <div class="weder" style="float:right;">
-      <img style="color:#fff; margin-top:4px; margin-right:10px; float:left;" src="image/con_w.png" />
+      <p id="currDate"></p>
+      <img id="currWeatherImg" style="color:#fff; margin-top:4px; margin-right:10px; float:left;" />
       <p style="color:#fff;  margin-top:15px; float:left; margin-right:10px;">날씨</p>
 
-      <input style="color:#333; float:left; margin-right:5px;" class="wed" type="text" value="12">
+      <input id="currWeatherTemp" style="color:#333; float:left; margin-right:5px;" class="wed" type="text" value="">
 
       <p style="color:#fff; margin-top:15px; float:left; ">℃</p>
     </div>
   </div>
 </div>
 
-<div class="wrap">
-  <!--네비-->
-  <nav class="navbar navbar-inverse navbar-inverse_st ">
-    <div class="container-fluid container-fluid_st">
-      <div class="navbar-header">
-        <a class="navbar-brand navbar-brand_st" href="/">
-          <img src="image/kepco-01.png" />
-          <h4> &nbsp;&nbsp; 보일러 플레이트</h4>
-          <!--<img src="image/logo_w-04_180.png" />-->
-        </a>
-      </div>
+<script>
+  // 날씨 정보
+  let currWeatherCastInfo = <%- JSON.stringify(currWeatherCastInfo) %>;
+  // Site SelectBox를 구성하기 위한 목록 정보
+  let siteList = <%- JSON.stringify(siteList) %>;
+  // 현재 선택한 Site Id
+  let siteId = <%- JSON.stringify(siteId) %>;
+  matchingMenu(document.querySelector('#navigation'), <%- menuNum  %>, 'active');
+  document.querySelector('#currWeatherImg').setAttribute('src', `image/weather/weather_${currWeatherCastInfo.wf}.png`)
+  document.querySelector('#currWeatherTemp').setAttribute('value', currWeatherCastInfo.temp);
 
-      <ul class="nav nav-pills navbar-nav_st" role="tablist">
-        <li class="<%= matchingMenu(1,menuNum)%>">
-          <a href="/main">
-            <i class="fa fa-home fa-home_st" aria-hidden="true"></i>홈</a>
-        </li>
-        <li class="<%= matchingMenu(2,menuNum)%>"><a href="/structure"> <i class="fa  fa-sitemap fa-home_st"
-              aria-hidden="true"></i>구성도</a></li>
-        <li class="<%= matchingMenu(3,menuNum)%>">
-          <a href="/connector">
-            <i class="fa fa-object-group fa-home_st" aria-hidden="true"></i>접속반</a>
-        </li>
-        <li class="<%= matchingMenu(4,menuNum)%>">
-          <a href="/inverter">
-            <i class="fa fa-server fa-home_st" aria-hidden="true"></i>인버터</a>
-        </li>
-        <li class="<%= matchingMenu(5,menuNum)%>">
-          <a href="/trend">
-            <i class="fa fa-bar-chart fa-home_st" aria-hidden="true"></i>트렌드</a>
-        </li>
-        <li class="<%= matchingMenu(6,menuNum)%>">
-          <a href="/report">
-            <i class="fa fa-pencil-square-o fa-home_st" aria-hidden="true"></i>보고서</a>
-        </li>
-        <li class="<%= matchingMenu(7,menuNum)%>">
-          <a href="/alarm">
-            <i class="fa fa-bullhorn fa-home_st" aria-hidden="true"></i>경보</a>
-        </li>
-        <li class="<%= matchingMenu(8,menuNum)%>"><a href="http://smtb.iptime.org:7502" target="_blank"> <i class="fa fa-camera-retro fa-home_st"
-              aria-hidden="true"></i>cctv</a></li>
-      </ul>
+  setSiteList(document.getElementById('sel_city'), siteList, siteId)
 
-    </div>
-
-    <div class="row nav_row">
-      <div class="nav_row_st">
-        <div class="nav_row_st_img">
-          <!-- <img src="image/logo.png" /> -->
-          <img src="image/con_p.png" />
-          <span>지점 1</span>
-        </div>
-
-        <div class="nav_row_st_right">
-          <span style="margin-right:40px;" id="today"></span>
-          <script>
-            var today = new Date();
-            var week = new Array('일', '월', '화', '수', '목', '금', '토');
-            $('#today').html(today.getFullYear() + '.' + (today.getMonth() + 1) + '.' + today.getDate() + '(' + week[
-              today.getDay()] + ')');
-
-            
-          </script>
-          <span>날씨</span>
-
-          <img src="image/weather_0.png" />
-          <!-- <img src="image/weather_1.png" /> -->
-
-          <input type="text" class="form-control" style="text-align: center" value="10">
-          <span class="Temperature">℃</span>
-        </div>
-      </div>
-    </div>
-  </nav>
+  // 사이트 변경 시
+  $('#sel_city').change(function () {
+    location.href = window.location.pathname + '?siteid=' + $(this).val()
+  })
+</script>
