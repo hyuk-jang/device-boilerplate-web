@@ -40,7 +40,7 @@ router.use(
         totalSiteAmount += totalAmount;
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
         const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
-        return { siteid: strMainSeq.toString(), name: siteName };
+        return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
     siteList.unshift({ siteid: 'all', name: `모두(${totalSiteAmount}kW급)` });

@@ -27,6 +27,9 @@ router.get(
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
 
+    /** @type {{siteid: string, m_name: string}[]} */
+    const mainSiteList = req.locals.siteList;
+
     // 지점 Id를 불러옴
     const { siteId } = req.locals;
 
@@ -47,7 +50,7 @@ router.get(
 
     const INCLINED_SOLAR = 'inclinedSolar';
 
-    BU.CLIN(placeDataList.map(ele => _.pick(ele, ['place_id', 'place_seq', INCLINED_SOLAR])));
+    // BU.CLIN(placeDataList.map(ele => _.pick(ele, ['place_id', 'place_seq', INCLINED_SOLAR])));
 
     // const viewPowerProfileRows = await biModule.getTable('v_pw_profile', pwProfileWhereInfo, false);
     // BU.CLI(inverterSeqList);
@@ -60,7 +63,24 @@ router.get(
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     viewInverterStatusRows.forEach(inverterStatus => {
       const foundPlaceData = _.find(placeDataList, { place_seq: inverterStatus.place_seq });
-      _.assign(inverterStatus, { [INCLINED_SOLAR]: _.get(foundPlaceData, INCLINED_SOLAR, null) });
+      const foundProfile = _.find(viewPowerProfileRows, {
+        inverter_seq: inverterStatus.inverter_seq,
+      });
+      const mainName = _.get(foundProfile, 'm_name', '');
+      // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
+      const {
+        ivt_target_name: subName,
+        ivt_director_name: company = '',
+        ivt_amount: amount,
+      } = foundProfile;
+      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
+        _.isString(company) && company.length ? company : ''
+      }`;
+
+      _.assign(inverterStatus, {
+        [INCLINED_SOLAR]: _.get(foundPlaceData, INCLINED_SOLAR, null),
+        siteName,
+      });
     });
 
     // BU.CLI(viewInverterStatusRows);
@@ -76,7 +96,7 @@ router.get(
 
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
     const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
-    BU.CLI(refinedInverterStatusList);
+    // BU.CLI(refinedInverterStatusList);
 
     const searchRange = biModule.getSearchRange('min10');
     // searchRange.searchInterval = 'day';

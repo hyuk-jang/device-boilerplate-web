@@ -76,6 +76,7 @@ app.set('passport', passport(app, dbInfo));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+// app.engine('html', require('ejs').renderFile);
 
 if (app.get('env') === 'development') {
   // app.use(logger('dev'));

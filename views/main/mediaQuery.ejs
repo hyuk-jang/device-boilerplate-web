@@ -1,29 +1,5 @@
 <style>
-  /*@media all and (max-width: 480px) and (min-width: 320px)  { 
-   
- html { font-size: 80%; } 
-    .tit_1 {font-size:15px!important; color:#222!important;} 
-    .box {width:100%!important; height:auto!important; float:none!important; margin-top:-17px!important;} 
-    .deve:first-child {font-size:17px!important;}
-    .box_5 {height:auto!important;}
-    .box_5>p {margin:10px 0 10px 0!important;}
-    .box_5_in {margin:0 0 5px 0!important; width:100%!important; padding:0 5px 0 5px!important;}
-    .box_5_in:first-child {margin:0 0 5px 0!important;}
-    .box_5_in:nth-child(4) {margin:0 0 5px 0!important;}
-    .box_5_in_sp {clear:none!important; width:30%!important; border-radius:unset!important; margin:0px!important; display:inline-block!important;}
-    .box_5_in_sp>p {margin-bottom:0!important;}
-    .wed_3 {margin:0px!important;}
-    .input-tx {float:left!important; width:30%!important;}
-    .box_6_in_4 {width:100%!important; height:auto!important;}
-    .box_6_in_4>p {float:left!important; display:inline-block!important; margin:20px 0 0 20px!important; width:40%;}
-    .wed_4 {width:25%!important; float:left!important;}
-    .box_6_in_4>span {float:left!important; line-height:3!important;}
-    .box_6_in_4>img {visibility: hidden!important; width:0!important; height:0!important; float:none!important; margin:0!important;} 
-
-}*/
-
-
-  @media all and (max-width: 540px)and (min-width: 320px) {
+  @media all and (max-width: 550px)and (min-width: 320px) {
     .containerb {
       display: flex;
       flex-direction: column;
@@ -34,8 +10,8 @@
     }
 
     .deve_1 {
-      display: flex !important;
-      justify-content: flex-start;
+      display: flex;
+      flex-direction: column;
       margin-bottom: 10px;
     }
 
@@ -90,7 +66,48 @@
       display: flex !important;
       flex-direction: column !important;
       width: 100% !important;
+      height: auto !important;
     }
+
+    .box_5_in {
+      display: flex !important;
+      justify-content: center;
+      width: 100% !important;
+    }
+
+    .box_5_bg {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-tx {
+      max-width: 30%;
+      margin: 5px;
+    }
+
+    .box_5_in_sp {
+      height: 40%;
+    }
+
+    .box_5_in:first-child {
+      margin: 5px;
+    }
+
+    .box_5_a {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 35%;
+    }
+
+
+    .wed_3 {
+      margin: 7px 2px;
+    }
+
+
+
 
     .box_6 {
       display: flex !important;
@@ -99,10 +116,34 @@
       height: auto;
     }
 
+
+    .box_6_in {
+      width: 100%;
+    }
+
     .stat {
-      float: left !important;
+      display: flex !important;
+      width: 100%;
       margin-bottom: 5px;
     }
+
+    .stat>p {
+      display: flex;
+    }
+
+    .stat>input {
+      display: flex;
+    }
+
+    .stat>span {
+      width: 12%;
+      text-align: left;
+    }
+
+    .tit_1 {
+      font-size: 16px;
+    }
+
 
   }
 
@@ -110,10 +151,10 @@
 
 
 
-  @media all and (max-width: 942px)and (min-width: 541px) {}
 
 
-  @media all and (max-width: 942px)and (min-width: 320px) {
+
+  @media all and (max-width: 942px)and (min-width: 551px) {
     .containerb {
       display: flex;
       flex-direction: column;
@@ -171,28 +212,33 @@
 
     .cont-box-rotate_s {
       visibility: hidden;
-      margin-top: 20px !important;
+      margin-top: 20px;
       width: 0;
       height: 0;
     }
 
     .box_5 {
-      display: flex !important;
-      flex-direction: column !important;
-      width: 100% !important;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
     }
 
     .box_6 {
-      display: flex !important;
-      flex-direction: column !important;
-      width: 100% !important;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
       height: auto;
     }
 
     .stat {
       display: flex;
-      flex-direction: column;
       margin-bottom: 5px;
+      width: 100%;
+    }
+
+    .stat>span {
+      width: 12%;
+      text-align: left;
     }
   }
 
@@ -208,7 +254,7 @@
     }
 
     .deve_1 {
-      margin-top: 20px !important;
+      margin-top: 20px;
     }
 
 

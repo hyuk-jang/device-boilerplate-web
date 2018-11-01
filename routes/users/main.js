@@ -52,10 +52,11 @@ router.get(
     );
 
     // 금일 발전 현황 데이터
-    // searchRange = biModule.getSearchRange('min10');
-    searchRange = biModule.getSearchRange('min10', '2018-10-25');
+    searchRange = biModule.getSearchRange('min10');
+    // searchRange = biModule.getSearchRange('min10', '2018-10-25');
 
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
+    // BU.CLI(inverterTrend);
 
     // 하루 데이터(10분 구간)는 특별히 데이터를 정제함.
     if (
@@ -95,10 +96,10 @@ router.get(
     // 금일 발전량
     const dailyPower = webUtil.calcValue(
       webUtil.reduceDataList(inverterTrend, 'interval_power'),
-      0.001,
+      1,
       2,
     );
-    // BU.CLI(dailyPower);
+    BU.CLI(dailyPower);
 
     // 차트를 생성하기 위한 옵션.
     const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
@@ -150,7 +151,7 @@ router.get(
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
-
+    // BU.CLI(req.locals);
     res.render('./main/index', req.locals);
   }),
 );

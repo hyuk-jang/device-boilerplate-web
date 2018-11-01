@@ -5,129 +5,59 @@
   <!-- Default Js -->
   <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
-  <script src="js/contents/master/setMenu.js"></script>
+  <script src="js/contents/master/mainUtil.js"></script>
   <script src="js/contents/inverter/setInverter.js"></script>
+  <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
-  <!--네비-->
-  <div>
-    <div class="warp">
+  <div class="wrap" style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+    <div class="center">
+      <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="row row_title">
-        <div class="title" style="float: none; margin-bottom: 10px"> 실시간 인버터 모니터링
-          <span>
-            측정시간:
-          </span>
+      <div class="containera">
+        <div class="text-center containerb">
+          <div class="title">
+            <p> 실시간 인버터 모니터링 측정시간 : 2018-10-17 10:27:00</p>
+          </div>
+          <div class="table-responsive" style="overflow-x:visible;">
+            <table class="table table-bordered" style="width:100%;background:#fff;">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="width:10%"></th>
+                  <th scope="col" colspan="4" style="text-align:center; width:30%">태양광</th>
+                  <th scope="col" colspan="3" style="text-align:center; width:20%">인버터</th>
+                  <th scope="col" colspan="5" style="text-align:center; width:40%">발전현황</th>
+                </tr>
+                <tr>
+                  <td style="width:8%;">경사일사량W/㎥</td>
+                  <td style="width:7%;">DC전류(A)</td>
+                  <td style="width:7%;">DC전압(V)</td>
+                  <td style="width:7%;">DC전력(kW)</td>
+                  <td style="width:8%;">AC전류(A)</td>
+                  <td style="width:8%;">AC전압(V)</td>
+                  <td style="width:8%;">주파수(Hz)</td>
+                  <td style="width:8%;">현재전력(kW)</td>
+                  <td style="width:6%;">효율</td>
+                  <td style="width:8%;">금일발전량(kWh)</td>
+                  <td style="width:8%;">누적발전량(kWh)</td>
+                  <td style="width:5%;">동작여부</td>
+                </tr>
+              </thead>
+              <tbody id="myTable">
+              </tbody>
+            </table>
+          </div>
         </div>
-
-
-        <div class="table-responsive">
-          <!-- <colgroup>
-              <col style="width:10%">
-              <col style="width:6%">
-              <col style="width:10%">
-              <col style="width:10%">
-              <col style="width:7%">
-              <col style="width:7%">
-              <col style="width:7%">
-              <col style="width:7%">
-              <col style="width:7%">
-              <col style="width:6%">
-              <col style="width:8%">
-              <col style="width:8%">
-              <col style="width:5%">
-            </colgroup> -->
-          <table class="table table-hover ">
-            <thead>
-              <tr>
-                <th colspan="4">태양광</th>
-                <th colspan="3">인버터</th>
-                <th colspan="4">발전 현황</th>
-
-              </tr>
-              <tr>
-                <th>경사일사량<br>(W/m²)</th>
-                <th>DC 전류<br>(A)</th>
-                <th>DC 전압<br>(V)</th>
-                <th>DC 전력<br>(kW)</th>
-                <th>AC 전류<br>(A)</th>
-                <th>AC 전압<br>(V)</th>
-                <th>주파수<br>(A)</th>
-                <th>현재 출력<br>(kW)</th>
-                <th>효율<br>(%)</th>
-                <th>금일발전량<br>(kWh)</th>
-                <th>누적발전량<br>(kWh)</th>
-                <th style="text-align:center;">장치<br>상태</th>
-              </tr>
-            </thead>
-            <tbody id="myTable">
-              <tr class="sel">
-                <td class="td1">
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td class="center_ball">
-
-                </td>
-              </tr>
-              <!--
-              <tr class="sel">
-                <td class="td1" style="text-align:right;">계</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                </td>
-                <td></td>
-                <td></td>
-                <td>
-                </td>
-                <td></td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td></td>
-              </tr>
-              -->
-            </tbody>
-          </table>
+        <div class="text-center" style="background-color:#fff; height:auto;">
+          <div class="row row_width  top_box">
+            <div class="title" style="margin-top:20px;">
+              <p>금일 시간 별 전력</p>
+            </div>
+            <div id="chart_div" style="width:100%; height:300px; background-color:#fff;"></div>
+          </div>
         </div>
-        <p class="re_p">※ 금일 발전량, 누적 발전량, 장치 상태를 제외한 위의 데이터는 모두 해당
-          <span> 실시간 데이터</span> 입니다. </p>
-        <div class="row row_title">
-          <div class="title" style="margin-top:20px; float:left;"> 금일 시간 별 전력</div>
-        </div>
-        <div class="title_box" id="chart_div" style="height :400px"></div>
-        <p class="re_p" style="margin-top: 10px">※ 전력(W) 데이터는 계통측 전력 데이터이며
-          <span> 시간당 평균 값 </span> 입니다. </p>
-        <p class="re_p" style="margin: 5px 0px 0px">※ 단: 단결정, 다: 다결정</p>
       </div>
       <!--하단1-->
       <div class="container-fluid bg-3 text-center">

@@ -6,39 +6,10 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const webUtil = require('../../models/templates/web.util');
-
 // server middleware
 router.use(
   asyncHandler(async (req, res, next) => {
-    const user = _.get(req, 'user', {});
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
-    _.set(req, 'locals.menuNum', 2);
-    _.set(req, 'locals.siteId', user.main_seq);
-    BU.CLI(user.main_seq);
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
-    req.locals.currWeatherCastInfo = currWeatherCastInfo;
-
-    /** @type {V_PW_PROFILE[]} */
-    const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
-
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        // BU.CLI(profileRows);
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
-        return { siteid: strMainSeq, name: siteName };
-      });
-
-    _.set(req, 'locals.siteList', siteList);
+    _.set(req, 'locals.menuNum', 4);
 
     // BU.CLI(req.locals);
     next();
@@ -50,45 +21,27 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     // BU.CLI(req.user);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    const user = _.get(req, 'user', {});
+    /** @type {{siteid: string, m_name: string}[]} */
+    const mainSiteList = req.locals.siteList;
 
     // 지점 Id를 불러옴
+    const { siteId } = req.locals;
+
+    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    const profileWhere = _.eq(siteId, 'all') ? null : { main_seq: siteId };
+
+    // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
+    /** @type {V_DV_SENSOR_PROFILE[]} */
+    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', profileWhere);
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation', profileWhere);
 
     // BU.CLIN(req.locals);
     res.render('./report/report', req.locals);
   }),
 );
 
-router.get(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    res.render('./main/index', req.locals);
-  }),
-);
-
-router.get(
-  '/ess',
-  asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
-    return res.render('./templates/ESS/index.ejs', req.locals);
-  }),
-);
-
 module.exports = router;
-
-// router.get('/intersection', (req, res) => {
-//   const grade = _.get(req, 'user.grade');
-//   switch (grade) {
-//     case 'admin':
-//       router.use('/admin', admin);
-//       res.redirect('/admin');
-//       break;
-//     case 'manager':
-//       router.use('/manager', manager);
-//       res.redirect('/manager');
-//       break;
-//     default:
-//       break;
-//   }
-// });

@@ -4,14 +4,13 @@
 <head>
   <!-- Default Js -->
   <script src="js/lodash.min.js"></script>
-  <%- include("./mediaQuery.ejs") %>
   <%- include("../master/head.ejs") %>
   <script src="js/hichart/highcharts.src.js"></script>
   <script src="js/hichart/highcharts-more.js"></script>
   <script src="js/hichart/solid-gauge.js"></script>
-  <script src="js/contents/master/setMenu.js"></script>
-  <script src="js/contents/main/powerstatus.js"></script>
+  <script src="js/contents/master/mainUtil.js"></script>
   <script src="js/contents/main/makeGaugeChart.js"></script>
+  <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
@@ -30,26 +29,31 @@
               <p>발전현황</p>
               <p>Development status</p>
             </div>
-            <div class="deve_1">
+            <div id="powerStatus" class="deve_1">
               <div class="stat">
                 <p><I>현재출력</I></p>
-                <input class="wed_1" style="margin-left:13px;" type="text" value="0.24kW">
+                <input id="currKw" class="wed_1" style="margin-left:13px;" type="text" value="">
+                <span>kW</span>
               </div>
               <div class="stat">
                 <p><I>금일발전량</I></p>
-                <input class="wed_1" type="text" value="0.42kWh">
+                <input id="dailyPower" class="wed_1" type="text" value="">
+                <span>kWh</span>
               </div>
               <div class="stat">
                 <p><I>당월발전량</I></p>
-                <input class="wed_1" type="text" value="803.9kWh">
+                <input id="monthPower" class="wed_1" type="text" value="">
+                <span>kWh</span>
               </div>
               <div class="stat">
                 <p><I>누적발전량</I></p>
-                <input class="wed_1" type="text" value="9.128MWh">
+                <input id="cumulativePower" class="wed_1" type="text" value="">
+                <span>MWh</span>
               </div>
               <div class="stat">
                 <p><I>CO2저감량</I></p>
-                <input class="wed_1" type="text" value="3.87Ton">
+                <input id="co2" class="wed_1" type="text" value="">
+                <span>Ton</span>
               </div>
             </div>
           </div>
@@ -60,7 +64,7 @@
       <div> <span>금일발전량</span><input class="wed_2" type="text" value="700">kW</div>-->
           </div>
           <div class="box_3">
-            <p style="margin-top:10px; font-weight:bold;">통합발전량</p>
+            <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
             <div id="daily-power-graph" style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
           </div>
         </div>
@@ -85,36 +89,48 @@
             <div class="box_5_bg">
               <div class="box_5_in">
                 <input class="input-tx" type="text">
-                <div class="box_5_in_sp">
-                  <p>AC전압</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
-                <div class="box_5_in_sp">
-                  <p>AC전류</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
               </div>
               <div class="box_5_in">
                 <input class="input-tx" type="text">
-                <div class="box_5_in_sp">
-                  <p>AC전압</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
-                <div class="box_5_in_sp">
-                  <p>AC전류</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
               </div>
               <div class="box_5_in">
                 <input class="input-tx" type="text">
-                <div class="box_5_in_sp">
-                  <p>AC전압</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
-                <div class="box_5_in_sp">
-                  <p>AC전류</p>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
                 </div>
-                <input class="wed_3" type="text" value="300">(v)
               </div>
             </div>
           </div>
@@ -150,9 +166,10 @@
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
+  </div>
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-    // console.log(powerGenerationInfo)
+    console.log(powerGenerationInfo)
     // 금일 발전량 차트
     makeGaugeChart({
       domId: 'daily-power-graph',
@@ -187,6 +204,8 @@
     })
     // 현재 날짜 세팅
     writeDateText(document.getElementById('currDate'))
+    // 발전 현황 셋팅
+    setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
   </script>
 </body>
 

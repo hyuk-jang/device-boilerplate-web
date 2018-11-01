@@ -9,7 +9,7 @@ function writeDateText(domElement) {
   // console.log(foundDom);
   domElement.innerHTML = `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}(${
     week[today.getDay()]
-  }`;
+  })`;
   // $(`#${domId}`).html(
   //   `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}(${week[today.getDay()]})`,
   // );
@@ -70,4 +70,39 @@ function setSiteList(domElement, siteList, siteId) {
     return siteOptionTemplate({ siteid, name, isSelected });
   });
   domElement.innerHTML = optionList;
+}
+
+/**
+ * Dom 객체 자식을 순회하면서 Json 조건에 맞는 데이터를 찾아 일치하는 값을 설정
+ * @param {HTMLElement} parentDom
+ * @param {*} jsonData
+ * @param {string=} setAttrName 설정할 어트리뷰트 이름,  default: inner
+ * @param {string=} getAttrName 찾을 어트리뷰트 이름,  default: id
+ */
+function setDomElementValueWithJson(
+  parentDom,
+  jsonData,
+  setAttrName = 'innerHTML',
+  getAttrName = 'id',
+) {
+  _.forEach(parentDom.children, child => {
+    const attibuteValue = child.getAttribute(getAttrName);
+    // 해당 Attribute Value와 Json Key가 일치하다면
+    if (_.has(jsonData, attibuteValue)) {
+      const selectedValue = _.get(jsonData, attibuteValue, '');
+      switch (setAttrName) {
+        case 'innerHTML':
+          child.innerHTML = selectedValue;
+          break;
+        default:
+          child.setAttribute(setAttrName, selectedValue);
+          break;
+      }
+    }
+
+    // 해당 Element의 자식이 존재한다면 재귀
+    if (child.childElementCount) {
+      setDomElementValueWithJson(child, jsonData, setAttrName, getAttrName);
+    }
+  });
 }

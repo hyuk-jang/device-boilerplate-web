@@ -7,7 +7,8 @@
 function setInverterList(domElement, inverterStatusList) {
   const inverterStatusTemplate = _.template(`
     <tr class="sel">
-    <td class="td1"> <%= inclinedSolar %> </td>
+    <td scope="row"><%= siteName %></td>
+    <td > <%= inclinedSolar %> </td>
     <td> <%= pv_a %> </td>
     <td> <%= pv_v %> </td>
     <td> <%= pv_kw %> </td>
@@ -29,5 +30,6 @@ function setInverterList(domElement, inverterStatusList) {
 
     return inverterStatusTemplate(inverterStatusInfo);
   });
-  domElement.innerHTML = optionList;
+  $(domElement).html(optionList);
+  // domElement.innerHTML = optionList;
 }

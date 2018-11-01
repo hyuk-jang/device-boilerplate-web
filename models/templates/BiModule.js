@@ -612,7 +612,7 @@ class BiModule extends BM {
           ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
           ROUND(MIN(min_c_kwh), 3) AS min_c_kwh,
           ROUND(MAX(max_c_kwh), 3) AS max_c_kwh,
-          ROUND(MAX(max_c_kwh) - MIN(max_c_kwh), 3) AS interval_power,
+          ROUND(MAX(max_c_kwh) - MIN(min_c_kwh), 3) AS interval_power,
           ivt.chart_color, ivt.chart_sort_rank,
           SUM(first_count) as total_count
     FROM
