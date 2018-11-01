@@ -86,20 +86,20 @@
           </div>
           <div class="box_5">
             <p>인버터 전압/전류</p>
-            <div class="box_5_bg">
+            <div id="inverterStatus" class="box_5_bg">
               <div class="box_5_in">
                 <input class="input-tx" type="text">
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전압</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전류</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
               </div>
               <div class="box_5_in">
@@ -108,13 +108,13 @@
                   <div class="box_5_in_sp">
                     <p>AC전압</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전류</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
               </div>
               <div class="box_5_in">
@@ -123,13 +123,13 @@
                   <div class="box_5_in_sp">
                     <p>AC전압</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전류</p>
                   </div>
-                  <div> <input class="wed_3" type="text" value="300"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@
               <div class="box_6_in_4">
                 <img src="image/no1.png" />
                 <p>일사량</p>
-                <input class="wed_4" type="text" value="45.7"><span> W/㎥</span>
+                <input id="inclinedSolar" class="wed_4" type="text" value=""><span> W/㎥</span>
               </div>
               <div class="box_6_in_4">
                 <img src="image/no2.png" />
@@ -204,8 +204,13 @@
     })
     // 현재 날짜 세팅
     writeDateText(document.getElementById('currDate'))
+
+    document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
+
     // 발전 현황 셋팅
     setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
+
+    $('#inverterStatus').html(<%- JSON.stringify(inverterStatusHtml) %>)
   </script>
 </body>
 

@@ -20,10 +20,13 @@ router.use(
 
 /* GET home page. */
 router.get(
-  '/',
+  ['/', '/main'],
   asyncHandler(async (req, res) => {
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
 
     // 지점 Id를 불러옴
     const { siteId } = req.locals;
@@ -44,16 +47,26 @@ router.get(
     // BU.CLIN(inverterMonthRows);
     // 금월 발전량
     const monthPower = webUtil.reduceDataList(inverterMonthRows, 'interval_power');
-    // 누적 발전량
+    BU.CLI(_.sum(_.map(inverterMonthRows, 'interval_power')));
+    // 오늘자 발전 현황을 구할 옵션 설정(strStartDate, strEndDate 를 오늘 날짜로 설정하기 위함)
+    // 검색 조건이 시간당으로 검색되기 때문에 금일 날짜로 date Format을 지정하기 위해 hour --> day 로 변경
+    const cumulativePowerList = await biModule.getInverterCumulativePower(inverterSeqList);
     const cumulativePower = webUtil.calcValue(
-      webUtil.reduceDataList(inverterMonthRows, 'max_c_kwh'),
+      webUtil.reduceDataList(cumulativePowerList, 'max_c_kwh'),
       0.001,
       3,
     );
 
+    // 누적 발전량
+    // const cumulativePower = webUtil.calcValue(
+    //   webUtil.reduceDataList(inverterMonthRows, 'max_c_kwh'),
+    //   0.001,
+    //   3,
+    // );
+
     // 금일 발전 현황 데이터
-    searchRange = biModule.getSearchRange('min10');
-    // searchRange = biModule.getSearchRange('min10', '2018-10-25');
+    // searchRange = biModule.getSearchRange('min10');
+    searchRange = biModule.getSearchRange('min10', '2018-11-01');
 
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
     // BU.CLI(inverterTrend);
@@ -99,7 +112,6 @@ router.get(
       1,
       2,
     );
-    BU.CLI(dailyPower);
 
     // 차트를 생성하기 위한 옵션.
     const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
@@ -112,13 +124,59 @@ router.get(
 
     // 인버터 현재 발전 현황
     /** @type {V_PW_INVERTER_STATUS[]} */
-    const inverterDataList = await biModule.getTable('v_pw_inverter_status', {
+    const viewInverterStatusRows = await biModule.getTable('v_pw_inverter_status', {
       inverter_seq: inverterSeqList,
     });
 
+    /** @type {{inverter_seq: number, siteName: string}[]} */
+    const inverterSiteNameList = [];
+
+    // 인버터별 경사 일사량을 가져옴
+    const INCLINED_SOLAR = 'inclinedSolar';
+    const placeDataList = await biDevice.extendsPlaceDeviceData(
+      viewPowerProfileRows,
+      INCLINED_SOLAR,
+    );
+
+    // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
+    viewInverterStatusRows.forEach(inverterStatus => {
+      const foundPlaceData = _.find(placeDataList, { place_seq: inverterStatus.place_seq });
+      // BU.CLI(foundPlaceData);
+      const foundProfile = _.find(viewPowerProfileRows, {
+        inverter_seq: inverterStatus.inverter_seq,
+      });
+      // const mainName = _.get(foundProfile, 'm_name', '');
+      // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
+      const {
+        ivt_target_name: subName,
+        ivt_director_name: company = '',
+        ivt_amount: amount,
+      } = foundProfile;
+      const siteName = `${subName || ''} ${_.round(amount)} kW급 ${
+        _.isString(company) && company.length ? company : ''
+      }`;
+
+      inverterSiteNameList.push({
+        inverter_seq: inverterStatus.inverter_seq,
+        siteName,
+      });
+
+      _.assign(inverterStatus, {
+        [INCLINED_SOLAR]: _.get(foundPlaceData, INCLINED_SOLAR, null),
+        siteName,
+      });
+    });
+
+    const inverterStatusHtml = makeInverterStatusDom(viewInverterStatusRows);
+
+    // 인버터에 붙어있는 경사 일사량을 구함
+    const avgInclinedSolar = _(viewInverterStatusRows)
+      .map(INCLINED_SOLAR)
+      .meanBy();
+
     // 인버터 발전 현황 데이터 검증
     const validInverterDataList = webUtil.checkDataValidation(
-      inverterDataList,
+      viewInverterStatusRows,
       new Date(),
       'writedate',
     );
@@ -138,7 +196,7 @@ router.get(
       monthPower,
       cumulativePower,
       co2: _.round(cumulativePower * 0.424, 3),
-      solarRadiation: '',
+      [INCLINED_SOLAR]: avgInclinedSolar,
       hasOperationInverter: _.every(
         _.values(_.map(validInverterDataList, data => data.hasValidData)),
       ),
@@ -146,32 +204,59 @@ router.get(
     };
     // BU.CLI(chartData);
 
-    // BU.CLI(powerGenerationInfo);
-
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
+
+    req.locals.inverterStatusHtml = inverterStatusHtml;
     // BU.CLI(req.locals);
     res.render('./main/index', req.locals);
   }),
 );
 
 router.get(
-  '/:id',
+  '/main/:id',
   asyncHandler(async (req, res) => {
     res.render('./main/index', req.locals);
   }),
 );
 
-router.get(
-  '/ess',
-  asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
-    return res.render('./templates/ESS/index.ejs', req.locals);
-  }),
-);
+// router.get(
+//   '/ess',
+//   asyncHandler(async (req, res) => {
+//     console.log(global.app.get('dbInfo'));
+//     return res.render('./templates/ESS/index.ejs', req.locals);
+//   }),
+// );
 
 module.exports = router;
+
+/**
+ *
+ * @param {V_INVERTER_STATUS[]} inverterStatusRows
+ */
+function makeInverterStatusDom(inverterStatusRows) {
+  const inverterStatusTemplate = _.template(`
+    <div class="box_5_in">
+    <input class="input-tx" type="text" value="<%= siteName %>">
+    <div class="box_5_a">
+      <div class="box_5_in_sp">
+        <p>AC전압</p>
+      </div>
+      <div> <input class="wed_3" type="text" value="<%= grid_rs_v %>"><span>(v)</span></div>
+    </div>
+    <div class="box_5_a">
+      <div class="box_5_in_sp">
+        <p>AC전류</p>
+      </div>
+      <div> <input class="wed_3" type="text" value="<%= grid_r_a %>"><span>(v)</span></div>
+    </div>
+  </div>
+    `);
+  const inverterStatusDom = inverterStatusRows.map(row => inverterStatusTemplate(row));
+
+  return inverterStatusDom;
+}
 
 // router.get('/intersection', (req, res) => {
 //   const grade = _.get(req, 'user.grade');

@@ -74,7 +74,7 @@ router.get(
         <td rowspan=<%= rowsPan %>> <%= windDirection %> </td>
         <td rowspan=<%= rowsPan %>> <%= windSpeed %> </td>
         <td rowspan=<%= rowsPan %>> <%= r1 %> </td>
-        <td rowspan=<%= rowsPan %>> <%= isRain %> </td>
+        <td rowspan=<%= rowsPan %>> <img src="image/weather/weather_<%= rainImgSrc %>.png" > </td>
       </tr>`,
     );
 
@@ -116,6 +116,16 @@ router.get(
       );
 
       const outsideSensor = _.assign(..._.map(outsidePlaceRows, row => _.pick(row, OUTSIDE_LIST)));
+
+      // 풍향 재설정
+      _.set(
+        outsideSensor,
+        'windDirection',
+        BU.getWindDirection(_.get(outsideSensor, 'windDirection', '')),
+      );
+
+      // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
+      _.set(outsideSensor, 'rainImgSrc', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
 
       // 센서 군 장소 목록 길이
       const rowsLength = _(groupPlaceRelationRows)

@@ -519,6 +519,8 @@ class BiModule extends BM {
             inverter_seq,
             writedate, 
             ${dateFormat.selectViewDate},
+            ${dateFormat.selectGroupDate},
+            ROUND(AVG(power_kw), 1)  AS avg_grid_kw,
             MAX(power_total_kwh) AS max_c_kwh,
             MIN(power_total_kwh) AS min_c_kwh,       
             ROUND((MAX(power_total_kwh) - MIN(power_total_kwh)), 1) AS interval_power
@@ -529,7 +531,7 @@ class BiModule extends BM {
       sql += ` AND inverter_seq IN (${inverterSeqList})`;
     }
     sql += `        
-    GROUP BY  inverter_seq
+    GROUP BY  ${dateFormat.groupByFormat}, inverter_seq
     ) AS main
     LEFT OUTER JOIN pw_inverter ivt
     ON ivt.inverter_seq = main.inverter_seq

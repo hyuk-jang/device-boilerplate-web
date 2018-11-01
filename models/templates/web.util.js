@@ -396,8 +396,8 @@ function refineSelectedInverterStatus(validInverterStatus) {
 
     const { hasValidData, data } = info;
 
-    if (true) {
-      // if (hasValidData) {
+    // if (true) {
+    if (hasValidData) {
       data.hasOperation = true;
       data.power_f = _.round(_.divide(data.power_kw, data.pv_kw) * 100, 1);
       _.set(data, INCLINED_SOLAR, _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '');
@@ -414,8 +414,8 @@ function refineSelectedInverterStatus(validInverterStatus) {
       data.line_f = '';
       data.power_f = '';
       data.power_kw = '';
-      data.daily_power_kwh = '';
-      data.power_total_kwh = '';
+      // data.daily_power_kwh = '';
+      // data.power_total_kwh = '';
       data.hasOperation = false;
       data[INCLINED_SOLAR] = '';
     }
@@ -453,11 +453,11 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
   // 데이터를 정리할 X 축 시간
-  const range = _.sortBy(_.union(_.map(rowDataPacketList, dateKey)));
+  const range = _.sortBy(_.unionWith(_.map(rowDataPacketList, dateKey), _.isEqual));
 
   // 반환 데이터 유형
   const returnValue = {
-    range: range.map(d => moment(d).toDate()),
+    range,
     series: [],
   };
 
@@ -485,7 +485,8 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
       }
 
       _.forEach(groupObj, gInfo => {
-        const index = _.indexOf(range, gInfo[dateKey]);
+        const index = _.findIndex(range, d => _.isEqual(d, gInfo[dateKey]));
+
         addObj.data[index] = gInfo[selectKey];
       });
       returnValue.series.push(addObj);

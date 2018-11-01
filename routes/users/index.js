@@ -39,7 +39,7 @@ router.use(
         );
         totalSiteAmount += totalAmount;
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
+        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
         return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
@@ -70,7 +70,7 @@ router.use(
   }),
 );
 
-router.use('/main', main);
+router.use('/', main);
 router.use('/inverter', inverter);
 router.use('/sensor', sensor);
 router.use('/trend', trend);

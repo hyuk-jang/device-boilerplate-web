@@ -4,6 +4,8 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
+const moment = require('moment');
+
 const { BU } = require('base-util-jh');
 
 const webUtil = require('../../models/templates/web.util');
@@ -27,9 +29,6 @@ router.get(
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
 
-    /** @type {{siteid: string, m_name: string}[]} */
-    const mainSiteList = req.locals.siteList;
-
     // 지점 Id를 불러옴
     const { siteId } = req.locals;
 
@@ -43,26 +42,24 @@ router.get(
     // const placeSeqList = _.map(viewPowerProfileRows, 'place_seq');
 
     // 인버터별 경사 일사량을 가져옴
+    const INCLINED_SOLAR = 'inclinedSolar';
     const placeDataList = await biDevice.extendsPlaceDeviceData(
       viewPowerProfileRows,
-      'inclinedSolar',
+      INCLINED_SOLAR,
     );
-
-    const INCLINED_SOLAR = 'inclinedSolar';
-
-    // BU.CLIN(placeDataList.map(ele => _.pick(ele, ['place_id', 'place_seq', INCLINED_SOLAR])));
-
-    // const viewPowerProfileRows = await biModule.getTable('v_pw_profile', pwProfileWhereInfo, false);
-    // BU.CLI(inverterSeqList);
 
     /** @type {V_INVERTER_STATUS[]} */
     const viewInverterStatusRows = await biModule.getTable('v_pw_inverter_status', {
       inverter_seq: inverterSeqList,
     });
 
+    /** @type {{inverter_seq: number, siteName: string}[]} */
+    const inverterSiteNameList = [];
+
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     viewInverterStatusRows.forEach(inverterStatus => {
       const foundPlaceData = _.find(placeDataList, { place_seq: inverterStatus.place_seq });
+      // BU.CLI(foundPlaceData);
       const foundProfile = _.find(viewPowerProfileRows, {
         inverter_seq: inverterStatus.inverter_seq,
       });
@@ -77,13 +74,18 @@ router.get(
         _.isString(company) && company.length ? company : ''
       }`;
 
+      inverterSiteNameList.push({
+        inverter_seq: inverterStatus.inverter_seq,
+        siteName,
+      });
+
       _.assign(inverterStatus, {
         [INCLINED_SOLAR]: _.get(foundPlaceData, INCLINED_SOLAR, null),
         siteName,
       });
     });
 
-    // BU.CLI(viewInverterStatusRows);
+    BU.CLI(viewInverterStatusRows);
 
     // 데이터 검증
     const validInverterStatusList = webUtil.checkDataValidation(
@@ -92,17 +94,39 @@ router.get(
       'writedate',
     );
 
-    // BU.CLI(validInverterStatus);
-
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
     const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
-    // BU.CLI(refinedInverterStatusList);
 
-    const searchRange = biModule.getSearchRange('min10');
-    // searchRange.searchInterval = 'day';
+    // const searchRange = biModule.getSearchRange('min10');
+    const searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
+    // BU.CLI(inverterPowerList);
+    const chartOption = {
+      selectKey: 'avg_grid_kw',
+      dateKey: 'view_date',
+      groupKey: 'inverter_seq',
+      colorKey: 'chart_color',
+      sortKey: 'chart_sort_rank',
+    };
+
+    const chartData = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
+
+    chartData.series.forEach(chartInfo => {
+      chartInfo.name = _.get(
+        _.find(inverterSiteNameList, { inverter_seq: Number(chartInfo.name) }),
+        'siteName',
+        '',
+      );
+    });
+
+    // BU.CLI(chartData);
+    // webUtil.mappingChartDataName(chartData, viewPowerProfileRows, 'target_id', 'target_name');
 
     req.locals.inverterStatusList = refinedInverterStatusList;
-
+    req.locals.outputByTimeChart = chartData;
+    req.locals.powerInfo = {
+      measureTime: `실시간 인버터 모니터링 측정시간 : ${moment().format('YYYY-MM-DD HH:SS')}:00`,
+    };
     // BU.CLIN(req.locals);
     res.render('./inverter/inverter', req.locals);
   }),

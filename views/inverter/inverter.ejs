@@ -5,6 +5,9 @@
   <!-- Default Js -->
   <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
+
+  <script src="js/hichart/highcharts.src.js"></script>
+
   <script src="js/contents/master/mainUtil.js"></script>
   <script src="js/contents/inverter/setInverter.js"></script>
   <%- include("./mediaQuery.ejs") %>
@@ -19,7 +22,7 @@
       <div class="containera">
         <div class="text-center containerb">
           <div class="title">
-            <p> 실시간 인버터 모니터링 측정시간 : 2018-10-17 10:27:00</p>
+            <p id="inverterMeasureTime"> 실시간 인버터 모니터링 측정시간 : 2018-10-17 10:27:00</p>
           </div>
           <div class="table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%;background:#fff;">
@@ -69,6 +72,78 @@
     let inverterStatusList = <%- JSON.stringify(inverterStatusList) %>;
     console.log(inverterStatusList)
     setInverterList(document.getElementById('myTable'), inverterStatusList)
+    document.getElementById('inverterMeasureTime').innerHTML = <%- JSON.stringify(powerInfo.measureTime) %>;
+
+    // 차트를 그리기 위한 데이터
+    let outputByTimeChart = <%- JSON.stringify(outputByTimeChart) %>;
+
+    console.log(_.head(outputByTimeChart.range))
+    if (outputByTimeChart.series.length) {
+      // console.log("@@@", outputByTimeChart.range, outputByTimeChart.series)
+      var yMax = 1500;
+
+      $('#chart_div').highcharts({
+        chart: {
+          type: "spline",
+          zoomType: 'xy',
+        },
+        title: {
+          text: ''
+        },
+        xAxis: {
+          type: 'datetime',
+          // opposite: true,
+          title: {
+            text: '시간(시)'
+          },
+          labels: {
+            overflow: 'justify'
+          },
+          // tickInterval: 6,
+          categories: outputByTimeChart.range
+        },
+        yAxis: {
+          // max: yMax,
+          title: {
+            text: '전력(kW)'
+          },
+        },
+        plotOptions: {
+          series: {
+            pointStart: 0
+          },
+          spline: {
+            lineWidth: 2,
+            states: {
+              hover: {
+                lineWidth: 3
+              }
+            },
+            marker: {
+              enabled: false
+            },
+            // pointInterval: 1000 * 60 * 10, // 10 min
+            // // pointStart: Date.UTC(2018, 1, 13, 0, 0, 0)
+            // pointStart: _.head(outputByTimeChart.range)
+          }
+        },
+        legend: { //범례
+          // layout: 'vertical',
+          align: 'center',
+          verticalAlign: 'bottom',
+          borderWidth: 0,
+        },
+        series: outputByTimeChart.series,
+        credits: {
+          enabled: false
+        },
+      });
+    } else {
+      $("#chart_div").html("발전 내역이 존재하지 않습니다.").css({
+        "line-height": "300px",
+        "font-size": "25px"
+      });
+    }
   </script>
 </body>
 

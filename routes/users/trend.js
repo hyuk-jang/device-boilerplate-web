@@ -34,7 +34,7 @@ router.use(
             .sum(),
         );
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트배드 (${siteMainName})`;
+        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
         return { siteid: strMainSeq, name: siteName };
       });
 
