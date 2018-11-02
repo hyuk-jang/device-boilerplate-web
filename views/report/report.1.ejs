@@ -3,14 +3,14 @@
 
 <head>
   <!-- Default Js -->
-  <script src="/js/lodash.min.js"></script>
+  <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
   <%- include("./mediaQuery.ejs") %>
-  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="js/contents/master/mainUtil.js"></script>
 </head>
 
 <body>
-  <div class="wrap" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
+  <div class="wrap" style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
     <div class="center">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
@@ -119,7 +119,79 @@
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
+  <script>
+    // const searchRange = <%- JSON.stringify(searchRange) %>
+    // console.log(searchRange)
+    // $('#inverterReportsDom').html(<%- JSON.stringify(inverterReportsDom) %>)
+    // $('#inverterSitesDom').html(<%- JSON.stringify(inverterSitesDom) %>)
+    // $('#pagination').html(<%- JSON.stringify(paginationInfo.paginationDom) %>)
 
+    // var selectedObj = $("#sel_type_div_area").find("input[value=" + searchRange.searchType + "]")
+    // $(selectedObj).trigger('click');
+
+    /**
+     * 검색 기간 Radio 클릭 시 날짜 영역 설정
+     * @param {Dom} input[name='searchType']
+     * @return {void} 
+     */
+    function setterSelectType(target) {
+      var checkedSearchType = target.value;
+      var startDateDom = document.querySelector('#start_date_input');
+      var endDateDom = document.querySelector('#end_date_input');
+
+      var startDate = new Date(searchRange.strStartDateInputValue);
+      var endDate = searchRange.strEndDateInputValue === '' || new Date(searchRange.strEndDateInputValue) ===
+        'Invalid Date' ? startDate : new Date(searchRange.strEndDateInputValue);
+
+      var viewMode = 0;
+      var sliceEndIndex = 10;
+
+      if (checkedSearchType === 'range') {
+        $('#end_date_input').show()
+        $('#between-start-end').show()
+      } else {
+        $('#end_date_input').hide();
+        $('#between-start-end').hide()
+      }
+
+      if (checkedSearchType == 'month') {
+        viewMode = 2;
+        sliceEndIndex = 4;
+      } else if (checkedSearchType == 'day') {
+        viewMode = 1;
+        sliceEndIndex = 7;
+      } else if (checkedSearchType == 'range') {
+        makeDatePicker(endDateDom, 0);
+        endDateDom.value = endDate.toISOString().substring(0, sliceEndIndex);
+      } else {
+        viewMode = 0;
+        sliceEndIndex = 10;
+      }
+      startDateDom.value = startDate.toISOString().substring(0, sliceEndIndex);
+      makeDatePicker(startDateDom, viewMode);
+    }
+
+    // 검색 클릭 시
+    function searchReport() {
+      var inverter_seq = document.querySelector('#inverterSitesDom option:checked').value;
+
+      inverter_seq = inverter_seq.trim();
+      var searchInterval = document.querySelector('#search_interval_sel option:checked').value;
+      var searchType = document.querySelector('#sel_type_div_area input[name="searchType"]:checked').value;
+      var startDate = document.getElementById('start_date_input').value;
+      var endDate = '';
+
+      if (searchType === 'range') {
+        endDate = document.getElementById('end_date_input').value;
+        if (startDate > endDate) {
+          return alert('종료일이 시작일보다 빠를 수 없습니다.');
+        }
+      }
+
+      return location.href = "/report?inverter_seq=" + inverter_seq + "&start_date=" + startDate + "&end_date=" +
+        endDate + "&search_type=" + searchType + "&search_interval=" + searchInterval;
+    }
+  </script>
 </body>
 
 </html>

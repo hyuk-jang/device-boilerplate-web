@@ -7,20 +7,61 @@ const router = express.Router();
 const { BU, DU } = require('base-util-jh');
 
 const DEFAULT_RANGE_FORMAT = 'min10';
+const DEFAULT_SITE_ID = 'all';
+const DEFAULT_CATEGORY = 'inverter';
+const DEFAULT_SUB_SITE = 'all';
 
 // server middleware
 router.use(
   asyncHandler(async (req, res, next) => {
     _.set(req, 'locals.menuNum', 3);
 
+    const { category = DEFAULT_CATEGORY, subSiteId = DEFAULT_SUB_SITE } = req.query;
+
     // BU.CLI(req.locals);
     next();
   }),
 );
 
+/** 인버터 목록 조회 */
+router.get(
+  ['/', '/:siteId', '/:siteId/inverter', '/:siteId/inverter/:inverterId'],
+  asyncHandler(async (req, res) => {
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
+
+    // 선택한 SiteId와 인버터 Id를 정의
+    const { siteId = DEFAULT_SITE_ID, inverterId = DEFAULT_SUB_SITE } = req.params;
+
+    // 선택한 SiteId에 따라 PowerProfile Rows 정의
+    const pwProfileWhereInfo = _.eq(siteId, DEFAULT_SITE_ID) ? null : { main_seq: siteId };
+
+    /** @type {V_PW_INVERTER_PROFILE[]} */
+    let viewPowerProfileList = _.filter(req.locals.viewPowerProfileRows, pwProfileWhereInfo);
+
+    let inverterSeqList = [];
+
+    // 인버터 단일 Seq로 검색했을 경우
+    if (BU.isNumberic(inverterId)) {
+      // 인버터 Seq 목록에 추가
+      inverterSeqList.push(Number(inverterId));
+      // 해당 인버터와 관련있는 목록으로 Power Profile Rows 구성
+      viewPowerProfileList = _.filter(viewPowerProfileList, { inverter_seq: Number(inverterId) });
+    } else {
+      // Default는 인버터 전체로 구성
+      inverterSeqList = _.map(viewPowerProfileList, 'inverter_seq');
+    }
+
+    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    // const pwProfileWhereInfo = _.eq(siteId, 'all') ? null : { main_seq: siteId };
+
+    res.render('./report/report', req.locals);
+  }),
+);
+
 /* GET home page. */
 router.get(
-  '/',
+  '/test',
   asyncHandler(async (req, res) => {
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -47,7 +88,7 @@ router.get(
     //   INCLINED_SOLAR,
     // );
 
-    /** @type {V_UPSAS_PROFILE[]} */
+    /** @type {V_PW_INVERTER_PROFILE[]} */
     let viewPowerProfileList = _.filter(req.locals.viewPowerProfileRows, pwProfileWhereInfo);
 
     let inverterSeqList = [];
@@ -168,7 +209,7 @@ function makeInverterReportsDom(inverterReportRows, paginationInfo) {
  */
 function makeInverterSitesDom(vInverterProfileRows, selectedId) {
   const template = _.template(`
-  <option <%= selected %> data-type="" value="<%= inverter_seq %>"><%= inverterName %></option>
+  <option selected="<%= selected %>" data-type="inverter" value="<%= inverter_seq %>"><%= inverterName %></option>
 `);
   const madeDom = vInverterProfileRows.map(row => {
     const { name = '', target_name: targetName, director_name: dName = '' } = row;

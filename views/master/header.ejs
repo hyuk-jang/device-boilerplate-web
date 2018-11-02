@@ -9,7 +9,7 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand tit_1" href="main">
-          <img style="width:30px; height:30px; margin:0px; margin-right:5px;" src="image/farm_icon.png" />
+          <img style="width:30px; height:30px; margin:0px; margin-right:5px;" src="/image/farm_icon.png" />
           농업병행 태양광발전 모니터링
         </a>
       </div>
@@ -51,7 +51,7 @@
   // 현재 선택한 Site Id
   let siteId = <%- JSON.stringify(siteId) %>;
   matchingMenu(document.getElementById('navigation'), <%- menuNum  %>, 'active');
-  document.querySelector('#currWeatherImg').setAttribute('src', `image/weather/weather_${currWeatherCastInfo.wf}.png`)
+  document.querySelector('#currWeatherImg').setAttribute('src', `/image/weather/weather_${currWeatherCastInfo.wf}.png`)
   document.querySelector('#currWeatherTemp').setAttribute('value', currWeatherCastInfo.temp);
 
   setSiteList(document.getElementById('sel_city'), siteList, siteId)
