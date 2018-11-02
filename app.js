@@ -29,6 +29,7 @@ const passport = require('./bin/passport');
 const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
+const PowerModel = require('./models/templates/PowerModel');
 
 // app.use(favicon(path.join(process.cwd(), 'public/image', 'favicon.ico')));
 app.use(bodyParser.json());
@@ -58,6 +59,7 @@ app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
+app.set('powerModel', new PowerModel(dbInfo));
 
 app.use(
   session({

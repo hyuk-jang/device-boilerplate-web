@@ -378,8 +378,8 @@ class BiModule extends BM {
     const returnValue = [];
     // deviceType = deviceType || 'all';
     // if (deviceType === 'all' || deviceType === 'inverter') {
-    /** @type {INVERTER[]} */
-    let inverterList = await this.getTable('inverter', { inverter_seq: inverterSeqList });
+    /** @type {PW_INVERTER[]} */
+    let inverterList = await this.getTable('pw_inverter', { inverter_seq: inverterSeqList });
     inverterList = _.sortBy(inverterList, 'chart_sort_rank');
     _.forEach(inverterList, info => {
       returnValue.push({ type: 'inverter', seq: info.inverter_seq, target_name: info.target_name });
@@ -792,56 +792,71 @@ class BiModule extends BM {
   /**
    * 인버터 Report
    * @param {searchRange} searchRange getSearchRange() Return 객체
-   * @param {number=|Array=} inverter_seq [inverter_seq]
+   * @param {number=|Array=} inverterSeq [inverter_seq]
    * @return {{totalCount: number, report: []}} 총 갯수, 검색 결과 목록
    */
-  async getInverterReport(searchRange, inverter_seq) {
+  async getInverterReport(searchRange, inverterSeq) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     const sql = `
     SELECT
         group_date,
-        ROUND(AVG(avg_in_a) / 10, 1) AS avg_in_a,
-        ROUND(AVG(avg_in_v) / 10, 1) AS avg_in_v,
-        ROUND(AVG(avg_in_w) / 10, 1) AS avg_in_w,
-        ROUND(AVG(avg_out_a) / 10, 1) AS avg_out_a,
-        ROUND(AVG(avg_out_v) / 10, 1) AS avg_out_v,
-        ROUND(AVG(avg_out_w) / 10, 1) AS avg_out_w,
-        ROUND(AVG(CASE WHEN avg_p_f > 0 THEN avg_p_f END) / 10, 1) AS avg_p_f,
-        ROUND(SUM(interval_power) / 1000, 2) AS total_s_kwh,
-        ROUND(SUM(max_c_wh) / 1000000, 3) AS total_c_mwh
+        ROUND(AVG(avg_pv_v), 1) AS avg_pv_v,
+        ROUND(AVG(avg_pv_a), 1) AS avg_pv_a,
+        ROUND(AVG(avg_pv_kw), 1) AS avg_pv_kw,
+        ROUND(AVG(avg_grid_rs_v), 1) AS avg_grid_rs_v,
+        ROUND(AVG(avg_grid_st_v), 1) AS avg_grid_st_v,
+        ROUND(AVG(avg_grid_tr_v), 1) AS avg_grid_tr_v,
+        ROUND(AVG(avg_grid_r_a), 1) AS avg_grid_r_a,
+        ROUND(AVG(avg_grid_s_a), 1) AS avg_grid_s_a,
+        ROUND(AVG(avg_grid_t_a), 1) AS avg_grid_t_a,
+        ROUND(AVG(avg_line_f), 1) AS avg_line_f,
+        ROUND(AVG(avg_p_f), 1) AS avg_p_f,
+        ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
+        ROUND(SUM(interval_power), 2) AS total_s_kwh,
+        ROUND(SUM(max_c_kwh) / 1000, 3) AS total_c_mwh
     FROM
       (SELECT
             inverter_seq,
             ${dateFormat.selectViewDate},
             ${dateFormat.selectGroupDate},
-            AVG(avg_in_a) AS avg_in_a,
-            AVG(avg_in_v) AS avg_in_v,
-            AVG(avg_in_w) AS avg_in_w,
-            AVG(avg_out_a) AS avg_out_a,
-            AVG(avg_out_v) AS avg_out_v,
-            AVG(avg_out_w) AS avg_out_w,
-            AVG(CASE WHEN avg_p_f > 0 THEN avg_p_f END) AS avg_p_f,
-            ROUND(MAX(max_c_wh) / 10, 1) AS max_c_wh,
-            ROUND(MIN(min_c_wh) / 10, 1) AS min_c_wh,
-            ROUND((MAX(max_c_wh) - MIN(min_c_wh)) / 10, 1) AS interval_power
+            AVG(avg_pv_v) AS avg_pv_v,
+            AVG(avg_pv_a) AS avg_pv_a,
+            AVG(avg_pv_kw) AS avg_pv_kw,
+            AVG(avg_grid_rs_v) AS avg_grid_rs_v,
+            AVG(avg_grid_st_v) AS avg_grid_st_v,
+            AVG(avg_grid_tr_v) AS avg_grid_tr_v,
+            AVG(avg_grid_r_a) AS avg_grid_r_a,
+            AVG(avg_grid_s_a) AS avg_grid_s_a,
+            AVG(avg_grid_t_a) AS avg_grid_t_a,
+            AVG(avg_line_f) AS avg_line_f,
+            AVG(avg_p_f) AS avg_p_f,
+            AVG(avg_power_kw) AS avg_power_kw,
+            MIN(min_c_kwh) AS min_c_kwh,
+            MAX(max_c_kwh) AS max_c_kwh,
+            MAX(max_c_kwh) - MIN(min_c_kwh) AS interval_power
       FROM
         (SELECT
-              id.inverter_seq,
-              writedate,
-              DATE_FORMAT(writedate,"%H") AS hour_time,
-              AVG(in_a) AS avg_in_a,
-              AVG(in_v) AS avg_in_v,
-              AVG(in_w) AS avg_in_w,
-              AVG(out_a) AS avg_out_a,
-              AVG(out_v) AS avg_out_v,
-              AVG(out_w) AS avg_out_w,
-              AVG(CASE WHEN p_f > 0 THEN p_f END) AS avg_p_f,
-              MAX(c_wh) AS max_c_wh,
-              MIN(c_wh) AS min_c_wh
-        FROM inverter_data id
+          id.inverter_seq,
+          writedate,
+          DATE_FORMAT(writedate,"%H") AS hour_time,
+          AVG(pv_v) AS avg_pv_v,
+          AVG(pv_a) AS avg_pv_a,
+          AVG(pv_kw) AS avg_pv_kw,
+          AVG(grid_rs_v) AS avg_grid_rs_v,
+          AVG(grid_st_v) AS avg_grid_st_v,
+          AVG(grid_tr_v) AS avg_grid_tr_v,
+          AVG(grid_r_a) AS avg_grid_r_a,
+          AVG(grid_s_a) AS avg_grid_s_a,
+          AVG(grid_t_a) AS avg_grid_t_a,
+          AVG(line_f) AS avg_line_f,
+          AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
+          AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
+          MIN(power_total_kwh) AS min_c_kwh,
+          MAX(power_total_kwh) AS max_c_kwh
+        FROM pw_inverter_data id
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-      AND inverter_seq IN (${inverter_seq})
+      AND inverter_seq IN (${inverterSeq})
         GROUP BY ${dateFormat.firstGroupByFormat}, inverter_seq
         ORDER BY inverter_seq, writedate) AS id_group
       GROUP BY inverter_seq, ${dateFormat.groupByFormat}) AS id_report

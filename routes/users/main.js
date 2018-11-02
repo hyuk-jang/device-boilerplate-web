@@ -47,7 +47,7 @@ router.get(
     // BU.CLIN(inverterMonthRows);
     // 금월 발전량
     const monthPower = webUtil.reduceDataList(inverterMonthRows, 'interval_power');
-    BU.CLI(_.sum(_.map(inverterMonthRows, 'interval_power')));
+    // BU.CLI(_.sum(_.map(inverterMonthRows, 'interval_power')));
     // 오늘자 발전 현황을 구할 옵션 설정(strStartDate, strEndDate 를 오늘 날짜로 설정하기 위함)
     // 검색 조건이 시간당으로 검색되기 때문에 금일 날짜로 date Format을 지정하기 위해 hour --> day 로 변경
     const cumulativePowerList = await biModule.getInverterCumulativePower(inverterSeqList);
@@ -56,13 +56,6 @@ router.get(
       0.001,
       3,
     );
-
-    // 누적 발전량
-    // const cumulativePower = webUtil.calcValue(
-    //   webUtil.reduceDataList(inverterMonthRows, 'max_c_kwh'),
-    //   0.001,
-    //   3,
-    // );
 
     // 금일 발전 현황 데이터
     searchRange = biModule.getSearchRange('min10');
@@ -145,14 +138,14 @@ router.get(
       const foundProfile = _.find(viewPowerProfileRows, {
         inverter_seq: inverterStatus.inverter_seq,
       });
-      // const mainName = _.get(foundProfile, 'm_name', '');
+      const mainName = _.get(foundProfile, 'm_name', '');
       // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
       const {
         ivt_target_name: subName,
         ivt_director_name: company = '',
         ivt_amount: amount,
       } = foundProfile;
-      const siteName = `${subName || ''} ${_.round(amount)} kW급 ${
+      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
         _.isString(company) && company.length ? company : ''
       }`;
 
@@ -170,9 +163,11 @@ router.get(
     const inverterStatusHtml = makeInverterStatusDom(viewInverterStatusRows);
 
     // 인버터에 붙어있는 경사 일사량을 구함
-    const avgInclinedSolar = _(viewInverterStatusRows)
-      .map(INCLINED_SOLAR)
-      .meanBy();
+    const avgInclinedSolar = _.round(
+      _(viewInverterStatusRows)
+        .map(INCLINED_SOLAR)
+        .meanBy(),
+    );
 
     // 인버터 발전 현황 데이터 검증
     const validInverterDataList = webUtil.checkDataValidation(
@@ -236,9 +231,10 @@ module.exports = router;
  * @param {V_INVERTER_STATUS[]} inverterStatusRows
  */
 function makeInverterStatusDom(inverterStatusRows) {
+  // <input class="input-tx" type="text" value="<%= siteName %>">
   const inverterStatusTemplate = _.template(`
     <div class="box_5_in">
-    <input class="input-tx" type="text" value="<%= siteName %>">
+    <div><%= siteName %></div>
     <div class="box_5_a">
       <div class="box_5_in_sp">
         <p>AC전압</p>

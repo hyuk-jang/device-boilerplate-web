@@ -28,6 +28,8 @@ router.use(
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
+    _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
+
     let totalSiteAmount = 0;
     const siteList = _(viewPowerProfileRows)
       .groupBy('main_seq')

@@ -27,7 +27,7 @@
             </div>-->
             <div class="col-xs-2 sel_box">
               지점
-              <select class="form-control form-control_st" id="device_list_sel" name="device_seq">
+              <select id="inverterSitesDom" class="form-control form-control_st" id="device_list_sel" name="device_seq">
                 <option>고정식 A</option>
                 <option>고정식 B</option>
               </select>
@@ -53,33 +53,37 @@
               <input class="input_tre" name="start" id="start_date_input" type="text" readonly="">
               <input class="input_tre" name="end" id="end_date_input" type="text" readonly="" hidden="hidden" style="display: none;">
               <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">검색</button>
-              <input type="image" src="image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc" onclick="doit('xlsx');">
+              <!-- <input type="image" src="image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc" onclick="doit('xlsx');"> -->
             </div>
           </div>
           <div class="table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%">
               <thead>
                 <tr>
-                  <th scope="col" style="text-align:center; width:10%">시간</th>
-                  <th scope="col" style="text-align:center; width:14%">장소</th>
-                  <th scope="col" style="text-align:center; width:8%">발전량(kWh)</th>
-                  <th scope="col" style="text-align:center; width:8%">경사일사량(w/m2)</th>
-                  <th scope="col" style="text-align:center; width:8%">조도(lx)</th>
-                  <th scope="col" style="text-align:center; width:8%">이산화탄소(ppm)</th>
-                  <th scope="col" style="text-align:center; width:8%">토양수분(%)</th>
-                  <th scope="col" style="text-align:center; width:8%">토양온도(℃)</th>
-                  <th scope="col" style="text-align:center; width:8%">토양습도(%)</th>
-                  <th scope="col" style="text-align:center; width:6%">외기온도(℃)</th>
-                  <th scope="col" style="text-align:center; width:6%">외기습도(%)</th>
-                  <th scope="col" style="text-align:center; width:4%">수평일사량(w/m2)</th>
-                  <th scope="col" style="text-align:center; width:4%">풍속(kW/h)</th>
-                  <th scope="col" style="text-align:center; width:4%">강우량(mm/hr)</th>
+                  <th scope="col" rowspan="2" style="width:5%">번호</th>
+                  <th scope="col" rowspan="2" style="width:10%">시간</th>
+                  <th scope="col" colspan="3" style="text-align:center; width:30%">태양광</th>
+                  <th scope="col" colspan="3" style="text-align:center; width:20%">인버터</th>
+                  <th scope="col" colspan="3" style="text-align:center; width:40%">발전현황</th>
                 </tr>
+                <tr>
+                  <!-- <td style="width:8%;">경사일사량(W/㎥)</td> -->
+                  <td style="width:7%;">DC전류(A)</td>
+                  <td style="width:7%;">DC전압(V)</td>
+                  <td style="width:7%;">DC전력(kW)</td>
+                  <td style="width:7%;">AC전류(A)</td>
+                  <td style="width:7%;">AC전압(V)</td>
+                  <td style="width:7%;">주파수(Hz)</td>
+                  <td style="width:7%;">AC 전력(kW)</td>
+                  <td style="width:6%;">변환효율(%)</td>
+                  <td style="width:8%;">누적발전량(kWh)</td>
+                </tr>
+
               </thead>
-              <tbody>
-                <tr>
+              <tbody id="inverterReportsDom">
+                <!-- <tr>
+                  <td>1</td>
                   <td>2018-10-15 14:55:00</td>
-                  <th scope="row">나주(고정형)태양광 하부</th>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -87,140 +91,14 @@
                   <td></td>
                   <td></td>
                   <td></td>
-                  <td rowspan="7"></td>
-                  <td rowspan="7"></td>
-                  <td rowspan="7"></td>
-                  <td rowspan="7"></td>
-                  <td rowspan="7"></td>
-                </tr>
-                <tr>
                   <td></td>
-                  <th scope="row">나주(고정형)외곽</th>
                   <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">나주(가변형)태양광 하부</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">나주(가변형)외곽</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">나주(수평)태양광 하부</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">나주(수평)외곽</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">나주 외기 환경</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row"> 보성(차) </th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td colspan="2"></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row"> 강진(사료) </th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td colspan="2"></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">오창</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td colspan="2"></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <th scope="row">영흥</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td colspan="2"></td>
-                  <td></td>
-                </tr>
+                </tr> -->
               </tbody>
             </table>
+            <nav id="pagination" aria-label="...">
+
+            </nav>
           </div>
         </div>
       </div>
@@ -230,6 +108,11 @@
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
+  <script>
+    $('#inverterReportsDom').html(<%- JSON.stringify(inverterReportsDom) %>)
+    $('#inverterSitesDom').html(<%- JSON.stringify(inverterSitesDom) %>)
+    $('#pagination').html(<%- JSON.stringify(paginationInfo.paginationDom) %>)
+  </script>
 </body>
 
 </html>

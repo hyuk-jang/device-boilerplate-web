@@ -2,14 +2,12 @@ const _ = require('lodash');
 
 const { BU } = require('base-util-jh');
 const moment = require('moment');
-const Promise = require('bluebird');
-const BiModule = require('../models/BiModule');
-const BiDevice = require('../models/BiDevice');
+// const Promise = require('bluebird');
+const BiModule = require('./BiModule');
+const BiDevice = require('./BiDevice');
 
-const webUtil = require('../models/web.util');
-const excelUtil = require('../models/excel.util');
-// TEST
-const tempSacle = require('../temp/tempSacle');
+const webUtil = require('./web.util');
+const excelUtil = require('./excel.util');
 
 class PowerModel extends BiModule {
   /** @param {dbInfo} dbInfo */

@@ -9,6 +9,7 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand tit_1" href="main">
+          <img style="width:30px; height:30px; margin:0px; margin-right:5px;" src="image/farm_icon.png" />
           농업병행 태양광발전 모니터링
         </a>
       </div>
@@ -17,7 +18,7 @@
           <li><a href="main">메인</a></li>
           <li><a href="inverter">인버터</a></li>
           <li><a href="sensor">생육센서</a></li>
-          <!--<li><a href="trend">트렌드</a></li>-->
+          <!-- <li><a href="trend">트렌드</a></li> -->
           <li><a href="report">보고서</a></li>
         </ul>
       </div>
@@ -54,6 +55,9 @@
   document.querySelector('#currWeatherTemp').setAttribute('value', currWeatherCastInfo.temp);
 
   setSiteList(document.getElementById('sel_city'), siteList, siteId)
+
+  // 현재 날짜 세팅
+  writeDateText(document.getElementById('currDate'))
 
   // 사이트 변경 시
   $('#sel_city').change(function () {
