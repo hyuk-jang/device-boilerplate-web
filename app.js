@@ -30,7 +30,7 @@ const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
 
-app.use(favicon(path.join(process.cwd(), 'public/image', 'favicon.ico')));
+// app.use(favicon(path.join(process.cwd(), 'public/image', 'favicon.ico')));
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({

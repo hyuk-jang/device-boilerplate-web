@@ -65,8 +65,8 @@ router.get(
     // );
 
     // 금일 발전 현황 데이터
-    // searchRange = biModule.getSearchRange('min10');
-    searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    searchRange = biModule.getSearchRange('min10');
+    // searchRange = biModule.getSearchRange('min10', '2018-11-01');
 
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
     // BU.CLI(inverterTrend);
