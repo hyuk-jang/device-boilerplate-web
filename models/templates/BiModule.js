@@ -501,6 +501,7 @@ class BiModule extends BM {
 
   /**
    * 인버터 발전량 구해옴
+   * @desc getInverterTrend 간소화 버젼
    * @param {searchRange} searchRange  검색 옵션
    * @param {number[]=} inverterSeqList
    * @return {{inverter_seq: number, interval_power: number, target_id: string }[]}
@@ -567,9 +568,9 @@ class BiModule extends BM {
           AVG(temp) AS avg_temp,
           AVG(reh) AS avg_reh,
           AVG(solar) AS avg_solar,
-          AVG(solar) / ${dateFormat.devideTimeNumber} AS interval_solar,
+          AVG(solar) / ${dateFormat.divideTimeNumber} AS interval_solar,
           AVG(inclined_solar) AS avg_inclined_solar,
-          AVG(inclined_solar) / ${dateFormat.devideTimeNumber} AS interval_inclined_solar,
+          AVG(inclined_solar) / ${dateFormat.divideTimeNumber} AS interval_inclined_solar,
           AVG(wd) AS avg_wd,	
           AVG(ws) AS avg_ws,	
           AVG(uv) AS avg_uv,
@@ -588,12 +589,12 @@ class BiModule extends BM {
    * 인버터 발전량 구해옴
    * @param {searchRange} searchRange  검색 옵션
    * @param {number[]} inverterSeqList
-   * @return {{inverter_seq: number, group_date: string, avg_in_a: number, avg_in_v: number, avg_in_w: number, avg_out_a: number, avg_out_v: number, avg_out_w: number, avg_p_f: number, max_c_wh: number, min_c_wh: number, interval_power: number, chart_color: string, chart_sort_rank: number, total_count: number}[]}
+   * @return {PW_INVERTER_TREND[]}
    */
-  getInverterTrend(searchRange, inverterSeqList) {
+  getInverterTrend(searchRange = this.getSearchRange(), inverterSeqList) {
     // BU.CLI(searchRange);
-    searchRange = searchRange || this.getSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+
     // BU.CLI(searchRange);
     const sql = `
     SELECT 
@@ -712,7 +713,7 @@ class BiModule extends BM {
    * 레포트 Date Format 자동 작성
    * @param {searchRange} searchRange
    * @param {string} dateName
-   * @return {{groupByFormat: string, firstGroupByFormat: string, selectGroupDate: string, selectViewDate: string, devideTimeNumber: number}}
+   * @return {dateFormatWithSearchRange}
    */
   makeDateFormatForReport(searchRange, dateName) {
     // BU.CLI(searchRange);
@@ -721,7 +722,7 @@ class BiModule extends BM {
       firstGroupByFormat: '',
       selectGroupDate: '',
       selectViewDate: '',
-      devideTimeNumber: 1,
+      divideTimeNumber: 1, // 1시간
     };
     // BU.CLI(returnValue.selectViewDate);
 
@@ -732,10 +733,10 @@ class BiModule extends BM {
 
     // 검색 간격에 따라서 첫번째 Group Format을 정함
     if (searchRange.searchInterval === 'min') {
-      returnValue.devideTimeNumber = 60;
+      returnValue.divideTimeNumber = 60;
       returnValue.firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i")`;
     } else {
-      returnValue.devideTimeNumber = 6;
+      returnValue.divideTimeNumber = 6;
       returnValue.firstGroupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
     }
 
@@ -753,7 +754,7 @@ class BiModule extends BM {
     // 최종적으로 묶을 데이터 형태를 정의하였다면 정의한 형태로 따라가고 아니라면 검색 간격에 따라감
 
     if (finalGroupingType === 'min10') {
-      returnValue.devideTimeNumber = 6;
+      returnValue.divideTimeNumber = 6;
       returnValue.selectGroupDate = `CONCAT(LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15), "0")  AS group_date`;
       returnValue.selectViewDate = `CONCAT(LEFT(DATE_FORMAT(${dateName},"%H:%i"), 4), "0")  AS view_date`;
       // returnValue.firstGroupByFormat = dateFormat;
@@ -768,7 +769,6 @@ class BiModule extends BM {
         case 'min':
           viewFormat = viewFormat.slice(9, 14);
           // firstGroupFormat = '%Y-%m-%d %H:%i';
-          returnValue.devideTimeNumber = 60;
           break;
         case 'hour':
           viewFormat = viewFormat.slice(9, 11);

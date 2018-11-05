@@ -44,7 +44,7 @@
                   <td style="width:5%;">동작여부</td>
                 </tr>
               </thead>
-              <tbody id="myTable">
+              <tbody id="inverterStatus">
               </tbody>
             </table>
           </div>
@@ -65,16 +65,18 @@
     </div>
   </div>
   <script>
-    $('#myTable').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+    // 인버터 측정 시간 입력
+    document.getElementById('inverterMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
 
-    document.getElementById('inverterMeasureTime').innerHTML = <%- JSON.stringify(powerInfo.measureTime) %>;
+    // 인버터 현재 상태 데이터 테이블 생성
+    $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+
 
     // 차트를 그리기 위한 데이터
-    let outputByTimeChart = <%- JSON.stringify(outputByTimeChart) %>;
+    let inverterPowerChart = <%- JSON.stringify(inverterPowerChart) %>;
 
-    console.log(_.head(outputByTimeChart.range))
-    if (outputByTimeChart.series.length) {
-      // console.log("@@@", outputByTimeChart.range, outputByTimeChart.series)
+    console.log(_.head(inverterPowerChart.range))
+    if (inverterPowerChart.series.length) {
       var yMax = 1500;
 
       $('#chart_div').highcharts({
@@ -95,7 +97,7 @@
             overflow: 'justify'
           },
           // tickInterval: 6,
-          categories: outputByTimeChart.range
+          categories: inverterPowerChart.range
         },
         yAxis: {
           // max: yMax,
@@ -119,7 +121,7 @@
             },
             // pointInterval: 1000 * 60 * 10, // 10 min
             // // pointStart: Date.UTC(2018, 1, 13, 0, 0, 0)
-            // pointStart: _.head(outputByTimeChart.range)
+            // pointStart: _.head(inverterPowerChart.range)
           }
         },
         legend: { //범례
@@ -128,7 +130,7 @@
           verticalAlign: 'bottom',
           borderWidth: 0,
         },
-        series: outputByTimeChart.series,
+        series: inverterPowerChart.series,
         credits: {
           enabled: false
         },

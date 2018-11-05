@@ -338,3 +338,23 @@ Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
 
 2018-11-01 21:55:57
 Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:25.895
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:25.899
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.851
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.862
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.866
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist

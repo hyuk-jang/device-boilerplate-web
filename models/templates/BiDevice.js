@@ -38,7 +38,7 @@ class BiDevice extends BiModule {
    * 장소 시퀀스를 기준으로 관련된 현재 데이터를 모두 가져옴
    * @param {{place_seq: number}[]} containedPlaceSeqRows
    * @param {string} pickId nd_target_id 입력
-   * @return {{place_seq: number, *: number=}[]}
+   * @return {{place_seq: number, *: number=}[]} new containedPlaceSeqRows with Extend PickId Key
    */
   async extendsPlaceDeviceData(containedPlaceSeqRows, pickId) {
     const relationPlaceRows = await this.getPlaceRelation(containedPlaceSeqRows);

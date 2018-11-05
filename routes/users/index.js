@@ -56,17 +56,17 @@ router.get(
         return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
-    siteList.unshift({ siteid: 'all', name: `모두(${totalSiteAmount}kW급)` });
+    siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
     // _.set(req, 'locals.siteList', siteList);
 
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', BU.isNumberic(siteId) ? Number(siteId) : siteId);
+    _.set(req, 'locals.mainInfo.siteList', siteList);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 사이트 목록 추가
     const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
-    _.set(req, 'locals.mainInfo.siteList', siteList);
     _.set(req, 'locals.dom.siteListDom', siteListDom);
 
     // 네비게이션 목록 추가
@@ -80,7 +80,6 @@ router.get(
 
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
-    _.set(req, 'locals.currWeatherCastInfo', currWeatherCastInfo);
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

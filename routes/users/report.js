@@ -11,18 +11,6 @@ const DEFAULT_SITE_ID = 'all';
 const DEFAULT_CATEGORY = 'inverter';
 const DEFAULT_SUB_SITE = 'all';
 
-// server middleware
-router.use(
-  asyncHandler(async (req, res, next) => {
-    _.set(req, 'locals.menuNum', 3);
-
-    const { category = DEFAULT_CATEGORY, subSiteId = DEFAULT_SUB_SITE } = req.query;
-
-    // BU.CLI(req.locals);
-    next();
-  }),
-);
-
 /** 인버터 목록 조회 */
 router.get(
   ['/', '/:siteId', '/:siteId/inverter', '/:siteId/inverter/:inverterId'],

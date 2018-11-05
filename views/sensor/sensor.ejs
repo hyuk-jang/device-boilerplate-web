@@ -17,7 +17,7 @@
       <div class="containera">
         <div class="text-center" style="background-color:#fff; height:auto; padding:5px; background-color: rgba(242,242,242,1);">
           <div class="title">
-            <p>작물 생육환경</p>
+            <p id="sensorMeasureTime"> 실시간 작물 생육환경 모니터링 측정시간 : 2018-10-17 10:27:00</p>
           </div>
           <div class="table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%; background:#fff;">
@@ -52,6 +52,9 @@
   </div>
   </div>
   <script>
+    // 센서 측정 시간 입력
+    document.getElementById('sensorMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
+
     // 작물 생육환경 테이블 구성
     $('#sensorTable').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
   </script>

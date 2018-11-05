@@ -193,22 +193,21 @@ function calcValue(value, scale = 1, toFixedNumber = 1) {
     return _.round(_.multiply(value, scale), toFixedNumber);
   }
   return '';
-  // throw Error('argument 중 숫자가 아닌것이 있습니다.');
 }
 exports.calcValue = calcValue;
 
 /**
  * 계산할려는 packetList를 순회하면서 이전 값과 현재 값의 차를 구하고 그 값의 유효성을 검증한 후 반환
- * @param {Object[]} rowDataPacketList
+ * @param {Object[]} tableRows
  * @param {calcRowPacketIntervalOption} calcOption
  */
-function calcRangePower(rowDataPacketList, calcOption) {
+function calcRangePower(tableRows, calcOption) {
   // BU.CLI(calcOption);
 
   // 같은 Key 끼리 그루핑
   if (calcOption.groupKey) {
     // BU.CLI(groupKey);
-    const groupRowDataPacketList = _.groupBy(rowDataPacketList, calcOption.groupKey);
+    const groupedTableRowInfo = _.groupBy(tableRows, calcOption.groupKey);
 
     // 설정한 유효 기간을 체크하여 검증할 건지 여부
     const hasCalcRange = !_.isEmpty(calcOption.rangeOption);
@@ -217,23 +216,21 @@ function calcRangePower(rowDataPacketList, calcOption) {
     // 데이터 분포군 개수로는 계산하지 않음.
     // const hasCalcCount = hasCalcRange && calcOption.rangeOption.minRequiredCountKey.length ? true : false;
 
-    _.forEach(groupRowDataPacketList, rowList => {
+    _.forEach(groupedTableRowInfo, groupedTableRows => {
       let prevValue;
       let prevDate;
-      rowList.forEach((rowData, index) => {
+      groupedTableRows.forEach((tableRow, index) => {
         let hasError = false;
         // 첫 데이터는 비교 대상이 없으므로 자체적으로 가지고 있는 최소 값을 기입
         if (index === 0) {
-          prevValue = _.isEmpty(calcOption.calcMinKey)
-            ? rowData[calcOption.calcMaxKey]
-            : rowData[calcOption.calcMinKey];
+          prevValue = tableRow[calcOption.calcMinKey || calcOption.calcMaxKey];
         }
 
         // BU.CLI(prevDate);
         // 날짜 계산 옵션이 있다면 날짜 임계치를 벗어났는지 체크
         if (hasCalcDate && prevDate instanceof Date) {
           /** @type {Date} */
-          let currDate = rowData[calcOption.rangeOption.dateKey];
+          let currDate = tableRow[calcOption.rangeOption.dateKey];
           currDate = typeof currDate === 'string' ? BU.convertTextToDate(currDate) : currDate;
           // BU.CLI(BU.convertDateToText(prevDate), BU.convertDateToText(currDate));
           const thisCritical = (currDate.getTime() - prevDate.getTime()) * 0.001;
@@ -248,22 +245,61 @@ function calcRangePower(rowDataPacketList, calcOption) {
         // }
 
         // BU.CLI(hasError);
-        rowData[calcOption.resultKey] = hasError ? '' : rowData[calcOption.calcMaxKey] - prevValue;
+        tableRow[calcOption.resultKey] = hasError
+          ? ''
+          : tableRow[calcOption.calcMaxKey] - prevValue;
         // BU.CLI(rowData);
-        prevValue = rowData[calcOption.calcMaxKey];
+        prevValue = tableRow[calcOption.calcMaxKey];
 
         if (hasCalcDate) {
-          prevDate = rowData[calcOption.rangeOption.dateKey];
+          prevDate = tableRow[calcOption.rangeOption.dateKey];
           prevDate = typeof prevDate === 'string' ? BU.convertTextToDate(prevDate) : prevDate;
         }
       });
       // rowList.shift();
     });
 
-    return groupRowDataPacketList;
+    return groupedTableRowInfo;
   }
 }
 exports.calcRangePower = calcRangePower;
+
+/**
+ * Table Rows을 Grouping 한 후 각 이전 Grouping과 이후 Grouping 간의 최대 값 차이를 구하여 resultkey에 반영
+ * @param {searchRange} searchRange
+ * @param {{}[]} dataRows
+ * @param {calcRowPacketIntervalOption} calcOption
+ */
+function refineDataRows(searchRange, dataRows, calcOption) {
+  // 하루 데이터(10분 구간)는 특별히 데이터를 정제함.
+  if (
+    searchRange.searchType === 'min' ||
+    searchRange.searchType === 'min10' ||
+    searchRange.searchType === 'hour'
+  ) {
+    let maxRequiredDateSecondValue = 0;
+    const minRequiredCountValue = 9;
+    switch (searchRange.searchType) {
+      case 'min':
+        maxRequiredDateSecondValue = 120;
+        break;
+      case 'min10':
+        maxRequiredDateSecondValue = 1200;
+        break;
+      case 'hour':
+        maxRequiredDateSecondValue = 7200;
+        break;
+      default:
+        break;
+    }
+
+    calcOption.rangeOption.maxRequiredDateSecondValue = maxRequiredDateSecondValue;
+    calcOption.rangeOption.minRequiredCountValue = minRequiredCountValue;
+
+    calcRangePower(dataRows, calcOption);
+  }
+}
+exports.refineDataRows = refineDataRows;
 
 /**
  *

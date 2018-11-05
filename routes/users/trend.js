@@ -8,87 +8,32 @@ const { BU } = require('base-util-jh');
 
 const webUtil = require('../../models/templates/web.util');
 
-// server middleware
-router.use(
-  asyncHandler(async (req, res, next) => {
-    const user = _.get(req, 'user', {});
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
-    _.set(req, 'locals.menuNum', 1);
-    _.set(req, 'locals.siteId', user.main_seq);
-    // BU.CLI(user.main_seq);
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(user.weather_location_seq);
-    req.locals.currWeatherCastInfo = currWeatherCastInfo;
-
-    /** @type {V_PW_PROFILE[]} */
-    const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
-
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        // BU.CLI(profileRows);
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
-        return { siteid: strMainSeq, name: siteName };
-      });
-
-    _.set(req, 'locals.siteList', siteList);
-
-    // BU.CLI(req.locals);
-    next();
-  }),
-);
-
-/* GET home page. */
 router.get(
-  '/',
+  ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
     // BU.CLI(req.user);
 
-    const user = _.get(req, 'user', {});
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId = req.user.main_seq } = req.params;
 
-    // 지점 Id를 불러옴
+    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+
+    // TODO: 1. 각종 Chart 작업
+
+    // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
+
+    // TODO: 1.2 조도 + 이산화 탄소
+
+    // TODO: 1.3 토양 수분 차트
+
+    // TODO: 1.4 토양 온.습도, 외기 온.습도
+
+    // TODO: 1.5 수평 일사량, 풍속
 
     // BU.CLIN(req.locals);
     res.render('./trend/trend', req.locals);
   }),
 );
 
-router.get(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    res.render('./main/index', req.locals);
-  }),
-);
-
-router.get(
-  '/ess',
-  asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
-    return res.render('./templates/ESS/index.ejs', req.locals);
-  }),
-);
-
 module.exports = router;
-
-// router.get('/intersection', (req, res) => {
-//   const grade = _.get(req, 'user.grade');
-//   switch (grade) {
-//     case 'admin':
-//       router.use('/admin', admin);
-//       res.redirect('/admin');
-//       break;
-//     case 'manager':
-//       router.use('/manager', manager);
-//       res.redirect('/manager');
-//       break;
-//     default:
-//       break;
-//   }
-// });
