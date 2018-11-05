@@ -52,27 +52,6 @@ function setWeatherCastTemp(domElement, value = '-') {
 }
 
 /**
- *
- * @param {HTMLElement} domElement
- * @param {{siteid: string, name: string}[]} siteList
- * @param {string} siteId
- */
-function setSiteList(domElement, siteList, siteId) {
-  const siteOptionTemplate = _.template(
-    '<option <%= isSelected %> value="<%= siteid %>"><%= name %></option>',
-  );
-  const optionList = siteList.map(siteInfo => {
-    const { siteid, name } = siteInfo;
-    let isSelected = '';
-    if (siteId.toString() === siteid) {
-      isSelected = 'selected';
-    }
-    return siteOptionTemplate({ siteid, name, isSelected });
-  });
-  domElement.innerHTML = optionList;
-}
-
-/**
  * Dom 객체 자식을 순회하면서 Json 조건에 맞는 데이터를 찾아 일치하는 값을 설정
  * @param {HTMLElement} parentDom
  * @param {*} jsonData

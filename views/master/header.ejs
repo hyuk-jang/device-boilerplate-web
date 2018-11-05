@@ -8,18 +8,18 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand tit_1" href="main">
+        <a class="navbar-brand tit_1" href="/main">
           <img style="width:30px; height:30px; margin:0px; margin-right:5px;" src="/image/farm_icon.png" />
           농업병행 태양광발전 모니터링
         </a>
       </div>
       <div id="myNavbar" class="collapse navbar-collapse navbar-right">
         <ul id="navigation" class="nav navbar-nav">
-          <li><a href="main">메인</a></li>
-          <li><a href="inverter">인버터</a></li>
-          <li><a href="sensor">생육센서</a></li>
-          <!-- <li><a href="trend">트렌드</a></li> -->
-          <li><a href="report">보고서</a></li>
+          <li><a href="/main">메인</a></li>
+          <li><a href="/inverter">인버터</a></li>
+          <li><a href="/sensor">생육센서</a></li>
+          <li><a href="/trend">트렌드</a></li>
+          <li><a href="/report">보고서</a></li>
         </ul>
       </div>
     </div>
@@ -32,7 +32,7 @@
       </form>
     </div>
     <div class="col-md-6 header_w_r">
-      <div class="nav_row_st_right">
+      <div id="weathercast" class="nav_row_st_right">
         <span style="margin-right:40px;" id="currDate"></span>
         <span>날씨</span>
         <img id="currWeatherImg">
@@ -44,23 +44,25 @@
 </header>
 
 <script>
-  // 날씨 정보
-  let currWeatherCastInfo = <%- JSON.stringify(currWeatherCastInfo) %>;
-  // Site SelectBox를 구성하기 위한 목록 정보
-  let siteList = <%- JSON.stringify(siteList) %>;
-  // 현재 선택한 Site Id
-  let siteId = <%- JSON.stringify(siteId) %>;
-  matchingMenu(document.getElementById('navigation'), <%- menuNum  %>, 'active');
-  document.querySelector('#currWeatherImg').setAttribute('src', `/image/weather/weather_${currWeatherCastInfo.wf}.png`)
-  document.querySelector('#currWeatherTemp').setAttribute('value', currWeatherCastInfo.temp);
+  const {
+    naviId
+  } = <%- JSON.stringify(mainInfo) %>
+  // 네비게이션 DOM
+  $('#navigation').html(<%- JSON.stringify(dom.naviListDom) %>)
+  // 사이트 목록 DOM
+  $('#sel_city').html(<%- JSON.stringify(dom.siteListDom) %>)
+  // 날씨 동적 DOM 생성
+  $('#weathercast').html(<%- JSON.stringify(dom.weathercastDom) %>)
 
-  setSiteList(document.getElementById('sel_city'), siteList, siteId)
-
-  // 현재 날짜 세팅
-  writeDateText(document.getElementById('currDate'))
 
   // 사이트 변경 시
   $('#sel_city').change(function () {
-    location.href = window.location.pathname + '?siteid=' + $(this).val()
+    location.href = window.location.origin + '/' + naviId + '/' + $(this).val()
+    // location.href = window.location.pathname + '/' + $(this).val()
   })
+
+  // 페이지 동적 바인딩이 완료되었을 경우 View 처리
+  window.onload = () => {
+    $('#wrap').removeClass('hidden')
+  }
 </script>

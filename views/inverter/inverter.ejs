@@ -3,18 +3,14 @@
 
 <head>
   <!-- Default Js -->
-  <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
-
-  <script src="js/hichart/highcharts.src.js"></script>
-
-  <script src="js/contents/master/mainUtil.js"></script>
-  <script src="js/contents/inverter/setInverter.js"></script>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/inverter/setInverter.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
-  <div class="wrap" style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
     <div class="center">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
@@ -69,9 +65,8 @@
     </div>
   </div>
   <script>
-    let inverterStatusList = <%- JSON.stringify(inverterStatusList) %>;
-    console.log(inverterStatusList)
-    setInverterList(document.getElementById('myTable'), inverterStatusList)
+    $('#myTable').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+
     document.getElementById('inverterMeasureTime').innerHTML = <%- JSON.stringify(powerInfo.measureTime) %>;
 
     // 차트를 그리기 위한 데이터

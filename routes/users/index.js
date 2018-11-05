@@ -15,13 +15,24 @@ const report = require('./report');
 
 const webUtil = require('../../models/templates/web.util');
 
+const domMakerMaster = require('../../models/domMaker/masterDom');
+
 // router.use((req, res, next) => {
 //   next();
 // });
 
+const DEFAULT_SITE_ID = 'all';
+
 // server middleware
-router.use(
+router.get(
+  ['/', '/:naviMenu', '/:naviMenu/:siteId'],
   asyncHandler(async (req, res, next) => {
+    /** @type {V_MEMBER} */
+    const user = _.get(req, 'user', {});
+
+    // 선택한 SiteId와 인버터 Id를 정의
+    const { naviMenu = '', siteId = user.main_seq } = req.params;
+
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
@@ -47,27 +58,34 @@ router.use(
       .value();
     siteList.unshift({ siteid: 'all', name: `모두(${totalSiteAmount}kW급)` });
 
+    // _.set(req, 'locals.siteList', siteList);
+
+    _.set(req, 'locals.mainInfo.naviId', naviMenu);
+    _.set(req, 'locals.mainInfo.siteId', BU.isNumberic(siteId) ? Number(siteId) : siteId);
+
+    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 사이트 목록 추가
-    _.set(req, 'locals.siteList', siteList);
+    const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
+    _.set(req, 'locals.mainInfo.siteList', siteList);
+    _.set(req, 'locals.dom.siteListDom', siteListDom);
 
-    const user = _.get(req, 'user', {});
-
-    // 지점 Id를 불러옴
-    const { siteid = user.main_seq } = req.query;
-    // 현재 선택한 사이트 Id 지정
-    _.set(req, 'locals.siteId', _.eq(siteid, 'all') ? 'all' : siteid);
+    // 네비게이션 목록 추가
+    const naviListDom = domMakerMaster.makeNaviListDom(naviMenu, siteId);
+    _.set(req, 'locals.dom.naviListDom', naviListDom);
 
     // Site All일 경우 날씨 정보는 로그인 한 User 의 Main 을 기준으로함.
-    const mainSeq = _.eq(siteid, 'all') ? user.main_seq : siteid;
+    const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
 
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
     _.set(req, 'locals.currWeatherCastInfo', currWeatherCastInfo);
-    // BU.CLI(currWeatherCastInfo);
 
-    // BU.CLI(req.locals);
+    const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
+    _.set(req, 'locals.dom.weathercastDom', weathercastDom);
+
+    // BU.CLI(req.locals.siteId);
     next();
   }),
 );

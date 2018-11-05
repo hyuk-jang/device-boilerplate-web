@@ -3,18 +3,15 @@
 
 <head>
   <!-- Default Js -->
-  <script src="js/lodash.min.js"></script>
+
   <%- include("../master/head.ejs") %>
-  <script src="js/hichart/highcharts.src.js"></script>
-  <script src="js/hichart/highcharts-more.js"></script>
-  <script src="js/hichart/solid-gauge.js"></script>
-  <script src="js/contents/master/mainUtil.js"></script>
-  <script src="js/contents/main/makeGaugeChart.js"></script>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/main/makeGaugeChart.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
-  <div class="wrap" style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
     <div class="center">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
@@ -137,22 +134,22 @@
           <div class="box_6">
             <div class="box_6_in">
               <div class="box_6_in_4">
-                <img src="image/no1.png" />
+                <img src="/image/no1.png" />
                 <p>일사량</p>
                 <input id="inclinedSolar" class="wed_4" type="text" value=""><span> W/㎥</span>
               </div>
               <div class="box_6_in_4">
-                <img src="image/no2.png" />
+                <img src="/image/no2.png" />
                 <p>모듈온도</p>
                 <input class="wed_4" type="text" value="7.1"><span> ℃</span>
               </div>
               <div class="box_6_in_4">
-                <img src="image/no3.png" />
+                <img src="/image/no3.png" />
                 <p>인버터</p>
                 <input class="wed_4" type="text" value="RUN">
               </div>
               <div class="box_6_in_4">
-                <img src="image/no4.png" />
+                <img src="/image/no4.png" />
                 <p>경보</p>
                 <input class="wed_4" type="text" value="정상">
               </div>
@@ -169,7 +166,7 @@
   </div>
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-    console.log(powerGenerationInfo)
+    // console.log(powerGenerationInfo)
     // 금일 발전량 차트
     makeGaugeChart({
       domId: 'daily-power-graph',
@@ -208,8 +205,10 @@
     // 발전 현황 셋팅
     setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
 
-    $('#inverterStatus').html(<%- JSON.stringify(inverterStatusHtml) %>)
+    $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
   </script>
+
+
 </body>
 
 </html>

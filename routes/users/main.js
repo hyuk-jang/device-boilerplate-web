@@ -8,19 +8,18 @@ const { BU } = require('base-util-jh');
 
 const webUtil = require('../../models/templates/web.util');
 
+const domMakerMain = require('../../models/domMaker/mainDom');
+
 // server middleware
 router.use(
   asyncHandler(async (req, res, next) => {
-    _.set(req, 'locals.menuNum', 0);
-
-    // BU.CLI(req.locals);
     next();
   }),
 );
 
 /* GET home page. */
 router.get(
-  ['/', '/main'],
+  ['/', '/main', '/main/:siteId'],
   asyncHandler(async (req, res) => {
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -29,7 +28,8 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     // 지점 Id를 불러옴
-    const { siteId } = req.locals;
+    const { mainInfo } = req.locals;
+    const { siteId } = mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const pwProfileWhereInfo = _.eq(siteId, 'all') ? null : { main_seq: siteId };
@@ -58,8 +58,8 @@ router.get(
     );
 
     // 금일 발전 현황 데이터
-    searchRange = biModule.getSearchRange('min10');
-    // searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    // searchRange = biModule.getSearchRange('min10');
+    searchRange = biModule.getSearchRange('min10', '2018-11-01');
 
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
     // BU.CLI(inverterTrend);
@@ -160,8 +160,6 @@ router.get(
       });
     });
 
-    const inverterStatusHtml = makeInverterStatusDom(viewInverterStatusRows);
-
     // 인버터에 붙어있는 경사 일사량을 구함
     const avgInclinedSolar = _.round(
       _(viewInverterStatusRows)
@@ -199,11 +197,15 @@ router.get(
     };
     // BU.CLI(chartData);
 
+    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
+    // 인버터 현재 데이터 동적 생성 돔
+    const inverterStatusListDom = domMakerMain.makeInverterStatusDom(viewInverterStatusRows);
+
+    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
+
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
-
-    req.locals.inverterStatusHtml = inverterStatusHtml;
     // BU.CLI(req.locals);
     res.render('./main/index', req.locals);
   }),
@@ -225,47 +227,3 @@ router.get(
 // );
 
 module.exports = router;
-
-/**
- *
- * @param {V_INVERTER_STATUS[]} inverterStatusRows
- */
-function makeInverterStatusDom(inverterStatusRows) {
-  // <input class="input-tx" type="text" value="<%= siteName %>">
-  const inverterStatusTemplate = _.template(`
-    <div class="box_5_in">
-    <div><%= siteName %></div>
-    <div class="box_5_a">
-      <div class="box_5_in_sp">
-        <p>AC전압</p>
-      </div>
-      <div> <input class="wed_3" type="text" value="<%= grid_rs_v %>"><span>(v)</span></div>
-    </div>
-    <div class="box_5_a">
-      <div class="box_5_in_sp">
-        <p>AC전류</p>
-      </div>
-      <div> <input class="wed_3" type="text" value="<%= grid_r_a %>"><span>(v)</span></div>
-    </div>
-  </div>
-    `);
-  const inverterStatusDom = inverterStatusRows.map(row => inverterStatusTemplate(row));
-
-  return inverterStatusDom;
-}
-
-// router.get('/intersection', (req, res) => {
-//   const grade = _.get(req, 'user.grade');
-//   switch (grade) {
-//     case 'admin':
-//       router.use('/admin', admin);
-//       res.redirect('/admin');
-//       break;
-//     case 'manager':
-//       router.use('/manager', manager);
-//       res.redirect('/manager');
-//       break;
-//     default:
-//       break;
-//   }
-// });

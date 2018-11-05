@@ -10,11 +10,11 @@ const { BU } = require('base-util-jh');
 
 const webUtil = require('../../models/templates/web.util');
 
+const domMakerInverter = require('../../models/domMaker/inverterDom');
+
 // server middleware
 router.use(
   asyncHandler(async (req, res, next) => {
-    _.set(req, 'locals.menuNum', 1);
-
     // BU.CLI(req.locals);
     next();
   }),
@@ -22,7 +22,7 @@ router.use(
 
 /* GET home page. */
 router.get(
-  '/',
+  ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -30,7 +30,8 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     // 지점 Id를 불러옴
-    const { siteId } = req.locals;
+    const { mainInfo } = req.locals;
+    const { siteId } = mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const pwProfileWhereInfo = _.eq(siteId, 'all') ? null : { main_seq: siteId };
@@ -97,8 +98,8 @@ router.get(
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
     const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
 
-    const searchRange = biModule.getSearchRange('min10');
-    // const searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    // const searchRange = biModule.getSearchRange('min10');
+    const searchRange = biModule.getSearchRange('min10', '2018-11-01');
     const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
     // BU.CLI(inverterPowerList);
     const chartOption = {
@@ -118,6 +119,14 @@ router.get(
         '',
       );
     });
+
+    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
+    // 인버터 현재 상태 데이터 동적 생성 돔
+    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(
+      refinedInverterStatusList,
+    );
+
+    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 
     // BU.CLI(chartData);
     // webUtil.mappingChartDataName(chartData, viewPowerProfileRows, 'target_id', 'target_name');

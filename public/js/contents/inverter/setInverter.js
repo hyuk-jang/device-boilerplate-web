@@ -20,7 +20,7 @@ function setInverterList(domElement, inverterStatusList) {
     <td> <%= daily_power_kwh %> </td>
     <td> <%= power_total_kwh %> </td>
     <td class="center_ball">
-      <img src="image/<%= operImgName %>" />
+      <img src="/image/<%= operImgName %>" />
     </td>
   </tr>
     `);

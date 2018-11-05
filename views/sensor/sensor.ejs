@@ -3,14 +3,13 @@
 
 <head>
   <!-- Default Js -->
-  <script src="js/lodash.min.js"></script>
   <%- include("../master/head.ejs") %>
+  <script src="/js/contents/master/mainUtil.js"></script>
   <%- include("./mediaQuery.ejs") %>
-  <script src="js/contents/master/mainUtil.js"></script>
 </head>
 
 <body>
-  <div class="wrap" style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9;">
+  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
     <div class="center">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
@@ -54,9 +53,7 @@
   </div>
   <script>
     // 작물 생육환경 테이블 구성
-    let sensorTableList = <%- JSON.stringify(sensorTableList) %>;
-
-    $('#sensorTable').html(sensorTableList)
+    $('#sensorTable').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
   </script>
 </body>
 
