@@ -93,8 +93,8 @@ router.get(
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
     const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
 
-    // const searchRange = biModule.getSearchRange('min10');
-    const searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    // const searchRange = biModule.createSearchRange('min10');
+    const searchRange = biModule.createSearchRange('min10', '2018-11-01');
     const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
     // BU.CLI(inverterPowerList);
     const chartOption = {

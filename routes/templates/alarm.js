@@ -78,7 +78,7 @@ module.exports = app => {
       startDate = BU.convertDateToText(startDate);
       endDate = BU.convertDateToText(endDate);
 
-      const searchRange = biModule.getSearchRange('range', startDate, endDate);
+      const searchRange = biModule.createSearchRange('range', startDate, endDate);
       // 검색 조건 객체에 현재 페이지, 페이지당 출력 건수 정의
       searchRange.page = Number(param_page);
       searchRange.pageListCount = 20;

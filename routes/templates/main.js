@@ -58,7 +58,7 @@ module.exports = app => {
       const photovoltaicSeqList = _.map(viewPowerProfileList, 'photovoltaic_seq');
 
       // console.time('0');
-      let searchRange = biModule.getSearchRange('day');
+      let searchRange = biModule.createSearchRange('day');
       // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
       searchRange.searchType = 'month';
       const inverterPowerByMonth = await biModule.getInverterPower(searchRange, inverterSeqList);
@@ -80,8 +80,8 @@ module.exports = app => {
       // console.timeEnd('0');
       // console.time('0.5');
       // 금일 발전 현황 데이터
-      searchRange = biModule.getSearchRange('min10');
-      // searchRange = biModule.getSearchRange('min10', '2018-08-12');
+      searchRange = biModule.createSearchRange('min10');
+      // searchRange = biModule.createSearchRange('min10', '2018-08-12');
 
       const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
 

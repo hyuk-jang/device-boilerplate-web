@@ -1,13 +1,16 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
 const { BU, DU } = require('base-util-jh');
 
-const DEFAULT_RANGE_FORMAT = 'min10';
-const DEFAULT_SITE_ID = 'all';
+// 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_TYPE = 'hour';
+// Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_INTERVAL = 'min10';
 const DEFAULT_CATEGORY = 'inverter';
 const DEFAULT_SUB_SITE = 'all';
 
@@ -18,30 +21,31 @@ router.get(
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
-    // 선택한 SiteId와 인버터 Id를 정의
-    const { siteId = DEFAULT_SITE_ID, inverterId = DEFAULT_SUB_SITE } = req.params;
-
-    // 선택한 SiteId에 따라 PowerProfile Rows 정의
-    const pwProfileWhereInfo = _.eq(siteId, DEFAULT_SITE_ID) ? null : { main_seq: siteId };
-
-    /** @type {V_PW_INVERTER_PROFILE[]} */
-    let viewPowerProfileList = _.filter(req.locals.viewPowerProfileRows, pwProfileWhereInfo);
-
-    let inverterSeqList = [];
-
-    // 인버터 단일 Seq로 검색했을 경우
-    if (BU.isNumberic(inverterId)) {
-      // 인버터 Seq 목록에 추가
-      inverterSeqList.push(Number(inverterId));
-      // 해당 인버터와 관련있는 목록으로 Power Profile Rows 구성
-      viewPowerProfileList = _.filter(viewPowerProfileList, { inverter_seq: Number(inverterId) });
-    } else {
-      // Default는 인버터 전체로 구성
-      inverterSeqList = _.map(viewPowerProfileList, 'inverter_seq');
-    }
+    // req.param 값 비구조화 할당
+    const { siteId = req.user.main_seq, inverterId = DEFAULT_SUB_SITE } = req.params;
+    // req.query 값 비구조화 할당
+    const {
+      page = 1,
+      searchType = DEFAULT_SEARCH_TYPE,
+      searchInterval = DEFAULT_SEARCH_INTERVAL,
+      strStartDate = moment().format('YYYY-MM-DD'),
+      strEndDate = '',
+    } = req.query;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    // const pwProfileWhereInfo = _.eq(siteId, 'all') ? null : { main_seq: siteId };
+    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+    const inverterWhere = BU.isNumberic(inverterId) ? { inverter_seq: Number(inverterId) } : null;
+
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+
+    // 인버터 Seq 목록
+    const inverterSeqList = _(powerProfileRows)
+      .filter(inverterWhere)
+      .map('inverter_seq')
+      .value();
+
+    const searchRange = powerModel.createSearchRange(searchType, strStartDate, strEndDate);
 
     res.render('./report/report', req.locals);
   }),
@@ -96,7 +100,7 @@ router.get(
 
     const searchType = req.query.search_type ? req.query.search_type : 'hour';
 
-    const searchRange = powerModel.getSearchRange(
+    const searchRange = powerModel.createSearchRange(
       searchType,
       req.query.start_date,
       req.query.end_date,
@@ -211,3 +215,25 @@ function makeInverterSitesDom(vInverterProfileRows, selectedId) {
 
   return madeDom;
 }
+
+// const testArray = [
+//   ['min', strStartDate, strEndDate],
+//   ['min10', strStartDate, strEndDate],
+//   ['hour', strStartDate, strEndDate],
+//   ['min10', '2018-11-01'],
+//   ['day', '2018-11-01'],
+//   ['hour', '2018-11-01'],
+//   ['range', '2018-11-01', '2018-11-25'],
+// ];
+
+// BU.CLI('??');
+// const result = _.map(testArray, ele => {
+//   const get = powerModel.createSearchRange(...ele);
+//   const create = powerModel.createSearchRange(...ele);
+//   BU.CLIS(get, create);
+//   if (_.isEqual(get, create)) {
+//     return true;
+//   }
+//   return false;
+// });
+// BU.CLI(result);

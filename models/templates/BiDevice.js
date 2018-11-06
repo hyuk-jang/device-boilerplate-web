@@ -114,7 +114,7 @@ class BiDevice extends BiModule {
    * @param {number[]} node_seq
    */
   getSensorTrend(searchRange, node_seq) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     const sql = `

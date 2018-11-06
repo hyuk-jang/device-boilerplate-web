@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const moment = require('moment');
 const { BM } = require('base-model-jh');
 const { BU } = require('base-util-jh');
 
@@ -26,7 +27,7 @@ class BiModule extends BM {
    * @return {{comment: string, is_error: number}[]} SQL 실행 결과
    */
   getCalendarComment(searchRange, mainSeq) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     const sql = `
@@ -52,7 +53,7 @@ class BiModule extends BM {
    * @return {Promise} SQL 실행 결과
    */
   getWaterLevel(searchRange, inverter_seq_list) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'applydate');
 
     // BU.CLI(dateFormat);
@@ -92,7 +93,7 @@ class BiModule extends BM {
    * @return {weatherRowDataPacketList}
    */
   getWeatherDeviceAverage(searchRange) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
     const sql = `
       SELECT
@@ -123,7 +124,7 @@ class BiModule extends BM {
    * @return {weatherRowDataPacketList}
    */
   getWeatherCastAverage(searchRange, weatherLocationSeq) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'applydate');
     // BU.CLI(dateFormat);
     // BU.CLI(searchRange);
@@ -214,7 +215,7 @@ class BiModule extends BM {
    * @return {Promise} SQL 실행 결과
    */
   getConnectorPower(searchRange, module_seq_list) {
-    searchRange = searchRange || this.getSearchRange();
+    searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     let sql = `
@@ -267,106 +268,93 @@ class BiModule extends BM {
   /**
    * 검색 종류와 검색 기간에 따라 계산 후 검색 조건 객체 반환
    * @param {string} searchType min10, hour, day, month, year, range
-   * @param {string} start_date '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
-   * @param {string} end_date '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
+   * @param {string} strStartDate '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
+   * @param {string} strEndDate '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
    * @return {searchRange} 검색 범위
    */
-  getSearchRange(searchType, start_date, end_date) {
-    // BU.CLIS(searchType, start_date, end_date);
-    let startDate = new Date();
-    if (start_date instanceof Date) {
-      startDate = start_date;
-    } else if (_.isString(start_date)) {
-      startDate = BU.convertTextToDate(start_date);
-    }
+  createSearchRange(
+    searchType = 'hour',
+    strStartDate = moment().format('YYYY-MM-DD'),
+    strEndDate = '',
+  ) {
+    const mStartDate = moment(strStartDate);
+    // BU.CLI(mStartDate.format('YYYY-MM-DD HH:mm:ss'));
+    let mEndDate = strEndDate.length ? moment(strEndDate) : mStartDate;
 
-    let endDate = startDate;
-    if (end_date instanceof Date) {
-      endDate = end_date;
-    } else if (searchType === 'range' && end_date !== '') {
-      endDate = BU.convertTextToDate(end_date);
-    }
-    // let endDate = searchType === 'range' && end_date !== '' ? BU.convertTextToDate(end_date) : new Date(startDate);
-    let convertEndDate = null;
-    // BU.CLI(BU.convertDateToText(startDate), BU.convertDateToText(endDate));
     /** @type {searchRange} */
     const returnValue = {
       searchType,
       searchInterval: searchType,
-      resultGroupType: null,
+      resultGroupType: null, // 최종으로 묶는 타입
       strStartDate: null, // sql writedate range 사용
       strEndDate: null, // sql writedate range 사용
       rangeStart: '', // Chart 위에 표시될 시작 날짜
       rangeEnd: '', // Chart 위에 표시될 종료 날짜
       strStartDateInputValue: '', // input에 표시될 시작 날짜
       strEndDateInputValue: '', // input에 표시될 종료 날짜
-      strBetweenStart: '',
+      strBetweenStart: '', // 구간 날짜 산출을 위한 str Date
       strBetweenEnd: '',
     };
 
-    let spliceIndex = 0;
-
-    // 검색 시작 시분초 초기화
-    startDate.setHours(0, 0, 0, 0);
-    if (searchType === 'hour' || searchType === '') {
-      spliceIndex = 2;
-      endDate = new Date(startDate).addDays(1);
-      convertEndDate = endDate;
-      // 검색 종료날짜가 현재 날짜라면 시간단위로 지정
-      let currDate = new Date().setHours(0, 0, 0, 0);
-      currDate = new Date(currDate).addDays(1);
-      if (BU.convertDateToText(currDate) === BU.convertDateToText(endDate)) {
-        convertEndDate = new Date(new Date().setMinutes(0, 0, 0));
-      }
-    } else if (searchType === 'min' || searchType === 'min10') {
-      spliceIndex = 2;
-      endDate = new Date(startDate).addDays(1);
-      convertEndDate = endDate;
-      // 검색 종료날짜가 현재 날짜라면 시간단위로 지정
-      let currDate = new Date().setHours(0, 0, 0, 0);
-      currDate = new Date(currDate).addDays(1);
-      if (BU.convertDateToText(currDate) === BU.convertDateToText(endDate)) {
-        const fixedMinutes = Math.floor(new Date().getMinutes() * 0.1) * 10;
-        convertEndDate = new Date(new Date().setMinutes(fixedMinutes, 0, 0));
-      }
-    } else if (searchType === 'day') {
-      spliceIndex = 1;
-      startDate.setDate(1);
-      endDate = new Date(startDate).addMonths(1);
-      convertEndDate = endDate;
-    } else if (searchType === 'month') {
-      spliceIndex = 0;
-      startDate.setMonth(0, 1);
-      endDate = new Date(startDate).addYear(1);
-      convertEndDate = endDate;
-    } else if (searchType === 'range') {
-      spliceIndex = 2;
-      // chart title에 사용될 기간을 설정
-      returnValue.rangeEnd = BU.convertDateToText(endDate, 'kor', spliceIndex, 0);
-      // 검색 조건 input value txt 설정
-      returnValue.strEndDateInputValue = BU.convertDateToText(endDate, '', spliceIndex, 0);
-      // SQL 날짜 검색에 사용할 범위를 위하여 하루 증가
-      endDate = new Date(endDate).addDays(1);
-      convertEndDate = endDate;
-    } else if (searchType === 'fixRange') {
-      returnValue.searchType = 'range';
-      spliceIndex = 2;
-      // chart title에 사용될 기간을 설정
-      returnValue.rangeEnd = BU.convertDateToText(endDate, 'kor', spliceIndex, 0);
-      // 검색 조건 input value txt 설정
-      returnValue.strEndDateInputValue = BU.convertDateToText(endDate, '', spliceIndex, 0);
-      // SQL 날짜 검색에 사용할 범위를 위하여 하루 증가
-      convertEndDate = endDate;
+    // 검색 시간이 금일을 기준으로 얼마나 경과했는지 체크. 0이면 당일. textFormat에 따라서 시분초가 0으로 초기화되므로 현재 시간 설정
+    const diffDay = moment().diff(mStartDate, 'days');
+    if (diffDay === 0) {
+      mEndDate = moment();
     }
 
-    returnValue.rangeStart = BU.convertDateToText(startDate, 'kor', spliceIndex, 0);
-    returnValue.strStartDateInputValue = BU.convertDateToText(startDate, '', spliceIndex, 0);
-    returnValue.strStartDate = BU.convertDateToText(startDate);
-    returnValue.strEndDate = BU.convertDateToText(convertEndDate);
+    // 종료 날짜를 설정하기 위한 단위.
+    let addUnit = 'day';
+    const convertDateFormat = 'YYYY-MM-DD 00:00:00';
+    let strEndDateFormat = convertDateFormat;
+    let baseViewDateFormat = 'YYYY-MM-DD';
+    let korViewDateFormat = 'YYYY년 MM월 DD일';
+    switch (searchType) {
+      case 'min':
+        strEndDateFormat = 'YYYY-MM-DD HH:mm:00';
+        diffDay === 0 && mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
+        break;
+      case 'min10':
+        strEndDateFormat = 'YYYY-MM-DD HH:mm:00';
+        diffDay === 0 && mEndDate.set({ minute: _.floor(mEndDate.get('minute'), -1) });
+        break;
+      case 'hour':
+        strEndDateFormat = 'YYYY-MM-DD HH:00:00';
+        break;
+      case 'day':
+        addUnit = 'month';
+        baseViewDateFormat = 'YYYY-MM';
+        korViewDateFormat = 'YYYY년 MM월';
+        break;
+      case 'month':
+        addUnit = 'year';
+        baseViewDateFormat = 'YYYY';
+        korViewDateFormat = 'YYYY년';
+        break;
+      case 'range':
+        returnValue.rangeEnd = mEndDate.format(korViewDateFormat);
+        returnValue.strEndDateInputValue = mEndDate.format(baseViewDateFormat);
+        break;
+      default:
+        break;
+    }
 
-    returnValue.strBetweenStart = returnValue.strStartDate;
-    returnValue.strBetweenEnd = BU.convertDateToText(endDate);
-    // BU.CLI(returnValue)
+    // 기간을 검색하기 위해 endDate 증가
+    const mAddEndDate = _.cloneDeep(mEndDate).add(1, addUnit);
+
+    // 사용자 화면에 보여주기 위한 날짜
+    returnValue.rangeStart = mStartDate.format(korViewDateFormat);
+    returnValue.strStartDateInputValue = mStartDate.format(baseViewDateFormat);
+
+    // SQL 문에 사용될 str Date
+    returnValue.strStartDate = mStartDate.format(convertDateFormat);
+    returnValue.strEndDate =
+      diffDay === 0 ? mEndDate.format(strEndDateFormat) : mAddEndDate.format(strEndDateFormat);
+
+    // 구간 날짜 산출을 위한 str Date
+    returnValue.strBetweenStart = mStartDate.format(convertDateFormat);
+    returnValue.strBetweenEnd = mAddEndDate.format(convertDateFormat);
+
+    // BU.CLI(returnValue);
     return returnValue;
   }
 
@@ -506,7 +494,7 @@ class BiModule extends BM {
    * @param {number[]=} inverterSeqList
    * @return {{inverter_seq: number, interval_power: number, target_id: string }[]}
    */
-  getInverterPower(searchRange = this.getSearchRange(), inverterSeqList) {
+  getInverterPower(searchRange = this.createSearchRange(), inverterSeqList) {
     // let dateFormat = this.convertSearchType2DateFormat(searchRange.searchType);
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
     // BU.CLI(dateFormat);
@@ -591,7 +579,7 @@ class BiModule extends BM {
    * @param {number[]} inverterSeqList
    * @return {PW_INVERTER_TREND[]}
    */
-  getInverterTrend(searchRange = this.getSearchRange(), inverterSeqList) {
+  getInverterTrend(searchRange = this.createSearchRange(), inverterSeqList) {
     // BU.CLI(searchRange);
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
@@ -656,7 +644,7 @@ class BiModule extends BM {
   /**
    * 모듈 Seq List와 SearchRange 객체를 받아 Report 생성 및 반환
    * @param {Array} moduleSeqList [photovoltaic_seq]
-   * @param {searchRange} searchRange getSearchRange() Return 객체
+   * @param {searchRange} searchRange createSearchRange() Return 객체
    * @return {Object[]} {betweenDatePointObj, gridPowerInfo}
    */
   getConnectorTrend(moduleSeqList, searchRange) {
@@ -791,7 +779,7 @@ class BiModule extends BM {
 
   /**
    * 인버터 Report
-   * @param {searchRange} searchRange getSearchRange() Return 객체
+   * @param {searchRange} searchRange createSearchRange() Return 객체
    * @param {number=|Array=} inverterSeq [inverter_seq]
    * @return {{totalCount: number, report: []}} 총 갯수, 검색 결과 목록
    */

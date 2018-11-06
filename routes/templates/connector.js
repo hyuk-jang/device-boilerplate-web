@@ -149,8 +149,8 @@ module.exports = app => {
       const totalPower = _.round(_.sumBy(refinedConnectorList, 'power') * 0.001, 3);
 
       // 금일 접속반 발전량 현황
-      const searchRange = biModule.getSearchRange('min10');
-      // let searchRange = biModule.getSearchRange('hour', '2018-03-10');
+      const searchRange = biModule.createSearchRange('min10');
+      // let searchRange = biModule.createSearchRange('hour', '2018-03-10');
       const connectorPowerList = await biModule.getConnectorPower(searchRange, moduleSeqList);
 
       const chartOption = {

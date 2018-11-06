@@ -71,7 +71,7 @@ module.exports = app => {
       // Search 타입을 지정
       const searchType = req.query.search_type ? req.query.search_type : defaultRangeFormat;
       // 지정된 SearchType으로 설정 구간 정의
-      let searchRange = powerModel.getSearchRange(
+      let searchRange = powerModel.createSearchRange(
         searchType,
         req.query.start_date,
         req.query.end_date,
@@ -87,7 +87,7 @@ module.exports = app => {
               )
             : searchType;
         if (realSearchType === 'hour') {
-          searchRange = powerModel.getSearchRange(
+          searchRange = powerModel.createSearchRange(
             defaultRangeFormat,
             req.query.start_date,
             req.query.end_date,

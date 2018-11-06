@@ -33,7 +33,7 @@ router.get(
 
     // Site 발전 현황 구성.
     // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
-    let searchRange = biModule.getSearchRange('day');
+    let searchRange = biModule.createSearchRange('day');
     // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
     searchRange.searchType = 'month';
     const inverterMonthRows = await biModule.getInverterPower(searchRange, inverterSeqList);
@@ -49,8 +49,8 @@ router.get(
     );
 
     // 금일 발전 현황 데이터
-    // searchRange = biModule.getSearchRange('min10');
-    searchRange = biModule.getSearchRange('min10', '2018-11-01');
+    // searchRange = biModule.createSearchRange('min10');
+    searchRange = biModule.createSearchRange('min10', '2018-11-01');
 
     // 인버터 트렌드 구함
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);

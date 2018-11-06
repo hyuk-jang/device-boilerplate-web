@@ -61,7 +61,7 @@ module.exports = app => {
         inverter_seq: inverterSeqList,
       });
 
-      let searchRange = biModule.getSearchRange('min10');
+      let searchRange = biModule.createSearchRange('min10');
       // searchRange.searchInterval = 'day';
       const waterLevelDataPacket = await biModule.getWaterLevel(searchRange, inverterSeqList);
 
@@ -149,8 +149,8 @@ module.exports = app => {
       const refinedInverterStatus = webUtil.refineSelectedInverterStatus(validInverterStatus);
       // BU.CLI(refinedInverterStatus);
 
-      // let searchRange = biModule.getSearchRange('hour', '2018-03-10');
-      searchRange = biModule.getSearchRange('min10');
+      // let searchRange = biModule.createSearchRange('hour', '2018-03-10');
+      searchRange = biModule.createSearchRange('min10');
       const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
       // BU.CLI(inverterPowerList);
       const chartOption = {

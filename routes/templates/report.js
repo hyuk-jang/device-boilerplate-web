@@ -85,7 +85,7 @@ module.exports = app => {
       const selectedReportMode = _.get(req.query, 'start_date', '').length
         ? 'reportMode'
         : 'calendarMode';
-      const searchRange = powerModel.getSearchRange(
+      const searchRange = powerModel.createSearchRange(
         searchType,
         req.query.start_date,
         req.query.end_date,
@@ -156,7 +156,7 @@ module.exports = app => {
       const endDate = req.query.end_date;
 
       // 지정된 SearchType으로 설정 구간 정의
-      let searchRange = powerModel.getSearchRange(searchType, startDate, endDate);
+      let searchRange = powerModel.createSearchRange(searchType, startDate, endDate);
 
       if (searchType === 'range') {
         const realSearchType =
@@ -167,7 +167,7 @@ module.exports = app => {
               )
             : searchType;
         if (realSearchType === 'hour') {
-          searchRange = powerModel.getSearchRange(
+          searchRange = powerModel.createSearchRange(
             defaultRangeFormat,
             req.query.start_date,
             req.query.end_date,

@@ -29,7 +29,7 @@ class PowerModel extends BiModule {
       .subtract(1, 'years')
       .format();
     const endDate = new Date(moment().format());
-    const searchRange = this.getSearchRange('fixRange', startDate, endDate);
+    const searchRange = this.createSearchRange('fixRange', startDate, endDate);
     searchRange.searchInterval = 'min10';
     searchRange.resultGroupType = 'day';
 
@@ -148,7 +148,7 @@ class PowerModel extends BiModule {
 
     // const device_seq = !_.isNaN(searchOption.device_seq) ? Number(searchOption.device_seq) : 'all';
     // TEST
-    // searchRange = this.getSearchRange('day', '2018-02-17', '2018-02-18');
+    // searchRange = this.createSearchRange('day', '2018-02-17', '2018-02-18');
     // searchRange.searchType = 'hour';
     // TODO: 인버터 모듈 이름을 가져오기 위한 테이블. 성능을 위해서라면 다른 쿼리문 작성 사용 필요
     /** @type {V_INVERTER_STATUS[]} */
@@ -372,7 +372,7 @@ class PowerModel extends BiModule {
 
     if (_.includes(['min', 'min10', 'hour'], searchRange.searchType) === false) {
       while (startDate < endDate) {
-        const newSearchRange = this.getSearchRange(searchInterval, startDate, endDate);
+        const newSearchRange = this.createSearchRange(searchInterval, startDate, endDate);
         searchRangeList.push(newSearchRange);
         startDate.setDate(startDate.getDate() + 1);
       }
@@ -508,7 +508,7 @@ class PowerModel extends BiModule {
     }
 
     // TEST
-    // searchRange = biModule.getSearchRange('range', '2018-02-10', '2018-02-14');
+    // searchRange = biModule.createSearchRange('range', '2018-02-10', '2018-02-14');
     // TODO: 접속반 모듈 이름을 가져오기 위한 테이블. 성능을 위해서라면 다른 쿼리문 작성 사용 필요
     const upsasProfile = await this.getTable('v_upsas_profile');
     // BU.CLI(searchRange);
