@@ -480,16 +480,16 @@ exports.refineSelectedInverterStatus = refineSelectedInverterStatus;
 
 /**
  * Range에 맞는 차트 데이터 구성
- * @param {Object[]} rowDataPacketList
+ * @param {Object[]} tableRows
  * @param {chartOption} chartOption
  * @return {chartData}
  */
-function makeDynamicChartData(rowDataPacketList, chartOption) {
+function makeDynamicChartData(tableRows, chartOption) {
   // BU.CLI(chartOption);
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
   // 데이터를 정리할 X 축 시간
-  const range = _.sortBy(_.unionWith(_.map(rowDataPacketList, dateKey), _.isEqual));
+  const range = _.sortBy(_.unionWith(_.map(tableRows, dateKey), _.isEqual));
 
   // 반환 데이터 유형
   const returnValue = {
@@ -500,9 +500,9 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
   // BU.CLI(returnValue.range);
   // 같은 Key 끼리 그루핑
   if (groupKey) {
-    const groupDataList = _.groupBy(rowDataPacketList, groupKey);
+    const groupedTableInfo = _.groupBy(tableRows, groupKey);
     returnValue.series = [];
-    _.forEach(groupDataList, (groupObj, gKey) => {
+    _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
       const addObj = {
         name: gKey,
         data: [],
@@ -512,18 +512,18 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
         addObj.type = 'area';
       }
 
-      const dataRow = _.head(groupObj);
+      const groupedFirstRow = _.head(groupedTableRows);
       if (colorKey) {
-        addObj.color = dataRow[chartOption.colorKey];
+        addObj.color = groupedFirstRow[chartOption.colorKey];
       }
       if (sortKey) {
-        addObj.sort = dataRow[chartOption.sortKey];
+        addObj.sort = groupedFirstRow[chartOption.sortKey];
       }
 
-      _.forEach(groupObj, gInfo => {
-        const index = _.findIndex(range, d => _.isEqual(d, gInfo[dateKey]));
+      _.forEach(groupedTableRows, tableRow => {
+        const index = _.findIndex(range, d => _.isEqual(d, tableRow[dateKey]));
 
-        addObj.data[index] = gInfo[selectKey];
+        addObj.data[index] = tableRow[selectKey];
       });
       returnValue.series.push(addObj);
     });
@@ -543,7 +543,7 @@ function makeDynamicChartData(rowDataPacketList, chartOption) {
       addObj.type = 'area';
     }
 
-    addObj.data = _(rowDataPacketList)
+    addObj.data = _(tableRows)
       .groupBy(dateKey)
       .toPairs()
       .sortBy()
@@ -558,12 +558,12 @@ exports.makeDynamicChartData = makeDynamicChartData;
 
 /**
  * 차트 데이터
- * @param {Object[]} rowDataPacketList
+ * @param {Object[]} tableRows
  * @param {{fullTxtPoint: [], shortTxtPoint: []}} baseRange 고정된 Column 객체
  * @param {chartOption} chartOption
  * @return {chartData}
  */
-function makeStaticChartData(rowDataPacketList, baseRange, chartOption) {
+function makeStaticChartData(tableRows, baseRange, chartOption) {
   const { selectKey, dateKey, groupKey, colorKey, sortKey } = chartOption;
 
   // 반환 데이터 유형
@@ -576,10 +576,10 @@ function makeStaticChartData(rowDataPacketList, baseRange, chartOption) {
   // 색상키가 정해져있찌 않다면 색상 없이 반환
   // 같은 Key 끼리 그루핑
   if (groupKey) {
-    const groupedRowPacketDataList = _.groupBy(rowDataPacketList, groupKey);
+    const groupedTableInfo = _.groupBy(tableRows, groupKey);
 
     returnValue.series = [];
-    _.forEach(groupedRowPacketDataList, (groupObj, gKey) => {
+    _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
       /** @type {chartSeries} */
       const addObj = {
         name: gKey,
@@ -587,16 +587,16 @@ function makeStaticChartData(rowDataPacketList, baseRange, chartOption) {
         option: {},
       };
 
-      const dataRow = _.head(groupObj);
+      const groupedFirstRow = _.head(groupedTableRows);
       // 색상 키가 있다면 입력
       if (colorKey) {
-        addObj.color = dataRow[colorKey];
+        addObj.color = groupedFirstRow[colorKey];
       }
 
-      addObj.option = calcStatisticsReport(groupObj, chartOption);
+      addObj.option = calcStatisticsReport(groupedTableRows, chartOption);
 
       baseRange.fullTxtPoint.forEach(fullTxtDate => {
-        const resultFind = _.find(groupObj, {
+        const resultFind = _.find(groupedTableRows, {
           [dateKey]: fullTxtDate,
         });
 
@@ -616,11 +616,11 @@ function makeStaticChartData(rowDataPacketList, baseRange, chartOption) {
     const addObj = {
       name: '',
       data: [],
-      option: calcStatisticsReport(rowDataPacketList, chartOption),
+      option: calcStatisticsReport(tableRows, chartOption),
     };
 
     baseRange.fullTxtPoint.forEach(fullTxtDate => {
-      const resultFind = _.find(rowDataPacketList, {
+      const resultFind = _.find(tableRows, {
         [dateKey]: fullTxtDate,
       });
 

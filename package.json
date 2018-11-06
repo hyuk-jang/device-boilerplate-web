@@ -16,7 +16,7 @@
     "build:macos": "pkg . --out-path dist --targets node8-macos-x64"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.117",
+    "@types/lodash": "^4.14.118",
     "docdash": "^1.0.0",
     "dotenv": "^6.1.0",
     "eslint": "^5.8.0",
@@ -55,7 +55,7 @@
     "socket.io": "^2.1.1",
     "split": "^1.0.1",
     "uuid": "^3.3.2",
-    "weather-cast": "^0.2.2",
+    "weather-cast": "^0.2.3",
     "xlsx": "^0.14.0"
   }
 }
