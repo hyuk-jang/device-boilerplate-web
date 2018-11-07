@@ -780,11 +780,13 @@ class BiModule extends BM {
   /**
    * 인버터 Report
    * @param {searchRange} searchRange createSearchRange() Return 객체
+   * @param {{page: number, pageListCount: number}} pageInfo
    * @param {number=|Array=} inverterSeq [inverter_seq]
-   * @return {{totalCount: number, report: []}} 총 갯수, 검색 결과 목록
+   * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
-  async getInverterReport(searchRange, inverterSeq) {
+  async getInverterReport(searchRange, pageInfo, inverterSeq) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const { page = 1, pageListCount = 10 } = pageInfo;
 
     const sql = `
     SELECT
@@ -855,9 +857,7 @@ class BiModule extends BM {
     // 총 갯수 구하는 Query 생성
     const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
     // Report 가져오는 Query 생성
-    const mainQuery = `${sql}\n LIMIT ${(searchRange.page - 1) * searchRange.pageListCount}, ${
-      searchRange.pageListCount
-    }`;
+    const mainQuery = `${sql}\n LIMIT ${(page - 1) * pageListCount}, ${pageListCount}`;
 
     const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
     const totalCount = resTotalCountQuery[0].total_count;
@@ -865,7 +865,7 @@ class BiModule extends BM {
 
     return {
       totalCount,
-      report: resMainQuery,
+      reportRows: resMainQuery,
     };
   }
 

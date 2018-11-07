@@ -26,7 +26,7 @@
             </div>-->
             <div class="col-xs-3 sel_box" style="width: 250px">
               지점
-              <select id="inverterSitesDom" class="form-control form-control_st" name="device_seq">
+              <select id="inverterSiteDom" class="form-control form-control_st" name="device_seq">
                 <option>모두</option>
               </select>
             </div>
@@ -90,7 +90,7 @@
                 </tr>
 
               </thead>
-              <tbody id="inverterReportsDom">
+              <tbody id="inverterReportDom">
                 <!-- <tr>
                   <td>1</td>
                   <td>2018-10-15 14:55:00</td>
@@ -106,7 +106,7 @@
                 </tr> -->
               </tbody>
             </table>
-            <nav id="pagination" aria-label="...">
+            <nav id="paginationDom" aria-label="...">
 
             </nav>
           </div>
@@ -118,6 +118,14 @@
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
+
+  <script>
+    // 인버터 목록 돔
+    $('#inverterSiteDom').html(<%- JSON.stringify(dom.inverterSiteDom) %>)
+    $('#inverterReportDom').html(<%- JSON.stringify(dom.inverterReportDom) %>)
+    console.log(<%- JSON.stringify(dom.paginationDom) %>)
+    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>)
+  </script>
 
 </body>
 

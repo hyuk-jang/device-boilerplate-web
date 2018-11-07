@@ -7,12 +7,15 @@ const router = express.Router();
 
 const { BU, DU } = require('base-util-jh');
 
+const reportDom = require('../../models/domMaker/reportDom');
+
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'hour';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'min10';
 const DEFAULT_CATEGORY = 'inverter';
 const DEFAULT_SUB_SITE = 'all';
+const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
 /** 인버터 목록 조회 */
 router.get(
@@ -36,6 +39,8 @@ router.get(
     const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
     const inverterWhere = BU.isNumberic(inverterId) ? { inverter_seq: Number(inverterId) } : null;
 
+    BU.CLIN(req.locals);
+
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
 
@@ -45,7 +50,48 @@ router.get(
       .map('inverter_seq')
       .value();
 
-    const searchRange = powerModel.createSearchRange(searchType, strStartDate, strEndDate);
+    // SQL 질의를 위한 검색 정보 옵션 객체 생성
+    // const searchRange = powerModel.createSearchRange(searchType, strStartDate, strEndDate);
+    const searchRange = powerModel.createSearchRange(searchType, '2018-11-01', strEndDate);
+    searchRange.searchInterval = searchInterval;
+    // searchRange.page = Number(page);
+    // searchRange.pageListCount = PAGE_LIST_COUNT;
+
+    const { reportRows, totalCount } = await powerModel.getInverterReport(
+      searchRange,
+      { page, pageListCount: PAGE_LIST_COUNT },
+      inverterSeqList,
+    );
+
+    // BU.CLI(reportRows);
+    const reportInfo = {
+      strStartDate: searchRange.strStartDateInputValue,
+      strEndDate: searchRange.strEndDateInputValue,
+      searchType,
+      searchInterval,
+    };
+
+    let paginationInfo = DU.makeBsPagination(
+      page,
+      totalCount,
+      `/report/${siteId}/inverter/${inverterId}`,
+      reportInfo,
+      PAGE_LIST_COUNT,
+    );
+    // 페이지네이션 돔 추가
+    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
+
+    // 페이지 정보 추가
+    paginationInfo = _.omit(paginationInfo, 'paginationDom');
+    _.set(req, 'locals.paginationInfo', paginationInfo);
+
+    // 인버터 사이트 목록 돔 추가
+    const inverterSiteDom = reportDom.makeInverterSiteDom(powerProfileRows, inverterId);
+    _.set(req, 'locals.dom.inverterSiteDom', inverterSiteDom);
+
+    // 인버터 보고서 돔 추가
+    const inverterReportDom = reportDom.makeInverterReportDom(reportRows, paginationInfo);
+    _.set(req, 'locals.dom.inverterReportDom', inverterReportDom);
 
     res.render('./report/report', req.locals);
   }),
@@ -140,7 +186,7 @@ router.get(
       target_name: '모두',
     });
 
-    const inverterReportsDom = makeInverterReportsDom(reportList.report, paginationInfo);
+    const inverterReportsDom = makeInverterReportsDom(reportList.reportRows, paginationInfo);
     const inverterSitesDom = makeInverterSitesDom(viewInverterProfileRows, siteId);
 
     req.locals.inverter_seq = inverterSeqList;
@@ -148,7 +194,7 @@ router.get(
     req.locals.inverterSitesDom = inverterSitesDom;
     req.locals.device_list = deviceList;
     req.locals.searchRange = searchRange;
-    req.locals.reportList = reportList.report;
+    req.locals.reportList = reportList.reportRows;
     req.locals.paginationInfo = paginationInfo;
 
     res.render('./report/report', req.locals);

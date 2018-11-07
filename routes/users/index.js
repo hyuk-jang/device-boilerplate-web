@@ -25,7 +25,13 @@ const DEFAULT_SITE_ID = 'all';
 
 // server middleware
 router.get(
-  ['/', '/:naviMenu', '/:naviMenu/:siteId'],
+  [
+    '/',
+    '/:naviMenu',
+    '/:naviMenu/:siteId',
+    '/:naviMenu/:siteId/:subCategory',
+    '/:naviMenu/:siteId/:subCategory/:subCategoryId',
+  ],
   asyncHandler(async (req, res, next) => {
     /** @type {V_MEMBER} */
     const user = _.get(req, 'user', {});
