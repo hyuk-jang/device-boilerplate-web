@@ -63,6 +63,7 @@ footer {
 /*테이블*/
 .table > thead > tr > th {
   vertical-align: middle;
+  text-align: center;
 }
 .table > tbody > tr > td,
 .table > tbody > tr > th,
@@ -174,6 +175,10 @@ footer {
   color: #fff;
   font-weight: bold;
   line-height: 2;
+}
+.box_5_in > input {
+  height: 50px;
+  width: 100%;
 }
 
 .box_6 {
@@ -320,20 +325,12 @@ footer {
   border-radius: 2px;
   text-align: right;
 }
-
 .input-tx {
   max-width: 80%;
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
 }
-
-.box_5_in > input {
-  height: 50px;
-  width: 100%;
-  color: #2a79cf;
-}
-
 .wed_4 {
   max-width: 65%;
   padding: 5px 8px;
@@ -432,6 +429,7 @@ p {
 
 #start_date_input {
   margin-right: 5px;
+  width: 100px;
 }
 #search {
   padding: 2px 10px !important;

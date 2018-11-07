@@ -46,18 +46,19 @@
 <script>
   const {
     naviId
-  } = <%- JSON.stringify(mainInfo) %>
+  } = <%- JSON.stringify(mainInfo) %>;
+
   // 네비게이션 DOM
-  $('#navigation').html(<%- JSON.stringify(dom.naviListDom) %>)
+  $('#navigation').html(<%- JSON.stringify(dom.naviListDom) %>);
   // 사이트 목록 DOM
-  $('#sel_city').html(<%- JSON.stringify(dom.siteListDom) %>)
+  $('#sel_city').html(<%- JSON.stringify(dom.siteListDom) %>);
   // 날씨 동적 DOM 생성
-  $('#weathercast').html(<%- JSON.stringify(dom.weathercastDom) %>)
+  $('#weathercast').html(<%- JSON.stringify(dom.weathercastDom) %>);
 
 
   // 사이트 변경 시
   $('#sel_city').change(function () {
-    location.href = window.location.origin + '/' + naviId + '/' + $(this).val()
+    location.href = window.location.origin + '/' + naviId + '/' + $(this).val();
     // location.href = window.location.pathname + '/' + $(this).val()
   })
 

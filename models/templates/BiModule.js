@@ -786,7 +786,9 @@ class BiModule extends BM {
    */
   async getInverterReport(searchRange, pageInfo, inverterSeq) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
-    const { page = 1, pageListCount = 10 } = pageInfo;
+    let { page = 1, pageListCount = 10 } = pageInfo;
+    page = Number(page);
+    pageListCount = Number(pageListCount);
 
     const sql = `
     SELECT

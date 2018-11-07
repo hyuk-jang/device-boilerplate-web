@@ -1,5 +1,7 @@
 const _ = require('lodash');
 
+const { BU } = require('base-util-jh');
+
 module.exports = {
   /**
    *
@@ -7,8 +9,9 @@ module.exports = {
    * @param {number} inverterSeq
    */
   makeInverterSiteDom(inverterProfileRows, inverterSeq) {
+    inverterSeq = BU.isNumberic(inverterSeq) ? Number(inverterSeq) : inverterSeq;
     const inverterSiteDom = _.template(`
-  <option "<%= selected %>" data-type="inverter" value="<%= inverter_seq %>"><%= inverterName %></option>
+  <option <%= selected %> data-type="inverter" value="<%= inverter_seq %>"><%= inverterName %></option>
 `);
     const madeDom = inverterProfileRows.map(row => {
       const {
@@ -69,5 +72,40 @@ module.exports = {
     });
 
     return inverterReportsDom;
+  },
+
+  /**
+   *
+   * @param {string} subCategory
+   */
+  makeSubCategoryDom(subCategory = 'sensor') {
+    const selected = 'btn-success';
+    const unselected = 'btn-default';
+
+    let sensor = '';
+    let inverter = '';
+
+    switch (subCategory) {
+      case 'sensor':
+        sensor = selected;
+        inverter = unselected;
+        break;
+      case 'inverter':
+        sensor = unselected;
+        inverter = selected;
+        break;
+      default:
+        sensor = selected;
+        inverter = unselected;
+        break;
+    }
+
+    const subCategoryTemplate = _.template(`
+      <button type="button" value="sensor" class="btn <%= sensor %> btn1">생육환경</button>
+      <button type="button" value="inverter" class="btn <%= inverter %> btn2">인버터</button>
+    `);
+
+    const madeDom = subCategoryTemplate({ sensor, inverter });
+    return madeDom;
   },
 };

@@ -1,4 +1,18 @@
 <style>
+  @media (max-width: 550px) and (min-width: 320px) {
+    .tit_1 {
+      font-size: 15px;
+    }
+  }
+
+
+
+
+
+
+
+  /*942-320*/
+
   @media all and (max-width: 942px)and (min-width: 320px) {
     .containera {
       display: flex;
@@ -10,6 +24,7 @@
       display: flex;
       flex-direction: column;
       width: 100%;
+      margin-left: 0 !important;
     }
 
     .serch_st {
@@ -18,7 +33,61 @@
       width: 100%;
     }
 
+    .btn1 {
+      width: 50%;
+    }
+
+    .btn2 {
+      width: 50%;
+    }
+
+    .table-responsive {
+      border: 0px !important;
+      display: flex;
+    }
+
+    /*.rara{display:flex; flex-direction:column; width:100%;}*/
+    .input_st {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .tb {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .serch_st {
+      display: flex;
+    }
+
+
+    .sel {
+      width: 100% !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sel_box {
+      width: 100% !important;
+    }
+
+    .sel_box2 {
+      width: 100% !important;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .sel_box3 {
+      width: 100% !important;
+      display: flex;
+      justify-content: flex-end;
+    }
   }
+
+
+
+
 
   /*@media screen and (max-width: 640px) {
 
@@ -30,6 +99,9 @@
       margin-top: 50px;
     }
 
+    .table-responsive {
+      border: 0px !important;
+    }
 
   }
 
@@ -37,10 +109,10 @@
 
     .table-responsive {
       width: 100%;
-      margin-bottom: 15px;
+      /*margin-bottom: 15px;*/
       overflow-y: hidden;
       -ms-overflow-style: -ms-autohiding-scrollbar;
-      border: 1px solid #ddd;
+
     }
 
     .responsive-table {
@@ -67,5 +139,76 @@
     border-radius: 20px;
     padding: 5px;
     margin-left: 20px;
+  }
+
+  .sel_box {
+    width: 25%;
+    border-radius: 3px;
+    background-color: #337ab7;
+    color: #fff;
+    padding: 5px;
+    margin-right: 5px;
+    padding: 5px !important;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+  }
+
+  .sel {
+    margin-top: 5px;
+    display: flex;
+    justify-content: flex-end;
+    justify-content: space-between;
+  }
+
+  .sel_box2 {
+    width: 15%;
+    border-radius: 3px;
+    background-color: #337ab7;
+    color: #fff;
+    padding: 5px;
+    margin-right: 5px;
+    padding: 5px !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sel_box3 {
+    width: 15%;
+    border-radius: 3px;
+    background-color: #337ab7;
+    color: #fff;
+    padding: 5px;
+    margin-right: 5px;
+    padding: 5px !important;
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  .btn {
+    padding: 6px 36px;
+  }
+
+  .rara {
+    display: flex;
+  }
+
+  .input_st {
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  .serch_st {}
+
+  .input_tre {
+    width: 100px;
+    height: 30px;
+    border-radius: 3px;
+    border: 1px solid #bcbcbc;
+    padding: 0 5px 0 0;
+    text-align: center;
+    margin: 0 5px;
   }
 </style>
