@@ -1,12 +1,31 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>회원 로그인</title>
-  <script src="/js/jquery-3.1.1.min.js"></script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link href="/css/loginStyle.css" rel="stylesheet" />
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="shortcut icon" href="/image/farm_icon_SFk_icon.ico">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+
   <style>
+
+    @media screen and (max-width: 640px) {
+
+            .login_full{padding:0!important; }
+            .login_top{font-size:18px;}
+}
+
+
+
     .login_top b {
       font-size: 12px;
     }
@@ -27,12 +46,13 @@
     }
 
     .loginButton {
-      float: left;
+     position:center;
     }
 
     .loginButton input {
-      float: right;
-      margin: 11px 53px 0 0;
+      /*float: right;
+      margin: 11px 53px 0 0;*/
+      margin:0 auto;
     }
 
     table td {
@@ -48,53 +68,53 @@
 
 <body>
 
+  <div style="background-image: url('image/bg_1025.jpg'); background-color:#e9e9e9; height:100%;">
 
+    <form id="form1" action="/auth/login" method="post">
+      <div class="login_full">
 
-  <form id="form1" action="/auth/login" method="post">
-    <div class="login_full">
-
-      <div class="login_main">
-        <div class="login_top">
-          농업 병행 태양광 모니터링
-          <b>v1.0</b>
-        </div>
-
-        <div class="login_mid">
-
-          <table class="table_login">
-            <tr>
-              <td class="logLabel" width="25%">
-                <span>아이디</span>
-              </td>
-              <td class="inputLabel" width="75%">
-                <input type="text" maxlength="15" name="userid" id="userid" placeholder="아이디를 입력해주세요" />
-              </td>
-            </tr>
-            <tr>
-              <td class="logLabel">
-                <span>비밀번호</span>
-              </td>
-              <td class="inputLabel">
-                <input type="password" name="password" maxlength="15" onkeypress="loginPress(event)" id="password"
-                  placeholder="비밀번호를 입력해주세요" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div id="login_bot" class="login_bot">
-          <div class="inputMessage">
-            <div id="textErrorMessage"></div>
+        <div class="login_main">
+          <div class="login_top">
+            농업병행 태양광 발전 모니터링
+            <b>v1.0</b>
           </div>
 
-          <div class="loginButton">
-            <input class="button" type="button" value="로그인" onclick="login()" />
-          </div>
+          <div class="login_mid">
 
+            <table class="table_login">
+              <tr>
+                <td class="logLabel" width="25%">
+                  <span>아이디</span>
+                </td>
+                <td class="inputLabel" width="75%">
+                  <input type="text" maxlength="15" name="userid" id="userid" placeholder="아이디를 입력해주세요" />
+                </td>
+              </tr>
+              <tr>
+                <td class="logLabel">
+                  <span>비밀번호</span>
+                </td>
+                <td class="inputLabel">
+                  <input type="password" name="password" maxlength="15" onkeypress="loginPress(event)" id="password"
+                    placeholder="비밀번호를 입력해주세요" />
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div id="login_bot" class="login_bot">
+            <div class="inputMessage">
+              <div id="textErrorMessage"></div>
+            </div>
+
+            <div class="loginButton">
+              <input class="button" type="button" value="로그인" onclick="login()" />
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
-  </form>
-
+    </form>
+  </div>
 
 
 

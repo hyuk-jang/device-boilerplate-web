@@ -14,7 +14,7 @@ module.exports = {
   makeTopHeader(userInfo) {
     console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
-      '<span><%= name %>님. 환영합니다</span> <a href="/auth/logout">logout</a>',
+      '<span style="font-weight:bold"><%= name %></span>님. 환영합니다. <a href="/auth/logout" style="color: black"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></a>',
     );
 
     const madeMap = loginAreaTemplate(userInfo);
