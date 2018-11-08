@@ -33,7 +33,7 @@ router.get(
     '/:naviMenu/:siteId/:subCategory/:subCategoryId',
   ],
   asyncHandler(async (req, res, next) => {
-    /** @type {V_MEMBER} */
+    /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
     // 선택한 SiteId와 인버터 Id를 정의
@@ -72,6 +72,9 @@ router.get(
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 사이트 목록 추가
+    const loginAreaDom = domMakerMaster.makeTopHeader(user);
+    _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
+
     const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
     _.set(req, 'locals.dom.siteListDom', siteListDom);
 

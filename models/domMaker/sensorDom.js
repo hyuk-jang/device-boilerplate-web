@@ -26,7 +26,7 @@ module.exports = {
         <td rowspan=<%= rowsPan %>> <%= windDirection %> </td>
         <td rowspan=<%= rowsPan %>> <%= windSpeed %> </td>
         <td rowspan=<%= rowsPan %>> <%= r1 %> </td>
-        <td rowspan=<%= rowsPan %>> <img src="/image/weather/weather_<%= rainImgSrc %>.png" > </td>
+        <td rowspan=<%= rowsPan %>> <%= rainImgSrc %> </td>
       </tr>`,
     );
 
@@ -74,8 +74,18 @@ module.exports = {
         BU.getWindDirection(_.get(outsideSensor, 'windDirection', '')),
       );
 
+      if (_.get(outsideSensor, 'isRain', '') === 1) {
+        const imgSrc = '<img src="/image/weather/weather_5.png" ></img>';
+        _.set(outsideSensor, 'rainImgSrc', imgSrc);
+      } else if (_.get(outsideSensor, 'isRain', '') === 0) {
+        const imgSrc = '<img src="/image/weather/weather_1.png" ></img>';
+        _.set(outsideSensor, 'rainImgSrc', imgSrc);
+      } else {
+        _.set(outsideSensor, 'rainImgSrc', '');
+      }
+
       // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
-      _.set(outsideSensor, 'rainImgSrc', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
+      // _.set(outsideSensor, 'rainImgSrc', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
 
       // 센서 군 장소 목록 길이
       const rowsLength = _(groupPlaceRelationRows)

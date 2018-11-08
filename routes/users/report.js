@@ -40,12 +40,12 @@ router.get(
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange(
-    //   searchType,
-    //   strStartDateInputValue,
-    //   strEndDateInputValue,
-    // );
-    const searchRange = biModule.createSearchRange(searchType, '2018-11-01', strEndDateInputValue);
+    const searchRange = biModule.createSearchRange(
+      searchType,
+      strStartDateInputValue,
+      strEndDateInputValue,
+    );
+    // const searchRange = biModule.createSearchRange(searchType, '2018-11-01', strEndDateInputValue);
     searchRange.searchInterval = searchInterval;
 
     // BU.CLI(reportRows);
@@ -63,9 +63,9 @@ router.get(
     _.set(req, 'locals.reportInfo', reportInfo);
     _.set(req, 'locals.searchRange', searchRange);
 
-    // 서브 메뉴 돔
-    const subCategoryDom = reportDom.makeSubCategoryDom('inverter');
-    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
+    // // 서브 메뉴 돔
+    // const subCategoryDom = reportDom.makeSubCategoryDom(subCategory);
+    // _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
     next();
   }),
@@ -137,7 +137,7 @@ router.get(
     const inverterReportDom = reportDom.makeInverterReportDom(reportRows, paginationInfo);
     _.set(req, 'locals.dom.reportDom', inverterReportDom);
 
-    res.render('./report/report', req.locals);
+    res.render('./report/rInverter', req.locals);
   }),
 );
 
@@ -164,7 +164,7 @@ router.get(
 
     // BU.CLI(viewPlaceRelationRows);
 
-    res.render('./report/report', req.locals);
+    res.render('./report/rSensor', req.locals);
   }),
 );
 

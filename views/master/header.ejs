@@ -1,5 +1,5 @@
 <header>
-  <!--<div class="header_top"><a href="login">login</a></div>-->
+  <div id="loginAreaDom" class="header_top"><span>tester님. 환영합니다.</span><a href="/auth/logout">logout</a></div>
   <nav class="navbar navbar-inverse">
     <div class="container-fluid">
       <div class="navbar-header">
@@ -14,7 +14,7 @@
         </a>
       </div>
       <div id="myNavbar" class="collapse navbar-collapse navbar-right">
-        <ul id="navigation" class="nav navbar-nav">
+        <ul id="naviListDom" class="nav navbar-nav">
           <li><a href="/main">메인</a></li>
           <li><a href="/inverter">인버터</a></li>
           <li><a href="/sensor">생육센서</a></li>
@@ -27,12 +27,12 @@
   <div class="row" style="height:50px; max-width:1024px; margin:0 auto;">
     <div class="col-md-6 header_w_r">
       <form>
-        <select id="sel_city" name="city" class="city">
+        <select id="siteListDom" name="city" class="city">
         </select>
       </form>
     </div>
     <div class="col-md-6 header_w_r">
-      <div id="weathercast" class="nav_row_st_right">
+      <div id="weathercastDom" class="nav_row_st_right">
         <span style="margin-right:40px;" id="currDate"></span>
         <span>날씨</span>
         <img id="currWeatherImg">
@@ -49,15 +49,17 @@
   } = <%- JSON.stringify(mainInfo) %>;
 
   // 네비게이션 DOM
-  $('#navigation').html(<%- JSON.stringify(dom.naviListDom) %>);
+  $('#loginAreaDom').html(<%- JSON.stringify(dom.loginAreaDom) %>);
+  // 네비게이션 DOM
+  $('#naviListDom').html(<%- JSON.stringify(dom.naviListDom) %>);
   // 사이트 목록 DOM
-  $('#sel_city').html(<%- JSON.stringify(dom.siteListDom) %>);
+  $('#siteListDom').html(<%- JSON.stringify(dom.siteListDom) %>);
   // 날씨 동적 DOM 생성
-  $('#weathercast').html(<%- JSON.stringify(dom.weathercastDom) %>);
+  $('#weathercastDom').html(<%- JSON.stringify(dom.weathercastDom) %>);
 
 
   // 사이트 변경 시
-  $('#sel_city').change(function () {
+  $('#siteListDom').change(function () {
     location.href = window.location.origin + '/' + naviId + '/' + $(this).val();
     // location.href = window.location.pathname + '/' + $(this).val()
   })

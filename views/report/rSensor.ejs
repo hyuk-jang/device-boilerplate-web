@@ -18,56 +18,27 @@
         <div class="text-center" style="background-color:#fff; height:auto;">
           <div class="row row_width  top_box" style="padding:5px;">
             <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
-              <button type="button" value="sensor" class="btn btn- btn1">생육환경</button>
+              <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
               <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
             </div>
             <div class="sel">
               <div class="col-xs-2 pad sel_box" style="margin-left: 0px">
-                인버터
+                생육 환경
                 <select class="form-control form-control_st" id="subSelectBoxDom" name="device_seq">
                 </select>
               </div>
-              <!-- <div class="rara">
-                <div class="col-xs-4 years">
-                  <div id="searchType" class="min">
-                    <label class="radio-inline">
-                      <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="hour">일일
-                    </label>
-                    <label class="radio-inline">
-                      <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="day">월간
-                    </label>
-                    <label class="radio-inline">
-                      <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="month">년간
-                    </label>
-                    <label class="radio-inline">
-                      <input type="radio" onclick="setterSelectType(this)" class="" name="searchType" value="range">기간선택
-                    </label>
-                  </div>
-                </div>
-                <div class="input_st">
-                  <span style="float:left; line-height:2; margin-right:10px; ">조회간격</span>
-                  <select class="form-control" id="searchInterval" style="width:80px; margin-top:-2px; height:30px; padding: 4px 8px;">
-                    <option value="min">1분</option>
-                    <option value="min10">10분</option>
-                    <option value="hour">1시간</option>
-                    <option value="day">1일</option>
-                    <option value="month">1달</option>
-                    <option value="year">1년</option>
-                  </select>
-                </div>
-              </div> -->
               <div class="sel_box2">
                 <span>조회기간</span>
-                <select class="form-control">
-                  <option value="min">일일</option>
-                  <option value="min10">월간</option>
-                  <option value="hour">년간</option>
-                  <option value="hour">기간선택</option>
+                <select id="searchType" class="form-control">
+                  <option value="hour">일일</option>
+                  <option value="day">월간</option>
+                  <option value="month">년간</option>
+                  <option value="range">기간선택</option>
                 </select>
               </div>
               <div class="sel_box3">
                 <span>조회간격</span>
-                <select class="form-control">
+                <select id="searchInterval" class="form-control">
                   <option value="min">1분</option>
                   <option value="min10">10분</option>
                   <option value="hour">1시간</option>
@@ -76,6 +47,7 @@
                   <option value="year">1년</option>
                 </select>
               </div>
+              <!--</div>-->
               <div class="serch_st sel_box_data">
                 날짜 &nbsp;
                 <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
@@ -91,6 +63,24 @@
             <table class="table table-bordered" style="width:100%;background:#fff;">
               <thead>
                 <tr>
+                  <th scope="col" style="width:5%">번호</th>
+                  <th scope="col" style="width:9%">일시</th>
+                  <th scope="col" style="width:7%">조도(lx)</th>
+                  <th scope="col" style="width:7%">이산화탄소(ppm)</th>
+                  <th scope="col" style="width:7%">토양수분(%)</th>
+                  <th scope="col" style="width:7%">토양온도(℃)</th>
+                  <th scope="col" style="width:7%">토양습도(%)</th>
+                  <th scope="col" style="width:7%">외기온도(℃)</th>
+                  <th scope="col" style="width:7%">외기습도(%)</th>
+                  <th scope="col" style="width:7%">수평일사량(W/m2)</th>
+                  <!-- <th scope="col" style="width:7%">풍향</th> -->
+                  <th scope="col" style="width:7%">풍속(km/h)</th>
+                  <th scope="col" style="width:6%">강우량(mm/hr)</th>
+                  <!-- <th scope="col" style="width:6%">강우상황</th> -->
+                </tr>
+              </thead>
+              <!-- <thead>
+                <tr>
                   <th scope="col" rowspan="2" style="width:5%">번호</th>
                   <th scope="col" rowspan="2" style="width:9%">일시</th>
                   <th scope="col" colspan="3" style="width:30%">태양광</th>
@@ -98,7 +88,6 @@
                   <th scope="col" colspan="3" style="width:40%">발전현황</th>
                 </tr>
                 <tr>
-                  <!-- <th style="width:8%;">경사일사량W/㎥</th> -->
                   <th style="width:7%;">DC전류(A)</th>
                   <th style="width:7%;">DC전압(V)</th>
                   <th style="width:7%;">DC전력(kW)</th>
@@ -109,7 +98,7 @@
                   <th style="width:6%;">효율</th>
                   <th style="width:8%;">누적발전량(kWh)</th>
                 </tr>
-              </thead>
+              </thead> -->
               <tbody id="reportDom">
               </tbody>
             </table>
@@ -126,17 +115,17 @@
   </div>
   <script>
     // 인버터 목록 돔
-    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>)
-    $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>)
-    $('#reportDom').html(<%- JSON.stringify(dom.reportDom) %>)
-    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>)
+    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+    $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
+    $('#reportDom').html(<%- JSON.stringify(dom.reportDom) %>);
+    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
   </script>
 
   <!-- 기본 데이터 세팅 -->
   <script>
     // 초기 시작시 라디오 체크버튼 클릭처리
     var searchRange = <%- JSON.stringify(searchRange)  %>;
-
+    console.log(searchRange)
     const {
       siteId,
       subCategory,
@@ -162,9 +151,11 @@
       }
     })
 
-    $(document).ready(function () {
-      var $foundDom = $("#searchType").find("input[value=" + searchRange.searchType + "]")
-      $($foundDom).trigger('click');
+    // 검색 타입에 따라 적용
+    applySearchType(searchRange.searchType)
+
+    $('#searchType').on('change', function () {
+      applySearchType($(this).val())
     })
 
 
@@ -173,8 +164,9 @@
      * @param {Dom} input[name='searchType']
      * @return {void} 
      */
-    function setterSelectType(target) {
-      var checkedSearchType = target.value;
+    function applySearchType(value) {
+      console.log(value)
+      var checkedSearchType = value;
       var startDateDom = document.querySelector('#strStartDateInputValue');
       var endDateDom = document.querySelector('#strEndDateInputValue');
 
@@ -215,19 +207,19 @@
       var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
       subCategoryId = subCategoryId.trim();
       var searchInterval = document.querySelector('#searchInterval option:checked').value;
-      var searchType = document.querySelector('#searchType input[name="searchType"]:checked').value;
-      var startDate = document.getElementById('strStartDateInputValue').value;
-      var endDate = '';
+      var searchType = document.querySelector('#searchType option:checked').value;
+      var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
+      var strEndDateInputValue = '';
 
       if (searchType === 'range') {
-        endDate = document.getElementById('strEndDateInputValue').value;
-        if (startDate > endDate) {
+        strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
+        if (strStartDateInputValue > strEndDateInputValue) {
           return alert('종료일이 시작일보다 빠를 수 없습니다.');
         }
       }
 
       const queryString =
-        `searchType=${searchType}&searchInterval=${searchInterval}&startDate=${startDate}&endDate=${endDate}`;
+        `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
 
       // 사이트 변경 시
       location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
@@ -235,7 +227,6 @@
 
     }
   </script>
-
 
 </body>
 

@@ -8,6 +8,21 @@ moment.locale('ko', {
 
 module.exports = {
   /**
+   *
+   * @param {MEMBER} userInfo
+   */
+  makeTopHeader(userInfo) {
+    console.log('userInfo', userInfo);
+    const loginAreaTemplate = _.template(
+      '<span><%= name %>님. 환영합니다</span> <a href="/auth/logout">logout</a>',
+    );
+
+    const madeMap = loginAreaTemplate(userInfo);
+
+    return madeMap;
+  },
+
+  /**
    * 금일 날짜 생성
    * @param {WC_KMA_DATA} currWeatherCastInfo
    */
@@ -73,10 +88,10 @@ module.exports = {
         href: 'sensor',
         name: '생육센서',
       },
-      {
-        href: 'trend',
-        name: '트렌드',
-      },
+      // {
+      //   href: 'trend',
+      //   name: '트렌드',
+      // },
       {
         href: 'report',
         name: '보고서',
