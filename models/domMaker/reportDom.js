@@ -39,6 +39,41 @@ module.exports = {
 
   /**
    *
+   * @param {V_DV_PLACE[]} placeRows
+   * @param {number} placeSeq
+   */
+  makePlaceSiteDom(placeRows, placeSeq) {
+    placeSeq = BU.isNumberic(placeSeq) ? Number(placeSeq) : placeSeq;
+    const placeSiteDom = _.template(`
+  <option <%= selected %> data-type="place" value="<%= place_seq %>"><%= placeName %></option>
+`);
+    const madeDom = placeRows.map(row => {
+      const {
+        m_name: mainName = '',
+        pd_target_name: pName = '',
+        p_target_name: pTargetName = '',
+      } = row;
+      _.set(row, 'selected', _.eq(row.place_seq, placeSeq) ? 'selected' : '');
+      const placeName = `${mainName} ${_.isString(pName) ? pName : ''} ${
+        _.isString(pTargetName) ? pTargetName : ''
+      }`;
+      _.set(row, 'placeName', placeName);
+      return placeSiteDom(row);
+    });
+
+    madeDom.unshift(
+      placeSiteDom({
+        selected: '',
+        place_seq: 'all',
+        placeName: '모두',
+      }),
+    );
+
+    return madeDom;
+  },
+
+  /**
+   *
    * @param {PW_INVERTER_DATA[]} inverterReportRows
    * @param {page: number, pageListCount: number} paginationInfo
    */
@@ -75,7 +110,7 @@ module.exports = {
   },
 
   /**
-   *
+   * @deprecated
    * @param {string} subCategory
    */
   makeSubCategoryDom(subCategory = 'sensor') {

@@ -13,7 +13,7 @@ const reportDom = require('../../models/domMaker/reportDom');
 const DEFAULT_SEARCH_TYPE = 'hour';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'min10';
-const DEFAULT_CATEGORY = 'inverter';
+const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
@@ -71,9 +71,45 @@ router.get(
   }),
 );
 
+/** 생육 환경 레포트 */
+router.get(
+  ['/', '/:siteId', '/:siteId/sensor', '/:siteId/sensor/:subCategoryId'],
+  asyncHandler(async (req, res) => {
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
+
+    // req.param 값 비구조화 할당
+    const { siteId = req.user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+    // req.query 값 비구조화 할당
+    const { page = 1 } = req.query;
+
+    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await biDevice.getTable('v_dv_place', mainWhere);
+    // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
+    _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
+
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const viewPlaceRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
+
+    // IVT가 포함된 장소는 제거.
+    _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+
+    // BU.CLI(viewPlaceRelationRows);
+
+    // 인버터 사이트 목록 돔 추가
+    const placeSiteDom = reportDom.makePlaceSiteDom(placeRows, subCategoryId);
+    _.set(req, 'locals.dom.subSelectBoxDom', placeSiteDom);
+
+    res.render('./report/rSensor', req.locals);
+  }),
+);
+
 /** 인버터 레포트 */
 router.get(
-  ['/', '/:siteId', '/:siteId/inverter', '/:siteId/inverter/:subCategoryId'],
+  ['/:siteId', '/:siteId/inverter', '/:siteId/inverter/:subCategoryId'],
   asyncHandler(async (req, res) => {
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
@@ -138,33 +174,6 @@ router.get(
     _.set(req, 'locals.dom.reportDom', inverterReportDom);
 
     res.render('./report/rInverter', req.locals);
-  }),
-);
-
-/** 생육 환경 레포트 */
-router.get(
-  ['/', '/:siteId', '/:siteId/sensor', '/:siteId/sensor/:subCategoryId'],
-  asyncHandler(async (req, res) => {
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
-
-    // req.param 값 비구조화 할당
-    const { siteId = req.user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
-    // req.query 값 비구조화 할당
-    const { page = 1 } = req.query;
-
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
-
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
-
-    // IVT가 포함된 장소는 제거.
-    _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
-
-    // BU.CLI(viewPlaceRelationRows);
-
-    res.render('./report/rSensor', req.locals);
   }),
 );
 
