@@ -1,23 +1,44 @@
 const _ = require('lodash');
+const moment = require('moment');
 const { BU } = require('base-util-jh');
 
-const uuidv4 = require('uuid/v4');
 const Server = require('socket.io');
 
-const net = require('net');
-// const map = require('../../../public/Map/map');
+const XLSX = require('xlsx');
 
-// const {
-//   requestOrderCommandType,
-//   combinedOrderType,
-//   simpleOrderStatus,
-// } = require('../../../../../module/default-intelligence').dcmConfigModel;
-
-/** 무안 6kW TB */
+const COLUMN_ID_LIST = ['date', 'a', 'b', 'c', 'd', 'e', 'f'];
 
 class SocketIoManager {
   constructor() {
     this.connectedSocketList = [];
+    /** @type {{dateHour: number, dateMinutes: number}[]} */
+    this.excelDataList = [];
+
+    this.readFile();
+  }
+
+  readFile() {
+    const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
+    // const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
+    const ws = wb.Sheets.Sheet1;
+    const dataTableRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+    // 데이터 초기화
+    this.excelDataList = [];
+
+    _.forEach(dataTableRows, dataTableRow => {
+      const addObj = {};
+      _.forEach(dataTableRow, (v, index) => {
+        if (index === 0) {
+          const date = BU.convertExcelDateToJSDate(v);
+          addObj.dateHour = moment(date).get('hours');
+          addObj.dateMinutes = moment(date).get('minutes');
+        } else {
+          addObj[COLUMN_ID_LIST[index]] = v;
+        }
+      });
+      this.excelDataList.push(addObj);
+    });
   }
 
   /**
@@ -28,94 +49,34 @@ class SocketIoManager {
     this.io = new Server(http);
 
     this.io.on('connection', socket => {
+      BU.CLI('connect Client');
       this.connectedSocketList.push(socket);
 
-      // // 접속한 Socket 등록
-      // socket.on('certifySocket', target => {
-      //   /** @type {msUserInfo} */
-      //   const msUser = target;
-      //   // 접속한 Socket 정보 정의
-      //   msUser.socketClient = socket;
+      // 1초마다 실행
+      setInterval(() => {
+        const hour = moment().get('hours');
+        const minutes = moment().get('minutes');
 
-      //   // Main 정보(거점)의 ID가 동일한 객체 탐색
-      //   const foundIt = _.find(this.mainStorageList, msInfo =>
-      //     _.isEqual(msInfo.msFieldInfo.main_seq, msUser.sessionUserInfo.main_seq),
-      //   );
+        const currExcelRow = _.find(this.excelDataList, { dateHour: hour, dateMinutes: minutes });
+        // BU.CLI(currExcelRow);
 
-      //   // 거점을 찾을 경우 초기 값을 보내줌.
-      //   if (foundIt) {
-      //     foundIt.msUserList.push(msUser);
+        const nodeDataList = [];
+        _.forEach(currExcelRow, (v, k) => {
+          const nodeInfo = {
+            node_id: k,
+            data: v,
+          };
+          nodeDataList.push(nodeInfo);
+        });
 
-      //     const { simpleOrderList } = foundIt.msDataInfo;
-
-      //     let connectedStatus = 'Disconnected';
-      //     if (foundIt.msClient instanceof net.Socket) {
-      //       connectedStatus = 'Connected';
-      //     }
-
-      //     const pickedNodeList = this.pickNodeList();
-      //     // BU.CLI(pickedNodeList);
-      //     socket.emit('updateNodeInfo', pickedNodeList);
-      //   }
-      // });
+        socket.emit('updateNodeInfo', nodeDataList);
+        // socket.emit('updateNodeInfo', [{ node_id: 'MRT_001', data: 5 }]);
+      }, 1000 * 60);
 
       // 연결 해제한 Socket 제거
       socket.on('disconnect', () => {
         _.remove(this.connectedSocketList, connSocket => _.isEqual(connSocket, socket));
       });
-
-      // socket.on('executeCommand', msg => {
-      //   // BU.CLI(msg)
-      //   /** @type {defaultFormatToRequest} */
-      //   const defaultFormatToRequestInfo = msg;
-
-      //   // uuid 추가
-      //   defaultFormatToRequestInfo.uuid = uuidv4();
-      //   // Main Storage 찾음.
-      //   const msInfo = this.findMainStorageBySocketClient(socket);
-
-      //   // Data Logger와 연결이 되어야만 명령 요청 가능
-      //   if (msInfo && msInfo.msClient instanceof net.Socket) {
-      //     // Socket Client로 명령 전송
-      //     msInfo.msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));
-      //   }
-      // });
-    });
-  }
-
-  /**
-   * 노드 정보에서 UI에 보여줄 내용만을 반환
-   * @param {msDataInfo} dataInfo
-   */
-  pickNodeList(dataInfo) {
-    const pickList = ['node_id', 'nd_target_name', 'data'];
-    return _(dataInfo.nodeList)
-      .map(nodeInfo => {
-        const placeNameList = _(dataInfo.placeList)
-          .filter(placeInfo => placeInfo.node_real_id === nodeInfo.node_real_id)
-          .map(pInfo => pInfo.place_name)
-          .value();
-        //  _.filter(dataInfo.placeList, placeInfo => {
-        //   placeInfo.node_real_id === nodeInfo.node_real_id;
-        // })
-        return _(nodeInfo)
-          .pick(pickList)
-          .assign({ place_name_list: placeNameList })
-          .value();
-      })
-      .sortBy('node_id')
-      .value();
-  }
-
-  /**
-   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
-   * @param {msInfo} msInfo
-   */
-  submitNodeListToIoClient(msInfo) {
-    const simpleNodeList = this.pickNodeList(msInfo.msDataInfo);
-    // 해당 Socket Client에게로 데이터 전송
-    msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateNodeInfo', simpleNodeList);
     });
   }
 }

@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "bin": {
-    "app": "./bin/www.js"
+    "app": "./temp/Sunda/app.js"
   },
   "pkg": {
-    "assets": "views/**/*"
+    "assets": [
+      "views/**/*",
+      "public/**/*"
+    ]
   },
   "scripts": {
     "start": "nodemon ./bin/www",
