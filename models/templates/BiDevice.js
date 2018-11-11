@@ -15,6 +15,31 @@ class BiDevice extends BiModule {
   }
 
   /**
+   * 센서 장치 데이터를 구해옴
+   * @param {searchRange} searchRange
+   * @param {number[]} nodeSeqList
+   * @return {{node_seq: number, view_date: string, group_date: string, avg_num_data: number}[]}
+   */
+  getSensorGroup(searchRange = this.createSearchRange(), nodeSeqList) {
+    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+
+    const sql = `
+      SELECT 
+          node_seq,
+          ${dateFormat.selectViewDate},
+          ${dateFormat.selectGroupDate},
+          ROUND(AVG(num_data), 1)  AS avg_num_data
+      FROM dv_sensor_data
+      WHERE node_seq IN (${nodeSeqList})
+        AND writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      GROUP BY ${dateFormat.groupByFormat}, node_seq
+      ORDER BY node_seq, writedate
+    `;
+
+    return this.db.single(sql, '', false);
+  }
+
+  /**
    * 장소 시퀀스를 기준으로 장소 관계 정보를 가져옴
    * @param {{place_seq: number}[]} receiveObjList
    */
@@ -111,9 +136,9 @@ class BiDevice extends BiModule {
   /**
    * 센서 장치 데이터를 구해옴
    * @param {searchRange} searchRange
-   * @param {number[]} node_seq
+   * @param {number[]} nodeSeqList
    */
-  getSensorTrend(searchRange, node_seq) {
+  getSensorTrend(searchRange, nodeSeqList) {
     searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
@@ -124,7 +149,7 @@ class BiDevice extends BiModule {
           ${dateFormat.selectGroupDate},
           ROUND(AVG(num_data), 1)  AS avg_num_data
       FROM v_dv_sensor_data
-      WHERE node_seq IN (${node_seq})
+      WHERE node_seq IN (${nodeSeqList})
         AND writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
       GROUP BY ${dateFormat.groupByFormat}, node_seq

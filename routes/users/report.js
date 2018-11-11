@@ -17,6 +17,8 @@ const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
+const { BaseModel } = require('../../../device-protocol-converter-jh');
+
 // report middleware
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory', '/:siteId/:subCategory/:subCategoryId'],
@@ -40,12 +42,12 @@ router.get(
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    const searchRange = biModule.createSearchRange(
-      searchType,
-      strStartDateInputValue,
-      strEndDateInputValue,
-    );
-    // const searchRange = biModule.createSearchRange(searchType, '2018-11-01', strEndDateInputValue);
+    // const searchRange = biModule.createSearchRange(
+    //   searchType,
+    //   strStartDateInputValue,
+    //   strEndDateInputValue,
+    // );
+    const searchRange = biModule.createSearchRange('range', '2018-11-09', '2018-11-09');
     searchRange.searchInterval = searchInterval;
 
     // BU.CLI(reportRows);
@@ -91,11 +93,103 @@ router.get(
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
     _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
 
+    // BU.CLI(placeRows);
+
     /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
+    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
 
     // IVT가 포함된 장소는 제거.
-    _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+
+    /** @type {searchRange} */
+    const searchRangeInfo = _.get(req, 'locals.searchRange');
+
+    console.time('getSensorGroup');
+    const sensorGroupRows = await biDevice.getSensorGroup(
+      searchRangeInfo,
+      _.map(placeRelationRows, 'node_seq'),
+    );
+
+    // BU.CLI(sensorGroupRows);
+    // BU.CLI(sensorGroupRows);
+    console.timeEnd('getSensorGroup');
+
+    // BU.CLI(sensorGroupRows);
+    console.time('sensorGroupRows');
+    // 그루핑 데이터를 해당 장소에 확장
+    _(sensorGroupRows)
+      .groupBy('node_seq')
+      .forEach((groupRows, strNodeSeq) => {
+        // BU.CLI(groupRows);
+        _.set(_.find(placeRelationRows, { node_seq: Number(strNodeSeq) }), 'list', groupRows);
+      });
+    // const group = _.groupBy(sensorGroupRows, 'node_seq');
+    console.timeEnd('sensorGroupRows');
+
+    // BU.CLI(sensorGroupRows);
+
+    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
+    // placeRelationRows[0].nd_target_id
+    const groupedPlaceRelation = _.groupBy(placeRelationRows, 'nd_target_id');
+
+    // 가져올려는 Report Key로 필터링
+    const FP_KEY = BaseModel.FarmParallel.BASE_KEY;
+    const pickedSensorKeys = [
+      FP_KEY.lux,
+      FP_KEY.co2,
+      FP_KEY.soilWaterValue,
+      FP_KEY.soilTemperature,
+      FP_KEY.soilReh,
+      FP_KEY.outsideAirTemperature,
+      FP_KEY.outsideAirReh,
+      FP_KEY.horizontalSolar,
+      FP_KEY.windSpeed,
+      FP_KEY.r1,
+    ];
+
+    const reportStoragesByNdName = _.map(pickedSensorKeys, ndId => ({
+      ndId,
+      ndName: '',
+      realData: [],
+      storageList: [],
+    }));
+
+    // 장소 관계를 순회하면서 해당 Reprot Key와 일치하는 곳에 데이터 정의
+    _(placeRelationRows)
+      .groupBy('nd_target_id')
+      .forEach((v, ndTargetId) => {
+        const foundStorage = _.find(reportStoragesByNdName, { ndId: ndTargetId });
+        if (foundStorage) {
+          const { nd_target_name: ndName } = _.head(v);
+          foundStorage.ndName = ndName;
+          foundStorage.storageList = v;
+        }
+      });
+
+    // BU.CLIN(reportStoragesByNdName, 3);
+
+    const betweenDatePoint = BU.getBetweenDatePoint(
+      searchRangeInfo.strBetweenEnd,
+      searchRangeInfo.strBetweenStart,
+      searchRangeInfo.searchInterval,
+      { startHour: 0, endHour: 24 },
+    );
+
+    console.time('reportStoragesByNdName');
+    reportStoragesByNdName.forEach(reportStorage => {
+      const mapData = _.map(reportStorage.storageList, 'list');
+
+      const flatMap = _.flatten(mapData);
+      // BU.CLI(flatMap);
+
+      reportStorage.realData = betweenDatePoint.shortTxtPoint.map(strDate =>
+        _(flatMap)
+          .filter(info => _.eq(info.view_date, strDate))
+          .map('avg_num_data')
+          .mean(),
+      );
+    });
+    console.timeEnd('reportStoragesByNdName');
 
     // BU.CLI(viewPlaceRelationRows);
 

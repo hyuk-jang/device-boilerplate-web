@@ -12,7 +12,7 @@ module.exports = {
    * @param {MEMBER} userInfo
    */
   makeTopHeader(userInfo) {
-    console.log('userInfo', userInfo);
+    // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
       '<span style="font-weight:bold"><%= name %></span>님. 환영합니다. <a href="/auth/logout" style="color: black"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></a>',
     );

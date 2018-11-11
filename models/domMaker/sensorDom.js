@@ -79,7 +79,7 @@ module.exports = {
       } else if (_.get(outsideSensor, 'isRain', '') === 0) {
         _.set(outsideSensor, 'rainStatus', 'X');
       } else {
-        _.set(outsideSensor, 'rainStatus', '');
+        _.set(outsideSensor, 'rainStatus', '-');
       }
 
       // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
