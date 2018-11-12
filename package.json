@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "base-model-jh": "^1.2.4",
-    "base-util-jh": "^1.1.19",
+    "base-util-jh": "^1.1.20",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",

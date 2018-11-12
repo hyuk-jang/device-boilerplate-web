@@ -71,7 +71,8 @@ module.exports = {
    * @param {string} selectedNavi
    * @param {string=} userSeq
    */
-  makeNaviListDom(selectedNavi, userSeq = '') {
+  makeNaviListDom(selectedNavi = 'main', userSeq = '') {
+    selectedNavi = selectedNavi.length ? selectedNavi : 'main';
     // siteId가 존재할 경우
     const siteParam = userSeq.length ? `/${userSeq}` : '';
 
@@ -88,10 +89,10 @@ module.exports = {
         href: 'sensor',
         name: '생육센서',
       },
-      // {
-      //   href: 'trend',
-      //   name: '트렌드',
-      // },
+      {
+        href: 'trend',
+        name: '트렌드',
+      },
       {
         href: 'report',
         name: '보고서',

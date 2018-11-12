@@ -75,18 +75,18 @@ module.exports = {
   /**
    * @desc searchOption -> Combine(병합)
    * 생육 환경 보고서 돔 생성
-   * @param {{ndId: string, ndName: string, dataUnit: string, realData: number[]}[]} reportStoragesByNdName
-   * @param {{viewStrDateList: string[], pickedSensorKeys: string[]}} reportOption
+   * @param {sensorReportStorageByPickNdId[]} reportStorageListByPickedNdIdList
+   * @param {{viewStrDateList: string[], pickedNodeDefIds: string[]}} reportOption
    * @param {{page: number, pageListCount: number}} paginationInfo
    */
-  makeSensorReportDomByCombine(reportStoragesByNdName, reportOption, paginationInfo) {
+  makeSensorReportDomByCombine(reportStorageListByPickedNdIdList, reportOption, paginationInfo) {
     // 기본 페이지 값 설정
     const { page = 1, pageListCount = 20 } = paginationInfo;
     // 보고서의 열을 가져오기 위한 첫번째 시작 번호 설정
     const firstRowNum = (page - 1) * pageListCount;
 
     // 데이터를 가져올 Node_Definition_ID List 및 해당 데이터를 Row에 미칭할 Grouping Date를 가져옴
-    const { pickedSensorKeys = [], viewStrDateList = [] } = reportOption;
+    const { pickedNodeDefIds = [], viewStrDateList = [] } = reportOption;
 
     // 동적으로 Table Header를 구성하기 위한 템플릿 초안 정의
     const headerTemplate = _.template(
@@ -94,8 +94,10 @@ module.exports = {
     );
 
     // Picked목록에 따라 동적 Header 생성
-    const dynamicHeaderDom = pickedSensorKeys.map(key => {
-      const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, { ndId: key });
+    const dynamicHeaderDom = pickedNodeDefIds.map(key => {
+      const { ndName = '', dataUnit = '' } = _.find(reportStorageListByPickedNdIdList, {
+        ndId: key,
+      });
       return headerTemplate({
         ndName,
         dataUnit: dataUnit.length ? `(${dataUnit})` : '',
@@ -112,7 +114,7 @@ module.exports = {
     `;
 
     // Picked 목록에 따라 동적으로 만들 Table Tr TD 템플릿 초안 정의
-    const dynamicTemplate = pickedSensorKeys.map(key => `<td><%= ${key} %></td>`);
+    const dynamicTemplate = pickedNodeDefIds.map(key => `<td><%= ${key} %></td>`);
     // 기본으로 생성할 TR 열 틀에 해당 동적 템플릿을 삽입
     const sensorReportTemplate = _.template(`
         <tr>
@@ -136,8 +138,8 @@ module.exports = {
         group_date: row, // row당 보여질 일시
       };
       // ND_TARGET_ID에 따라 그루핑된 레포트 저장소를 순회하면서 해당 ndId를 Key로 한 데이터 확장
-      _.forEach(reportStoragesByNdName, reportStorage => {
-        _.assign(sensorData, { [reportStorage.ndId]: reportStorage.realData[dataIndex] });
+      _.forEach(reportStorageListByPickedNdIdList, reportStorage => {
+        _.assign(sensorData, { [reportStorage.ndId]: reportStorage.mergedAvgList[dataIndex] });
       });
 
       // 확장한 sensorData를 템플릿에 반영

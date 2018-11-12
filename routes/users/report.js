@@ -9,6 +9,8 @@ const { BU, DU } = require('base-util-jh');
 
 const reportDom = require('../../models/domMaker/reportDom');
 
+const sensorUtil = require('../../models/templates/sensor.util');
+
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'hour';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
@@ -19,6 +21,8 @@ const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
 const { BaseModel } = require('../../../device-protocol-converter-jh');
+
+const SensorProtocol = require('../../models/SensorProtocol');
 
 // report middleware
 router.get(
@@ -44,12 +48,17 @@ router.get(
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
+    // const searchRange = biModule.createSearchRange({
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
+    // });
     const searchRange = biModule.createSearchRange({
-      searchType,
-      searchInterval,
-      searchOption,
-      strStartDate: strStartDateInputValue,
-      strEndDate: strEndDateInputValue,
+      searchType: 'min10',
+      strStartDate: '2018-11-09',
+      strEndDate: '',
     });
     // const searchRange = biModule.createSearchRange('min10', '2018-11-10');
     // const searchRange = biModule.createSearchRange('range', '2018-11-08', '2018-11-10');
@@ -91,6 +100,8 @@ router.get(
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+    const sensorWhere = BU.isNumberic(subCategoryId) ? { place_seq: Number(subCategoryId) } : null;
+    BU.CLI(sensorWhere);
 
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere);
@@ -102,109 +113,64 @@ router.get(
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere, true);
 
-    // IVT가 포함된 장소는 제거.
+    // 인버터 Seq 목록
+    const sensorSeqList = _(placeRelationRows)
+      .filter(sensorWhere)
+      .map('node_seq')
+      .value();
+
+    // BU.CLI(sensorSeqList);
+
+    // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
-    // BU.CLI(searchRangeInfo)
+    // BU.CLI(searchRangeInfo);
 
     console.time('getSensorGroup');
-    const sensorGroupRows = await biDevice.getSensorGroup(
-      searchRangeInfo,
-      _.map(placeRelationRows, 'node_seq'),
-    );
-
-    // BU.CLI(sensorGroupRows);
+    const sensorGroupRows = await biDevice.getSensorAvgGroup(searchRangeInfo, sensorSeqList);
     console.timeEnd('getSensorGroup');
-
-    console.time('groupDateList');
-    // 실제 사용된 데이터 그룹 Union 처리
-    const groupDateList = _(sensorGroupRows)
-      .map('group_date')
-      .union()
-      .value();
-    // BU.CLI(groupDateList);
-    console.timeEnd('groupDateList');
-
     // BU.CLI(sensorGroupRows);
 
-    // BU.CLI(sensorGroupRows);
+    // 실제 사용된 데이터 그룹 Union 처리하여 반환
+    const groupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
+
     console.time('sensorGroupRows');
     // 그루핑 데이터를 해당 장소에 확장
-    _(sensorGroupRows)
-      .groupBy('node_seq')
-      .forEach((groupRows, strNodeSeq) => {
-        // BU.CLI(groupRows);
-        _.set(_.find(placeRelationRows, { node_seq: Number(strNodeSeq) }), 'list', groupRows);
-      });
-    // const group = _.groupBy(sensorGroupRows, 'node_seq');
+    sensorUtil.extendsPlaceRelationRowsWithSensorGroupRows(placeRelationRows, sensorGroupRows);
     console.timeEnd('sensorGroupRows');
 
     // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
 
-    // 가져올려는 Report Key로 필터링
-    const FP_KEY = BaseModel.FarmParallel.BASE_KEY;
-    const pickedSensorKeys = [
-      FP_KEY.pvRearTemperature,
-      FP_KEY.lux,
-      FP_KEY.co2,
-      FP_KEY.soilWaterValue,
-      FP_KEY.soilTemperature,
-      FP_KEY.soilReh,
-      FP_KEY.outsideAirTemperature,
-      FP_KEY.outsideAirReh,
-      FP_KEY.horizontalSolar,
-      FP_KEY.windSpeed,
-      FP_KEY.r1,
-    ];
+    const sensorProtocol = new SensorProtocol(siteId);
 
-    const reportStoragesByNdName = _.map(pickedSensorKeys, ndId => ({
-      ndId,
-      ndName: '',
-      dataUnit: '',
-      realData: [],
-      storageList: [],
-    }));
+    // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
+    console.time('reportStorageList');
+    const reportStorageList = sensorUtil.makeReportStorageListByPickedNdId(
+      placeRelationRows,
+      sensorProtocol.pickedNodeDefIds,
+      groupDateList,
+    );
+    console.timeEnd('reportStorageList');
 
-    // 장소 관계를 순회하면서 해당 Reprot Key와 일치하는 곳에 데이터 정의
-    _(placeRelationRows)
-      .groupBy('nd_target_id')
-      .forEach((v, ndTargetId) => {
-        const foundStorage = _.find(reportStoragesByNdName, { ndId: ndTargetId });
-        if (foundStorage) {
-          const { nd_target_name: ndName, data_unit: dataUnit } = _.head(v);
-          foundStorage.ndName = ndName;
-          foundStorage.dataUnit = dataUnit;
-          foundStorage.storageList = v;
-        }
-      });
+    const pickedNodeDefIdList = sensorProtocol.getPickedNodeDefIdList();
+    console.time('calcMergedReportStorageList');
+    // 데이터 그룹의 평균 값 산출
+    if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
+      sensorUtil.calcMergedReportStorageList(reportStorageList, groupDateList);
+    } else {
+    }
+    console.timeEnd('calcMergedReportStorageList');
 
-    console.time('reportStoragesByNdName');
-    reportStoragesByNdName.forEach(reportStorage => {
-      const mapData = _.map(reportStorage.storageList, 'list');
-
-      const flatMap = _.flatten(mapData);
-      // BU.CLI(flatMap);
-
-      reportStorage.realData = groupDateList.map(strDate => {
-        const meanValue = _(flatMap)
-          .filter(info => _.eq(info.group_date, strDate))
-          .map('avg_num_data')
-          .mean();
-        return _.isNaN(meanValue) ? '' : _.round(meanValue, 1);
-      });
-    });
-    console.timeEnd('reportStoragesByNdName');
-
-    // BU.CLIN(reportStoragesByNdName, 2);
+    // BU.CLIN(reportStorageList, 2);
 
     const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
-      reportStoragesByNdName,
+      reportStorageList,
       {
-        pickedSensorKeys,
+        pickedNodeDefIds,
         viewStrDateList: groupDateList,
         searchRangeInfo,
       },
@@ -230,7 +196,7 @@ router.get(
     _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
     _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
 
-    // 인버터 사이트 목록 돔 추가
+    // 생육센서 사이트 목록 돔 추가
     const placeSiteDom = reportDom.makePlaceSiteDom(placeRows, subCategoryId);
     _.set(req, 'locals.dom.subSelectBoxDom', placeSiteDom);
 

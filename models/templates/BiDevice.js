@@ -18,9 +18,9 @@ class BiDevice extends BiModule {
    * 센서 장치 데이터를 구해옴
    * @param {searchRange} searchRange
    * @param {number[]} nodeSeqList
-   * @return {{node_seq: number, view_date: string, group_date: string, avg_num_data: number}[]}
+   * @return {sensorAvgGroup[]}
    */
-  getSensorGroup(searchRange = this.createSearchRange(), nodeSeqList) {
+  getSensorAvgGroup(searchRange = this.createSearchRange(), nodeSeqList) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     const sql = `
