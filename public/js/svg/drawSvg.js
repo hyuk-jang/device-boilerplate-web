@@ -3,14 +3,17 @@ const svgNodeTextList = [];
 
 /**
  * @param {string} documentId
+ * @param {string=} img
  */
-function svgCanvas(documentId) {
+function svgCanvas(documentId, image) {
   /** @type {mDeviceMap} */
   const realMap = map;
 
   // canvas 생성
   const { width: canvasWidth, height: canvasHeight } = realMap.drawInfo.frame.mapSize;
   const canvas = SVG(documentId).size(canvasWidth, canvasHeight);
+  const img = canvas.image(image, canvasWidth, canvasHeight);
+  img.move(0, 0);
   canvas.attr({ id: 'canvasId' });
 
   // Place 그리기
@@ -66,9 +69,18 @@ function drawExistCanvasValue(nodeId, svgValue) {
 
   const foundCanvas = _.find(svgNodeTextList, { id: nodeId });
   if (_.isUndefined(foundCanvas)) return false;
-  const nodeX = foundCanvas.text.node.attributes.x.value;
-  foundCanvas.text.node.innerHTML = `<tspan dy="0.5%">${foundCanvas.name}</tspan>`;
-  foundCanvas.text.node.innerHTML += `<tspan class="data" style="fill: #00c51a; font-size: 8pt; stroke: #00c51a; stroke-width: 0.2" dy="1.2em" x=${nodeX}>${svgValue}</tspan>`;
+
+  foundCanvas.text.node.innerHTML = `<tspan class="data" style="font-size: 20pt; stroke: #00c51a; stroke-width: 0.2" dx="1.1%" dy="0.5%">${svgValue}</tspan>`;
+  // const getSvgElement = $(`#${nodeId}`);
+  // const x1 = getSvgElement[0].x.animVal.value + getSvgElement[0].width.baseVal.value;
+  // const textX1 = foundCanvas.textX + foundCanvas.text.node.textLength.baseVal.value;
+  // let x;
+  // if (textX1 > x1) {
+  //   x = foundCanvas.text.node.attributes.x.value - (textX1 - x1);
+  // } else {
+  //   return false;
+  // }
+  // foundCanvas.text.node.innerHTML = `<tspan class="data" style="font-size: 20pt; stroke: #00c51a; stroke-width: 0.2" x="${x}" dx="1.1%" dy="0.9%">${svgValue}</tspan>`;
 
   // 받아온 id 값으로  color 값 찾기
   realMap.drawInfo.positionInfo.svgNodeList.forEach(svgNodeInfo => {
@@ -119,6 +131,7 @@ function writeText(canvas, defInfo, resourceInfo) {
   let [textX, textY, textSize, textColor, leading] = [0, 0, 10, '#fdfe02', '1em'];
   const { width, height, radius } = resourceInfo.elementDrawInfo;
   const [x1, y1, x2, y2] = defInfo.point;
+  let anchor = 'middle';
 
   // svgPositionList를 검색하여 장치인지 센서인지 정의
   let foundSvgInfo = _.find(realMap.drawInfo.positionInfo.svgNodeList, svgNodeInfo =>
@@ -139,9 +152,11 @@ function writeText(canvas, defInfo, resourceInfo) {
       // 노드중 sensor style 지정
       if (foundSvgInfo.is_sensor === 1) {
         textColor = 'black';
+        anchor = 'end';
+        textX = x1 + width - 25;
       }
       // 장소 text style 지정
-      if (_.isString(foundSvgInfo.placeClassId)) {
+      if (_.isString(foundSvgInfo.placeId)) {
         textSize = 17;
         leading = '0.8em';
       }
@@ -168,7 +183,7 @@ function writeText(canvas, defInfo, resourceInfo) {
       .font({
         fill: textColor,
         size: textSize,
-        anchor: 'middle',
+        anchor,
         leading,
         weight: 'bold',
       })
@@ -183,6 +198,8 @@ function writeText(canvas, defInfo, resourceInfo) {
     const svgNode = {
       id: svgId,
       name: defInfo.name,
+      textX,
+      textY,
       text,
     };
     svgNodeTextList.push(svgNode);
@@ -205,18 +222,17 @@ function excludeText(id) {
     /** @type {defInfo} */
     const foundIt = _.find(svgPlaceInfo.defList, { id });
     if (_.isObject(foundIt)) {
-      findExclusion = _.indexOf(realMap.realtionInfo.nameExclusionList, svgPlaceInfo.placeClassId);
+      findExclusion = _.indexOf(realMap.realtionInfo.nameExclusionList, svgPlaceInfo.placeId);
     }
   });
-
   realMap.drawInfo.positionInfo.svgNodeList.forEach(svgNodeInfo => {
     /** @type {defInfo} */
     const foundIt = _.find(svgNodeInfo.defList, { id });
     if (_.isObject(foundIt)) {
-      findExclusion = _.indexOf(realMap.realtionInfo.nameExclusionList, svgNodeInfo.nodeClassId);
+      findExclusion = _.indexOf(realMap.realtionInfo.nameExclusionList, svgNodeInfo.nodeDefId);
     }
   });
-  // -1 : 제외목록에서 찾았을 때 없음을 나타낸다.
+  // -1 : 제외목록에서 찾았을 때, 없음을 나타낸다.
   if (findExclusion === -1) {
     return true;
   }
@@ -229,19 +245,73 @@ function excludeText(id) {
 function dataInstallEvent(socket) {
   /** @type {mDeviceMap} */
   const realMap = map;
-  let controlValue;
 
   realMap.drawInfo.positionInfo.svgNodeList.forEach(svgNodeInfo => {
     svgNodeInfo.defList.forEach(defInfo => {
       const getSvgElement = $(`#${defInfo.id}`);
       getSvgElement.on('click touchstart', e => {
+        let controlValue;
+
+        // 장치 or 센서 구분  1: 센서, 0: 장치, -1: 미분류
+        const foundSvgNodeInfo = _.find(realMap.drawInfo.positionInfo.svgNodeList, info =>
+          _.map(info.defList, 'id').includes(defInfo.id),
+        );
+        if (_.isUndefined(foundSvgNodeInfo)) return false;
+
+        // ' $.confirm ' : jquery dailog
+        if (foundSvgNodeInfo.is_sensor === 1) {
+          $.confirm({
+            title: '',
+            content:
+              '' +
+              '<form action="" class="formName">' +
+              '<div class="form-group">' +
+              `'${defInfo.name}' 의 값을 입력하세요.` +
+              '<input type="text" placeholder="here" class="name form-control" required />' +
+              '</div>' +
+              '</form>',
+            buttons: {
+              formSubmit: {
+                text: 'OK',
+                btnClass: 'btn-blue',
+                action() {
+                  controlValue = this.$content.find('.name').val();
+                  if (_.isUndefined(controlValue)) return false;
+                },
+              },
+              cancel() {
+                // close
+              },
+            },
+          });
+        } else {
+          $.confirm({
+            title: '',
+            content: `'${defInfo.name}' 의 상태를 변경합니다.`,
+            buttons: {
+              confirm: {
+                text: 'OPEN',
+                action() {
+                  controlValue = 'open';
+                },
+              },
+              somethingElse: {
+                text: 'CLOSE',
+                action() {
+                  controlValue = 'close';
+                },
+              },
+              cancel: {
+                text: 'CANCEL',
+                btnClass: 'btn-blue',
+              },
+            },
+          });
+        }
         const falseValueList = ['CLOSE', 'CLOSING', 'OFF', 0, '0'];
         const trueValueList = ['OPEN', 'OPENING', 'ON', 1, '1'];
 
-        controlValue = prompt(`${defInfo.name}의 값을 입력하세요`);
         if (controlValue != null) {
-          drawExistCanvasValue(defInfo.id, controlValue);
-
           const falseValueCheck = _.includes(falseValueList, controlValue.toUpperCase());
           const trueValueCheck = _.includes(trueValueList, controlValue.toUpperCase());
 
@@ -262,6 +332,7 @@ function dataInstallEvent(socket) {
               rank: 2,
             },
           };
+          console.log(requestMsg);
           socket.emit('executeCommand', requestMsg);
         }
       });
@@ -303,24 +374,28 @@ function svgDrawing(canvas, type, point, elementDrawInfo, id) {
  *
  * @param {*} canvas
  * @param {number[]} point point[]
- * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
+ * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color, opactiy}
  * @param {string} id 그려진 obj의 이
  */
 function svgDrawingRect(canvas, point, elementDrawInfo, id) {
   const [x, y] = point;
-  let { width, height, color } = elementDrawInfo;
+
+  let { width, height, color, opacity, radius } = elementDrawInfo;
+  if (_.isUndefined(radius)) return 0;
+
   // color가 배열이 아니면 배열로 변환
   color = Array.isArray(color) ? color : [color];
-
   const model = canvas
     .rect(width, height)
     .fill(color[0])
     .move(x, y)
-    .stroke({ width: 0.5 })
+    .radius(radius)
+    // .stroke({ width: 0.5 })
     .attr({
       id,
+      opacity,
     });
-  svgDrawingShadow(model, id);
+  // svgDrawingShadow(model, id);
 }
 
 /**

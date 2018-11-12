@@ -30,8 +30,9 @@
             Close</button>
         </div>
         <!-- canvas -->
-        <div style="">
-          <div id="canvas" style="background-image: url('/image/sunda/bg.jpg'); background-size: cover; background-repeat: no-repeat; display: flex; justify-content: center; margin: 5px"></div>
+        <div>
+          <div id="canvas" style=" display: flex; justify-content: center; margin: 5px;"></div>
+          <!-- <div id="canvas" style="background-image: url('/image/sunda/bg.jpg'); background-size: cover; background-repeat: no-repeat; display: flex; justify-content: center; margin: 5px"></div> -->
         </div>
       </div>
     </div>
@@ -42,7 +43,7 @@
   <!-- Map 설정 및 Canvas 그림 -->
   <script>
     var map = <%- JSON.stringify(map) %>
-    svgCanvas('canvas');
+    svgCanvas('canvas', '/image/sunda/bg.jpg');
 
     // size 재설정
     var svgMap = SVG.get('canvasId')
@@ -56,7 +57,7 @@
       // $zoomOut: $('#zoom-out'),
       $reset: $('#reset'),
       cursor: "context-menu",
-      startTransform: 'matrix(0.6, 0, 0, 0.6, -256, -245)',
+      startTransform: 'matrix(0.6, 0, 0, 0.6, -100, -600)',
     })
 
     // zoom 기능 기준점 재정의

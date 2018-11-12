@@ -6,7 +6,7 @@ const Server = require('socket.io');
 
 const XLSX = require('xlsx');
 
-const COLUMN_ID_LIST = ['date', 'a', 'b', 'c', 'd', 'e', 'f'];
+const COLUMN_ID_LIST = ['date', 'SAP_001', 'TAPP_001', 'STP_001', 'CGT_001', 'COT_001', 'HMST_001'];
 
 class SocketIoManager {
   constructor() {
@@ -18,8 +18,8 @@ class SocketIoManager {
   }
 
   readFile() {
-    const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
-    // const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
+    // const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
+    const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
     const ws = wb.Sheets.Sheet1;
     const dataTableRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
@@ -52,24 +52,10 @@ class SocketIoManager {
       BU.CLI('connect Client');
       this.connectedSocketList.push(socket);
 
+      socket.emit('updateNodeInfo', this.renewalData());
       // 1초마다 실행
       setInterval(() => {
-        const hour = moment().get('hours');
-        const minutes = moment().get('minutes');
-
-        const currExcelRow = _.find(this.excelDataList, { dateHour: hour, dateMinutes: minutes });
-        // BU.CLI(currExcelRow);
-
-        const nodeDataList = [];
-        _.forEach(currExcelRow, (v, k) => {
-          const nodeInfo = {
-            node_id: k,
-            data: v,
-          };
-          nodeDataList.push(nodeInfo);
-        });
-
-        socket.emit('updateNodeInfo', nodeDataList);
+        socket.emit('updateNodeInfo', this.renewalData());
         // socket.emit('updateNodeInfo', [{ node_id: 'MRT_001', data: 5 }]);
       }, 1000 * 60);
 
@@ -78,6 +64,29 @@ class SocketIoManager {
         _.remove(this.connectedSocketList, connSocket => _.isEqual(connSocket, socket));
       });
     });
+  }
+
+  renewalData() {
+    const hour = moment().get('hours');
+    const minutes = moment().get('minutes');
+
+    const currExcelRow = _.find(this.excelDataList, { dateHour: hour, dateMinutes: minutes });
+    // BU.CLI(currExcelRow);
+
+    const nodeDataList = [];
+    _.forEach(currExcelRow, (v, k) => {
+      const nodeInfo = {
+        node_id: k,
+        data: _.isNumber(v) ? this.numberWithCommas(v) : v,
+      };
+      nodeDataList.push(nodeInfo);
+    });
+
+    return nodeDataList;
+  }
+
+  numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 }
 module.exports = SocketIoManager;
