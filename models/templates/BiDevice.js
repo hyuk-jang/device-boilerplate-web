@@ -39,6 +39,52 @@ class BiDevice extends BiModule {
     return this.db.single(sql, '', false);
   }
 
+  // getSensorReportRange(searchRange, nodeSeqList) {
+
+  // }
+
+  // /**
+  //  *
+  //  * @param {searchRange} searchRange
+  //  * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+  //  */
+  // getSensorReport(searchRange = this.createSearchRange(), placeRelationRows) {
+  //   // BU.CLI(searchRange);
+  //   const { groupByFormat, selectViewDate, selectGroupDate } = this.makeDateFormatForReport(
+  //     searchRange,
+  //     'writedate',
+  //   );
+  //   const { strStartDate, strEndDate } = searchRange;
+  //   // BU.CLI(strStartDate, strEndDate);
+  //   let sql = `
+  //   SELECT
+  //       STRAIGHT_JOIN *
+  //   FROM
+  //   (
+  //     SELECT DISTINCT ${selectGroupDate}
+  //     FROM dv_sensor_data
+  //   ) AS main
+  //   `;
+
+  //   placeRelationRows.forEach((relationRow, index) => {
+  //     sql += `
+  //     JOIN
+  //     (
+  //       SELECT
+  //               ${selectGroupDate},
+  //               ROUND(AVG(num_data), 1) AS ${relationRow.nd_target_id}
+  //       FROM dv_sensor_data
+  //       WHERE node_seq = ${relationRow.node_seq}
+  //       GROUP BY ${groupByFormat}, node_seq
+  //       AND writedate>= "${strStartDate}" and writedate<"${strEndDate}"
+  //     ) AS group_${index}
+  //     ON group_${index}.group_date = main.group_date
+  //     `;
+  //   });
+
+  //   return this.db.single(sql, '', false);
+  // }
+
   /**
    * 장소 시퀀스를 기준으로 장소 관계 정보를 가져옴
    * @param {{place_seq: number}[]} receiveObjList

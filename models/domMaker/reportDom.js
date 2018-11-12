@@ -73,6 +73,146 @@ module.exports = {
   },
 
   /**
+   * @desc searchOption -> Combine(병합)
+   * 생육 환경 보고서 돔 생성
+   * @param {{ndId: string, ndName: string, dataUnit: string, realData: number[]}[]} reportStoragesByNdName
+   * @param {{viewStrDateList: string[], pickedSensorKeys: string[]}} reportOption
+   * @param {{page: number, pageListCount: number}} paginationInfo
+   */
+  makeSensorReportDomByCombine(reportStoragesByNdName, reportOption, paginationInfo) {
+    // 기본 페이지 값 설정
+    const { page = 1, pageListCount = 20 } = paginationInfo;
+    // 보고서의 열을 가져오기 위한 첫번째 시작 번호 설정
+    const firstRowNum = (page - 1) * pageListCount;
+
+    // 데이터를 가져올 Node_Definition_ID List 및 해당 데이터를 Row에 미칭할 Grouping Date를 가져옴
+    const { pickedSensorKeys = [], viewStrDateList = [] } = reportOption;
+
+    // 동적으로 Table Header를 구성하기 위한 템플릿 초안 정의
+    const headerTemplate = _.template(
+      '<th scope="col" style="width:7%"><%= ndName %><%= dataUnit %></th>',
+    );
+
+    // Picked목록에 따라 동적 Header 생성
+    const dynamicHeaderDom = pickedSensorKeys.map(key => {
+      const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, { ndId: key });
+      return headerTemplate({
+        ndName,
+        dataUnit: dataUnit.length ? `(${dataUnit})` : '',
+      });
+    });
+
+    // 만들어진 동적 Table Header Dom
+    const sensorReportHeaderDom = `
+      <tr>
+      <th scope="col" style="width:5%">번호</th>
+      <th scope="col" style="width:9%">일시</th>
+      ${dynamicHeaderDom}
+      </tr>
+    `;
+
+    // Picked 목록에 따라 동적으로 만들 Table Tr TD 템플릿 초안 정의
+    const dynamicTemplate = pickedSensorKeys.map(key => `<td><%= ${key} %></td>`);
+    // 기본으로 생성할 TR 열 틀에 해당 동적 템플릿을 삽입
+    const sensorReportTemplate = _.template(`
+        <tr>
+        <td><%= num %></td>
+        <td><%= group_date %></td>
+        ${dynamicTemplate.toString()}
+      </tr>
+    `);
+
+    // BU.CLI(sensorReportTemplate);
+    // 선택한 페이지에 따라 생성할 Dom을 생성하기 위해 기존 ViewStrDateList를 자름
+    const sensorReportBodyDom = _.slice(
+      viewStrDateList,
+      firstRowNum,
+      firstRowNum + pageListCount,
+    ).map((row, index) => {
+      // 실제 데이터를 가져올 Row Index 설정
+      const dataIndex = _.sum([firstRowNum, index]);
+      const sensorData = {
+        num: dataIndex + 1, // 사용자에게 보여질 번호는 + 1
+        group_date: row, // row당 보여질 일시
+      };
+      // ND_TARGET_ID에 따라 그루핑된 레포트 저장소를 순회하면서 해당 ndId를 Key로 한 데이터 확장
+      _.forEach(reportStoragesByNdName, reportStorage => {
+        _.assign(sensorData, { [reportStorage.ndId]: reportStorage.realData[dataIndex] });
+      });
+
+      // 확장한 sensorData를 템플릿에 반영
+      return sensorReportTemplate(sensorData);
+    });
+
+    return {
+      sensorReportHeaderDom,
+      sensorReportBodyDom,
+    };
+  },
+
+  /**
+   *
+   * @param {{ndId: string, ndName: string, dataUnit: string, realData: number[]}[]} reportStoragesByNdName
+   * @param {{viewStrDateList: string[], pickedSensorKeys: string[], searchRangeInfo: searchRange}} reportOption
+   * @param {page: number, pageListCount: number} paginationInfo
+   */
+  makeSensorReportDomByIndividual(reportStoragesByNdName, reportOption, paginationInfo) {
+    // const firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
+
+    const { pickedSensorKeys = [], viewStrDateList = [], searchRangeInfo } = reportOption;
+
+    const headerTemplate = _.template(
+      '<th scope="col" style="width:7%"><%= ndName %><%= dataUnit %></th>',
+    );
+
+    const dynamicHeaderDom = pickedSensorKeys.map(key => {
+      const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, { ndId: key });
+      return headerTemplate({
+        ndName,
+        dataUnit: dataUnit.length ? `(${dataUnit})` : '',
+      });
+    });
+
+    const sensorReportHeaderDom = `
+    <tr>
+    <th scope="col" style="width:5%">번호</th>
+    <th scope="col" style="width:9%">일시</th>
+    <th scope="col" style="width:9%">장소</th>
+    ${dynamicHeaderDom}
+    </tr>
+    `;
+
+    const dynamicTemplate = pickedSensorKeys.map(key => `<td><%= ${key} %></td>`);
+
+    const sensorReportTemplate = _.template(`
+        <tr>
+        <td><%= num %></td>
+        <td><%= group_date %></td>
+        <td><%= placeName %></td>
+        ${dynamicTemplate.toString()}
+      </tr>
+    `);
+
+    // BU.CLI(sensorReportTemplate);
+
+    const sensorReportsDom = viewStrDateList.map((row, index) => {
+      const sensorData = {
+        num: index,
+        group_date: row,
+      };
+      _.forEach(reportStoragesByNdName, reportStorage => {
+        _.assign(sensorData, { [reportStorage.ndId]: reportStorage.realData[index] });
+      });
+
+      return sensorReportTemplate(sensorData);
+    });
+
+    return {
+      sensorReportHeaderDom,
+      sensorReportsDom,
+    };
+  },
+  /**
    *
    * @param {PW_INVERTER_DATA[]} inverterReportRows
    * @param {page: number, pageListCount: number} paginationInfo

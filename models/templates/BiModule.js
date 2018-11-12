@@ -267,24 +267,36 @@ class BiModule extends BM {
 
   /**
    * 검색 종류와 검색 기간에 따라 계산 후 검색 조건 객체 반환
-   * @param {string} searchType min10, hour, day, month, year, range
-   * @param {string} strStartDate '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
-   * @param {string} strEndDate '', undefined, 'YYYY', 'YYYY-MM', 'YYYY-MM-DD'
+   * @param {searchRangeConfig} searchRangeConfig
    * @return {searchRange} 검색 범위
    */
-  createSearchRange(
-    searchType = 'hour',
-    strStartDate = moment().format('YYYY-MM-DD'),
-    strEndDate = '',
-  ) {
+  createSearchRange(searchRangeConfig) {
+    const {
+      searchType = 'hour',
+      searchOption = 'merge',
+      strStartDate = moment().format('YYYY-MM-DD'),
+      strEndDate = '',
+    } = searchRangeConfig;
+
+    let { searchInterval = '' } = searchRangeConfig;
+
     const mStartDate = moment(strStartDate);
     // BU.CLI(mStartDate.format('YYYY-MM-DD HH:mm:ss'));
     let mEndDate = strEndDate.length ? moment(strEndDate) : mStartDate;
 
+    let realSearchType = searchType;
+    // 기간 검색이라면 실제 구간 사이를 계산하여 정의
+    if (searchType === 'range') {
+      realSearchType = this.convertSearchTypeWithCompareDate(strEndDate, strStartDate);
+      searchInterval = realSearchType;
+    }
+
     /** @type {searchRange} */
     const returnValue = {
+      realSearchType,
       searchType,
-      searchInterval: searchType,
+      searchInterval: searchInterval.length ? searchInterval : searchType,
+      searchOption,
       resultGroupType: null, // 최종으로 묶는 타입
       strStartDate: null, // sql writedate range 사용
       strEndDate: null, // sql writedate range 사용
@@ -450,22 +462,6 @@ class BiModule extends BM {
     }
     return dateFormat;
   }
-
-  /**
-   * searchRange Type
-   * @typedef {Object} searchRange
-   * @property {string} searchType day, month, year, range
-   * @property {string} searchInterval min, min10, hour, day, month, year, range
-   * @property {string=} resultGroupType 최종적으로 데이터를 묶을 데이터 형태 min, min10, hour, day, month, year, range
-   * @property {string} strStartDate sql writedate range 사용
-   * @property {string} strEndDate sql writedate range 사용
-   * @property {string} rangeStart Chart 위에 표시될 시작 날짜
-   * @property {string} rangeEnd Chart 위에 표시될 종료 날짜
-   * @property {string} strStartDateInputValue input[type=text] 에 표시될 시작 날짜
-   * @property {string} strEndDateInputValue input[type=text] 에 표시될 종료 날짜
-   * @property {string} strBetweenStart static chart 범위를 표현하기 위한 시작 날짜
-   * @property {string} strBetweenEnd static chart 범위를 표현하기 위한 종료 날짜
-   */
 
   /**
    * 인버터 총 누적 발전량을 구함
@@ -774,6 +770,7 @@ class BiModule extends BM {
       // returnValue.firstGroupByFormat = `DATE_FORMAT(${dateName},"${firstGroupFormat}")`;
       returnValue.groupByFormat = `DATE_FORMAT(${dateName},"${dateFormat}")`;
     }
+    // BU.CLI(returnValue)
     return returnValue;
   }
 

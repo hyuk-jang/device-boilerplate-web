@@ -121,18 +121,22 @@
       })
     })
 
-    var trendReportList = '';
 
-    var $is = $("#searchInterval option");
-    $is.each(function (index, dom) {
-      // dom.getAttribute('value')
-      if (dom.getAttribute('value') === searchRange.searchInterval) {
-        dom.selected = true;
-      } else {
-        dom.selected = false;
-      }
-    })
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
 
+    function checkSelectBoxOption(selectBoxId, selectValue) {
+      var $selectBoxOptions = $("#" + selectBoxId).children();
+      $selectBoxOptions.each(function (index, dom) {
+        // dom.getAttribute('value')
+        if (dom.getAttribute('value') === selectValue) {
+          dom.selected = true;
+        } else {
+          dom.selected = false;
+        }
+      })
+    }
     // 검색 타입에 따라 적용
     applySearchType(searchRange.searchType)
 

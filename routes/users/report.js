@@ -13,6 +13,7 @@ const reportDom = require('../../models/domMaker/reportDom');
 const DEFAULT_SEARCH_TYPE = 'hour';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'min10';
+const DEFAULT_SEARCH_OPTION = 'merge';
 const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
@@ -37,20 +38,23 @@ router.get(
     const {
       searchType = DEFAULT_SEARCH_TYPE,
       searchInterval = DEFAULT_SEARCH_INTERVAL,
+      searchOption = DEFAULT_SEARCH_OPTION,
       strStartDateInputValue = moment().format('YYYY-MM-DD'),
       strEndDateInputValue = '',
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange(
-    //   searchType,
-    //   strStartDateInputValue,
-    //   strEndDateInputValue,
-    // );
-    const searchRange = biModule.createSearchRange('range', '2018-11-09', '2018-11-09');
-    searchRange.searchInterval = searchInterval;
+    const searchRange = biModule.createSearchRange({
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
+    });
+    // const searchRange = biModule.createSearchRange('min10', '2018-11-10');
+    // const searchRange = biModule.createSearchRange('range', '2018-11-08', '2018-11-10');
 
-    // BU.CLI(reportRows);
+    BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
     const reportInfo = {
       siteId,
@@ -96,13 +100,14 @@ router.get(
     // BU.CLI(placeRows);
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
+    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere, true);
 
     // IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
+    // BU.CLI(searchRangeInfo)
 
     console.time('getSensorGroup');
     const sensorGroupRows = await biDevice.getSensorGroup(
@@ -111,8 +116,18 @@ router.get(
     );
 
     // BU.CLI(sensorGroupRows);
-    // BU.CLI(sensorGroupRows);
     console.timeEnd('getSensorGroup');
+
+    console.time('groupDateList');
+    // 실제 사용된 데이터 그룹 Union 처리
+    const groupDateList = _(sensorGroupRows)
+      .map('group_date')
+      .union()
+      .value();
+    // BU.CLI(groupDateList);
+    console.timeEnd('groupDateList');
+
+    // BU.CLI(sensorGroupRows);
 
     // BU.CLI(sensorGroupRows);
     console.time('sensorGroupRows');
@@ -129,12 +144,11 @@ router.get(
     // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    // placeRelationRows[0].nd_target_id
-    const groupedPlaceRelation = _.groupBy(placeRelationRows, 'nd_target_id');
 
     // 가져올려는 Report Key로 필터링
     const FP_KEY = BaseModel.FarmParallel.BASE_KEY;
     const pickedSensorKeys = [
+      FP_KEY.pvRearTemperature,
       FP_KEY.lux,
       FP_KEY.co2,
       FP_KEY.soilWaterValue,
@@ -150,6 +164,7 @@ router.get(
     const reportStoragesByNdName = _.map(pickedSensorKeys, ndId => ({
       ndId,
       ndName: '',
+      dataUnit: '',
       realData: [],
       storageList: [],
     }));
@@ -160,20 +175,12 @@ router.get(
       .forEach((v, ndTargetId) => {
         const foundStorage = _.find(reportStoragesByNdName, { ndId: ndTargetId });
         if (foundStorage) {
-          const { nd_target_name: ndName } = _.head(v);
+          const { nd_target_name: ndName, data_unit: dataUnit } = _.head(v);
           foundStorage.ndName = ndName;
+          foundStorage.dataUnit = dataUnit;
           foundStorage.storageList = v;
         }
       });
-
-    // BU.CLIN(reportStoragesByNdName, 3);
-
-    const betweenDatePoint = BU.getBetweenDatePoint(
-      searchRangeInfo.strBetweenEnd,
-      searchRangeInfo.strBetweenStart,
-      searchRangeInfo.searchInterval,
-      { startHour: 0, endHour: 24 },
-    );
 
     console.time('reportStoragesByNdName');
     reportStoragesByNdName.forEach(reportStorage => {
@@ -182,16 +189,46 @@ router.get(
       const flatMap = _.flatten(mapData);
       // BU.CLI(flatMap);
 
-      reportStorage.realData = betweenDatePoint.shortTxtPoint.map(strDate =>
-        _(flatMap)
-          .filter(info => _.eq(info.view_date, strDate))
+      reportStorage.realData = groupDateList.map(strDate => {
+        const meanValue = _(flatMap)
+          .filter(info => _.eq(info.group_date, strDate))
           .map('avg_num_data')
-          .mean(),
-      );
+          .mean();
+        return _.isNaN(meanValue) ? '' : _.round(meanValue, 1);
+      });
     });
     console.timeEnd('reportStoragesByNdName');
 
-    // BU.CLI(viewPlaceRelationRows);
+    // BU.CLIN(reportStoragesByNdName, 2);
+
+    const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
+      reportStoragesByNdName,
+      {
+        pickedSensorKeys,
+        viewStrDateList: groupDateList,
+        searchRangeInfo,
+      },
+      { page, pageListCount: PAGE_LIST_COUNT },
+    );
+
+    // 페이지 네이션 생성
+    let paginationInfo = DU.makeBsPagination(
+      page,
+      groupDateList.length,
+      `/report/${siteId}/sensor/${subCategoryId}`,
+      _.get(req, 'locals.reportInfo'),
+      PAGE_LIST_COUNT,
+    );
+
+    // 페이지네이션 돔 추가
+    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
+
+    // 페이지 정보 추가
+    paginationInfo = _.omit(paginationInfo, 'paginationDom');
+    _.set(req, 'locals.paginationInfo', paginationInfo);
+
+    _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
+    _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
 
     // 인버터 사이트 목록 돔 추가
     const placeSiteDom = reportDom.makePlaceSiteDom(placeRows, subCategoryId);

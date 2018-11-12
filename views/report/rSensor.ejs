@@ -68,10 +68,11 @@
           </div>
           <div class="table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%;background:#fff;">
-              <thead>
+              <thead id="sensorReportHeaderDom">
                 <tr>
                   <th scope="col" style="width:5%">번호</th>
                   <th scope="col" style="width:9%">일시</th>
+                  <th scope="col" style="width:7%">모듈후면온도(℃)</th>
                   <th scope="col" style="width:7%">조도(lx)</th>
                   <th scope="col" style="width:7%">이산화탄소(ppm)</th>
                   <th scope="col" style="width:7%">토양수분(%)</th>
@@ -86,27 +87,7 @@
                   <!-- <th scope="col" style="width:6%">강우상황</th> -->
                 </tr>
               </thead>
-              <!-- <thead>
-                <tr>
-                  <th scope="col" rowspan="2" style="width:5%">번호</th>
-                  <th scope="col" rowspan="2" style="width:9%">일시</th>
-                  <th scope="col" colspan="3" style="width:30%">태양광</th>
-                  <th scope="col" colspan="3" style="width:20%">인버터</th>
-                  <th scope="col" colspan="3" style="width:40%">발전현황</th>
-                </tr>
-                <tr>
-                  <th style="width:7%;">DC전류(A)</th>
-                  <th style="width:7%;">DC전압(V)</th>
-                  <th style="width:7%;">DC전력(kW)</th>
-                  <th style="width:8%;">AC전류(A)</th>
-                  <th style="width:8%;">AC전압(V)</th>
-                  <th style="width:8%;">주파수(Hz)</th>
-                  <th style="width:8%;">현재전력(kW)</th>
-                  <th style="width:6%;">효율</th>
-                  <th style="width:8%;">누적발전량(kWh)</th>
-                </tr>
-              </thead> -->
-              <tbody id="reportDom">
+              <tbody id="sensorReportBodyDom">
               </tbody>
             </table>
             <nav id="paginationDom" aria-label="...">
@@ -121,10 +102,11 @@
     </div>
   </div>
   <script>
-    // 인버터 목록 돔
+    // 돔 설정
     $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
     $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
-    $('#reportDom').html(<%- JSON.stringify(dom.reportDom) %>);
+    $('#sensorReportHeaderDom').html(<%- JSON.stringify(dom.sensorReportHeaderDom) %>);
+    $('#sensorReportBodyDom').html(<%- JSON.stringify(dom.sensorReportBodyDom) %>);
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
   </script>
 
@@ -146,17 +128,21 @@
       })
     })
 
-    var trendReportList = '';
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
 
-    var $is = $("#searchInterval option");
-    $is.each(function (index, dom) {
-      // dom.getAttribute('value')
-      if (dom.getAttribute('value') === searchRange.searchInterval) {
-        dom.selected = true;
-      } else {
-        dom.selected = false;
-      }
-    })
+    function checkSelectBoxOption(selectBoxId, selectValue) {
+      var $selectBoxOptions = $("#" + selectBoxId).children();
+      $selectBoxOptions.each(function (index, dom) {
+        // dom.getAttribute('value')
+        if (dom.getAttribute('value') === selectValue) {
+          dom.selected = true;
+        } else {
+          dom.selected = false;
+        }
+      })
+    }
 
     // 검색 타입에 따라 적용
     applySearchType(searchRange.searchType)
@@ -172,7 +158,6 @@
      * @return {void} 
      */
     function applySearchType(value) {
-      console.log(value)
       var checkedSearchType = value;
       var startDateDom = document.querySelector('#strStartDateInputValue');
       var endDateDom = document.querySelector('#strEndDateInputValue');
@@ -215,6 +200,7 @@
       subCategoryId = subCategoryId.trim();
       var searchInterval = document.querySelector('#searchInterval option:checked').value;
       var searchType = document.querySelector('#searchType option:checked').value;
+      var searchOption = document.querySelector('#searchOption option:checked').value;
       var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
       var strEndDateInputValue = '';
 
@@ -226,7 +212,7 @@
       }
 
       const queryString =
-        `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
+        `searchType=${searchType}&searchInterval=${searchInterval}&searchOption=${searchOption}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
 
       // 사이트 변경 시
       location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
@@ -234,6 +220,7 @@
 
     }
   </script>
+
 
 </body>
 
