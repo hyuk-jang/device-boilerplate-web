@@ -10,6 +10,7 @@ const { BU, DU } = require('base-util-jh');
 const reportDom = require('../../models/domMaker/reportDom');
 
 const sensorUtil = require('../../models/templates/sensor.util');
+const commonUtil = require('../../models/templates/common.util');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'hour';
@@ -48,22 +49,20 @@ router.get(
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'min10',
-      strStartDate: '2018-11-09',
-      strEndDate: '',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
-    // const searchRange = biModule.createSearchRange('min10', '2018-11-10');
-    // const searchRange = biModule.createSearchRange('range', '2018-11-08', '2018-11-10');
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'min10',
+    //   strStartDate: '2018-11-11',
+    //   strEndDate: '',
+    // });
 
-    BU.CLI(searchRange);
+    // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
     const reportInfo = {
       siteId,
@@ -90,18 +89,22 @@ router.get(
 router.get(
   ['/', '/:siteId', '/:siteId/sensor', '/:siteId/sensor/:subCategoryId'],
   asyncHandler(async (req, res) => {
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
+    commonUtil.applyHasNumbericReqToNumber(req);
 
+    /** @type {MEMBER} */
+    const user = _.get(req, 'user', {});
     // req.param 값 비구조화 할당
-    const { siteId = req.user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+    const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
-    const sensorWhere = BU.isNumberic(subCategoryId) ? { place_seq: Number(subCategoryId) } : null;
-    BU.CLI(sensorWhere);
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
+
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
 
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere);
@@ -111,7 +114,7 @@ router.get(
     // BU.CLI(placeRows);
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere, true);
+    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
 
     // 인버터 Seq 목록
     const sensorSeqList = _(placeRelationRows)
@@ -134,7 +137,7 @@ router.get(
     // BU.CLI(sensorGroupRows);
 
     // 실제 사용된 데이터 그룹 Union 처리하여 반환
-    const groupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
+    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
 
     console.time('sensorGroupRows');
     // 그루핑 데이터를 해당 장소에 확장
@@ -144,43 +147,48 @@ router.get(
     // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-
     const sensorProtocol = new SensorProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     console.time('reportStorageList');
     const reportStorageList = sensorUtil.makeReportStorageListByPickedNdId(
       placeRelationRows,
-      sensorProtocol.pickedNodeDefIds,
-      groupDateList,
+      sensorProtocol.pickedNodeDefIdList,
     );
     console.timeEnd('reportStorageList');
+
+    const sensorGroupDateInfo = sensorUtil.sliceStrGroupDateList(strGroupDateList, {
+      page,
+      pageListCount: PAGE_LIST_COUNT,
+    });
+
+    // BU.CLI(sensorGroupDateInfo);
 
     const pickedNodeDefIdList = sensorProtocol.getPickedNodeDefIdList();
     console.time('calcMergedReportStorageList');
     // 데이터 그룹의 평균 값 산출
+    // FIXME: 병합은 하지 않음. 이슈 생길 경우 대처
     if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
-      sensorUtil.calcMergedReportStorageList(reportStorageList, groupDateList);
-    } else {
+      // 동일 Node Def Id 를 사용하는 저장소 데이터를 GroupDate 별로 합산처리
+      sensorUtil.calcMergedReportStorageList(reportStorageList, sensorGroupDateInfo);
+      const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
+        reportStorageList,
+        {
+          pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdList,
+          groupDateInfo: sensorGroupDateInfo,
+        },
+      );
+      _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
+      _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
     }
     console.timeEnd('calcMergedReportStorageList');
 
     // BU.CLIN(reportStorageList, 2);
 
-    const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
-      reportStorageList,
-      {
-        pickedNodeDefIds,
-        viewStrDateList: groupDateList,
-        searchRangeInfo,
-      },
-      { page, pageListCount: PAGE_LIST_COUNT },
-    );
-
     // 페이지 네이션 생성
     let paginationInfo = DU.makeBsPagination(
       page,
-      groupDateList.length,
+      strGroupDateList.length,
       `/report/${siteId}/sensor/${subCategoryId}`,
       _.get(req, 'locals.reportInfo'),
       PAGE_LIST_COUNT,
@@ -192,9 +200,6 @@ router.get(
     // 페이지 정보 추가
     paginationInfo = _.omit(paginationInfo, 'paginationDom');
     _.set(req, 'locals.paginationInfo', paginationInfo);
-
-    _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
-    _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
 
     // 생육센서 사이트 목록 돔 추가
     const placeSiteDom = reportDom.makePlaceSiteDom(placeRows, subCategoryId);
@@ -211,16 +216,19 @@ router.get(
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
+    commonUtil.applyHasNumbericReqToNumber(req);
+
+    /** @type {MEMBER} */
+    const user = _.get(req, 'user', {});
     // req.param 값 비구조화 할당
-    const { siteId = req.user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+    const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
-    const inverterWhere = BU.isNumberic(subCategoryId)
-      ? { inverter_seq: Number(subCategoryId) }
-      : null;
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);

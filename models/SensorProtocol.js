@@ -8,7 +8,7 @@ const { BASE_KEY } = BaseModel.FarmParallel;
 
 class SensorProtocol {
   constructor(siteId) {
-    this.pickedNodeDefIds = [
+    this.pickedNodeDefIdList = [
       BASE_KEY.lux,
       BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
@@ -22,7 +22,7 @@ class SensorProtocol {
     ];
 
     // 생육 센서 목록
-    this.INSIDE_LIST = [
+    this.SENSOR_INSIDE_ND_ID_LIST = [
       BASE_KEY.lux,
       BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
@@ -31,7 +31,7 @@ class SensorProtocol {
     ];
 
     // 외기 센서 목록
-    this.OUTSIDE_LIST = [
+    this.SENSOR_OUTSIDE_ND_ID_LIST = [
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
@@ -43,17 +43,17 @@ class SensorProtocol {
 
     // 나주를 선택할 경우
     if (siteId === 1) {
-      this.pickedNodeDefIds.unshift(BASE_KEY.pvRearTemperature);
-      this.INSIDE_LIST.unshift(BASE_KEY.pvRearTemperature);
+      this.pickedNodeDefIdList.unshift(BASE_KEY.pvRearTemperature);
+      this.SENSOR_INSIDE_ND_ID_LIST.unshift(BASE_KEY.pvRearTemperature);
     }
   }
 
   getPickedNodeDefIdList() {
-    return this.pickedNodeDefIds.map(ndId => {
+    return this.pickedNodeDefIdList.map(ndId => {
       let isInside;
-      if (_.includes(this.INSIDE_LIST, ndId)) {
+      if (_.includes(this.SENSOR_INSIDE_ND_ID_LIST, ndId)) {
         isInside = 1;
-      } else if (_.includes(this.OUTSIDE_LIST, ndId)) {
+      } else if (_.includes(this.SENSOR_OUTSIDE_ND_ID_LIST, ndId)) {
         isInside = 0;
       }
 

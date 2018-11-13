@@ -10,9 +10,15 @@ const { BU } = require('base-util-jh');
 
 const sensorDom = require('../../models/domMaker/sensorDom');
 
+const commonUtil = require('../../models/templates/common.util');
+
+const SensorProtocol = require('../../models/SensorProtocol');
+
 router.get(
   ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
+
     // BU.CLI(req.user);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -26,7 +32,7 @@ router.get(
     const { siteId = req.user.main_seq } = req.params;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
@@ -50,6 +56,20 @@ router.get(
         });
       }
     });
+
+    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
+    const sensorProtocol = new SensorProtocol(siteId);
+
+    const { sensorEnvHeaderDom, sensorEnvBodyDom } = sensorDom.makeDynamicSensorDom(
+      viewPlaceRelationRows,
+      {
+        insideList: sensorProtocol.SENSOR_INSIDE_ND_ID_LIST,
+        outsideList: sensorProtocol.SENSOR_OUTSIDE_ND_ID_LIST,
+      },
+      mainSiteList,
+    );
+    _.set(req, 'locals.dom.sensorEnvHeaderDom', sensorEnvHeaderDom);
+    _.set(req, 'locals.dom.sensorEnvBodyDom', sensorEnvBodyDom);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 상태 데이터 동적 생성 돔

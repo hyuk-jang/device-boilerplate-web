@@ -14,6 +14,7 @@ const report = require('./report');
 // const users = require('./users');
 
 const webUtil = require('../../models/templates/web.util');
+const commonUtil = require('../../models/templates/common.util');
 
 const domMakerMaster = require('../../models/domMaker/masterDom');
 
@@ -33,6 +34,7 @@ router.get(
     '/:naviMenu/:siteId/:subCategory/:subCategoryId',
   ],
   asyncHandler(async (req, res, next) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
@@ -67,7 +69,7 @@ router.get(
     // _.set(req, 'locals.siteList', siteList);
 
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
-    _.set(req, 'locals.mainInfo.siteId', BU.isNumberic(siteId) ? Number(siteId) : siteId);
+    _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */

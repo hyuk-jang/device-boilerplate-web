@@ -27,7 +27,7 @@
                 <select class="form-control form-control_st" id="subSelectBoxDom" name="device_seq">
                 </select>
               </div>
-              <div class="sel_box3">
+              <div class="sel_box2">
                 <span>조회기간</span>
                 <select id="searchType" class="form-control">
                   <option value="hour">일일</option>
@@ -36,7 +36,7 @@
                   <option value="range">기간선택</option>
                 </select>
               </div>
-              <div class="sel_box3">
+              <div class="sel_box2">
                 <span>조회간격</span>
                 <select id="searchInterval" class="form-control">
                   <option value="min">1분</option>
@@ -47,13 +47,13 @@
                   <option value="year">1년</option>
                 </select>
               </div>
-              <div class="sel_box3">
+              <!-- <div class="sel_box3">
                 <span>조회설정</span>
                 <select id="searchOption" class="form-control">
                   <option value="merge">병합</option>
                   <option value="individual">개별</option>
                 </select>
-              </div>
+              </div> -->
               <!--</div>-->
               <div class="serch_st sel_box_data">
                 날짜 &nbsp;
@@ -90,9 +90,9 @@
               <tbody id="sensorReportBodyDom">
               </tbody>
             </table>
-            <nav id="paginationDom" aria-label="...">
-            </nav>
           </div>
+          <nav id="paginationDom" aria-label="...">
+          </nav>
         </div>
       </div>
       <!--하단1-->
@@ -130,7 +130,7 @@
 
     checkSelectBoxOption("searchInterval", searchRange.searchInterval)
     checkSelectBoxOption("searchType", searchRange.searchType)
-    checkSelectBoxOption("searchOption", searchRange.searchOption)
+    // checkSelectBoxOption("searchOption", searchRange.searchOption)
 
     function checkSelectBoxOption(selectBoxId, selectValue) {
       var $selectBoxOptions = $("#" + selectBoxId).children();
@@ -200,7 +200,7 @@
       subCategoryId = subCategoryId.trim();
       var searchInterval = document.querySelector('#searchInterval option:checked').value;
       var searchType = document.querySelector('#searchType option:checked').value;
-      var searchOption = document.querySelector('#searchOption option:checked').value;
+      // var searchOption = document.querySelector('#searchOption option:checked').value;
       var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
       var strEndDateInputValue = '';
 
@@ -211,8 +211,10 @@
         }
       }
 
+      // const queryString =
+      //   `searchType=${searchType}&searchInterval=${searchInterval}&searchOption=${searchOption}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
       const queryString =
-        `searchType=${searchType}&searchInterval=${searchInterval}&searchOption=${searchOption}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
+        `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
 
       // 사이트 변경 시
       location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +

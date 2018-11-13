@@ -21,7 +21,7 @@
           </div>
           <div class="table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%; background:#fff;">
-              <thead>
+              <thead id="sensorEnvHeaderDom">
                 <tr>
                   <th scope="col" style="width:18%"></th>
                   <th scope="col" style="text-align:center; width:7%">조도(lx)</th>
@@ -38,7 +38,7 @@
                   <th scope="col" style="text-align:center; width:6%">강우상황</th>
                 </tr>
               </thead>
-              <tbody id="sensorTable">
+              <tbody id="sensorEnvBodyDom">
               </tbody>
             </table>
           </div>
@@ -56,7 +56,8 @@
     document.getElementById('sensorMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
 
     // 작물 생육환경 테이블 구성
-    $('#sensorTable').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
+    $('#sensorEnvHeaderDom').html(<%- JSON.stringify(dom.sensorEnvHeaderDom) %>)
+    $('#sensorEnvBodyDom').html(<%- JSON.stringify(dom.sensorEnvBodyDom) %>)
   </script>
 </body>
 

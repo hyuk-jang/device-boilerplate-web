@@ -89,10 +89,10 @@ module.exports = {
         href: 'sensor',
         name: '생육센서',
       },
-      {
-        href: 'trend',
-        name: '트렌드',
-      },
+      // {
+      //   href: 'trend',
+      //   name: '트렌드',
+      // },
       {
         href: 'report',
         name: '보고서',

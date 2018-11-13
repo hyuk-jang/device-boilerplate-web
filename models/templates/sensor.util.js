@@ -44,6 +44,7 @@ function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) 
     ndId,
     ndName: '',
     dataUnit: '',
+    strGroupDateList: [],
     mergedAvgList: [],
     mergedSumList: [],
     storageList: [],
@@ -67,13 +68,40 @@ function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) 
 exports.makeReportStorageListByPickedNdId = makeReportStorageListByPickedNdId;
 
 /**
+ * page 정보에 따라 보여줄 항목(일시)을 계산
+ * @param {string[]} strGroupDateList
+ * @param {{page: number, pageListCount: number}=} pageOption
+ * @return {sensorGroupDateInfo}
+ */
+function sliceStrGroupDateList(strGroupDateList = [], pageOption) {
+  const { page, pageListCount } = pageOption;
+
+  // page 정보 단위로 구간을 계산하고자 할 경우
+  if (_.isNumber(page) && _.isNumber(pageListCount)) {
+    const firstRowNum = (page - 1) * pageListCount;
+    strGroupDateList = _.slice(strGroupDateList, firstRowNum, firstRowNum + pageListCount);
+  }
+
+  return {
+    strGroupDateList,
+    page,
+    pageListCount,
+  };
+}
+exports.sliceStrGroupDateList = sliceStrGroupDateList;
+
+/**
  * 저장소 목록의 StorageList의 데이터 계산을 하고자 할 경우
  * @param {sensorReportStorageByPickNdId[]} reportStorageList
- * @param {string[]=} strGroupDateList mergedList를 뽑아내고 싶을 경우 날짜 목록 사용
+ * @param {sensorGroupDateInfo=} groupDateInfo
  * @return {void}
  */
-function calcMergedReportStorageList(reportStorageList, strGroupDateList) {
+function calcMergedReportStorageList(reportStorageList, groupDateInfo) {
+  const { strGroupDateList = [], page, pageListCount } = groupDateInfo;
+  // BU.CLIS(page, pageListCount);
+
   reportStorageList.forEach(reportStorage => {
+    reportStorage.strGroupDateList = strGroupDateList;
     // BU.CLI(reportStorage.placeRelationRows.length);
     const mapData = _(reportStorage.placeRelationRows)
       .map('sensorGroupList')
