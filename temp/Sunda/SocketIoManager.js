@@ -18,8 +18,8 @@ class SocketIoManager {
   }
 
   readFile() {
-    // const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
-    const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
+    const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
+    // const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
     const ws = wb.Sheets.Sheet1;
     const dataTableRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
@@ -80,6 +80,11 @@ class SocketIoManager {
         data: _.isNumber(v) ? this.numberWithCommas(v) : v,
       };
       nodeDataList.push(nodeInfo);
+    });
+
+    nodeDataList.push({
+      node_id: 'UT_001',
+      data: moment().format('HH:mm:ss'),
     });
 
     return nodeDataList;

@@ -43,7 +43,8 @@
   <!-- Map 설정 및 Canvas 그림 -->
   <script>
     var map = <%- JSON.stringify(map) %>
-    svgCanvas('canvas', '/image/sunda/bg.jpg');
+
+    drawSvgCanvas('canvas', '/image/sunda/bg.jpg', '집광형 태양열 발전 시스템 모니터링');
 
     // size 재설정
     var svgMap = SVG.get('canvasId')
@@ -97,7 +98,7 @@
       socket.on("updateNodeInfo", function (nodeList) {
         console.log(nodeList)
         _.forEach(nodeList, nodeInfo => {
-          drawExistCanvasValue(nodeInfo.node_id, nodeInfo.data)
+          showDataValue(nodeInfo.node_id, nodeInfo.data)
         })
 
         // document.getElementById("data").innerText = data;
