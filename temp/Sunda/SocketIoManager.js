@@ -18,8 +18,8 @@ class SocketIoManager {
   }
 
   readFile() {
-    const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
-    // const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
+    // const wb = XLSX.readFile(`${__dirname}/data.xlsx`);
+    const wb = XLSX.readFile(`${process.cwd()}/data.xlsx`);
     const ws = wb.Sheets.Sheet1;
     const dataTableRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
@@ -52,12 +52,23 @@ class SocketIoManager {
       BU.CLI('connect Client');
       this.connectedSocketList.push(socket);
 
-      socket.emit('updateNodeInfo', this.renewalData());
-      // 1초마다 실행
       setInterval(() => {
-        socket.emit('updateNodeInfo', this.renewalData());
-        // socket.emit('updateNodeInfo', [{ node_id: 'MRT_001', data: 5 }]);
-      }, 1000 * 60);
+        socket.emit('updateNodeInfo', [
+          {
+            node_id: 'CT_001',
+            data: moment().format('HH:mm:ss'),
+          },
+        ]);
+      }, 1000);
+
+      socket.emit('updateNodeInfo', this.renewalData());
+
+      this.operationFixTime(socket);
+      // // 1초마다 실행
+      // const startInterval = setInterval(() => {
+      //   socket.emit('updateNodeInfo', this.renewalData());
+      //   // socket.emit('updateNodeInfo', [{ node_id: 'MRT_001', data: 5 }]);
+      // }, 1000 * 1);
 
       // 연결 해제한 Socket 제거
       socket.on('disconnect', () => {
@@ -66,20 +77,42 @@ class SocketIoManager {
     });
   }
 
+  /**
+   *
+   * @param {net.Socket} socket
+   */
+  operationFixTime(socket) {
+    setTimeout(() => {
+      const nowSec = moment().get('seconds');
+      if (nowSec === 0) {
+        socket.emit('updateNodeInfo', this.renewalData());
+        setInterval(() => {
+          socket.emit('updateNodeInfo', this.renewalData());
+        }, 1000 * 60);
+      } else {
+        this.operationFixTime(socket);
+      }
+    }, 1000);
+  }
+
   renewalData() {
     const hour = moment().get('hours');
     const minutes = moment().get('minutes');
+
+    const excludeList = ['dateHour', 'dateMinutes'];
 
     const currExcelRow = _.find(this.excelDataList, { dateHour: hour, dateMinutes: minutes });
     // BU.CLI(currExcelRow);
 
     const nodeDataList = [];
     _.forEach(currExcelRow, (v, k) => {
-      const nodeInfo = {
-        node_id: k,
-        data: _.isNumber(v) ? this.numberWithCommas(v) : v,
-      };
-      nodeDataList.push(nodeInfo);
+      if (!_.includes(excludeList, k)) {
+        const nodeInfo = {
+          node_id: k,
+          data: _.isNumber(v) ? this.numberWithCommas(v) : v,
+        };
+        nodeDataList.push(nodeInfo);
+      }
     });
 
     nodeDataList.push({

@@ -59,6 +59,7 @@
       $reset: $('#reset'),
       cursor: "context-menu",
       startTransform: 'matrix(0.6, 0, 0, 0.6, -100, -600)',
+      increment: 0.1
     })
 
     // zoom 기능 기준점 재정의
@@ -66,6 +67,7 @@
       e.clientX = 300
       e.clientY = 200
       $panzoom.panzoom('zoom', {
+
         // focal: e
       })
     })

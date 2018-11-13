@@ -9,12 +9,12 @@ const map = {
         {
           id: 'timeArea',
           type: 'rect',
-          elementDrawInfo: { width: 350, height: 50, opacity: 1, color: '#667e99' },
+          elementDrawInfo: { width: 350, height: 50, color: '#667e99' },
         },
         {
           id: 'time',
           type: 'rect',
-          elementDrawInfo: { width: 100, height: 40, opacity: 0, color: 'white' },
+          elementDrawInfo: { width: 100, radius: 5, height: 40, opacity: 0, color: '#dfdfdf' },
         },
         {
           id: 'accDataPlace',
@@ -308,7 +308,7 @@ const map = {
       },
     ],
   },
-  realtionInfo: {
+  relationInfo: {
     placeRelationList: [
       {
         target_id: 'dataPlace',
@@ -377,7 +377,16 @@ const map = {
       { targetIdList: ['CT_001', 'UT_001'], resourceIdList: ['time'] },
       { targetIdList: ['UT_P_1', 'CT_P_1'], resourceIdList: ['timeArea'] },
     ],
-    nameExclusionList: [],
+    nameExclusionList: [
+      'CGT_001',
+      'COT_001',
+      'HMST_001',
+      'STP_001',
+      'SAP_001',
+      'TAPP_001',
+      'CT_001',
+      'UT_001',
+    ],
   },
   controlInfo: {},
 };
