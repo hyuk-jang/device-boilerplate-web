@@ -92,8 +92,13 @@ module.exports = {
         } else if (_.get(outsideSensor, 'isRain', '') === 0) {
           _.set(outsideSensor, 'rainStatus', 'X');
         } else {
-          _.set(outsideSensor, 'rainStatus', '-');
+          _.set(outsideSensor, 'rainStatus', '');
         }
+
+        // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
+        _.forEach(outsideList, ndId => {
+          !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
+        });
 
         // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
         // _.set(outsideSensor, 'rainStatus', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
@@ -224,6 +229,10 @@ module.exports = {
         _.set(outsideSensor, 'rainStatus', '-');
       }
 
+      _.forEach(OUTSIDE_LIST, ndId => {
+        !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
+      });
+
       // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
       // _.set(outsideSensor, 'rainStatus', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
 
@@ -239,6 +248,10 @@ module.exports = {
 
       const sensorTable = _.map(groupByPlaceSeqRelation, pRows => {
         const insideSensor = _.assign(..._.map(pRows, row => _.pick(row, INSIDE_LIST)));
+        // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
+        _.forEach(INSIDE_LIST, ndId => {
+          !_.has(insideSensor, ndId) && _.set(insideSensor, ndId, '');
+        });
 
         // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
         const { pd_target_name: subName, p_target_name: lastName } = _.head(pRows);
@@ -251,6 +264,8 @@ module.exports = {
           isFirst = false;
           // rowsPan 입력
           _.set(insideSensor, 'rowsPan', rowsLength);
+
+          BU.CLIS(insideSensor, outsideSensor);
 
           return firstTemplateTR(_.assign(insideSensor, outsideSensor));
         }

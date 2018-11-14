@@ -50,16 +50,22 @@ router.get(
       const foundIt = _.find(viewSensorProfileRows, { node_seq: placeRelation.node_seq });
       // 데이터가 존재한다면 sensorProfile Node Def ID로 해당 데이터 입력
       if (foundIt) {
-        _.assign(placeRelation, {
-          [foundIt.nd_target_id]: foundIt.node_data,
-          writedate: foundIt.writedate,
-        });
+        const diffMinutes = moment().diff(moment(foundIt.writedate), 'minutes');
+        // BU.CLI(foundIt.node_name, diffMinutes);
+        // 10분 이상 지난 데이터라면 가치 없음
+        if (diffMinutes < 10) {
+          _.assign(placeRelation, {
+            [foundIt.nd_target_id]: foundIt.node_data,
+            writedate: foundIt.writedate,
+          });
+        }
       }
     });
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const sensorProtocol = new SensorProtocol(siteId);
 
+    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     const { sensorEnvHeaderDom, sensorEnvBodyDom } = sensorDom.makeDynamicSensorDom(
       viewPlaceRelationRows,
       {
@@ -71,15 +77,8 @@ router.get(
     _.set(req, 'locals.dom.sensorEnvHeaderDom', sensorEnvHeaderDom);
     _.set(req, 'locals.dom.sensorEnvBodyDom', sensorEnvBodyDom);
 
-    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
-    // 인버터 현재 상태 데이터 동적 생성 돔
-    const sensorStatusListDom = sensorDom.makeSensorStatusDom(viewPlaceRelationRows, mainSiteList);
-    _.set(req, 'locals.dom.sensorStatusListDom', sensorStatusListDom);
-
     req.locals.measureInfo = {
-      measureTime: `실시간 작물 생육환경 모니터링 측정시간 : ${moment().format(
-        'YYYY-MM-DD HH:mm',
-      )}:00`,
+      measureTime: `생육환경 모니터링 측정시간 : ${moment().format('YYYY-MM-DD HH:mm')}:00`,
     };
 
     // BU.CLIN(req.locals);

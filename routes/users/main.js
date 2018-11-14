@@ -186,12 +186,12 @@ router.get(
   }),
 );
 
-// router.get(
-//   '/ess',
-//   asyncHandler(async (req, res) => {
-//     console.log(global.app.get('dbInfo'));
-//     return res.render('./templates/ESS/index.ejs', req.locals);
-//   }),
-// );
+router.get(
+  '/ess',
+  asyncHandler(async (req, res) => {
+    BU.CLI('ESS');
+    return res.render('./templates/ESS/main.ejs', req.locals);
+  }),
+);
 
 module.exports = router;
