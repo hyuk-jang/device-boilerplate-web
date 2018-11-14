@@ -320,7 +320,7 @@ class BiModule extends BM {
     let strEndDateFormat = convertDateFormat;
     let baseViewDateFormat = 'YYYY-MM-DD';
     let korViewDateFormat = 'YYYY년 MM월 DD일';
-    switch (searchType) {
+    switch (searchInterval) {
       case 'min':
         strEndDateFormat = 'YYYY-MM-DD HH:mm:00';
         diffDay === 0 && mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
@@ -331,6 +331,7 @@ class BiModule extends BM {
         break;
       case 'hour':
         strEndDateFormat = 'YYYY-MM-DD HH:00:00';
+        diffDay === 0 && mEndDate.set({ hour: _.floor(mEndDate.get('hour'), -1) });
         break;
       case 'day':
         addUnit = 'month';
