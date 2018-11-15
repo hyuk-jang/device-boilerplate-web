@@ -186,12 +186,4 @@ router.get(
   }),
 );
 
-router.get(
-  '/ess',
-  asyncHandler(async (req, res) => {
-    BU.CLI('ESS');
-    return res.render('./templates/ESS/main.ejs', req.locals);
-  }),
-);
-
 module.exports = router;

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>냉각형 태양광 모니터링 v0.0</title>
+  <script src="/js/jquery-3.1.1.min.js"></script>
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/css/datepicker3.css" rel="stylesheet" />
+  <link href="/css/ess.custom.css" rel="stylesheet" />
+
+  <script src="/js/common-html/date-picker.js"></script>
+
+  <script src="/js/svg/svg.js"></script>
+
+  <!-- 모든 컴파일된 플러그인을 포함합니다 (아래), 원하지 않는다면 필요한 각각의 파일을 포함하세요 -->
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/bootstrap-datepicker.js"></script>
+  <script src="/js/bootstrap-datepicker.kr.js"></script>
+  <!-- 차트 관련 -->
+  <!-- <script src="https://www.gstatic.com/charts/loader.js"></script> -->
+  <!-- <script src="/js/hichart/highcharts.src.js"></script>
+  <script src="/js/hichart/highcharts-more.js"></script>
+  <script src="/js/hichart/solid-gauge.js"></script> -->
+
+  <!-- <script src="https://code.highcharts.com/modules/solid-gauge.js"></script> -->
+</head>
+
+<body>
+  <!--메인-->
+  <div class="wrap">
+    <div class="container-div">
+      <nav class="navbar navbar-inverse navbar-inverse_st">
+        <div class="container-fluid container-fluid_st">
+          <div class="navbar-header">
+            <a class="navbar-brand navbar-brand_st">
+              <!-- <img src="/image/logo_w-04_180.png" /> -->
+              <h4> 냉각형 태양광 모니터링</h4>
+              <!--<img src="/image/logo_w-04_180.png" />-->
+            </a>
+          </div>
+          <ul class="nav nav-pills navbar-nav_st" role="tablist" id="navigation">
+            <li class="active">
+              <a href="#" id="navi-main" name="navi-main">
+                <i class="fa fa-home fa-home_st" name="navi-main" aria-hidden="true"></i>홈</a>
+            </li>
+            <li class="">
+              <a href="#" id="navi-trend" name="navi-trend">
+                <i class="fa fa-pencil-square-o fa-home_st" aria-hidden="true" name="navi-trend"></i>통신 패킷</a>
+            </li>
+          </ul>
+
+        </div>
+      </nav>
+      <div id="menu-main" class="jumbotron text-center jumbotron_st" style="padding-top: 40px">
+        <div class="row row_st">
+          <!--콘텐츠왼쪽-->
+          <div class="col-xs-3 power" style="height: 620px;">
+            <div class="row power_3" style="border-radius: 0px; height: 50px;">
+              <button type="button" class="btn btn-success" id="reload">새로 고침</button>
+              새로 고침 남은시간:
+              <span id="reload-sec">60</span>
+            </div>
+            <div class="row power_1" style="border-radius: 0px; height: 35px;">
+              <h4 style="font-size: 15px;">태양광 발전 현황</h4>
+            </div>
+            <div class="row power_3">
+              <div class="col-xs-6 power_3in">
+                <p>냉각형 태양광 발전</p>
+                <input type="text" name="large" data-id="in_kw" data-type="W" value="W">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style="font-size: 12px; padding: 0px">냉각형 태양광 누적량</p>
+                <input type="text" name="large" data-id="total_pv_generating_kwh" data-type="kWh" value="kWh">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p>일반 태양광 발전</p>
+                <input type="text" name="small" data-id="in_kw" data-type="W" value="W">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style="font-size: 12px; padding: 0px">일반 태양광 누적량</p>
+                <input type="text" name="small" data-id="total_pv_generating_kwh" data-type="kWh" value="kWh">
+              </div>
+
+            </div>
+            <div class="row power_1" style="border-radius: 0px; height: 35px;">
+              <h4 style="font-size: 15px;">수온 현황</h4>
+            </div>
+            <div class="row power_3">
+              <div class="col-xs-6 power_3in">
+                <p>냉각형 태양광 발전</p>
+                <input type="text" name="large" data-id="led_using_kw" data-type="kW" value="kW">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style=" padding: 0 0 0 0px;">3.3kW 누적 소모량</p>
+                <input type="text" name="large" data-id="led_total_using_kwh" data-type="kWh" value="kWh">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p>600W 소모량</p>
+                <input type="text" name="small" data-id="led_using_kw" data-type="kW" value="kW">
+                </button>
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style="padding: 0 0 0 0px;"> 600W 누적 소모량</p>
+                <input type="text" name="small" data-id="led_total_using_kwh" data-type="kWh" value="kWh">
+              </div>
+
+            </div>
+
+            <div class="row power_1" style="border-radius: 0px; height: 35px;">
+              <h4 style="font-size: 15px;">계통 충전 현황</h4>
+            </div>
+            <div class="row power_3">
+              <div class="col-xs-6 power_3in">
+                <p>3.3kW 전력</p>
+                <input type="text" name="large" data-id="input_line_kw" data-type="kW" value="kW">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style="padding: 0 0 0 0px;">3.3kW 누적 충전량</p>
+                <input type="text" name="large" data-id="input_total_line_kwh" data-type="kWh" value="kWh">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p>600kW 전력</p>
+                <input type="text" name="small" data-id="input_line_kw" data-type="kW" value="kW">
+              </div>
+              <div class="col-xs-6 power_3in">
+                <p style="padding: 0 0 0 0px;">600W 누적 충전량</p>
+                <input type="text" name="small" data-id="input_total_line_kwh" data-type="kWh" value="kWh">
+              </div>
+            </div>
+            <div class="row power_1" style="border-radius: 0px; height: 35px;">
+              <h4 style="font-size: 15px;">Mode State & Fault</h4>
+            </div>
+            <div class="row power_3" style="position: relative; height: 220px;">
+              <div class="col-xs-6 power_3in" style="width: 270px; height: 100px;">
+                <p>3.3kW</p>
+                <input type="text" name="large" style="width: 245px; margin-bottom: 5px" data-id="operation_mode">
+                <input type="text" name="large" style="width: 245px; margin-bottom: 5px" data-id="operation_status">
+              </div>
+              <div class="col-xs-6 power_3in" style="width: 270px; height: 100px;">
+                <p>600W</p>
+                <input type="text" name="small" style="width: 245px; margin-bottom: 5px" data-id="operation_mode">
+                <input type="text" name="small" style="width: 245px; margin-bottom: 5px" data-id="operation_status">
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <!--콘텐츠중앙-->
+
+          <div class="col-xs-9 col-sm-9_st">
+            <div class="col-xs-6 con_1 con_1_main" style="height: 230px; border-radius: 5px; background: linear-gradient(to top, #E7F0F9,#FEFEFE);  margin: 0;
+                border: 7px solid transparent;
+                -moz-border-image: -moz-linear-gradient(top left, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                -webkit-border-image: -webkit-linear-gradient(top left, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                border-image: linear-gradient(to bottom right, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                border-image-slice: 1; 
+                margin-left: 35px; margin-bottom: 30px;">
+              <div class="con_1_title" style="width: 180px; height: 50px; margin-top: -20px; margin-left:92px; position:absolute; background-image: url('/image/btn_03.png'); ">
+                <h5 style="color:#fff; font-weight:500; margin-top:15px; font-size:16px;">3.3kW 계통 현황</h5>
+              </div>
+              <div style="position: absolute; margin-top: 40px; margin-left: 70px">
+                <p name="large" data-id="out_total_kwh" data-type="kWh" style="font-size: 17px"></p>
+              </div>
+              <div class="con_1_con" style="width: 300px; height: 180px;  margin: 50px auto 0">
+                <div id="chart_div_1" style="width: 400px; height: 280px;"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-6 con_1 con_1_main" style="height: 230px; border-radius: 5px; background: linear-gradient(to top, #E7F0F9,#FEFEFE);  margin: 0;
+                border: 7px solid transparent;
+                -moz-border-image: -moz-linear-gradient(top left, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                -webkit-border-image: -webkit-linear-gradient(top left, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                border-image: linear-gradient(to bottom right, #90BAE3 0%, #C6D8EA 50%, #90BBE3 100%);
+                border-image-slice: 1;
+                margin-left: 55px; margin-bottom: 30px;">
+
+              <div class="con_1_title" style="width: 180px; height: 50px; margin-top: -20px; margin-left:92px; position:absolute; background-image: url('/image/btn_03.png'); 
+                  ">
+                <h5 style="color:#fff; font-weight:500; margin-top:15px; font-size:16px;">600W 계통 현황</h5>
+              </div>
+              <div style="position: absolute; margin-top: 40px; margin-left: 70px">
+                <p name="small" data-id="out_total_kwh" data-type="kWh" style="font-size: 17px"></p>
+              </div>
+              <div class="con_1_con" style="width: 300px; height: 180px;  margin: 50px auto 0">
+                <div id="chart_div_2" style="width: 400px; height: 280px;"></div>
+              </div>
+              <!-- <div class="con_1_bot" style="width: 180px; height: 70px; margin-left: 90px; margin-top:-5px; background-image: url('image/btn_09.png'); ">
+                    <p style="color:#fff; font-weight:500; font-size:16px; padding-top:10px; margin-bottom:5px;">금일 발전량</p>
+                    <p style="color:#333; font-weight:500; font-size:16px;  ">14.75kWh</p>
+                  </div> -->
+            </div>
+
+
+
+
+            <div class="col-xs-12 con_4" style="margin-left:35px;width:842px;">
+              <div class="row con_2" style="border-radius: 0px;">
+                <h5 style="float:left; margin-left:20px;">태양광 발전 그래프 </h5>
+
+                <span style="float:right; margin-right:3px; font-size:12px; color:#ddd; line-height:3;  color:burlywood; ">
+                  <button type="button" class="btn btn-warning" id="download_excel">Download Excel</button>
+                </span>
+              </div>
+              <div class="row con_2_1" style="height:347px; background: #fff; ">
+                <div class="row row_width  top_box" style="margin: 0px; padding: 0px; width: auto">
+                  <div class="col-xs-8 " style="padding: 5px">
+                    <!-- <div class="col-xs-2 sel_box"> -->
+                    <select class="form-control form-control_st" id="device_list_sel" name="device_seq" style="height: 30px; padding: 0 10px">
+                    </select>
+                    <!-- </div> -->
+                    <div id="sel_type_div_area" class="input_st" style="margin:3px; width: 380px; padding: 3px; height: auto;">
+                      <label class="radio-inline">
+                        <input type="radio" class="" name="searchType" value="min">일일(1분)</label>
+                      <label class="radio-inline">
+                        <input type="radio" class="" name="searchType" value="min10">일일(10분)</label>
+                      <label class="radio-inline">
+                        <input type="radio" class="" name="searchType" value="hour">일일(1시간)</label>
+                      <label class="radio-inline">
+                        <input type="radio" class="" name="searchType" value="day">월간</label>
+                      <!-- <label class="radio-inline">
+                                  <input type="radio" class="" name="searchType" value="month">년간</label>
+                                <label class="radio-inline">
+                                  <input type="radio" class="" name="searchType" value="range">기간선택</label> -->
+                    </div>
+                  </div>
+
+                  <div class="serch_st sel_box_data" style="margin:2px 0 0">
+                    날짜 &nbsp;
+                    <input class="input_tre" name="start" id="start_date_input" type="text" readonly>
+
+                    <input class="input_tre" name="end" id="end_date_input" type="text" readonly hidden="hidden">
+                    <button id="searchPower" type="button" class="btn btn-primary" style="margin-bottom:3px; height:28px;"
+                      id="search">검색</button>
+
+                  </div>
+                </div>
+                <div id="dailyPowerChart" class="title_box2" style="height: 300px;">
+
+                </div>
+
+              </div>
+              <!-- <p class="re_p" style="margin-top: 5px">※ 발전량(kWh) 데이터는 모든 인버터에서 측정한
+                    <span>시간당 발전량의 합 </span> 입니다. </p> -->
+            </div>
+
+          </div>
+        </div>
+
+
+
+        <!--콘텐츠하단-->
+        <div class="row row_title" style="width: 1170px;">
+
+
+
+          <div class="title" style="float: none; margin-bottom: 10px; margin-top:50px; margin-left: 331px"> Battery 현황
+            <span id="measureTime" style="position: absolute;color: black;width: 300px; text-align: left; text-indent: 30px">
+            </span>
+          </div>
+
+          <div class="table-responsive" style="margin-left: 331px">
+            <table class="table table-hover " style="background: #fff;">
+              <thead>
+                <tr>
+                  <th style="width:6%;"></th>
+                  <th style="width:5%;">전압
+                    <br>(V)</th>
+                  <th style="width:5%;">전류
+                    <br>(A)</th>
+                  <th style="width:7%;">충전 전력
+                    <br>(kW)</th>
+                  <th style="width:7%;">방전 전력
+                    <br>(kW)</th>
+                  <th style="width:8%;">누적 충전 전력
+                    <br>(kWh)</th>
+                  <th style="width:8%;">누적 방전 전력
+                    <br>(kWh)</th>
+                  <!-- <th style="width:8%;">계통 전압 여부
+                        <br>(0: Y, 1: N)</th>
+                      <th style="width:10%;">Mode
+                        <br>State
+                      </th>
+                      <th style="width:14%; vertical-align: middle">Fault</th> -->
+                </tr>
+              </thead>
+              <tbody id="myTable">
+                <tr class="sel">
+                  <td class="td1" style="text-align:right;vertical-align: middle">3.3 kW</td>
+                  <td name="large" style="vertical-align: middle" data-id="battery_v"></td>
+                  <td name="large" style="vertical-align: middle" data-id="battery_a"></td>
+                  <td name="large" style="vertical-align: middle" data-id="battery_charging_kw"></td>
+                  <td name="large" style="vertical-align: middle" data-id="battery_discharging_kw"></td>
+                  <td name="large" style="vertical-align: middle" data-id="battery_total_charging_kwh"></td>
+                  <td style="vertical-align: middle" data-id="">0</td>
+                  <!-- <td name="large" style="vertical-align: middle" data-id="battery_total_discharging_kwh"></td> -->
+                  <!-- <td name="large" style="vertical-align: middle" data-id="operation_has_v">1</td>
+                      <td name="large" style="vertical-align: middle" data-id="operation_mode">주간모드</td>
+                      <td name="large" style="vertical-align: middle" data-id="operation_status">DC48V OC(Over Current)</td> -->
+                </tr>
+                <tr class="sel">
+                  <td class="td1" style="text-align:right;vertical-align: middle">600 W</td>
+                  <td name="small" style="vertical-align: middle" data-id="battery_v"></td>
+                  <td name="small" style="vertical-align: middle" data-id="battery_a"></td>
+                  <td name="small" style="vertical-align: middle" data-id="battery_charging_kw"></td>
+                  <td name="small" style="vertical-align: middle" data-id="battery_discharging_kw"></td>
+                  <td name="small" style="vertical-align: middle" data-id="battery_total_charging_kwh"></td>
+                  <td style="vertical-align: middle" data-id="">0</td>
+                  <!-- <td name="small" style="vertical-align: middle" data-id="battery_total_discharging_kwh"></td> -->
+                  <!-- <td name="small" style="vertical-align: middle" data-id="operation_has_v">1</td>
+                      <td name="small" style="vertical-align: middle" data-id="operation_mode">주간모드</td>
+                      <td name="small" style="vertical-align: middle" data-id="operation_status">DC48V OC(Over Current)</td> -->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="menu-trend" hidden class="jumbotron text-center jumbotron_line">
+        <div class="row row_st_line min_h_780">
+          <div class="row row_width  top_box">
+            <div class="col-xs-2 sel_box">
+              인버터
+              <select class="form-control form-control_st" id="" name="device_seq">
+                <option data-type="1" value="2">
+                  hi
+                </option>
+              </select>
+            </div>
+
+
+            <div class="col-xs-4 ">
+              <div id="" class="input_st" style="height:58px; margin:10px">
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="min">일일(1분)</label>
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="min10">일일(10분)</label>
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="hour">일일(1시간)</label>
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="day">월간</label>
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="month">년간</label>
+                <label class="radio-inline">
+                  <input type="radio" class="" name="searchType" value="range">기간선택</label>
+              </div>
+            </div>
+
+            <div class="serch_st sel_box_data">
+              날짜 &nbsp;
+              <input class="input_tre" name="start" id="" type="text" readonly>
+
+              <input class="input_tre" name="end" id="" type="text" readonly hidden="hidden">
+              <button id="searchTrend" type="button" class="btn btn-primary" style="margin-bottom:3px; height:28px;" id="search">검색</button>
+
+            </div>
+          </div>
+          <div class="row_width">
+
+            <div class="row row_title">
+              <div class="title title_trend">발전량</div>
+              <div class="title_trend_exc">
+                <!-- <input id='downloadExcel' class="title_trend_exc_in" type="submit" value="Download Excel"> -->
+              </div>
+
+              <p class="title_p" id="during">
+              </p>
+            </div>
+
+            <div class="title_box2" id="moduleChart_1" style="height: 500px;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--네비-->
+
+  </div>
+
+
+  </div>
+
+  <!-- <script src="/js/lodash.js"> -->
+
+  <!-- <script src="./renderer.js"></script> -->
+
+  <!-- 
+  <script>
+    // You can also require other files to run in this process
+    // require('./renderer.js')
+
+    // renderer 프로세스(웹 페이지)안에서
+    const {
+      ipcRenderer
+    } = require('electron')
+    // console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // "pong"이 출력됩니다.
+
+    // ipcRenderer.on('asynchronous-reply', (event, arg) => {
+    //   console.log(arg) // "pong"이 출력됩니다.
+    // })
+    // ipcRenderer.send('asynchronous-message', 'ping')
+
+    // ipcRenderer.on('ping', (event, message) => {
+    //   console.log('print', message) // Prints 'whoooooooh!'
+    // })
+
+
+
+
+    document.querySelector('#navi-inverter').addEventListener('click', event => {
+          console.log(event)
+      
+      // ipcRenderer.send('navigationMenu', 'inverter')
+    })
+  </script> -->
+</body>
+
+</html>

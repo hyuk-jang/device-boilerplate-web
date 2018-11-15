@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+  <%- include("../master/head.ejs") %>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <%- include("./mediaQuery.ejs") %>
+</head>
+
+<body style="background-color: #333">
+  <div id="wrap" class="wrap hidden">
+    <div class="center">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="containera">
+        <div class="text-center" style="background-color:#fff; height:auto;">
+          <div class="row row_width  top_box" style="padding:5px;">
+            <div class="sel" style="justify-content: flex-start">
+              <!-- <div class="col-xs-2 pad sel_box" style="margin-left: 0px">
+                태양광 모듈
+                <select class="form-control form-control_st" id="subSelectBoxDom" name="device_seq">
+                  <option value="">모두</option>
+                  <option value="">냉각형모듈(200 W)</option>
+                  <option value="">일반형모듈(200 W)</option>
+                </select>
+              </div> -->
+              <div class="sel_box2">
+                <span>조회기간</span>
+                <select id="searchType" class="form-control">
+                  <option value="hour">일일</option>
+                  <option value="day">월간</option>
+                  <option value="month">년간</option>
+                  <option value="range">기간선택</option>
+                </select>
+              </div>
+              <div class="sel_box3">
+                <span>조회간격</span>
+                <select id="searchInterval" class="form-control">
+                  <option value="min">1분</option>
+                  <option value="min10">10분</option>
+                  <option value="hour">1시간</option>
+                  <option value="day">1일</option>
+                  <option value="month">1달</option>
+                  <option value="year">1년</option>
+                </select>
+              </div>
+              <!--</div>-->
+              <div class="serch_st sel_box_data">
+                날짜 &nbsp;
+                <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
+                <span id="between-start-end" hidden>~</span>
+                <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
+                  style="display: none;">
+                <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
+                <input type="image" src="/image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc" onclick="doit('xlsx');">
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive " style="overflow-x:visible; min-height: 650px">
+            <table class="table table-bordered " style="width:100%;background:#fff;">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="width:5%">번호</th>
+                  <th scope="col" rowspan="2" style="width:9%">일시</th>
+                  <th scope="col" rowspan="2" style="width:15%">모듈명</th>
+                  <th scope="col" colspan="4" style="width:30%">인버터</th>
+                  <th scope="col" colspan="3" style="width:30%">센서</th>
+                </tr>
+                <tr>
+                  <th style="width:8%;">AC전류(A)</th>
+                  <th style="width:8%;">AC전압(V)</th>
+                  <th style="width:8%;">AC전력(W)</th>
+                  <th style="width:8%;">누적발전량(kWh)</th>
+                  <th style="width:8%;">모듈후면온도(℃)</th>
+                  <th style="width:8%;">수온(℃)</th>
+                  <th style="width:8%;">외기온도(℃)</th>
+                </tr>
+              </thead>
+              <tbody id="reportDom">
+                <tr>
+                  <td>1</td>
+                  <td>2018-11-15 00:00</td>
+                  <td>1.5</td>
+                  <td>176.2</td>
+                  <td>213.6</td>
+                  <td>2.64</td>
+                  <td>32.7</td>
+                  <td>25.6</td>
+                  <td>17.2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <nav id="paginationDom" aria-label="...">
+          </nav>
+        </div>
+      </div>
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
+      </div><br>
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </div>
+
+
+  <!-- 기본 데이터 세팅 -->
+  <script>
+    $('#reportDom').html(<%- JSON.stringify(dom.reportDom)  %>)
+    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+
+    // 초기 시작시 라디오 체크버튼 클릭처리
+    var searchRange = <%- JSON.stringify(searchRange)  %>;
+    console.log(searchRange)
+    const {
+      siteId,
+      subCategory,
+      subCategoryId
+    } = <%- JSON.stringify(reportInfo) %>;
+
+    // 생육 환경, 인버터 클릭 시 페이지 이동
+    $('#subCategoryDom').children().each((index, dom) => {
+      $(dom).on('click', function () {
+        location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + $(this).val()
+      })
+    })
+
+
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
+    // 검색 타입에 따라 적용
+    applySearchType(searchRange.searchType)
+
+
+    function checkSelectBoxOption(selectBoxId, selectValue) {
+      var $selectBoxOptions = $("#" + selectBoxId).children();
+      $selectBoxOptions.each(function (index, dom) {
+        // dom.getAttribute('value')
+        if (dom.getAttribute('value') === selectValue) {
+          dom.selected = true;
+        } else {
+          dom.selected = false;
+        }
+      })
+    }
+
+    $('#searchType').on('change', function () {
+      applySearchType($(this).val())
+    })
+
+
+    /**
+     * 검색 기간 Radio 클릭 시 날짜 영역 설정
+     * @param {Dom} input[name='searchType']
+     * @return {void} 
+     */
+    function applySearchType(value) {
+      console.log(value)
+      var checkedSearchType = value;
+      var startDateDom = document.querySelector('#strStartDateInputValue');
+      var endDateDom = document.querySelector('#strEndDateInputValue');
+
+      var startDate = new Date(searchRange.strStartDateInputValue);
+      var endDate = searchRange.strEndDateInputValue === '' || new Date(searchRange.strEndDateInputValue) ===
+        'Invalid Date' ? startDate : new Date(searchRange.strEndDateInputValue);
+
+      var viewMode = 0;
+      var sliceEndIndex = 10;
+
+      if (checkedSearchType === 'range') {
+        $('#strEndDateInputValue').show()
+        $('#between-start-end').show()
+      } else {
+        $('#strEndDateInputValue').hide();
+        $('#between-start-end').hide()
+      }
+
+      if (checkedSearchType == 'month') {
+        viewMode = 2;
+        sliceEndIndex = 4;
+      } else if (checkedSearchType == 'day') {
+        viewMode = 1;
+        sliceEndIndex = 7;
+      } else if (checkedSearchType == 'range') {
+        makeDatePicker(endDateDom, 0);
+        endDateDom.value = endDate.toISOString().substring(0, sliceEndIndex);
+      } else {
+        viewMode = 0;
+        sliceEndIndex = 10;
+      }
+      startDateDom.value = startDate.toISOString().substring(0, sliceEndIndex);
+      makeDatePicker(startDateDom, viewMode);
+    }
+
+    // 검색 클릭 시
+    function searchReport() {
+      var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
+      subCategoryId = subCategoryId.trim();
+      var searchInterval = document.querySelector('#searchInterval option:checked').value;
+      var searchType = document.querySelector('#searchType option:checked').value;
+      var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
+      var strEndDateInputValue = '';
+
+      if (searchType === 'range') {
+        strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
+        if (strStartDateInputValue > strEndDateInputValue) {
+          return alert('종료일이 시작일보다 빠를 수 없습니다.');
+        }
+      }
+
+      const queryString =
+        `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
+
+      // 사이트 변경 시
+      location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
+        '?' + queryString;
+
+    }
+  </script>
+
+
+</body>
+
+</html>

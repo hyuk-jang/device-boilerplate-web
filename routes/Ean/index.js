@@ -7,9 +7,6 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const main = require('./main');
-const inverter = require('./inverter');
-const sensor = require('./sensor');
-const trend = require('./trend');
 const report = require('./report');
 // const users = require('./users');
 
@@ -49,36 +46,13 @@ router.get(
 
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
 
-    let totalSiteAmount = 0;
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        totalSiteAmount += totalAmount;
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
-        return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
-      })
-      .value();
-    siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
-
-    // _.set(req, 'locals.siteList', siteList);
-
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
-    _.set(req, 'locals.mainInfo.siteList', siteList);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 사이트 목록 추가
     const loginAreaDom = domMakerMaster.makeTopHeader(user);
     _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
-
-    const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
-    _.set(req, 'locals.dom.siteListDom', siteListDom);
 
     // 네비게이션 목록 추가
     const naviList = [
@@ -86,18 +60,6 @@ router.get(
         href: 'main',
         name: '메인',
       },
-      {
-        href: 'inverter',
-        name: '인버터',
-      },
-      {
-        href: 'sensor',
-        name: '생육센서',
-      },
-      // {
-      //   href: 'trend',
-      //   name: '트렌드',
-      // },
       {
         href: 'report',
         name: '보고서',
@@ -123,29 +85,6 @@ router.get(
 );
 
 router.use('/', main);
-router.use('/inverter', inverter);
-router.use('/sensor', sensor);
-router.use('/trend', trend);
 router.use('/report', report);
-
-// router.use('/users', users);
-
-// server middleware
-// router.use(
-//   asyncHandler(async (req, res, next) => {
-//     const user = _.get(req, 'user', {});
-//     next();
-//   }),
-// );
-
-// /* GET users listing. */
-// router.get('/', (req, res, next) => {
-//   BU.CLI(process.env.DEV_PAGE);
-//   if (_.isString(process.env.DEV_PAGE)) {
-//     res.redirect(`/${process.env.DEV_PAGE}`);
-//   } else {
-//     res.redirect('/main');
-//   }
-// });
 
 module.exports = router;

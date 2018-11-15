@@ -11,6 +11,20 @@ const admin = require('./admin/users');
 // const owner = require('./owner/users');
 // const guest = require('./guest/users');
 const users = require('./users');
+const Ean = require('./Ean');
+
+let selectedRouter;
+switch (process.env.DEV_CATEGORY) {
+  case 'FP':
+    selectedRouter = users;
+    break;
+  case 'Ean':
+    selectedRouter = Ean;
+    break;
+  default:
+    selectedRouter = users;
+    break;
+}
 
 // router.use('/', users);
 
@@ -39,7 +53,7 @@ router.get('/intersection', (req, res) => {
       res.redirect('/admin');
       break;
     default:
-      router.use('/', users);
+      router.use('/', selectedRouter);
       _.isString(process.env.DEV_PAGE)
         ? res.redirect(`/${process.env.DEV_PAGE}`)
         : res.redirect('/main');
@@ -62,10 +76,9 @@ router.get('/intersection', (req, res) => {
 // );
 
 router.get(
-  '/ess',
+  '/home',
   asyncHandler(async (req, res) => {
-    console.log(global.app.get('dbInfo'));
-    return res.render('./templates/ESS/index.ejs', req.locals);
+    res.render('./templates/Ean/main', req.locals);
   }),
 );
 
