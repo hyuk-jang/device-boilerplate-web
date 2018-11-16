@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const moment = require('moment');
 const { BU } = require('base-util-jh');
 
 /**
@@ -12,6 +13,78 @@ function getDistinctGroupDateList(sensorGroupRows) {
     .value();
 }
 exports.getDistinctGroupDateList = getDistinctGroupDateList;
+
+/**
+ * searchRange 형태를 분석하여 addUnit, addValue, momentFormat을 반환
+ * @param {searchRange} searchRange
+ */
+function getSearchRangeWithMomentFormat(searchRange) {
+  const { searchInterval } = searchRange;
+
+  let addUnit = 'minutes';
+  let addValue = 1;
+  let momentFormat = 'YYYY-MM-DD HH:mm:ss';
+  switch (searchInterval) {
+    case 'min':
+      addUnit = 'minutes';
+      momentFormat = 'YYYY-MM-DD HH:mm';
+      break;
+    case 'min10':
+      addUnit = 'minutes';
+      addValue = 10;
+      momentFormat = 'YYYY-MM-DD HH:mm';
+      break;
+    case 'hour':
+      addUnit = 'hours';
+      momentFormat = 'YYYY-MM-DD HH';
+      break;
+    case 'day':
+      addUnit = 'days';
+      momentFormat = 'YYYY-MM-DD';
+      break;
+    case 'month':
+      addUnit = 'months';
+      momentFormat = 'YYYY-MM';
+      break;
+    case 'year':
+      addUnit = 'years';
+      momentFormat = 'YYYY';
+      break;
+    default:
+      break;
+  }
+  return {
+    addUnit,
+    addValue,
+    momentFormat,
+  };
+}
+exports.getSearchRangeWithMomentFormat = getSearchRangeWithMomentFormat;
+
+/**
+ * 실제 사용된 데이터 그룹 Union 처리하여 반환
+ * @param {searchRange} searchRange
+ */
+function getGroupDateList(searchRange) {
+  // BU.CLI(searchRange);
+  const groupDateList = [];
+  const { strStartDate, strEndDate } = searchRange;
+
+  const { addUnit, addValue, momentFormat } = getSearchRangeWithMomentFormat(searchRange);
+
+  const startMoment = moment(strStartDate);
+  const endMoment = moment(strEndDate);
+
+  while (startMoment.format(momentFormat) < endMoment.format(momentFormat)) {
+    // string 날짜로 변환하여 저장
+    groupDateList.push(startMoment.format(momentFormat));
+
+    // 날짜 간격 더함
+    startMoment.add(addValue, addUnit);
+  }
+  return groupDateList;
+}
+exports.getGroupDateList = getGroupDateList;
 
 /**
  * 그루핑 데이터를 해당 장소에 확장
@@ -44,7 +117,7 @@ function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) 
     ndId,
     ndName: '',
     dataUnit: '',
-    strGroupDateList: [],
+    // strGroupDateList: [],
     mergedAvgList: [],
     mergedSumList: [],
     storageList: [],
@@ -66,6 +139,22 @@ function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) 
   return reportStorageList;
 }
 exports.makeReportStorageListByPickedNdId = makeReportStorageListByPickedNdId;
+
+/**
+ * 센서 목록을 장소 순으로 묶은 후
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {V_DV_PLACE[]} placeRows
+ * @param {string[]} pickedNodeDefIds
+ */
+function extendsPlaceRowsWithPlaceRelationRows(placeRelationRows, placeRows, pickedNodeDefIds) {
+  placeRows.forEach(pRow => {
+    pRow.sensorReportStorageList = makeReportStorageListByPickedNdId(
+      placeRelationRows,
+      pickedNodeDefIds,
+    );
+  });
+}
+exports.extendsPlaceRowsWithPlaceRelationRows = extendsPlaceRowsWithPlaceRelationRows;
 
 /**
  * page 정보에 따라 보여줄 항목(일시)을 계산

@@ -32,6 +32,7 @@ router.get(
     '/:naviMenu/:siteId',
     '/:naviMenu/:siteId/:subCategory',
     '/:naviMenu/:siteId/:subCategory/:subCategoryId',
+    '/:naviMenu/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
     commonUtil.applyHasNumbericReqToNumber(req);

@@ -27,7 +27,13 @@ const SensorProtocol = require('../../models/SensorProtocol');
 
 // report middleware
 router.get(
-  ['/', '/:siteId', '/:siteId/:subCategory', '/:siteId/:subCategory/:subCategoryId'],
+  [
+    '/',
+    '/:siteId',
+    '/:siteId/:subCategory',
+    '/:siteId/:subCategory/:subCategoryId',
+    '/:siteId/sensor/:subCategoryId/:finalCategory',
+  ],
   asyncHandler(async (req, res, next) => {
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -49,18 +55,18 @@ router.get(
     } = req.query;
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    const searchRange = biModule.createSearchRange({
-      searchType,
-      searchInterval,
-      searchOption,
-      strStartDate: strStartDateInputValue,
-      strEndDate: strEndDateInputValue,
-    });
     // const searchRange = biModule.createSearchRange({
-    //   searchType: 'min10',
-    //   strStartDate: '2018-11-11',
-    //   strEndDate: '',
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
     // });
+    const searchRange = biModule.createSearchRange({
+      searchType: 'min10',
+      strStartDate: '2018-11-12',
+      strEndDate: '',
+    });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -87,9 +93,17 @@ router.get(
 
 /** 생육 환경 레포트 */
 router.get(
-  ['/', '/:siteId', '/:siteId/sensor', '/:siteId/sensor/:subCategoryId'],
-  asyncHandler(async (req, res) => {
+  [
+    '/',
+    '/:siteId',
+    '/:siteId/sensor',
+    '/:siteId/sensor/:subCategoryId',
+    '/:siteId/sensor/:subCategoryId/:finalCategory',
+  ],
+  asyncHandler(async (req, res, next) => {
     commonUtil.applyHasNumbericReqToNumber(req);
+
+    BU.CLI(req.path);
 
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
@@ -99,7 +113,7 @@ router.get(
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
 
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
+    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
 
@@ -131,18 +145,27 @@ router.get(
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     // BU.CLI(searchRangeInfo);
 
+    console.time('111');
+    // BU.CLI(sensorUtil.getGroupDateList(searchRangeInfo));
+    console.timeEnd('111');
+
     console.time('getSensorGroup');
+    /** @type {sensorAvgGroup[]} */
     const sensorGroupRows = await biDevice.getSensorAvgGroup(searchRangeInfo, sensorSeqList);
     console.timeEnd('getSensorGroup');
     // BU.CLI(sensorGroupRows);
-
-    // 실제 사용된 데이터 그룹 Union 처리하여 반환
-    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
 
     console.time('sensorGroupRows');
     // 그루핑 데이터를 해당 장소에 확장
     sensorUtil.extendsPlaceRelationRowsWithSensorGroupRows(placeRelationRows, sensorGroupRows);
     console.timeEnd('sensorGroupRows');
+
+    // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
+    if (_.get(req.params, 'finalCategory', '') === 'excel') {
+      _.set(req, 'locals.placeRows', placeRows);
+      _.set(req, 'locals.placeRelationRows', placeRelationRows);
+      return next();
+    }
 
     // BU.CLI(sensorGroupRows);
 
@@ -157,14 +180,15 @@ router.get(
     );
     console.timeEnd('reportStorageList');
 
+    // 실제 사용된 데이터 그룹 Union 처리하여 반환
+    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
+
     const sensorGroupDateInfo = sensorUtil.sliceStrGroupDateList(strGroupDateList, {
       page,
       pageListCount: PAGE_LIST_COUNT,
     });
 
     // BU.CLI(sensorGroupDateInfo);
-
-    const pickedNodeDefIdList = sensorProtocol.getPickedNodeDefIdList();
     console.time('calcMergedReportStorageList');
     // 데이터 그룹의 평균 값 산출
     // FIXME: 병합은 하지 않음. 이슈 생길 경우 대처
@@ -205,7 +229,53 @@ router.get(
     const placeSiteDom = reportDom.makePlaceSiteDom(placeRows, subCategoryId);
     _.set(req, 'locals.dom.subSelectBoxDom', placeSiteDom);
 
-    res.render('./report/rSensor', req.locals);
+    return res.render('./report/rSensor', req.locals);
+  }),
+);
+
+/** 생육 환경 레포트 */
+router.get(
+  ['/:siteId/sensor/:subCategoryId/excel'],
+  asyncHandler(async (req, res) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
+
+    /** @type {MEMBER} */
+    const user = _.get(req, 'user', {});
+    /** @type {searchRange} */
+    const searchRangeInfo = _.get(req, 'locals.searchRange');
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = _.get(req, 'locals.placeRows', {});
+    // /** @type {sensorAvgGroup[]} */
+    // const sensorGroupRows = _.get(req, 'locals.sensorGroupRows', {});
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const placeRelationRows = _.get(req, 'placeRelationRows', {});
+
+    // req.param 값 비구조화 할당
+    const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+
+    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
+
+    console.time('111');
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    console.timeEnd('111');
+
+    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
+    const sensorProtocol = new SensorProtocol(siteId);
+
+    console.time('extendsPlaceRowsWithPlaceRelationRows');
+    // placeRows 확장
+    sensorUtil.extendsPlaceRowsWithPlaceRelationRows(
+      placeRelationRows,
+      placeRows,
+      sensorProtocol.pickedNodeDefIdList,
+    );
+    console.timeEnd('extendsPlaceRowsWithPlaceRelationRows');
+
+    // BU.CLIN(placeRows);
+
+    res.send('hi');
   }),
 );
 
