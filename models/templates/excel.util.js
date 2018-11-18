@@ -36,6 +36,35 @@ const webUtil = require('./web.util');
  * @property {string} group_date 그룹 처리한 Date Format
  */
 
+/**
+ * 장소 분류로 만들 엑셀 워크 시트
+ * @param {V_DV_PLACE} placeRow 장소 단위로 만들 엑셀
+ * @param {{strGroupDateList: string[], searchRangeInfo: searchRange}} makeOption 엑셀을 만드는데 필요한 옵션
+ */
+function makeEWSWithPlaceRow(placeRow, makeOption) {
+  const ws = XLSX.utils.aoa_to_sheet([]);
+
+  const { searchRangeInfo, strGroupDateList } = makeOption;
+  const {
+    m_name: mainSiteName = '',
+    pd_target_name: placeDefName = '',
+    p_target_name: placeLastName = '',
+    sensorReportStorageList,
+  } = placeRow;
+
+  // 검색 기간
+  const { rangeStart, rangeEnd = '' } = searchRangeInfo;
+  const strSearchRange = `${rangeStart}${rangeEnd && ` ~ ${rangeEnd}`}`;
+  const placeName = `${mainSiteName} ${placeDefName} ${placeLastName}`;
+
+  /** 개요 구성 시작 */
+  const searchRowsEC = ['검색 기간', strSearchRange];
+  const placeInfoRowsEC = ['장소', placeName];
+
+  // BU.CLIN(sensorReportStorageList);
+}
+exports.makeEWSWithPlaceRow = makeEWSWithPlaceRow;
+
 const weatherCastOptionList = [{ name: '운량', selectKey: 'avg_sky', dateKey: 'group_date' }];
 
 /**

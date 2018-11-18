@@ -10,6 +10,7 @@ const { BU, DU } = require('base-util-jh');
 const reportDom = require('../../models/domMaker/reportDom');
 
 const sensorUtil = require('../../models/templates/sensor.util');
+const excelUtil = require('../../models/templates/excel.util');
 const commonUtil = require('../../models/templates/common.util');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
@@ -64,7 +65,7 @@ router.get(
     // });
     const searchRange = biModule.createSearchRange({
       searchType: 'min10',
-      strStartDate: '2018-11-12',
+      strStartDate: '2018-11-10',
       strEndDate: '',
     });
 
@@ -102,8 +103,6 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     commonUtil.applyHasNumbericReqToNumber(req);
-
-    BU.CLI(req.path);
 
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
@@ -151,21 +150,24 @@ router.get(
 
     console.time('getSensorGroup');
     /** @type {sensorAvgGroup[]} */
-    const sensorGroupRows = await biDevice.getSensorAvgGroup(searchRangeInfo, sensorSeqList);
+    const sensorAvgReportRows = await biDevice.getSensorAvgGroup(searchRangeInfo, sensorSeqList);
     console.timeEnd('getSensorGroup');
     // BU.CLI(sensorGroupRows);
-
-    console.time('sensorGroupRows');
-    // 그루핑 데이터를 해당 장소에 확장
-    sensorUtil.extendsPlaceRelationRowsWithSensorGroupRows(placeRelationRows, sensorGroupRows);
-    console.timeEnd('sensorGroupRows');
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
       _.set(req, 'locals.placeRows', placeRows);
       _.set(req, 'locals.placeRelationRows', placeRelationRows);
+      _.set(req, 'locals.sensorAvgReportRows', sensorAvgReportRows);
       return next();
     }
+
+    console.time('sensorGroupRows');
+    // 그루핑 데이터를 해당 장소에 확장
+    sensorUtil.extPlaRelRowsNdRepRows(placeRelationRows, sensorAvgReportRows);
+    console.timeEnd('sensorGroupRows');
+
+    // BU.CLIN(placeRelationRows, 2);
 
     // BU.CLI(sensorGroupRows);
 
@@ -174,14 +176,14 @@ router.get(
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     console.time('reportStorageList');
-    const reportStorageList = sensorUtil.makeReportStorageListByPickedNdId(
+    const reportStorageList = sensorUtil.makeRepStorageList(
       placeRelationRows,
       sensorProtocol.pickedNodeDefIdList,
     );
     console.timeEnd('reportStorageList');
 
     // 실제 사용된 데이터 그룹 Union 처리하여 반환
-    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorGroupRows);
+    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorAvgReportRows);
 
     const sensorGroupDateInfo = sensorUtil.sliceStrGroupDateList(strGroupDateList, {
       page,
@@ -233,7 +235,7 @@ router.get(
   }),
 );
 
-/** 생육 환경 레포트 */
+/** 생육 환경 엑셀 다운로드 */
 router.get(
   ['/:siteId/sensor/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
@@ -244,11 +246,15 @@ router.get(
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     /** @type {V_DV_PLACE[]} */
-    const placeRows = _.get(req, 'locals.placeRows', {});
+    const placeRows = _.get(req, 'locals.placeRows', []);
     // /** @type {sensorAvgGroup[]} */
-    // const sensorGroupRows = _.get(req, 'locals.sensorGroupRows', {});
+    // const sensorGroupRows = _.get(req, 'locals.sensorGroupRows', []);
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = _.get(req, 'placeRelationRows', {});
+    const placeRelationRows = _.get(req, 'locals.placeRelationRows', []);
+    /** @type {sensorAvgGroup[]} */
+    const sensorAvgReportRows = _.get(req, 'locals.sensorAvgReportRows', []);
+
+    // BU.CLIN(placeRelationRows);
 
     // req.param 값 비구조화 할당
     const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
@@ -257,23 +263,50 @@ router.get(
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
 
-    console.time('111');
     const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-    console.timeEnd('111');
+
+    // Place Relation Rows 확장
+    console.time('extPlaRelRowsPerfectNdRepRows');
+    sensorUtil.extPlaRelRowsPerfectNdRepRows(
+      placeRelationRows,
+      sensorAvgReportRows,
+      strGroupDateList,
+    );
+    console.timeEnd('extPlaRelRowsPerfectNdRepRows');
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const sensorProtocol = new SensorProtocol(siteId);
 
-    console.time('extendsPlaceRowsWithPlaceRelationRows');
-    // placeRows 확장
-    sensorUtil.extendsPlaceRowsWithPlaceRelationRows(
+    // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
+    console.time('reportStorageList');
+    const reportStorageList = sensorUtil.makeRepStorageList(
       placeRelationRows,
-      placeRows,
       sensorProtocol.pickedNodeDefIdList,
     );
-    console.timeEnd('extendsPlaceRowsWithPlaceRelationRows');
+    console.timeEnd('reportStorageList');
 
-    // BU.CLIN(placeRows);
+    placeRows.forEach(pRow => {
+      excelUtil.makeEWSWithPlaceRow(pRow, {
+        searchRangeInfo,
+        strGroupDateList,
+      });
+    });
+
+    // console.time('extendsPlaceRowsWithPlaceRelationRows');
+    // // placeRows 확장
+    // sensorUtil.extendsPlaceRowsWithPlaceRelationRows(
+    //   placeRelationRows,
+    //   placeRows,
+    //   sensorProtocol.pickedNodeDefIdList,
+    // );
+    // console.timeEnd('extendsPlaceRowsWithPlaceRelationRows');
+
+    // BU.CLIN(placeRows, 2);
+
+    // excelUtil.makeEWSWithPlaceRow(_.head(placeRows), {
+    //   searchRangeInfo,
+    //   strGroupDateList,
+    // });
 
     res.send('hi');
   }),

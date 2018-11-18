@@ -18,7 +18,7 @@ exports.getDistinctGroupDateList = getDistinctGroupDateList;
  * searchRange 형태를 분석하여 addUnit, addValue, momentFormat을 반환
  * @param {searchRange} searchRange
  */
-function getSearchRangeWithMomentFormat(searchRange) {
+function getMomentFormat(searchRange) {
   const { searchInterval } = searchRange;
 
   let addUnit = 'minutes';
@@ -59,7 +59,7 @@ function getSearchRangeWithMomentFormat(searchRange) {
     momentFormat,
   };
 }
-exports.getSearchRangeWithMomentFormat = getSearchRangeWithMomentFormat;
+exports.getMomentFormat = getMomentFormat;
 
 /**
  * 실제 사용된 데이터 그룹 Union 처리하여 반환
@@ -70,7 +70,7 @@ function getGroupDateList(searchRange) {
   const groupDateList = [];
   const { strStartDate, strEndDate } = searchRange;
 
-  const { addUnit, addValue, momentFormat } = getSearchRangeWithMomentFormat(searchRange);
+  const { addUnit, addValue, momentFormat } = getMomentFormat(searchRange);
 
   const startMoment = moment(strStartDate);
   const endMoment = moment(strEndDate);
@@ -87,23 +87,60 @@ function getGroupDateList(searchRange) {
 exports.getGroupDateList = getGroupDateList;
 
 /**
+ * 1. DB에서 검색한 Sensor 데이터 결과를 완전한 날짜를 지닌 Rows로 변환
+ * 2. 해당 node_seq를 사용하는 PlaceRelation에 결합
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {sensorAvgGroup[]} sensorAvgReportRows
+ * @param {string[]} strGroupDateList
+ */
+function extPlaRelRowsPerfectNdRepRows(placeRelationRows, sensorAvgReportRows, strGroupDateList) {
+  // Node Seq 별로 그룹
+  const groupedSensorReport = _.groupBy(sensorAvgReportRows, 'node_seq');
+
+  _.keys(groupedSensorReport).forEach(key => {
+    // 모든 날짜 목록을 순회하면서 빈 데이터 목록 생성
+    const emptyAvgSensorReportRows = _.map(strGroupDateList, strGroupDate => ({
+      node_seq: Number(key),
+      group_date: strGroupDate,
+      avg_num_data: null,
+    }));
+
+    // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣음
+    const unionSensorReportRows = _.unionBy(
+      groupedSensorReport[key],
+      emptyAvgSensorReportRows,
+      'group_date',
+    );
+
+    //  union 처리 된 결과물을 재 정의
+    _.set(groupedSensorReport, key, unionSensorReportRows);
+  });
+
+  _(groupedSensorReport).forEach((groupRows, strNodeSeq) => {
+    // BU.CLI(groupRows);
+    _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
+      _.set(placeRelationRow, 'sensorGroupList', groupRows);
+    });
+  });
+}
+exports.extPlaRelRowsPerfectNdRepRows = extPlaRelRowsPerfectNdRepRows;
+
+/**
  * 그루핑 데이터를 해당 장소에 확장
  * @param {V_DV_PLACE_RELATION[]} placeRelationRows
  * @param {sensorAvgGroup[]} sensorGroupRows
  */
-function extendsPlaceRelationRowsWithSensorGroupRows(placeRelationRows, sensorGroupRows) {
+function extPlaRelRowsNdRepRows(placeRelationRows, sensorGroupRows) {
   _(sensorGroupRows)
     .groupBy('node_seq')
     .forEach((groupRows, strNodeSeq) => {
       // BU.CLI(groupRows);
-      _.set(
-        _.find(placeRelationRows, { node_seq: Number(strNodeSeq) }),
-        'sensorGroupList',
-        groupRows,
-      );
+      _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
+        _.set(placeRelationRow, 'sensorGroupList', groupRows);
+      });
     });
 }
-exports.extendsPlaceRelationRowsWithSensorGroupRows = extendsPlaceRelationRowsWithSensorGroupRows;
+exports.extPlaRelRowsNdRepRows = extPlaRelRowsNdRepRows;
 
 /**
  * Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
@@ -111,7 +148,7 @@ exports.extendsPlaceRelationRowsWithSensorGroupRows = extendsPlaceRelationRowsWi
  * @param {string[]} pickedNodeDefIds
  * @return {sensorReportStorageByPickNdId[]}
  */
-function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) {
+function makeRepStorageList(placeRelationRows, pickedNodeDefIds) {
   /** @type {sensorReportStorageByPickNdId[]} */
   const reportStorageList = _.map(pickedNodeDefIds, ndId => ({
     ndId,
@@ -138,7 +175,7 @@ function makeReportStorageListByPickedNdId(placeRelationRows, pickedNodeDefIds) 
 
   return reportStorageList;
 }
-exports.makeReportStorageListByPickedNdId = makeReportStorageListByPickedNdId;
+exports.makeRepStorageList = makeRepStorageList;
 
 /**
  * 센서 목록을 장소 순으로 묶은 후
@@ -146,15 +183,12 @@ exports.makeReportStorageListByPickedNdId = makeReportStorageListByPickedNdId;
  * @param {V_DV_PLACE[]} placeRows
  * @param {string[]} pickedNodeDefIds
  */
-function extendsPlaceRowsWithPlaceRelationRows(placeRelationRows, placeRows, pickedNodeDefIds) {
+function extPlaRowsPlaRelRows(placeRelationRows, placeRows, pickedNodeDefIds) {
   placeRows.forEach(pRow => {
-    pRow.sensorReportStorageList = makeReportStorageListByPickedNdId(
-      placeRelationRows,
-      pickedNodeDefIds,
-    );
+    pRow.sensorReportStorageList = makeRepStorageList(placeRelationRows, pickedNodeDefIds);
   });
 }
-exports.extendsPlaceRowsWithPlaceRelationRows = extendsPlaceRowsWithPlaceRelationRows;
+exports.extPlaRowsPlaRelRows = extPlaRowsPlaRelRows;
 
 /**
  * page 정보에 따라 보여줄 항목(일시)을 계산
