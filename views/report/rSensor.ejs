@@ -4,6 +4,7 @@
 <head>
   <!-- Default Js -->
   <%- include("../master/head.ejs") %>
+  <%- include("../master/excel.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
@@ -62,7 +63,7 @@
                 <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
                   style="display: none;">
                 <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
-                <input type="image" src="/image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc" onclick="doit('xlsx');">
+                <input type="image" id="downloadExcel" src="/image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc">
               </div>
             </div>
           </div>
@@ -223,6 +224,46 @@
     }
   </script>
 
+  <script>
+    $("#downloadExcel").on('click', function (event) {
+      var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
+      subCategoryId = subCategoryId.trim();
+      var searchInterval = document.querySelector('#searchInterval option:checked').value;
+      var searchType = document.querySelector('#searchType option:checked').value;
+      var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
+      var strEndDateInputValue = '';
+
+      if (searchType === 'range') {
+        strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
+        if (strStartDateInputValue > strEndDateInputValue) {
+          return alert('종료일이 시작일보다 빠를 수 없습니다.');
+        }
+      }
+
+      if (!_.includes(['min', 'min10', 'hour'], searchInterval)) {
+        return alert("엑셀 Download는 1분, 10분, 1시간 단위 생성만 지원합니다.")
+      }
+
+      var dataParam = {
+        searchInterval,
+        searchType,
+        strStartDateInputValue,
+        strEndDateInputValue
+      }
+
+      $.ajax({
+        type: "GET",
+        url: window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
+          '/' + 'excel',
+        data: dataParam
+      }).done(function (excelData) {
+        console.log(excelData)
+        XLSX.writeFile(excelData.workBook, excelData.fileName + ".xlsx");
+      }).fail(function (req, sts, err) {
+        alert(err);
+      });
+    })
+  </script>
 
 </body>
 

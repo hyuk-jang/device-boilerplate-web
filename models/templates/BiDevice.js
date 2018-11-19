@@ -18,9 +18,9 @@ class BiDevice extends BiModule {
    * 센서 장치 데이터를 구해옴
    * @param {searchRange} searchRange
    * @param {number[]} nodeSeqList
-   * @return {sensorAvgGroup[]}
+   * @return {sensorReport[]}
    */
-  getSensorAvgGroup(searchRange = this.createSearchRange(), nodeSeqList) {
+  getSensorReport(searchRange = this.createSearchRange(), nodeSeqList) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
     const sql = `
@@ -28,7 +28,8 @@ class BiDevice extends BiModule {
           node_seq,
           ${dateFormat.selectViewDate},
           ${dateFormat.selectGroupDate},
-          ROUND(AVG(num_data), 1)  AS avg_num_data
+          ROUND(AVG(num_data), 1)  AS avg_data,
+          ROUND(MAX(num_data), 1)  AS max_data
       FROM dv_sensor_data
       WHERE node_seq IN (${nodeSeqList})
         AND writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"

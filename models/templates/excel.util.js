@@ -36,6 +36,8 @@ const webUtil = require('./web.util');
  * @property {string} group_date 그룹 처리한 Date Format
  */
 
+// function
+
 /**
  * 장소 분류로 만들 엑셀 워크 시트
  * @param {V_DV_PLACE} placeRow 장소 단위로 만들 엑셀
@@ -49,7 +51,7 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
     m_name: mainSiteName = '',
     pd_target_name: placeDefName = '',
     p_target_name: placeLastName = '',
-    sensorReportStorageList,
+    sensorRepStorageList,
   } = placeRow;
 
   // 검색 기간
@@ -62,6 +64,101 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
   const placeInfoRowsEC = ['장소', placeName];
 
   // BU.CLIN(sensorReportStorageList);
+
+  const dataReportList = _(placeRow.nodeDefStorageList)
+    .map('sensorDataRows')
+    .value();
+
+  const dataHeaderList = ['날짜'];
+  // const dataBodyList = [strGroupDateList]
+
+  // BU.CLIN(dataReportList, 3);
+
+  // 데이터 개요를 구성
+  const reportList = [];
+  const dataBodyList = _.map(placeRow.nodeDefStorageList, nodeDefStorage => {
+    const { ndName = '', dataUnit = '', nodePlaceList = [] } = nodeDefStorage;
+    // 헤더 명 추가
+    const headerName = `${ndName}${dataUnit.length ? ` (${dataUnit})` : ''}`;
+    dataHeaderList.push(`${ndName}${dataUnit.length ? ` (${dataUnit})` : ''}`);
+
+    // FIXME: 임시로 평균 값 산출
+    // 장소에 해당 ND를 가진 데이터 장치가 하나일 경우
+    let dataBody = [];
+    if (nodePlaceList.length === 1) {
+      const nodePlace = _.head(nodePlaceList);
+
+      dataBody = _(nodePlace.sensorDataRows)
+        .map('avg_data')
+        .value();
+
+      // dataBody = makeTrendToReport(reportList, strGroupDateList, [
+      //   { pickValueKeyList: ['avg_data'], trend: nodePlace.sensorDataRows },
+      // ]);
+    } else {
+      const mapData = _(nodePlaceList)
+        .map('sensorDataRows')
+        .flatten()
+        .value();
+
+      strGroupDateList.map((strDate, index) => {
+        const mean = _(mapData)
+          .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
+          .map('avg_data')
+          .mean();
+        return _.isNaN(mean) ? '' : _.round(mean, 1);
+      });
+    }
+
+    // Header 추가
+    // dataHeaderList.push(headerName);
+    // dataBody.unshift(headerName);
+    dataHeaderList.push(headerName)
+
+    return dataBody;
+  });
+  // 날짜 Header 입력
+  strGroupDateList.unshift('날짜');
+  // 좌측열에 세울 날짜 삽입
+  dataBodyList.unshift(strGroupDateList);
+
+  const dataContents = _.map(strGroupDateList, (strDate, index) => {
+    const dataRows = _.map(dataBodyList, bodyList => bodyList[index]);
+    dataRows.unshift(strDate);
+    return dataRows;
+  });
+
+  dataContents.unshift(dataHeaderList)
+
+  const wb = XLSX.utils.book_new();
+  wb.SheetNames = [placeName];
+
+  /* TEST: properties */
+  wb.Props = {
+    Title: placeName,
+    Subject: '',
+    Author: 'SmSoft',
+    Manager: 'SmSoft',
+    Company: 'SmSoft',
+    Category: '',
+    Keywords: 'Excel',
+    Comments: 'Nothing to say here',
+    LastAuthor: 'j.hyuk',
+    CreatedDate: new Date(),
+  };
+
+  XLSX.utils.sheet_add_aoa(ws, dataContents, { origin: 'B2' });
+
+  return { sheetName: placeName, ws };
+
+  // BU.CLIN(
+  //   _(dataBodyList)
+  //     .map(v => v[0])
+  //     .value(),
+  //   2,
+  // );
+
+  /** 데이터 바디 시작 */
 }
 exports.makeEWSWithPlaceRow = makeEWSWithPlaceRow;
 
@@ -99,7 +196,7 @@ function getNextAlphabet(char, nextIndex) {
 
 /**
  * Trend를 기준 날짜에 매칭시켜 Report 형태로 변환 후 반환
- * @param {[][]} excelDataRows
+ * @param {[]} excelDataRows
  * @param {string[]} baseDateList
  * @param {{trend: Object[], pickValueKeyList: string[]}[]} trendInfoList
  */

@@ -127,15 +127,13 @@ router.get(
     // BU.CLI(placeRows);
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere);
+    const placeRelationRows = await biDevice.getTable(
+      'v_dv_place_relation',
+      _.assign(mainWhere, sensorWhere),
+      false,
+    );
 
-    // 인버터 Seq 목록
-    const sensorSeqList = _(placeRelationRows)
-      .filter(sensorWhere)
-      .map('node_seq')
-      .value();
-
-    // BU.CLI(sensorSeqList);
+    // BU.CLIN(placeRelationRows);
 
     // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
@@ -144,28 +142,27 @@ router.get(
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     // BU.CLI(searchRangeInfo);
 
-    console.time('111');
-    // BU.CLI(sensorUtil.getGroupDateList(searchRangeInfo));
-    console.timeEnd('111');
-
-    console.time('getSensorGroup');
-    /** @type {sensorAvgGroup[]} */
-    const sensorAvgReportRows = await biDevice.getSensorAvgGroup(searchRangeInfo, sensorSeqList);
-    console.timeEnd('getSensorGroup');
+    console.time('getSensorReport');
+    /** @type {sensorReport[]} */
+    const sensorReportRows = await biDevice.getSensorReport(
+      searchRangeInfo,
+      _.map(placeRelationRows, 'node_seq'),
+    );
+    console.timeEnd('getSensorReport');
     // BU.CLI(sensorGroupRows);
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
       _.set(req, 'locals.placeRows', placeRows);
       _.set(req, 'locals.placeRelationRows', placeRelationRows);
-      _.set(req, 'locals.sensorAvgReportRows', sensorAvgReportRows);
+      _.set(req, 'locals.sensorReportRows', sensorReportRows);
       return next();
     }
 
-    console.time('sensorGroupRows');
-    // 그루핑 데이터를 해당 장소에 확장
-    sensorUtil.extPlaRelRowsNdRepRows(placeRelationRows, sensorAvgReportRows);
-    console.timeEnd('sensorGroupRows');
+    console.time('extPlaRelSensorRep');
+    // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
+    sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
+    console.timeEnd('extPlaRelSensorRep');
 
     // BU.CLIN(placeRelationRows, 2);
 
@@ -183,7 +180,7 @@ router.get(
     console.timeEnd('reportStorageList');
 
     // 실제 사용된 데이터 그룹 Union 처리하여 반환
-    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorAvgReportRows);
+    const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorReportRows);
 
     const sensorGroupDateInfo = sensorUtil.sliceStrGroupDateList(strGroupDateList, {
       page,
@@ -251,64 +248,63 @@ router.get(
     // const sensorGroupRows = _.get(req, 'locals.sensorGroupRows', []);
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationRows = _.get(req, 'locals.placeRelationRows', []);
-    /** @type {sensorAvgGroup[]} */
-    const sensorAvgReportRows = _.get(req, 'locals.sensorAvgReportRows', []);
+    /** @type {sensorReport[]} */
+    const sensorReportRows = _.get(req, 'locals.sensorReportRows', []);
 
     // BU.CLIN(placeRelationRows);
 
     // req.param 값 비구조화 할당
     const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-    const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
-
     const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
 
     // Place Relation Rows 확장
-    console.time('extPlaRelRowsPerfectNdRepRows');
-    sensorUtil.extPlaRelRowsPerfectNdRepRows(
-      placeRelationRows,
-      sensorAvgReportRows,
-      strGroupDateList,
-    );
-    console.timeEnd('extPlaRelRowsPerfectNdRepRows');
+    console.time('extPlaRelPerfectSenRep');
+    sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
+    console.timeEnd('extPlaRelPerfectSenRep');
+    // BU.CLIN(placeRelationRows)
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const sensorProtocol = new SensorProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     console.time('reportStorageList');
-    const reportStorageList = sensorUtil.makeRepStorageList(
+
+    // PlaceRows --> nodeDefList --> nodePlaceList  --> sensorDataRows
+    const finalPlaceRows = sensorUtil.extPlaWithPlaRel(
+      placeRows,
       placeRelationRows,
-      sensorProtocol.pickedNodeDefIdList,
+      sensorProtocol.getSenRepProtocolFP(),
     );
     console.timeEnd('reportStorageList');
 
-    placeRows.forEach(pRow => {
+    // BU.CLIN(finalPlaceRows, 6);
+
+    // BU.CLIN(finalPlaceRows[0], 4);
+
+    BU.CLI('@@@@@@@@@@@');
+    console.time('excelWorkSheetList');
+    const excelWorkSheetList = finalPlaceRows.map(pRow =>
       excelUtil.makeEWSWithPlaceRow(pRow, {
         searchRangeInfo,
         strGroupDateList,
-      });
-    });
+      }),
+    );
+    console.timeEnd('excelWorkSheetList');
 
-    // console.time('extendsPlaceRowsWithPlaceRelationRows');
-    // // placeRows 확장
-    // sensorUtil.extendsPlaceRowsWithPlaceRelationRows(
-    //   placeRelationRows,
-    //   placeRows,
-    //   sensorProtocol.pickedNodeDefIdList,
-    // );
-    // console.timeEnd('extendsPlaceRowsWithPlaceRelationRows');
+    BU.CLIN(excelWorkSheetList);
 
-    // BU.CLIN(placeRows, 2);
-
-    // excelUtil.makeEWSWithPlaceRow(_.head(placeRows), {
+    // excelUtil.makeEWSWithPlaceRow(finalPlaceRows[0], {
     //   searchRangeInfo,
     //   strGroupDateList,
     // });
 
-    res.send('hi');
+    const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);
+
+    BU.CLIN(excelWorkBook);
+
+    // res.send('hi');
+    res.send({ fileName: 'test', workBook: excelWorkBook });
   }),
 );
 

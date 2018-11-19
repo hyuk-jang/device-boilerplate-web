@@ -89,26 +89,27 @@ exports.getGroupDateList = getGroupDateList;
 /**
  * 1. DB에서 검색한 Sensor 데이터 결과를 완전한 날짜를 지닌 Rows로 변환
  * 2. 해당 node_seq를 사용하는 PlaceRelation에 결합
+ * Extends Place Realtion Rows With Perfect Sensor Report Rows
  * @param {V_DV_PLACE_RELATION[]} placeRelationRows
- * @param {sensorAvgGroup[]} sensorAvgReportRows
+ * @param {sensorReport[]} sensorReportRows
  * @param {string[]} strGroupDateList
  */
-function extPlaRelRowsPerfectNdRepRows(placeRelationRows, sensorAvgReportRows, strGroupDateList) {
+function extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList) {
   // Node Seq 별로 그룹
-  const groupedSensorReport = _.groupBy(sensorAvgReportRows, 'node_seq');
+  const groupedSensorReport = _.groupBy(sensorReportRows, 'node_seq');
 
   _.keys(groupedSensorReport).forEach(key => {
     // 모든 날짜 목록을 순회하면서 빈 데이터 목록 생성
-    const emptyAvgSensorReportRows = _.map(strGroupDateList, strGroupDate => ({
+    const emptySensorReportRows = _.map(strGroupDateList, strGroupDate => ({
       node_seq: Number(key),
       group_date: strGroupDate,
-      avg_num_data: null,
+      avg_data: null,
     }));
 
     // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣음
     const unionSensorReportRows = _.unionBy(
       groupedSensorReport[key],
-      emptyAvgSensorReportRows,
+      emptySensorReportRows,
       'group_date',
     );
 
@@ -119,18 +120,20 @@ function extPlaRelRowsPerfectNdRepRows(placeRelationRows, sensorAvgReportRows, s
   _(groupedSensorReport).forEach((groupRows, strNodeSeq) => {
     // BU.CLI(groupRows);
     _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
-      _.set(placeRelationRow, 'sensorGroupList', groupRows);
+      placeRelationRow.sensorDataRows = groupRows;
+      // _.set(placeRelationRow, 'sensorGroupList', groupRows);
     });
   });
 }
-exports.extPlaRelRowsPerfectNdRepRows = extPlaRelRowsPerfectNdRepRows;
+exports.extPlaRelPerfectSenRep = extPlaRelPerfectSenRep;
 
 /**
  * 그루핑 데이터를 해당 장소에 확장
+ * Extends Place Realtion Rows With Sensor Report Rows
  * @param {V_DV_PLACE_RELATION[]} placeRelationRows
  * @param {sensorAvgGroup[]} sensorGroupRows
  */
-function extPlaRelRowsNdRepRows(placeRelationRows, sensorGroupRows) {
+function extPlaRelWithSenRep(placeRelationRows, sensorGroupRows) {
   _(sensorGroupRows)
     .groupBy('node_seq')
     .forEach((groupRows, strNodeSeq) => {
@@ -140,42 +143,66 @@ function extPlaRelRowsNdRepRows(placeRelationRows, sensorGroupRows) {
       });
     });
 }
-exports.extPlaRelRowsNdRepRows = extPlaRelRowsNdRepRows;
+exports.extPlaRelWithSenRep = extPlaRelWithSenRep;
 
 /**
  * Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
  * @param {V_DV_PLACE_RELATION[]} placeRelationRows
  * @param {string[]} pickedNodeDefIds
- * @return {sensorReportStorageByPickNdId[]}
+ * @return {nodeDefStorage[]}
  */
 function makeRepStorageList(placeRelationRows, pickedNodeDefIds) {
-  /** @type {sensorReportStorageByPickNdId[]} */
+  // BU.CLI(pickedNodeDefIds);
+  /** @type {nodeDefStorage[]} */
   const reportStorageList = _.map(pickedNodeDefIds, ndId => ({
     ndId,
     ndName: '',
     dataUnit: '',
-    // strGroupDateList: [],
     mergedAvgList: [],
     mergedSumList: [],
     storageList: [],
+    nodePlaceList: [],
   }));
 
   // 장소 관계를 순회하면서 해당 Reprot Key와 일치하는 곳에 데이터 정의
   _(placeRelationRows)
     .groupBy('nd_target_id')
-    .forEach((v, ndTargetId) => {
+    .forEach((groupedRelationPlaceRows, ndTargetId) => {
       const foundStorage = _.find(reportStorageList, { ndId: ndTargetId });
       if (foundStorage) {
-        const { nd_target_name: ndName, data_unit: dataUnit } = _.head(v);
+        const { nd_target_name: ndName, data_unit: dataUnit } = _.head(groupedRelationPlaceRows);
         foundStorage.ndName = ndName;
         foundStorage.dataUnit = dataUnit;
-        foundStorage.placeRelationRows = v;
+        foundStorage.nodePlaceList = groupedRelationPlaceRows;
       }
     });
 
   return reportStorageList;
 }
 exports.makeRepStorageList = makeRepStorageList;
+
+/**
+ * Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
+ * @param {V_DV_PLACE[]} placeRows
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {{key: string, protocol: string}[]} protocolList
+ */
+function extPlaWithPlaRel(placeRows, placeRelationRows, protocolList) {
+  // 장소 단위로 그루핑
+  const groupedPlaRel = _.groupBy(placeRelationRows, 'place_seq');
+
+  // 그루핑 된 PR과 일치하는 Place의 정보를 가져온 뒤 해당 Place에 Sensor Report Storage List를  추가
+  const reportStorageList = _.map(groupedPlaRel, (plaRelPartRows, strPlaceSeq) => {
+    const placeRow = _.find(placeRows, { place_seq: Number(strPlaceSeq) });
+    // FIXME: protocolKey를 뽑아서 처리함. Action 별로 처리해야 함
+    placeRow.nodeDefStorageList = makeRepStorageList(plaRelPartRows, _.map(protocolList, 'key'));
+
+    return placeRow;
+  });
+
+  return reportStorageList;
+}
+exports.extPlaWithPlaRel = extPlaWithPlaRel;
 
 /**
  * 센서 목록을 장소 순으로 묶은 후
@@ -185,7 +212,7 @@ exports.makeRepStorageList = makeRepStorageList;
  */
 function extPlaRowsPlaRelRows(placeRelationRows, placeRows, pickedNodeDefIds) {
   placeRows.forEach(pRow => {
-    pRow.sensorReportStorageList = makeRepStorageList(placeRelationRows, pickedNodeDefIds);
+    pRow.sensorRepStorageList = makeRepStorageList(placeRelationRows, pickedNodeDefIds);
   });
 }
 exports.extPlaRowsPlaRelRows = extPlaRowsPlaRelRows;
@@ -235,7 +262,7 @@ function calcMergedReportStorageList(reportStorageList, groupDateInfo) {
     reportStorage.mergedAvgList = strGroupDateList.map(strDate => {
       const mean = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
-        .map('avg_num_data')
+        .map('avg_data')
         .mean();
       return _.isNaN(mean) ? '' : _.round(mean, 1);
     });
@@ -244,7 +271,7 @@ function calcMergedReportStorageList(reportStorageList, groupDateInfo) {
     reportStorage.mergedSumList = strGroupDateList.map(strDate => {
       const sum = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
-        .map('avg_num_data')
+        .map('avg_data')
         .sum();
       return _.isNaN(sum) ? '' : _.round(sum, 1);
     });
@@ -271,7 +298,7 @@ function calcIndividualReportStorageList(reportStorageList, strGroupDateList) {
     reportStorage.mergedAvgList = strGroupDateList.map(strDate => {
       const mean = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
-        .map('avg_num_data')
+        .map('avg_data')
         .mean();
       return _.isNaN(mean) ? '' : _.round(mean, 1);
     });
@@ -280,7 +307,7 @@ function calcIndividualReportStorageList(reportStorageList, strGroupDateList) {
     reportStorage.mergedSumList = strGroupDateList.map(strDate => {
       const sum = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
-        .map('avg_num_data')
+        .map('avg_data')
         .sum();
       return _.isNaN(sum) ? '' : _.round(sum, 1);
     });
