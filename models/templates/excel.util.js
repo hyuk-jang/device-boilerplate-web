@@ -57,7 +57,9 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
   // 검색 기간
   const { rangeStart, rangeEnd = '' } = searchRangeInfo;
   const strSearchRange = `${rangeStart}${rangeEnd && ` ~ ${rangeEnd}`}`;
-  const placeName = `${mainSiteName} ${placeDefName} ${placeLastName}`;
+  const placeName = `${mainSiteName} ${placeDefName} ${
+    _.isEmpty(placeLastName) ? '' : placeLastName
+  }`;
 
   /** 개요 구성 시작 */
   const searchRowsEC = ['검색 기간', strSearchRange];
@@ -80,8 +82,7 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
     const { ndName = '', dataUnit = '', nodePlaceList = [] } = nodeDefStorage;
     // 헤더 명 추가
     const headerName = `${ndName}${dataUnit.length ? ` (${dataUnit})` : ''}`;
-    dataHeaderList.push(`${ndName}${dataUnit.length ? ` (${dataUnit})` : ''}`);
-
+    dataHeaderList.push(headerName);
     // FIXME: 임시로 평균 값 산출
     // 장소에 해당 ND를 가진 데이터 장치가 하나일 경우
     let dataBody = [];
@@ -110,25 +111,22 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
       });
     }
 
-    // Header 추가
-    // dataHeaderList.push(headerName);
-    // dataBody.unshift(headerName);
-    dataHeaderList.push(headerName)
-
     return dataBody;
   });
+
+  // BU.CLI(dataHeaderList);
   // 날짜 Header 입력
-  strGroupDateList.unshift('날짜');
   // 좌측열에 세울 날짜 삽입
+  // BU.CLI(dataBodyList);
   dataBodyList.unshift(strGroupDateList);
 
   const dataContents = _.map(strGroupDateList, (strDate, index) => {
     const dataRows = _.map(dataBodyList, bodyList => bodyList[index]);
-    dataRows.unshift(strDate);
+    // dataRows.unshift(strDate);
     return dataRows;
   });
 
-  dataContents.unshift(dataHeaderList)
+  dataContents.unshift(dataHeaderList);
 
   const wb = XLSX.utils.book_new();
   wb.SheetNames = [placeName];

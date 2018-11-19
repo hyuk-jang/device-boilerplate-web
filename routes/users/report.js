@@ -55,6 +55,8 @@ router.get(
       strEndDateInputValue = '',
     } = req.query;
 
+    // BU.CLI(req.query);
+
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
     // const searchRange = biModule.createSearchRange({
     //   searchType,
@@ -120,7 +122,7 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     /** @type {V_DV_PLACE[]} */
-    const placeRows = await biDevice.getTable('v_dv_place', mainWhere);
+    const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
     _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
 
@@ -149,7 +151,7 @@ router.get(
       _.map(placeRelationRows, 'node_seq'),
     );
     console.timeEnd('getSensorReport');
-    // BU.CLI(sensorGroupRows);
+    // BU.CLI(sensorReportRows);
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
@@ -172,12 +174,12 @@ router.get(
     const sensorProtocol = new SensorProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
-    console.time('reportStorageList');
-    const reportStorageList = sensorUtil.makeRepStorageList(
+    console.time('makeNodeDefStorageList');
+    const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
       sensorProtocol.pickedNodeDefIdList,
     );
-    console.timeEnd('reportStorageList');
+    console.timeEnd('makeNodeDefStorageList');
 
     // 실제 사용된 데이터 그룹 Union 처리하여 반환
     const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorReportRows);
@@ -193,9 +195,9 @@ router.get(
     // FIXME: 병합은 하지 않음. 이슈 생길 경우 대처
     if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
       // 동일 Node Def Id 를 사용하는 저장소 데이터를 GroupDate 별로 합산처리
-      sensorUtil.calcMergedReportStorageList(reportStorageList, sensorGroupDateInfo);
+      sensorUtil.calcMergedReportStorageList(nodeDefStorageList, sensorGroupDateInfo);
       const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
-        reportStorageList,
+        nodeDefStorageList,
         {
           pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdList,
           groupDateInfo: sensorGroupDateInfo,
@@ -251,6 +253,8 @@ router.get(
     /** @type {sensorReport[]} */
     const sensorReportRows = _.get(req, 'locals.sensorReportRows', []);
 
+    // BU.CLIN(sensorReportRows);
+
     // BU.CLIN(placeRelationRows);
 
     // req.param 값 비구조화 할당
@@ -282,7 +286,6 @@ router.get(
 
     // BU.CLIN(finalPlaceRows[0], 4);
 
-    BU.CLI('@@@@@@@@@@@');
     console.time('excelWorkSheetList');
     const excelWorkSheetList = finalPlaceRows.map(pRow =>
       excelUtil.makeEWSWithPlaceRow(pRow, {
@@ -292,16 +295,18 @@ router.get(
     );
     console.timeEnd('excelWorkSheetList');
 
-    BU.CLIN(excelWorkSheetList);
+    // BU.CLIN(excelWorkSheetList);
 
     // excelUtil.makeEWSWithPlaceRow(finalPlaceRows[0], {
     //   searchRangeInfo,
     //   strGroupDateList,
     // });
 
+    console.time('makeExcelWorkBook');
     const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);
+    console.timeEnd('makeExcelWorkBook');
 
-    BU.CLIN(excelWorkBook);
+    // BU.CLIN(excelWorkBook);
 
     // res.send('hi');
     res.send({ fileName: 'test', workBook: excelWorkBook });

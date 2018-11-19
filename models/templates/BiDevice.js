@@ -31,8 +31,8 @@ class BiDevice extends BiModule {
           ROUND(AVG(num_data), 1)  AS avg_data,
           ROUND(MAX(num_data), 1)  AS max_data
       FROM dv_sensor_data
-      WHERE node_seq IN (${nodeSeqList})
-        AND writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      ${nodeSeqList.length ? ` AND node_seq IN (${nodeSeqList})` : ''}
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
     `;

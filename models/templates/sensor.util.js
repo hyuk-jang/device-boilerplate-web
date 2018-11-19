@@ -1,4 +1,11 @@
 const _ = require('lodash');
+
+// const a = [{a:1, v: 1}, {a:2, v:2}];
+// const b = [{a:2, v: 1}, {a:3, v:3}];
+
+// const res = _.unionBy(a, b, 'v')
+// console.log(res);
+
 const moment = require('moment');
 const { BU } = require('base-util-jh');
 
@@ -106,13 +113,14 @@ function extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDat
       avg_data: null,
     }));
 
-    // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣음
-    const unionSensorReportRows = _.unionBy(
-      groupedSensorReport[key],
-      emptySensorReportRows,
-      'group_date',
-    );
+    // BU.CLIN(emptySensorReportRows);
+    // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣은 후 날짜 순으로 정렬
+    const unionSensorReportRows = _(groupedSensorReport[key])
+      .unionBy(emptySensorReportRows, 'group_date')
+      .sortBy('group_date')
+      .value();
 
+    // BU.CLIN(unionSensorReportRows);
     //  union 처리 된 결과물을 재 정의
     _.set(groupedSensorReport, key, unionSensorReportRows);
   });
@@ -139,7 +147,8 @@ function extPlaRelWithSenRep(placeRelationRows, sensorGroupRows) {
     .forEach((groupRows, strNodeSeq) => {
       // BU.CLI(groupRows);
       _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
-        _.set(placeRelationRow, 'sensorGroupList', groupRows);
+        placeRelationRow.sensorDataRows = groupRows;
+        // _.set(placeRelationRow, 'sensorGroupList', groupRows);
       });
     });
 }
@@ -151,7 +160,7 @@ exports.extPlaRelWithSenRep = extPlaRelWithSenRep;
  * @param {string[]} pickedNodeDefIds
  * @return {nodeDefStorage[]}
  */
-function makeRepStorageList(placeRelationRows, pickedNodeDefIds) {
+function makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds) {
   // BU.CLI(pickedNodeDefIds);
   /** @type {nodeDefStorage[]} */
   const reportStorageList = _.map(pickedNodeDefIds, ndId => ({
@@ -167,8 +176,8 @@ function makeRepStorageList(placeRelationRows, pickedNodeDefIds) {
   // 장소 관계를 순회하면서 해당 Reprot Key와 일치하는 곳에 데이터 정의
   _(placeRelationRows)
     .groupBy('nd_target_id')
-    .forEach((groupedRelationPlaceRows, ndTargetId) => {
-      const foundStorage = _.find(reportStorageList, { ndId: ndTargetId });
+    .forEach((groupedRelationPlaceRows, strNdTargetId) => {
+      const foundStorage = _.find(reportStorageList, { ndId: strNdTargetId });
       if (foundStorage) {
         const { nd_target_name: ndName, data_unit: dataUnit } = _.head(groupedRelationPlaceRows);
         foundStorage.ndName = ndName;
@@ -179,7 +188,7 @@ function makeRepStorageList(placeRelationRows, pickedNodeDefIds) {
 
   return reportStorageList;
 }
-exports.makeRepStorageList = makeRepStorageList;
+exports.makeNodeDefStorageList = makeNodeDefStorageList;
 
 /**
  * Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
@@ -195,7 +204,10 @@ function extPlaWithPlaRel(placeRows, placeRelationRows, protocolList) {
   const reportStorageList = _.map(groupedPlaRel, (plaRelPartRows, strPlaceSeq) => {
     const placeRow = _.find(placeRows, { place_seq: Number(strPlaceSeq) });
     // FIXME: protocolKey를 뽑아서 처리함. Action 별로 처리해야 함
-    placeRow.nodeDefStorageList = makeRepStorageList(plaRelPartRows, _.map(protocolList, 'key'));
+    placeRow.nodeDefStorageList = makeNodeDefStorageList(
+      plaRelPartRows,
+      _.map(protocolList, 'key'),
+    );
 
     return placeRow;
   });
@@ -212,7 +224,7 @@ exports.extPlaWithPlaRel = extPlaWithPlaRel;
  */
 function extPlaRowsPlaRelRows(placeRelationRows, placeRows, pickedNodeDefIds) {
   placeRows.forEach(pRow => {
-    pRow.sensorRepStorageList = makeRepStorageList(placeRelationRows, pickedNodeDefIds);
+    pRow.sensorRepStorageList = makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds);
   });
 }
 exports.extPlaRowsPlaRelRows = extPlaRowsPlaRelRows;
@@ -242,24 +254,22 @@ exports.sliceStrGroupDateList = sliceStrGroupDateList;
 
 /**
  * 저장소 목록의 StorageList의 데이터 계산을 하고자 할 경우
- * @param {sensorReportStorageByPickNdId[]} reportStorageList
+ * @param {nodeDefStorage[]} nodeDefStorageList
  * @param {sensorGroupDateInfo=} groupDateInfo
  * @return {void}
  */
-function calcMergedReportStorageList(reportStorageList, groupDateInfo) {
+function calcMergedReportStorageList(nodeDefStorageList, groupDateInfo) {
   const { strGroupDateList = [], page, pageListCount } = groupDateInfo;
   // BU.CLIS(page, pageListCount);
 
-  reportStorageList.forEach(reportStorage => {
-    reportStorage.strGroupDateList = strGroupDateList;
-    // BU.CLI(reportStorage.placeRelationRows.length);
-    const mapData = _(reportStorage.placeRelationRows)
-      .map('sensorGroupList')
+  nodeDefStorageList.forEach(nodeDefStorage => {
+    const mapData = _(nodeDefStorage.nodePlaceList)
+      .map('sensorDataRows')
       .flatten()
       .value();
 
     // 평균 값
-    reportStorage.mergedAvgList = strGroupDateList.map(strDate => {
+    nodeDefStorage.mergedAvgList = strGroupDateList.map(strDate => {
       const mean = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
         .map('avg_data')
@@ -268,7 +278,7 @@ function calcMergedReportStorageList(reportStorageList, groupDateInfo) {
     });
 
     // 합산 값
-    reportStorage.mergedSumList = strGroupDateList.map(strDate => {
+    nodeDefStorage.mergedSumList = strGroupDateList.map(strDate => {
       const sum = _(mapData)
         .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
         .map('avg_data')

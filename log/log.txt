@@ -378,3 +378,7 @@ Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
 
 2018-11-06 21:24:43.728
 Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-19 22:24:57.313
+Error: Handshake inactivity timeout
