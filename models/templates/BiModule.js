@@ -270,7 +270,7 @@ class BiModule extends BM {
    * @param {searchRangeConfig} searchRangeConfig
    * @return {searchRange} 검색 범위
    */
-  createSearchRange(searchRangeConfig) {
+  createSearchRange(searchRangeConfig = {}) {
     const {
       searchType = 'days',
       searchInterval = 'hour',
@@ -478,13 +478,13 @@ class BiModule extends BM {
   }
 
   /**
-   * searchType을 받아 dateFormat String 변환하여 반환
-   * @param {string} searchType
+   * strDateType 받아 dateFormat String 변환하여 반환
+   * @param {string} strDateType
    * @return {string} dateFormat
    */
-  convertSearchType2DateFormat(searchType) {
+  convertDateTypeToDBFormat(strDateType) {
     let dateFormat = '';
-    switch (searchType) {
+    switch (strDateType) {
       case 'year':
         dateFormat = '%Y';
         break;
@@ -498,13 +498,11 @@ class BiModule extends BM {
         dateFormat = '%Y-%m-%d %H';
         break;
       case 'min10':
-        dateFormat = '%Y-%m-%d %H:%i';
-        break;
       case 'min':
         dateFormat = '%Y-%m-%d %H:%i';
         break;
       default:
-        dateFormat = '%Y-%m-%d %H:';
+        dateFormat = '%Y-%m-%d %H';
         break;
     }
     return dateFormat;
@@ -526,6 +524,44 @@ class BiModule extends BM {
     }
     sql += `        
     GROUP BY inverter_seq
+    `;
+    return this.db.single(sql, '', false);
+  }
+
+  /**
+   * 인버터 통계치 출력
+   * @desc getInverterTrend 간소화 버젼
+   * @param {searchRange} searchRange  검색 옵션
+   * @param {number[]=} inverterSeqList
+   * @return {{inverter_seq: number, interval_power: number, max_c_kwh: number, min_c_kwh: number, target_id: string }[]}
+   */
+  getInverterStatistics(searchRange = this.createSearchRange(), inverterSeqList) {
+    // const dateFormat = this.convertDateTypeToDBFormat(searchRange.searchType);
+    const { groupByFormat, selectGroupDate } = this.convertSearchRangeToDBFormat(
+      searchRange,
+      'writedate',
+    );
+
+    const sql = `
+        SELECT
+              main.*,
+              ivt.target_id, ivt.chart_color, ivt.chart_sort_rank
+        FROM
+          (
+          SELECT
+                inverter_seq,
+                ${selectGroupDate},
+                MAX(power_total_kwh) AS max_c_kwh,
+                MIN(power_total_kwh) AS min_c_kwh,       
+                ROUND((MAX(power_total_kwh) - MIN(power_total_kwh)), 1) AS interval_power
+          FROM pw_inverter_data
+          WHERE writedate >= "${searchRange.strStartDate}" 
+           AND writedate < "${searchRange.strEndDate}"
+           ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
+          GROUP BY ${groupByFormat}, inverter_seq
+          ) AS main
+        LEFT OUTER JOIN pw_inverter ivt
+         ON ivt.inverter_seq = main.inverter_seq
     `;
     return this.db.single(sql, '', false);
   }
@@ -563,7 +599,7 @@ class BiModule extends BM {
       sql += ` AND inverter_seq IN (${inverterSeqList})`;
     }
     sql += `        
-    GROUP BY  ${dateFormat.groupByFormat}, inverter_seq
+    GROUP BY ${dateFormat.groupByFormat}, inverter_seq
     ) AS main
     LEFT OUTER JOIN pw_inverter ivt
     ON ivt.inverter_seq = main.inverter_seq
@@ -624,14 +660,19 @@ class BiModule extends BM {
    */
   getInverterTrend(searchRange = this.createSearchRange(), inverterSeqList) {
     // BU.CLI(searchRange);
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const {
+      selectGroupDate,
+      selectViewDate,
+      firstGroupByFormat,
+      groupByFormat,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
 
     // BU.CLI(searchRange);
     const sql = `
     SELECT 
           id_group.inverter_seq,
-          ${dateFormat.selectViewDate},
-          ${dateFormat.selectGroupDate},
+          ${selectViewDate},
+          ${selectGroupDate},
           ROUND(AVG(avg_pv_v), 1) AS avg_pv_v,
           ROUND(AVG(avg_pv_a), 1) AS avg_pv_a,
           ROUND(AVG(avg_pv_kw), 1) AS avg_pv_kw,
@@ -674,11 +715,11 @@ class BiModule extends BM {
       searchRange.strEndDate
     }"
     AND id.inverter_seq IN (${inverterSeqList})
-      GROUP BY ${dateFormat.firstGroupByFormat}, id.inverter_seq
+      GROUP BY ${firstGroupByFormat}, id.inverter_seq
       ORDER BY id.inverter_seq, writedate) AS id_group
       LEFT OUTER JOIN pw_inverter ivt
       ON ivt.inverter_seq = id_group.inverter_seq
-    GROUP BY id_group.inverter_seq, ${dateFormat.groupByFormat}
+    GROUP BY id_group.inverter_seq, ${groupByFormat}
     `;
 
     return this.db.single(sql, '', false);
@@ -746,7 +787,102 @@ class BiModule extends BM {
    * @param {string} dateName
    * @return {dateFormatWithSearchRange}
    */
-  makeDateFormatForReport(searchRange, dateName) {
+  convertSearchRangeToDBFormat(searchRange, dateName = 'writedate') {
+    // BU.CLI(searchRange);
+
+    const { searchType, searchInterval, resultGroupType } = searchRange;
+
+    // BU.CLI(returnValue.selectViewDate);
+
+    let divideTimeNumber = 1;
+    let firstGroupByFormat = '';
+    let selectGroupDate = '';
+    let selectViewDate = '';
+    let groupByFormat = '';
+    let viewFormat = '';
+    // BU.CLI(searchRange);
+
+    // BU.CLI(dateFormat);
+
+    // 검색 간격에 따라서 첫번째 Group Format을 정함
+    if (searchInterval === 'min') {
+      divideTimeNumber = 60;
+      firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i")`;
+    } else if (searchInterval === 'min10') {
+      divideTimeNumber = 6;
+      firstGroupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
+    } else {
+      divideTimeNumber = 1;
+      firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d %H")`;
+    }
+
+    // 최종 묶는 타입을 지정 안했다면 조회 간격으로 dateFormat 생성
+    let dateFormat = '';
+    let finalGroupingType = '';
+    if (searchRange.resultGroupType == null) {
+      finalGroupingType = searchInterval;
+      dateFormat = this.convertDateTypeToDBFormat(searchInterval);
+    } else {
+      finalGroupingType = resultGroupType;
+      dateFormat = this.convertDateTypeToDBFormat(resultGroupType);
+    }
+
+    // 최종적으로 묶을 데이터 형태를 정의하였다면 정의한 형태로 따라가고 아니라면 검색 간격에 따라감
+
+    if (finalGroupingType === 'min10') {
+      selectGroupDate = `CONCAT(LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15), "0")  AS group_date`;
+      selectViewDate = `CONCAT(LEFT(DATE_FORMAT(${dateName},"%H:%i"), 4), "0")  AS view_date`;
+      // firstGroupByFormat = dateFormat;
+      // firstGroupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
+      groupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
+    } else {
+      selectGroupDate = `DATE_FORMAT(${dateName},"${dateFormat}") AS group_date`;
+
+      viewFormat = dateFormat;
+      // let firstGroupFormat = '%Y-%m-%d %H';
+      switch (searchInterval) {
+        case 'min':
+        case 'min10':
+          viewFormat = viewFormat.slice(9, 14);
+          // firstGroupFormat = '%Y-%m-%d %H:%i';
+          break;
+        case 'hour':
+          viewFormat = viewFormat.slice(9, 11);
+          break;
+        case 'day':
+          viewFormat = viewFormat.slice(6, 8);
+          break;
+        case 'month':
+          viewFormat = viewFormat.slice(3, 5);
+          break;
+        case 'year':
+          viewFormat = viewFormat.slice(0, 2);
+          break;
+        default:
+          break;
+      }
+      selectViewDate = `DATE_FORMAT(${dateName},"${viewFormat}") AS view_date`;
+      groupByFormat = `DATE_FORMAT(${dateName},"${dateFormat}")`;
+    }
+
+    const returnValue = {
+      groupByFormat,
+      firstGroupByFormat,
+      selectGroupDate,
+      selectViewDate,
+      divideTimeNumber,
+    };
+    // BU.CLI(returnValue)
+    return returnValue;
+  }
+
+  /**
+   * 레포트 Date Format 자동 작성
+   * @param {searchRange} searchRange
+   * @param {string} dateName
+   * @return {dateFormatWithSearchRange}
+   */
+  makeDateFormatForReport(searchRange, dateName = 'writedate') {
     // BU.CLI(searchRange);
     const returnValue = {
       groupByFormat: '',
@@ -757,7 +893,6 @@ class BiModule extends BM {
     };
     // BU.CLI(returnValue.selectViewDate);
 
-    dateName = dateName == null ? 'writedate' : dateName;
     // BU.CLI(searchRange);
 
     // BU.CLI(dateFormat);
@@ -776,10 +911,10 @@ class BiModule extends BM {
     let finalGroupingType = '';
     if (searchRange.resultGroupType == null) {
       finalGroupingType = searchRange.searchInterval;
-      dateFormat = this.convertSearchType2DateFormat(searchRange.searchInterval);
+      dateFormat = this.convertDateTypeToDBFormat(searchRange.searchInterval);
     } else {
       finalGroupingType = searchRange.resultGroupType;
-      dateFormat = this.convertSearchType2DateFormat(searchRange.resultGroupType);
+      dateFormat = this.convertDateTypeToDBFormat(searchRange.resultGroupType);
     }
 
     // 최종적으로 묶을 데이터 형태를 정의하였다면 정의한 형태로 따라가고 아니라면 검색 간격에 따라감
@@ -796,8 +931,9 @@ class BiModule extends BM {
 
       let viewFormat = dateFormat;
       // let firstGroupFormat = '%Y-%m-%d %H';
-      switch (searchRange.searchType) {
+      switch (searchRange.searchInterval) {
         case 'min':
+        case 'min10':
           viewFormat = viewFormat.slice(9, 14);
           // firstGroupFormat = '%Y-%m-%d %H:%i';
           break;

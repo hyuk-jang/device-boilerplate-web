@@ -19,19 +19,19 @@
     "@types/lodash": "^4.14.118",
     "docdash": "^1.0.0",
     "dotenv": "^6.1.0",
-    "eslint": "^5.8.0",
+    "eslint": "^5.9.0",
     "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^3.1.0",
+    "eslint-config-prettier": "^3.3.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-prettier": "^3.0.0",
     "eslint-plugin-react": "^7.11.1",
     "jsdoc": "^3.5.5",
     "pkg": "^4.3.4",
-    "prettier": "^1.14.3"
+    "prettier": "^1.15.2"
   },
   "dependencies": {
-    "base-model-jh": "^1.2.4",
+    "base-model-jh": "^1.2.5",
     "base-util-jh": "^1.1.20",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
@@ -56,6 +56,6 @@
     "split": "^1.0.1",
     "uuid": "^3.3.2",
     "weather-cast": "^0.2.3",
-    "xlsx": "^0.14.0"
+    "xlsx": "^0.14.1"
   }
 }
