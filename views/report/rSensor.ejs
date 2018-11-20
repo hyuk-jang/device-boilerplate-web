@@ -31,9 +31,9 @@
               <div class="sel_box2">
                 <span>조회기간</span>
                 <select id="searchType" class="form-control">
-                  <option value="hour">일일</option>
-                  <option value="day">월간</option>
-                  <option value="month">년간</option>
+                  <option value="days">일일</option>
+                  <option value="months">월간</option>
+                  <option value="years">년간</option>
                   <option value="range">기간선택</option>
                 </select>
               </div>
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="table-responsive" style="overflow-x:visible;">
+          <div class="min-table table-responsive" style="overflow-x:visible;">
             <table class="table table-bordered" style="width:100%;background:#fff;">
               <thead id="sensorReportHeaderDom">
                 <tr>
@@ -109,10 +109,6 @@
     $('#sensorReportHeaderDom').html(<%- JSON.stringify(dom.sensorReportHeaderDom) %>);
     $('#sensorReportBodyDom').html(<%- JSON.stringify(dom.sensorReportBodyDom) %>);
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
-  </script>
-
-  <!-- 기본 데이터 세팅 -->
-  <script>
     // 초기 시작시 라디오 체크버튼 클릭처리
     var searchRange = <%- JSON.stringify(searchRange)  %>;
     console.log(searchRange)
@@ -121,149 +117,20 @@
       subCategory,
       subCategoryId
     } = <%- JSON.stringify(reportInfo) %>;
+  </script>
 
-    // 생육 환경, 인버터 클릭 시 페이지 이동
-    $('#subCategoryDom').children().each((index, dom) => {
-      $(dom).on('click', function () {
-        location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + $(this).val()
-      })
-    })
+  <script src="/js/contents/report/search.js"></script>
 
+  <!-- 기본 데이터 세팅 -->
+  <script>
     checkSelectBoxOption("searchInterval", searchRange.searchInterval)
     checkSelectBoxOption("searchType", searchRange.searchType)
-    // checkSelectBoxOption("searchOption", searchRange.searchOption)
-
-    function checkSelectBoxOption(selectBoxId, selectValue) {
-      var $selectBoxOptions = $("#" + selectBoxId).children();
-      $selectBoxOptions.each(function (index, dom) {
-        // dom.getAttribute('value')
-        if (dom.getAttribute('value') === selectValue) {
-          dom.selected = true;
-        } else {
-          dom.selected = false;
-        }
-      })
-    }
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
 
     // 검색 타입에 따라 적용
     applySearchType(searchRange.searchType)
-
-    $('#searchType').on('change', function () {
-      applySearchType($(this).val())
-    })
-
-
-    /**
-     * 검색 기간 Radio 클릭 시 날짜 영역 설정
-     * @param {Dom} input[name='searchType']
-     * @return {void} 
-     */
-    function applySearchType(value) {
-      var checkedSearchType = value;
-      var startDateDom = document.querySelector('#strStartDateInputValue');
-      var endDateDom = document.querySelector('#strEndDateInputValue');
-
-      var startDate = new Date(searchRange.strStartDateInputValue);
-      var endDate = searchRange.strEndDateInputValue === '' || new Date(searchRange.strEndDateInputValue) ===
-        'Invalid Date' ? startDate : new Date(searchRange.strEndDateInputValue);
-
-      var viewMode = 0;
-      var sliceEndIndex = 10;
-
-      if (checkedSearchType === 'range') {
-        $('#strEndDateInputValue').show()
-        $('#between-start-end').show()
-      } else {
-        $('#strEndDateInputValue').hide();
-        $('#between-start-end').hide()
-      }
-
-      if (checkedSearchType == 'month') {
-        viewMode = 2;
-        sliceEndIndex = 4;
-      } else if (checkedSearchType == 'day') {
-        viewMode = 1;
-        sliceEndIndex = 7;
-      } else if (checkedSearchType == 'range') {
-        makeDatePicker(endDateDom, 0);
-        endDateDom.value = endDate.toISOString().substring(0, sliceEndIndex);
-      } else {
-        viewMode = 0;
-        sliceEndIndex = 10;
-      }
-      startDateDom.value = startDate.toISOString().substring(0, sliceEndIndex);
-      makeDatePicker(startDateDom, viewMode);
-    }
-
-    // 검색 클릭 시
-    function searchReport() {
-      var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
-      subCategoryId = subCategoryId.trim();
-      var searchInterval = document.querySelector('#searchInterval option:checked').value;
-      var searchType = document.querySelector('#searchType option:checked').value;
-      // var searchOption = document.querySelector('#searchOption option:checked').value;
-      var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
-      var strEndDateInputValue = '';
-
-      if (searchType === 'range') {
-        strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
-        if (strStartDateInputValue > strEndDateInputValue) {
-          return alert('종료일이 시작일보다 빠를 수 없습니다.');
-        }
-      }
-
-      // const queryString =
-      //   `searchType=${searchType}&searchInterval=${searchInterval}&searchOption=${searchOption}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
-      const queryString =
-        `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
-
-      // 사이트 변경 시
-      location.href = window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
-        '?' + queryString;
-
-    }
   </script>
 
-  <script>
-    $("#downloadExcel").on('click', function (event) {
-      var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
-      subCategoryId = subCategoryId.trim();
-      var searchInterval = document.querySelector('#searchInterval option:checked').value;
-      var searchType = document.querySelector('#searchType option:checked').value;
-      var strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
-      var strEndDateInputValue = '';
-
-      if (searchType === 'range') {
-        strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
-        if (strStartDateInputValue > strEndDateInputValue) {
-          return alert('종료일이 시작일보다 빠를 수 없습니다.');
-        }
-      }
-
-      if (!_.includes(['min', 'min10', 'hour'], searchInterval)) {
-        return alert("엑셀 Download는 1분, 10분, 1시간 단위 생성만 지원합니다.")
-      }
-
-      var dataParam = {
-        searchInterval,
-        searchType,
-        strStartDateInputValue,
-        strEndDateInputValue
-      }
-
-      $.ajax({
-        type: "GET",
-        url: window.location.origin + '/' + naviId + '/' + siteId + '/' + subCategory + '/' + subCategoryId +
-          '/' + 'excel',
-        data: dataParam
-      }).done(function (excelData) {
-        console.log(excelData)
-        XLSX.writeFile(excelData.workBook, excelData.fileName + ".xlsx");
-      }).fail(function (req, sts, err) {
-        alert(err);
-      });
-    })
-  </script>
 
 </body>
 

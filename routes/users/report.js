@@ -14,9 +14,9 @@ const excelUtil = require('../../models/templates/excel.util');
 const commonUtil = require('../../models/templates/common.util');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
-const DEFAULT_SEARCH_TYPE = 'hour';
+const DEFAULT_SEARCH_TYPE = 'days';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
-const DEFAULT_SEARCH_INTERVAL = 'min10';
+const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
 const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
@@ -58,18 +58,18 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'min10',
-      strStartDate: '2018-11-10',
-      strEndDate: '',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'min10',
+    //   strStartDate: '2018-11-10',
+    //   strEndDate: '',
+    // });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -127,7 +127,7 @@ router.get(
     _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
 
     // BU.CLI(placeRows);
-
+    // BU.CLI(_.assign(mainWhere, sensorWhere));
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationRows = await biDevice.getTable(
       'v_dv_place_relation',
@@ -144,13 +144,13 @@ router.get(
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     // BU.CLI(searchRangeInfo);
 
-    console.time('getSensorReport');
+    // console.time('getSensorReport');
     /** @type {sensorReport[]} */
     const sensorReportRows = await biDevice.getSensorReport(
       searchRangeInfo,
       _.map(placeRelationRows, 'node_seq'),
     );
-    console.timeEnd('getSensorReport');
+    // console.timeEnd('getSensorReport');
     // BU.CLI(sensorReportRows);
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
@@ -161,10 +161,10 @@ router.get(
       return next();
     }
 
-    console.time('extPlaRelSensorRep');
+    // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
-    console.timeEnd('extPlaRelSensorRep');
+    // console.timeEnd('extPlaRelSensorRep');
 
     // BU.CLIN(placeRelationRows, 2);
 
@@ -174,12 +174,12 @@ router.get(
     const sensorProtocol = new SensorProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
-    console.time('makeNodeDefStorageList');
+    // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
       sensorProtocol.pickedNodeDefIdList,
     );
-    console.timeEnd('makeNodeDefStorageList');
+    // console.timeEnd('makeNodeDefStorageList');
 
     // 실제 사용된 데이터 그룹 Union 처리하여 반환
     const strGroupDateList = sensorUtil.getDistinctGroupDateList(sensorReportRows);
@@ -190,7 +190,7 @@ router.get(
     });
 
     // BU.CLI(sensorGroupDateInfo);
-    console.time('calcMergedReportStorageList');
+    // console.time('calcMergedReportStorageList');
     // 데이터 그룹의 평균 값 산출
     // FIXME: 병합은 하지 않음. 이슈 생길 경우 대처
     if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
@@ -206,7 +206,7 @@ router.get(
       _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
       _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
     }
-    console.timeEnd('calcMergedReportStorageList');
+    // console.timeEnd('calcMergedReportStorageList');
 
     // BU.CLIN(reportStorageList, 2);
 
@@ -256,44 +256,35 @@ router.get(
     // BU.CLIN(sensorReportRows);
 
     // BU.CLIN(placeRelationRows);
-
-    // req.param 값 비구조화 할당
-    const { siteId = user.main_seq, subCategoryId = DEFAULT_SUB_SITE } = req.params;
-
     const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
 
     // Place Relation Rows 확장
-    console.time('extPlaRelPerfectSenRep');
+    // console.time('extPlaRelPerfectSenRep');
     sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
-    console.timeEnd('extPlaRelPerfectSenRep');
+    // console.timeEnd('extPlaRelPerfectSenRep');
     // BU.CLIN(placeRelationRows)
 
-    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
-
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
-    console.time('reportStorageList');
-
+    // console.time('reportStorageList');
+    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
+    const { siteId = user.main_seq } = req.params;
+    const sensorProtocol = new SensorProtocol(siteId);
     // PlaceRows --> nodeDefList --> nodePlaceList  --> sensorDataRows
     const finalPlaceRows = sensorUtil.extPlaWithPlaRel(
       placeRows,
       placeRelationRows,
       sensorProtocol.getSenRepProtocolFP(),
     );
-    console.timeEnd('reportStorageList');
+    // console.timeEnd('reportStorageList');
 
-    // BU.CLIN(finalPlaceRows, 6);
-
-    // BU.CLIN(finalPlaceRows[0], 4);
-
-    console.time('excelWorkSheetList');
+    // console.time('excelWorkSheetList');
     const excelWorkSheetList = finalPlaceRows.map(pRow =>
       excelUtil.makeEWSWithPlaceRow(pRow, {
         searchRangeInfo,
         strGroupDateList,
       }),
     );
-    console.timeEnd('excelWorkSheetList');
+    // console.timeEnd('excelWorkSheetList');
 
     // BU.CLIN(excelWorkSheetList);
 
@@ -302,14 +293,16 @@ router.get(
     //   strGroupDateList,
     // });
 
-    console.time('makeExcelWorkBook');
+    // console.time('makeExcelWorkBook');
     const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);
-    console.timeEnd('makeExcelWorkBook');
+    // console.timeEnd('makeExcelWorkBook');
 
     // BU.CLIN(excelWorkBook);
 
     // res.send('hi');
-    res.send({ fileName: 'test', workBook: excelWorkBook });
+    const { rangeStart, rangeEnd } = searchRangeInfo;
+    const fileName = `${rangeStart}${rangeEnd.length ? ` ~ ${rangeEnd}` : ''}`;
+    res.send({ fileName, workBook: excelWorkBook });
   }),
 );
 

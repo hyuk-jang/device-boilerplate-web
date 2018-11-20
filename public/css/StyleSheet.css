@@ -18,7 +18,13 @@ footer {
 
 .containera {
   max-width: 1024px !important;
+  min-height: 700px;
   padding: 0;
+  background-color: white;
+}
+.containera .min-table {
+  min-height: 500px;
+  background-color: white;
 }
 .center {
   max-width: 1024px;

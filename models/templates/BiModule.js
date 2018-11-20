@@ -272,30 +272,110 @@ class BiModule extends BM {
    */
   createSearchRange(searchRangeConfig) {
     const {
-      searchType = 'hour',
+      searchType = 'days',
+      searchInterval = 'hour',
       searchOption = 'merge',
       strStartDate = moment().format('YYYY-MM-DD'),
       strEndDate = '',
     } = searchRangeConfig;
 
-    let { searchInterval = '' } = searchRangeConfig;
+    // let {} = searchRangeConfig;
 
-    const mStartDate = moment(strStartDate);
-    // BU.CLI(mStartDate.format('YYYY-MM-DD HH:mm:ss'));
-    let mEndDate = strEndDate.length ? moment(strEndDate) : mStartDate;
+    // commonUtil.applyHasNumbericReqToNumber(req)를 사용할 경우 2018 년도 경우 숫자형으로 반환되버리므로 string 형으로 변환
+    const mStartDate = moment(strStartDate.toString());
 
-    let realSearchType = searchType;
+    // 종료 날짜를 설정하기 위한 단위. 기본으로 1일을 더함
+    let addUnit = 'days';
+    const convertDateFormat = 'YYYY-MM-DD 00:00:00';
+    // Web 상에 나타낼 Date Format
+    let baseViewDateFormat = 'YYYY-MM-DD';
+    let korViewDateFormat = 'YYYY년 MM월 DD일';
+
+    // 검색 기간에 따른 Data Format 변환
+    // 1. 검색 타입에 따라 월,년,시,분,초를 초기화 함
+    // 2. endDate가 명시되지 않을 경우 검색 타입을 포함하는 시간을 더하기 위해 addUnit을 정의
+    // 3. 사용자에게 보여질 시간 형태(en, kr)를 정의
+    switch (searchType) {
+      case 'days':
+        mStartDate.set({ hour: 0, minute: 0, second: 0 });
+        addUnit = 'days';
+        baseViewDateFormat = 'YYYY-MM-DD';
+        korViewDateFormat = 'YYYY년 MM월 DD일';
+        break;
+      case 'months':
+        mStartDate.set({ date: 1, hour: 0, minute: 0, second: 0 });
+        addUnit = 'months';
+        baseViewDateFormat = 'YYYY-MM';
+        korViewDateFormat = 'YYYY년 MM월';
+        break;
+      case 'years':
+        mStartDate.set({ month: 1, date: 1, hour: 0, minute: 0, second: 0 });
+        addUnit = 'years';
+        baseViewDateFormat = 'YYYY';
+        korViewDateFormat = 'YYYY년';
+        break;
+      case 'range':
+        mStartDate.set({ hour: 0, minute: 0, second: 0 });
+        addUnit = 'days';
+        baseViewDateFormat = 'YYYY-MM-DD';
+        korViewDateFormat = 'YYYY년 MM월 DD일';
+        break;
+      default:
+        mStartDate.set({ hour: 0, minute: 0, second: 0 });
+        addUnit = 'days';
+        baseViewDateFormat = 'YYYY-MM-DD';
+        korViewDateFormat = 'YYYY년 MM월 DD일';
+        break;
+    }
+
+    let mEndDate;
+    let realSearchType = '';
     // 기간 검색이라면 실제 구간 사이를 계산하여 정의
     if (searchType === 'range') {
       realSearchType = this.convertSearchTypeWithCompareDate(strEndDate, strStartDate);
-      searchInterval = realSearchType;
+      mEndDate = moment(strEndDate);
+    } else {
+      // 기본 종료 기간은 검색일을 기준으로 함
+      realSearchType = searchType;
+      mEndDate = mStartDate;
+    }
+
+    // BU.CLI(mEndDate.format('YYYY-MM-DD 00:00:00'));
+
+    // 시작 날짜를 검색 기간에 따라서 변환.
+    // example --> searchType: months, mStartDate: 2018-11-13 --> 2018-11
+    // mStartDate = moment(mStartDate.format(baseViewDateFormat));
+
+    // 검색 시간이 금일을 기준으로 얼마나 경과했는지 체크. 0이면 당일. textFormat에 따라서 시분초가 0으로 초기화되므로 현재 시간 설정
+    const diffDay = moment().diff(mEndDate, 'days');
+    // 검색 인터벌이 1시간 이내이고 금일 발전량 및 일사량 등 양을 환산할 경우 완전한 기간이 아니면 마지막 검색 구간에 오차가 생기기 때문에 변환
+    let todayStrEndDateFormat = 'YYYY-MM-DD HH:00:00';
+    // 검색 종료일이 오늘 일 경우
+    if (_.includes(['min', 'min10', 'hour'], searchInterval) && diffDay === 0) {
+      mEndDate = moment();
+
+      switch (searchInterval) {
+        case 'min':
+          todayStrEndDateFormat = 'YYYY-MM-DD HH:mm:00';
+          diffDay === 0 && mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
+          break;
+        case 'min10':
+          todayStrEndDateFormat = 'YYYY-MM-DD HH:mm:00';
+          diffDay === 0 && mEndDate.set({ minute: _.floor(mEndDate.get('minute'), -1) });
+          break;
+        case 'hour':
+          todayStrEndDateFormat = 'YYYY-MM-DD HH:00:00';
+          break;
+        default:
+          break;
+      }
     }
 
     /** @type {searchRange} */
-    const returnValue = {
+    const searchRangeInfo = {
       realSearchType,
       searchType,
-      searchInterval: searchInterval.length ? searchInterval : searchType,
+      searchInterval,
       searchOption,
       resultGroupType: null, // 최종으로 묶는 타입
       strStartDate: null, // sql writedate range 사용
@@ -308,67 +388,33 @@ class BiModule extends BM {
       strBetweenEnd: '',
     };
 
-    // 검색 시간이 금일을 기준으로 얼마나 경과했는지 체크. 0이면 당일. textFormat에 따라서 시분초가 0으로 초기화되므로 현재 시간 설정
-    const diffDay = moment().diff(mStartDate, 'days');
-    if (diffDay === 0) {
-      mEndDate = moment();
+    // 조회기간이 기간 선택일 경우
+    if (searchType === 'range') {
+      searchRangeInfo.rangeEnd = mEndDate.format(korViewDateFormat);
+      searchRangeInfo.strEndDateInputValue = mEndDate.format(baseViewDateFormat);
     }
 
-    // 종료 날짜를 설정하기 위한 단위.
-    let addUnit = 'day';
-    const convertDateFormat = 'YYYY-MM-DD 00:00:00';
-    let strEndDateFormat = convertDateFormat;
-    let baseViewDateFormat = 'YYYY-MM-DD';
-    let korViewDateFormat = 'YYYY년 MM월 DD일';
-    switch (searchInterval) {
-      case 'min':
-        strEndDateFormat = 'YYYY-MM-DD HH:mm:00';
-        diffDay === 0 && mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
-        break;
-      case 'min10':
-        strEndDateFormat = 'YYYY-MM-DD HH:mm:00';
-        diffDay === 0 && mEndDate.set({ minute: _.floor(mEndDate.get('minute'), -1) });
-        break;
-      case 'hour':
-        strEndDateFormat = 'YYYY-MM-DD HH:00:00';
-        diffDay === 0 && mEndDate.set({ hour: _.floor(mEndDate.get('hour'), -1) });
-        break;
-      case 'day':
-        addUnit = 'month';
-        baseViewDateFormat = 'YYYY-MM';
-        korViewDateFormat = 'YYYY년 MM월';
-        break;
-      case 'month':
-        addUnit = 'year';
-        baseViewDateFormat = 'YYYY';
-        korViewDateFormat = 'YYYY년';
-        break;
-      case 'range':
-        returnValue.rangeEnd = mEndDate.format(korViewDateFormat);
-        returnValue.strEndDateInputValue = mEndDate.format(baseViewDateFormat);
-        break;
-      default:
-        break;
-    }
-
+    // BU.CLIS(mEndDate, addUnit);
     // 기간을 검색하기 위해 endDate 증가
     const mAddEndDate = _.cloneDeep(mEndDate).add(1, addUnit);
 
     // 사용자 화면에 보여주기 위한 날짜
-    returnValue.rangeStart = mStartDate.format(korViewDateFormat);
-    returnValue.strStartDateInputValue = mStartDate.format(baseViewDateFormat);
+    searchRangeInfo.rangeStart = mStartDate.format(korViewDateFormat);
+    searchRangeInfo.strStartDateInputValue = mStartDate.format(baseViewDateFormat);
 
     // SQL 문에 사용될 str Date
-    returnValue.strStartDate = mStartDate.format(convertDateFormat);
-    returnValue.strEndDate =
-      diffDay === 0 ? mEndDate.format(strEndDateFormat) : mAddEndDate.format(strEndDateFormat);
+    searchRangeInfo.strStartDate = mStartDate.format(convertDateFormat);
+    searchRangeInfo.strEndDate =
+      diffDay === 0
+        ? mEndDate.format(todayStrEndDateFormat)
+        : mAddEndDate.format(convertDateFormat);
 
     // 구간 날짜 산출을 위한 str Date
-    returnValue.strBetweenStart = mStartDate.format(convertDateFormat);
-    returnValue.strBetweenEnd = mAddEndDate.format(convertDateFormat);
+    searchRangeInfo.strBetweenStart = mStartDate.format(convertDateFormat);
+    searchRangeInfo.strBetweenEnd = mAddEndDate.format(convertDateFormat);
 
     // BU.CLI(returnValue);
-    return returnValue;
+    return searchRangeInfo;
   }
 
   /**
