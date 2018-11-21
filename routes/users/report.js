@@ -66,7 +66,8 @@ router.get(
       strEndDate: strEndDateInputValue,
     });
     // const searchRange = biModule.createSearchRange({
-    //   searchType: 'min10',
+    //   searchType: 'days',
+    //   searchInterval: 'hour',
     //   strStartDate: '2018-11-10',
     //   strEndDate: '',
     // });
@@ -85,11 +86,6 @@ router.get(
 
     _.set(req, 'locals.reportInfo', reportInfo);
     _.set(req, 'locals.searchRange', searchRange);
-
-    // // 서브 메뉴 돔
-    // const subCategoryDom = reportDom.makeSubCategoryDom(subCategory);
-    // _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
-
     next();
   }),
 );
@@ -273,7 +269,7 @@ router.get(
     const finalPlaceRows = sensorUtil.extPlaWithPlaRel(
       placeRows,
       placeRelationRows,
-      sensorProtocol.getSenRepProtocolFP(),
+      sensorProtocol.senorReportProtocol,
     );
     // console.timeEnd('reportStorageList');
 

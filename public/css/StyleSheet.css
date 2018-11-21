@@ -264,9 +264,9 @@ footer {
 
 .deve {
   color: #fff;
-  margin-top: 40px;
-  margin-bottom: 30px;
-  margin-left: 30px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  margin-left: 20px;
   text-align: left;
 }
 .deve > p:first-child {
@@ -298,7 +298,7 @@ footer {
 
 .wed_1 {
   max-width: 70px;
-  padding: 5px 5px;
+  padding: 3px 5px;
   box-sizing: border-box;
   border: none;
   color: #333;
@@ -350,7 +350,7 @@ footer {
 }
 
 p {
-  margin: 0 0 5px;
+  margin: 0 0 0 5px;
 }
 
 /*헤더*/

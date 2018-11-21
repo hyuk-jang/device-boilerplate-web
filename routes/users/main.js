@@ -12,8 +12,9 @@ const webUtil = require('../../models/templates/web.util');
 const domMakerMain = require('../../models/domMaker/mainDom');
 
 const commonUtil = require('../../models/templates/common.util');
+const sensorUtil = require('../../models/templates/sensor.util');
 
-const INCLINED_SOLAR = 'inclinedSolar';
+const SensorProtocol = require('../../models/SensorProtocol');
 
 router.get(
   ['/', '/main', '/main/:siteId'],
@@ -21,8 +22,6 @@ router.get(
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId = req.user.main_seq } = req.params;
@@ -37,22 +36,16 @@ router.get(
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
-    const inclinedSolarRows = _.filter(viewSensorProfileRows, { nd_target_id: INCLINED_SOLAR });
-    // BU.CLI(inclinedSolarRows);
-    // 측정된 경사 일사량이 유효한 값인지 확인
-    const validInclinedSolarRows = webUtil.checkDataValidation(
-      inclinedSolarRows,
-      // moment('2018-11-02 18:19:00').toDate(),
-      new Date(),
-      'writedate',
-    );
-    // 유효한 경사 일사량 데이터만을 구한 뒤 평균치
-    const inclinedSolar = _(validInclinedSolarRows)
-      .filter(row => row.hasValidData)
-      .map('data.node_data')
-      .filter(_.isNumber)
-      .mean();
-    // BU.CLI(validInclinedSolarRows);
+    const sensorProtocol = new SensorProtocol(siteId);
+
+    const sensorDataInfo = {};
+    sensorProtocol.mainViewList.forEach(ndKey => {
+      const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
+        calcKey: ndKey,
+        standardDate: moment('2018-11-12 09:19:00').toDate(),
+      });
+      _.assign(sensorDataInfo, { [ndKey]: result });
+    });
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
 
@@ -167,8 +160,7 @@ router.get(
       dailyPower,
       monthPower,
       cumulativePower,
-      co2: _.round(cumulativePower * 0.424, 3),
-      [INCLINED_SOLAR]: _.isNaN(inclinedSolar) ? 0 : inclinedSolar,
+      // co2: _.round(cumulativePower * 0.424, 3),
       hasOperationInverter: _.chain(validInverterDataList)
         .map('hasValidData')
         .values()
@@ -176,7 +168,6 @@ router.get(
         .value(),
       hasAlarm: false, // TODO 알람 정보 작업 필요
     };
-    // BU.CLI(powerGenerationInfo);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 데이터 동적 생성 돔
@@ -187,6 +178,7 @@ router.get(
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
+    req.locals.growthEnv = sensorDataInfo;
     // BU.CLI(req.locals);
     res.render('./main/index', req.locals);
   }),

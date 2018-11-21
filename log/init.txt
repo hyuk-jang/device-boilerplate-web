@@ -90,3 +90,11 @@ Info : 2018-10-26 09:29:24
     at deviceList.forEach.currentItem (D:\200_Project\uwps\module\module\device-boilerplate-web\src\GetterWeathercast\index.js:45:27)
 	err Message : mainError
 
+Info : 2018-11-21 09:24:19.088
+    at Handshake.<anonymous> (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\Protocol.js:163:17)
+	err Message : mainError
+
+Info : 2018-11-21 09:25:11.113
+    at Handshake.<anonymous> (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\Protocol.js:163:17)
+	err Message : mainError
+

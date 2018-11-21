@@ -93,7 +93,7 @@ router.get(
       },
       {
         href: 'sensor',
-        name: '생육센서',
+        name: '생육환경',
       },
       // {
       //   href: 'trend',

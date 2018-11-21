@@ -61,7 +61,20 @@ class SensorProtocol {
     return CALC_TYPE;
   }
 
-  getSenRepProtocolFP() {
+  get mainViewList() {
+    return [
+      BASE_KEY.lux,
+      BASE_KEY.co2,
+      BASE_KEY.soilWaterValue,
+      BASE_KEY.soilTemperature,
+      BASE_KEY.soilReh,
+      BASE_KEY.outsideAirTemperature,
+      BASE_KEY.outsideAirReh,
+      BASE_KEY.inclinedSolar,
+    ];
+  }
+
+  get senorReportProtocol() {
     const avgPickList = [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.lux,
@@ -80,22 +93,6 @@ class SensorProtocol {
       key,
       protocol: CALC_TYPE.AVG,
     }));
-  }
-
-  getPickedNodeDefIdList() {
-    return this.pickedNodeDefIdList.map(ndId => {
-      let isInside;
-      if (_.includes(this.SENSOR_INSIDE_ND_ID_LIST, ndId)) {
-        isInside = 1;
-      } else if (_.includes(this.SENSOR_OUTSIDE_ND_ID_LIST, ndId)) {
-        isInside = 0;
-      }
-
-      return {
-        ndId,
-        isInside,
-      };
-    });
   }
 }
 module.exports = SensorProtocol;

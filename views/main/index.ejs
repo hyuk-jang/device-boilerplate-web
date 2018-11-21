@@ -6,7 +6,7 @@
 
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
-  <script src="/js/contents/main/makeGaugeChart.js"></script>
+  <script src="/js/contents/main/hichartMaker.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
 
@@ -56,13 +56,11 @@
           </div>
           <div class="box_2">
             <p style="margin-top:10px; font-weight:bold;">현재 발전현황</p>
-            <div id="current-power-graph" style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
-            <!--<div> <span>&nbsp&nbsp &nbsp현재발전</span><input class="wed_2" type="text" value="17.7">kW</div>
-      <div> <span>금일발전량</span><input class="wed_2" type="text" value="700">kW</div>-->
+            <div id="current-power-graph" style="align-self: center;width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
           </div>
           <div class="box_3">
             <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
-            <div id="daily-power-graph" style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
+            <div id="daily-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
           </div>
         </div>
         <div class="text-center containerc">
@@ -71,67 +69,87 @@
               <div class="cont-box-rotate_1"></div>
             </div>
             <div class="deve">
-              <p>상세정보</p>
-              <p>More information</p>
+              <p>생육환경정보</p>
+              <p>Growth Environment</p>
             </div>
-            <div class="deve_1">
+            <div id="growthEnv" class="deve_1">
+              <div class="stat">
+                <p><I>일사량</I></p>
+                <input id="inclinedSolar" class="wed_1" type="text" value="">
+                <span>W/m²</span>
+              </div>
+              <div class="stat">
+                <p><I>조도</I></p>
+                <input id="lux" class="wed_1" type="text" value="">
+                <span>lx</span>
+              </div>
+              <div class="stat">
+                <p><I>CO2</I></p>
+                <input id="co2" class="wed_1" type="text" value="">
+                <span>ppm</span>
+              </div>
+              <div class="stat">
+                <p><I>외기온도</I></p>
+                <input id="outsideAirTemperature" class="wed_1" type="text" value="">
+                <span>℃</span>
+              </div>
+              <div class="stat">
+                <p><I>외기습도</I></p>
+                <input id="outsideAirReh" class="wed_1" type="text" value="">
+                <span>%</span>
+              </div>
+              <div class="stat">
+                <p><I>토양온도</I></p>
+                <input id="soilTemperature" class="wed_1" type="text" value="">
+                <span>℃</span>
+              </div>
+              <div class="stat">
+                <p><I>토양습도</I></p>
+                <input id="soilReh" class="wed_1" type="text" value="">
+                <span>%</span>
+              </div>
+              <div class="stat">
+                <p><I>토양수분</I></p>
+                <input id="soilWaterValue" class="wed_1" type="text" value="">
+                <span>%</span>
+              </div>
+            </div>
+            <!-- <div class="deve_1">
               <div class="stat">
                 <p><I>기계</I></p>
                 <input class="wed_1" type="text" value="정상">
               </div>
-            </div>
+            </div> -->
           </div>
           <div class="box_5">
             <p>인버터 전압/전류</p>
             <div id="inverterStatus" class="box_5_bg">
               <div class="box_5_in">
-                <input class="input-tx" type="text">
+                <div class="box_5_a" style="word-break: keep-all;
+                word-wrap: break-word; padding: 5px; text-align: left">
+                  <b>
+                  </b>
+                </div>
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전압</p>
                   </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span> V</span></div>
                 </div>
                 <div class="box_5_a">
                   <div class="box_5_in_sp">
                     <p>AC전류</p>
                   </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
-                </div>
-              </div>
-              <div class="box_5_in">
-                <input class="input-tx" type="text">
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전압</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
-                </div>
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전류</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
-                </div>
-              </div>
-              <div class="box_5_in">
-                <input class="input-tx" type="text">
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전압</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
-                </div>
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전류</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                  <div> <input class="wed_3" type="text"><span> A</span></div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="box_6">
+          <div class="box_2">
+            <p style="margin:10px 0; font-weight:bold;">생육 환경 현황</p>
+            <div id="growthEnvChart" style="align-self: center;width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
+          </div>
+          <!-- <div class="box_6">
             <div class="box_6_in">
               <div class="box_6_in_4">
                 <img src="/image/no1.png" />
@@ -154,7 +172,7 @@
                 <input class="wed_4" type="text" value="정상">
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       <!--하단1-->
@@ -166,7 +184,16 @@
   </div>
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-    // console.log(powerGenerationInfo)
+    let growthEnv = <%- JSON.stringify(growthEnv) %>;
+
+    document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
+
+    // 발전 현황 셋팅
+    setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
+    setDomElementValueWithJson(document.getElementById('growthEnv'), growthEnv, 'value', 'id')
+
+    $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+
     // 금일 발전량 차트
     makeGaugeChart({
       domId: 'daily-power-graph',
@@ -200,12 +227,70 @@
       },
     })
 
-    document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
 
-    // 발전 현황 셋팅
-    setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
-
-    $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+    makeColumnChart({
+      domId: 'growthEnvChart',
+      xAxis: {
+        categories: ['토양', '외기']
+      },
+      yAxis: [{
+          labels: {
+            format: '{value} °C',
+            style: {
+              color: Highcharts.getOptions().colors[1]
+            }
+          },
+          title: {
+            text: '온도'
+          },
+          min: -10,
+          max: 40,
+          tickInterval: 10,
+          // tickAmount: 5,
+        },
+        {
+          labels: {
+            format: '{value} %',
+            style: {
+              color: Highcharts.getOptions().colors[1]
+            }
+          },
+          title: {
+            text: '습도'
+          },
+          min: 0,
+          max: 100,
+          tickInterval: 20,
+          // tickAmount: 5,
+          opposite: 1
+        }
+      ],
+      series: [{
+          name: '온도',
+          data: [growthEnv.soilTemperature, growthEnv.outsideAirTemperature],
+          color: 'red',
+          tooltip: {
+            valueSuffix: ' °C'
+          }
+        },
+        {
+          name: '습도',
+          data: [growthEnv.soilReh, growthEnv.outsideAirReh],
+          yAxis: 1,
+          tooltip: {
+            valueSuffix: ' %'
+          }
+        },
+        {
+          name: '수분',
+          data: [growthEnv.soilWaterValue],
+          yAxis: 1,
+          tooltip: {
+            valueSuffix: ' %'
+          }
+        }
+      ]
+    })
   </script>
 
 

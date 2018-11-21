@@ -17,7 +17,7 @@
         <ul id="naviListDom" class="nav navbar-nav">
           <li><a href="/main">메인</a></li>
           <li><a href="/inverter">인버터</a></li>
-          <li><a href="/sensor">생육센서</a></li>
+          <li><a href="/sensor">생육환경</a></li>
           <li><a href="/trend">트렌드</a></li>
           <li><a href="/report">보고서</a></li>
         </ul>
@@ -66,6 +66,8 @@
   // 페이지 동적 바인딩이 완료되었을 경우 View 처리
   window.onload = () => {
     $('#wrap').removeClass('hidden')
-    $('#loader').addClass('hidden')
+    // Spinner Loader
+    // $('#loader').addClass('hidden')
+    // $('#loader-ground').addClass('hidden')
   }
 </script>

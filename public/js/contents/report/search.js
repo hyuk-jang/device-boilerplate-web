@@ -11,12 +11,12 @@ $('#subCategoryDom')
     });
   });
 
-$('#downloadExcel').on('click', (event) => {
+$('#downloadExcel').on('click', event => {
   let subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value;
   subCategoryId = subCategoryId.trim();
-  let searchInterval = document.querySelector('#searchInterval option:checked').value;
-  let searchType = document.querySelector('#searchType option:checked').value;
-  let strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
+  const searchInterval = document.querySelector('#searchInterval option:checked').value;
+  const searchType = document.querySelector('#searchType option:checked').value;
+  const strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
   let strEndDateInputValue = '';
 
   if (searchType === 'range') {
@@ -30,34 +30,28 @@ $('#downloadExcel').on('click', (event) => {
     return alert('엑셀 Download는 1분, 10분, 1시간 단위 생성만 지원합니다.');
   }
 
-  let dataParam = {
+  const dataParam = {
     searchInterval,
     searchType,
     strStartDateInputValue,
     strEndDateInputValue,
   };
 
+  $('#loader').removeClass('hidden');
+  $('#loader-ground').removeClass('hidden');
+
   $.ajax({
     type: 'GET',
-    url:
-      window.location.origin +
-      '/' +
-      naviId +
-      '/' +
-      siteId +
-      '/' +
-      subCategory +
-      '/' +
-      subCategoryId +
-      '/' +
-      'excel',
+    url: `${window.location.origin}/${naviId}/${siteId}/${subCategory}/${subCategoryId}/` + 'excel',
     data: dataParam,
   })
-    .done(function(excelData) {
-      console.log(excelData);
-      XLSX.writeFile(excelData.workBook, `${excelData.fileName  }.xlsx`);
+    .done(excelData => {
+      $('#loader').addClass('hidden');
+      $('#loader-ground').addClass('hidden');
+      // console.log(excelData);
+      XLSX.writeFile(excelData.workBook, `${excelData.fileName}.xlsx`);
     })
-    .fail(function(req, sts, err) {
+    .fail((req, sts, err) => {
       alert(err);
     });
 });
@@ -139,6 +133,9 @@ function searchReport() {
   }
 
   const queryString = `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
+
+  $('#loader').removeClass('hidden');
+  $('#loader-ground').removeClass('hidden');
 
   // 사이트 변경 시
   location.href = `${

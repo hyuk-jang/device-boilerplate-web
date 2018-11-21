@@ -90,4 +90,6 @@ module.exports = {
     });
     return madeDom;
   },
+
+  makeShadowDom() {},
 };

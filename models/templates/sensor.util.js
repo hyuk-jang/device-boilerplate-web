@@ -10,6 +10,51 @@ const moment = require('moment');
 const { BU } = require('base-util-jh');
 
 /**
+ *
+ * @param {V_DV_SENSOR_PROFILE[]} sensorProfileRows
+ * @param {Object} calcOption
+ * @param {string} calcOption.calcKey 계산하고자 하는 nd_target_id
+ * @param {Date=} calcOption.standardDate 기준을 잡을 시간. default: Curr Date
+ * @param {number=} calcOption.diffMinutes 유효한 현재 시간과의 차, default: 10
+ * @param {string=} calcOption.lodashMathName 해당 calcKey들의 계산 결과(sum, mean), default: mean
+ * @param {number=} calcOption.fixedCount 소수 점. default 1
+ */
+function calcSensorProfileRows(sensorProfileRows, calcOption) {
+  const {
+    calcKey,
+    diffMinutes = 10,
+    lodashMathName = 'mean',
+    fixedCount = 1,
+    standardDate = new Date(),
+  } = calcOption;
+  const validNumberList = _(sensorProfileRows)
+    .filter(
+      row =>
+        _.eq(row.nd_target_id, calcKey) &&
+        _.isNumber(row.node_data) &&
+        moment(standardDate).diff(moment(row.writedate), 'minutes') < diffMinutes,
+    )
+    .map('node_data')
+    .value();
+
+  let result = 0;
+
+  switch (lodashMathName) {
+    case 'mean':
+      result = _.round(_.mean(validNumberList), fixedCount);
+      break;
+    case 'sum':
+      result = _.round(_.sum(validNumberList), fixedCount);
+      break;
+    default:
+      break;
+  }
+
+  return _.isNaN(result) ? '-' : result;
+}
+exports.calcSensorProfileRows = calcSensorProfileRows;
+
+/**
  * 실제 사용된 데이터 그룹 Union 처리하여 반환
  * @param {{group_date: string}[]} sensorGroupRows
  */

@@ -5,8 +5,8 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '85%'],
-    size: '140%',
+    center: ['50%', '75%'],
+    size: '120%',
     startAngle: -90,
     endAngle: 90,
     background: {
@@ -48,27 +48,20 @@ const gaugeOptions = {
 };
 
 /**
- *
- * @param {{domId: string, yAxis: {min: number=, max: number, title: string}, series: {name: string, data: number[], tooltip: {valueSuffix: string}} }} gaugeData
+ * @param {Object} gaugeOption
+ * @param {string} gaugeOption.domId
+ * @param {Object} gaugeOption.yAxis
+ * @param {number=} gaugeOption.yAxis.min
+ * @param {number} gaugeOption.yAxis.max
+ * @param {string} gaugeOption.yAxis.title
+ * @param {Object} gaugeOption.series
+ * @param {string} gaugeOption.series.name
+ * @param {number[]} gaugeOption.series.data
+ * @param {Object} gaugeOption.series.tooltip
+ * @param {string} gaugeOption.series.tooltip.valueSuffix
  */
-function makeGaugeChart(
-  gaugeData = {
-    domId: '',
-    yAxis: {
-      min: 0,
-      max: null,
-      title: '',
-    },
-    series: {
-      name: '',
-      data: [],
-      tooltip: {
-        valueSuffix: '',
-      },
-    },
-  },
-) {
-  const { domId, yAxis, series } = gaugeData;
+function makeGaugeChart(gaugeOption) {
+  const { domId, yAxis, series } = gaugeOption;
 
   Highcharts.chart(
     domId,
@@ -281,4 +274,70 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
   //     }
   //   }]
   // }));
+}
+
+/**
+ * @param {Object} chartOption
+ * @param {string} chartOption.domId
+ * @param {Object} chartOption.title
+ * @param {string} chartOption.title.text
+ * @param {Object} chartOption.subtitle
+ * @param {string=} chartOption.subtitle.text
+ * @param {Object} chartOption.xAxis
+ * @param {string[]} chartOption.xAxis.categories x축 좌표 Column 값
+ * @param {Object[]} chartOption.yAxis
+ * @param {Object} chartOption.yAxis.labels
+ * @param {string} chartOption.yAxis.labels.format '{value} °C',
+ * @param {Object} chartOption.yAxis.labels.style
+ * @param {string} chartOption.yAxis.labels.style.color Highcharts.getOptions().colors[1]
+ * @param {number=} chartOption.yAxis.min y 축 최소값
+ * @param {number} chartOption.yAxis.max
+ * @param {number} chartOption.yAxis.tickInterval
+ * @param {number} chartOption.yAxis.tickAmount
+ * @param {Object} chartOption.yAxis.title
+ * @param {string} chartOption.yAxis.title.text y축 단위
+ * @param {boolean} chartOption.yAxis.opposite y축 범례 우측 여부
+ * @param {Object[]} chartOption.series
+ * @param {string} chartOption.series.name
+ * @param {number[]} chartOption.series.data
+ * @param {number} chartOption.series.yAxis 0: left, 1: right
+ * @param {string=} chartOption.series.color 카테고리 색상
+ * @param {Object} chartOption.series.tooltip
+ * @param {string} chartOption.series.tooltip.valueSuffix Data Unit
+ */
+function makeColumnChart(chartOption) {
+  console.log(chartOption.yAxis);
+  Highcharts.chart(chartOption.domId, {
+    chart: {
+      type: 'column',
+    },
+    title: {
+      text: _.get(chartOption, 'title.text', ''),
+    },
+    subtitle: {
+      text: _.get(chartOption, 'subtitle.text', ''),
+    },
+    xAxis: {
+      categories: chartOption.xAxis.categories,
+      crosshair: true,
+    },
+    yAxis: chartOption.yAxis,
+    tooltip: {
+      shared: true,
+      useHTML: true,
+    },
+    plotOptions: {
+      column: {
+        pointPadding: 0.2,
+        borderWidth: 0,
+      },
+      series: {
+        threshold: -20,
+      },
+    },
+    series: chartOption.series,
+    credits: {
+      enabled: false,
+    },
+  });
 }
