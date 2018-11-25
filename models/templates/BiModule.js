@@ -405,7 +405,7 @@ class BiModule extends BM {
     // SQL 문에 사용될 str Date
     searchRangeInfo.strStartDate = mStartDate.format(convertDateFormat);
     searchRangeInfo.strEndDate =
-      diffDay === 0
+      _.includes(['min', 'min10', 'hour'], searchInterval) && diffDay === 0
         ? mEndDate.format(todayStrEndDateFormat)
         : mAddEndDate.format(convertDateFormat);
 

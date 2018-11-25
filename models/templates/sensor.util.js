@@ -11,6 +11,20 @@ const { BU } = require('base-util-jh');
 
 /**
  *
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {Object} filterInfo
+ */
+function getPlaceRelationSeqList(placeRelationRows, filterInfo) {
+  return _(placeRelationRows)
+    .filter(filterInfo)
+    .map('node_seq')
+    .union()
+    .value();
+}
+exports.getPlaceRelationSeqList = getPlaceRelationSeqList;
+
+/**
+ *
  * @param {V_DV_SENSOR_PROFILE[]} sensorProfileRows
  * @param {Object} calcOption
  * @param {string} calcOption.calcKey 계산하고자 하는 nd_target_id

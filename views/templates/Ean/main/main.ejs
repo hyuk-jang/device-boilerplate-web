@@ -6,7 +6,7 @@
 
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
-  <script src="/js/contents/main/makeGaugeChart.js"></script>
+  <script src="/js/contents/main/hichartMaker.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
 
@@ -25,25 +25,25 @@
             <div class="deve">
               <p>발전현황</p>
             </div>
-            <div id="powerStatus" class="deve_1">
+            <div id="powerInfo" class="deve_1">
               <div class="stat">
                 <p><I>현재출력</I></p>
-                <input id="currKw" class="wed_1" style="margin-left:13px;" type="text" value="">
+                <input id="currPvW" class="wed_1" style="margin-left:13px;" type="text" value="">
                 <span>W</span>
               </div>
               <div class="stat">
                 <p><I>금일발전량</I></p>
-                <input id="dailyPower" class="wed_1" type="text" value="">
+                <input id="dailyKwh" class="wed_1" type="text" value="">
                 <span>kWh</span>
               </div>
               <div class="stat">
                 <p><I>당월발전량</I></p>
-                <input id="monthPower" class="wed_1" type="text" value="">
+                <input id="monthKwh" class="wed_1" type="text" value="">
                 <span>kWh</span>
               </div>
               <div class="stat">
                 <p><I>누적발전량</I></p>
-                <input id="cumulativePower" class="wed_1" type="text" value="">
+                <input id="cpKwh" class="wed_1" type="text" value="">
                 <span>kWh</span>
               </div>
               <!-- <div class="stat">
@@ -60,11 +60,11 @@
             </section>
             <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue; border-top:none ">
               <p style="margin-top:10px; font-weight:bold;">일반형 모듈 발전 현황</p>
-              <div id="gauge-ice-daily-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
+              <div id="gauge-normal-curr-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
             </section>
             <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue;  ">
               <p style="margin-top:10px; font-weight:bold;">냉각형 모듈 금일 발전량</p>
-              <div id="gauge-normal-curr-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
+              <div id="gauge-ice-daily-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
             </section>
             <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue;  ">
               <p style="margin-top:10px; font-weight:bold;">일반형 모듈 금일 발전량</p>
@@ -82,20 +82,20 @@
             <div class="deve">
               <p>센서정보</p>
             </div>
-            <div id="" class="deve_1">
+            <div id="currSensorDataInfo" class="deve_1">
               <div class="stat">
                 <p><I>모듈 온도</I></p>
-                <input id="currKw" class="wed_1" style="margin-left:13px;" type="text" value="">
+                <input id="pvRearTemperature" class="wed_1" style="margin-left:13px;" type="text" value="">
                 <span>℃</span>
               </div>
               <div class="stat">
                 <p><I>수온</I></p>
-                <input id="dailyPower" class="wed_1" type="text" value="">
+                <input id="waterTemperature" class="wed_1" type="text" value="">
                 <span>℃</span>
               </div>
               <div class="stat">
                 <p><I>외기온도</I></p>
-                <input id="monthPower" class="wed_1" type="text" value="">
+                <input id="outsideAirTemperature" class="wed_1" type="text" value="">
                 <span>℃</span>
               </div>
             </div>
@@ -114,17 +114,17 @@
                     </tr>
                   </thead>
                   <tbody id="myTable">
-                    <tr class="sel active">
+                    <tr id="currCoolingSensorDataInfo" class="sel active">
                       <td class="td1" style="vertical-align: middle">냉각형 모듈(200 W)</td>
-                      <td name="large" style="vertical-align: middle" data-id="battery_v">29.2</td>
-                      <td name="large" style="vertical-align: middle" data-id="battery_a">25.3</td>
-                      <td name="large" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
+                      <td key="pvRearTemperature" name="large" style="vertical-align: middle" data-id="battery_v">29.2</td>
+                      <td key="waterTemperature" name="large" style="vertical-align: middle" data-id="battery_a">25.3</td>
+                      <td key="outsideAirTemperature" name="large" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
                     </tr>
-                    <tr class="sel">
+                    <tr id="currNormalSensorDataInfo" class="sel">
                       <td class="td1" style="vertical-align: middle">일반형 모듈(200 W)</td>
-                      <td name="small" style="vertical-align: middle" data-id="battery_v">32.3</td>
-                      <td name="small" style="vertical-align: middle" data-id="battery_a">18.5</td>
-                      <td name="small" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
+                      <td key="pvRearTemperature" name="small" style="vertical-align: middle" data-id="battery_v">32.3</td>
+                      <td key="waterTemperature" name="small" style="vertical-align: middle" data-id="battery_a">18.5</td>
+                      <td key="outsideAirTemperature" name="small" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
                     </tr>
                   </tbody>
                 </table>
@@ -142,6 +142,18 @@
     </div>
   </div>
   <script>
+    let powerInfo = <%- JSON.stringify(powerInfo) %>;
+    let dailyPowerInfo = <%- JSON.stringify(dailyPowerInfo) %>;
+    let currSensorDataInfo = <%- JSON.stringify(currSensorDataInfo) %>;
+    let currNormalSensorDataInfo = <%- JSON.stringify(currNormalSensorDataInfo) %>;
+    let currCoolingSensorDataInfo = <%- JSON.stringify(currCoolingSensorDataInfo) %>;
+    setDomElementValueWithJson(document.getElementById('powerInfo'), powerInfo, 'value', 'id')
+    setDomElementValueWithJson(document.getElementById('currSensorDataInfo'), currSensorDataInfo, 'value', 'id')
+    setDomElementValueWithJson(document.getElementById('currNormalSensorDataInfo'), currNormalSensorDataInfo,
+      'innerHTML', 'key')
+    setDomElementValueWithJson(document.getElementById('currCoolingSensorDataInfo'), currCoolingSensorDataInfo,
+      'innerHTML', 'key')
+
     // 금일 발전량 차트
     makeGaugeChart({
       domId: 'gauge-ice-curr-power',
@@ -152,23 +164,7 @@
       },
       series: {
         name: '',
-        data: 165.2,
-        tooltip: {
-          valueSuffix: 'W'
-        }
-      },
-    })
-
-    makeGaugeChart({
-      domId: 'gauge-ice-daily-power',
-      yAxis: {
-        min: 0,
-        max: 200,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: 151.6,
+        data: currCoolingSensorDataInfo.pvW,
         tooltip: {
           valueSuffix: 'W'
         }
@@ -179,12 +175,28 @@
       domId: 'gauge-normal-curr-power',
       yAxis: {
         min: 0,
+        max: 200,
+        title: ''
+      },
+      series: {
+        name: '',
+        data: currNormalSensorDataInfo.pvW,
+        tooltip: {
+          valueSuffix: 'W'
+        }
+      },
+    })
+
+    makeGaugeChart({
+      domId: 'gauge-ice-daily-power',
+      yAxis: {
+        min: 0,
         max: 3,
         title: ''
       },
       series: {
         name: '',
-        data: 1.56,
+        data: dailyPowerInfo.cooling,
         tooltip: {
           valueSuffix: 'kWh'
         }
@@ -200,7 +212,7 @@
       },
       series: {
         name: '',
-        data: 1.47,
+        data: dailyPowerInfo.normal,
         tooltip: {
           valueSuffix: 'kWh'
         }

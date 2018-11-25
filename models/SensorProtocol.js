@@ -5,6 +5,7 @@ const { BaseModel } = require('../../device-protocol-converter-jh');
 
 // 가져올려는 Report Key로 필터링
 const { BASE_KEY } = BaseModel.FarmParallel;
+const EAN_BASE_KEY = BaseModel.Sensor.BASE_KEY;
 
 const CALC_TYPE = {
   // 평균 값
@@ -87,6 +88,46 @@ class SensorProtocol {
       BASE_KEY.horizontalSolar,
       BASE_KEY.windSpeed,
       BASE_KEY.r1,
+    ];
+
+    return avgPickList.map(key => ({
+      key,
+      protocol: CALC_TYPE.AVG,
+    }));
+  }
+
+  /** 이안용 */
+  get mainEanViewList() {
+    return [
+      EAN_BASE_KEY.pvRearTemperature,
+      EAN_BASE_KEY.waterTemperature,
+      EAN_BASE_KEY.outsideAirTemperature,
+      EAN_BASE_KEY.pvW,
+      EAN_BASE_KEY.powerCpKwh,
+    ];
+  }
+
+  get pickedNodeDefIdListEan() {
+    return [
+      EAN_BASE_KEY.pvAmp,
+      EAN_BASE_KEY.pvVol,
+      EAN_BASE_KEY.pvW,
+      EAN_BASE_KEY.powerCpKwh,
+      EAN_BASE_KEY.pvRearTemperature,
+      EAN_BASE_KEY.waterTemperature,
+      EAN_BASE_KEY.outsideAirTemperature,
+    ];
+  }
+
+  get senorReportProtocolEan() {
+    const avgPickList = [
+      EAN_BASE_KEY.pvAmp,
+      EAN_BASE_KEY.pvVol,
+      EAN_BASE_KEY.pvW,
+      EAN_BASE_KEY.powerCpKwh,
+      EAN_BASE_KEY.pvRearTemperature,
+      EAN_BASE_KEY.waterTemperature,
+      EAN_BASE_KEY.outsideAirTemperature,
     ];
 
     return avgPickList.map(key => ({
