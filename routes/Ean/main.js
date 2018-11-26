@@ -98,8 +98,8 @@ router.get(
     const dailyReport = await biDevice.getSensorReport(searchRange, cpKwhSeqList, 2);
 
     const dailyPowerInfo = {
-      cooling: _.find(dailyReport, { node_seq: coolingCpKwhSeq }).interval_data,
-      normal: _.find(dailyReport, { node_seq: normalCpKwhSeq }).interval_data,
+      cooling: _.get(_.find(dailyReport, { node_seq: coolingCpKwhSeq }), 'interval_data'),
+      normal: _.get(_.find(dailyReport, { node_seq: normalCpKwhSeq }), 'interval_data'),
     };
 
     searchRange = biModule.createSearchRange({

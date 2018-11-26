@@ -6,7 +6,7 @@
     "app": "./bin/www.js"
   },
   "pkg": {
-    "assets": "views/**/*"
+    "assets": ["views/**/*", "public/**/*"]
   },
   "scripts": {
     "start": "nodemon ./bin/www",
