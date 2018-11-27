@@ -67,12 +67,12 @@ const map = {
               resourceId: 'accDataPlace',
               point: [1500, 465],
             },
-            {
-              id: 'TAPP_P_1',
-              name: '터빈 누적 생산전력',
-              resourceId: 'accDataPlace',
-              point: [1500, 525],
-            },
+            // {
+            //   id: 'TAPP_P_1',
+            //   name: '터빈 누적 생산전력',
+            //   resourceId: 'accDataPlace',
+            //   point: [1500, 525],
+            // },
             {
               id: 'STP_P_1',
               name: '스팀터빈 발전량',
@@ -137,19 +137,19 @@ const map = {
             },
           ],
         },
-        {
-          nodeDefId: 'turbinAccProductionPower',
-          is_sensor: 1,
-          defList: [
-            {
-              id: 'TAPP_001',
-              name: '터빈 누적 생산 전력_001',
-              placeId: 'TAPP_P_1',
-              resourceId: 'sensor_B',
-              point: [1760, 533.5],
-            },
-          ],
-        },
+        // {
+        //   nodeDefId: 'turbinAccProductionPower',
+        //   is_sensor: 1,
+        //   defList: [
+        //     {
+        //       id: 'TAPP_001',
+        //       name: '터빈 누적 생산 전력_001',
+        //       placeId: 'TAPP_P_1',
+        //       resourceId: 'sensor_B',
+        //       point: [1760, 533.5],
+        //     },
+        //   ],
+        // },
         {
           nodeDefId: 'steamTurbinePower',
           is_sensor: 1,
