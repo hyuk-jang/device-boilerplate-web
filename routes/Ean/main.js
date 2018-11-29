@@ -95,11 +95,23 @@ router.get(
       searchType: 'days',
       searchInterval: 'day',
     });
-    const dailyReport = await biDevice.getSensorReport(searchRange, cpKwhSeqList, 2);
+    const dailyReport = await biDevice.getSensorReport(searchRange, cpKwhSeqList, 4);
+    // BU.CLI(dailyReport);
+
+    const coolRow = _.find(dailyReport, { node_seq: coolingCpKwhSeq });
+    const normalRow = _.find(dailyReport, { node_seq: normalCpKwhSeq });
 
     const dailyPowerInfo = {
-      cooling: _.get(_.find(dailyReport, { node_seq: coolingCpKwhSeq }), 'interval_data'),
-      normal: _.get(_.find(dailyReport, { node_seq: normalCpKwhSeq }), 'interval_data'),
+      cooling: _.chain(coolRow.max_data)
+        .subtract(coolRow.min_data)
+        .multiply(1000)
+        .round(2)
+        .value(),
+      normal: _.chain(normalRow.max_data)
+        .subtract(normalRow.min_data)
+        .multiply(1000)
+        .round(2)
+        .value(),
     };
 
     searchRange = biModule.createSearchRange({
@@ -111,7 +123,7 @@ router.get(
 
     const powerInfo = {
       currPvW: currSensorDataInfo.pvW,
-      dailyKwh: _.sum(_.values(dailyPowerInfo)),
+      dailyWh: _.sum(_.values(dailyPowerInfo)),
       monthKwh: _.sum(_.map(monthReport, 'interval_data')),
       cpKwh: _.sum(_.map(monthReport, 'max_data')),
     };
