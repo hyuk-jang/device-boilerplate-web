@@ -96,6 +96,32 @@ class SensorProtocol {
     }));
   }
 
+  get trendViewList() {
+    return [
+      {
+        domId: 'temperatureChart',
+        title: '온도 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.soilTemperature, BASE_KEY.outsideAirTemperature],
+            yTitle: '온도',
+            dataUnit: ' ℃',
+          },
+        ],
+      },
+      // {
+      //   title: '습도',
+      //   list: [
+      //     {
+      //       left: [BASE_KEY.soilReh, BASE_KEY.outsideAirReh],
+      //       title: '습도',
+      //       dataUnit: '%',
+      //     },
+      //   ],
+      // },
+    ];
+  }
+
   /** 이안용 */
   get mainEanViewList() {
     return [

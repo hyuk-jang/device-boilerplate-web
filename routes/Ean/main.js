@@ -123,7 +123,7 @@ router.get(
 
     const powerInfo = {
       currPvW: currSensorDataInfo.pvW,
-      dailyWh: _.sum(_.values(dailyPowerInfo)),
+      dailyWh: _.round(_.sum(_.values(dailyPowerInfo)), 2),
       monthKwh: _.sum(_.map(monthReport, 'interval_data')),
       cpKwh: _.sum(_.map(monthReport, 'max_data')),
     };

@@ -6,6 +6,7 @@
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
   <%- include("./mediaQuery.ejs") %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 </head>
 
 <body>
@@ -16,12 +17,11 @@
       <!--메인-->
       <div class="containera">
         <div class="text-center" style="background-color:#fff; height:auto; padding:5px; background-color: rgba(242,242,242,1);">
-          <div class="title">
-            <p>작물 생육환경</p>
+          <div class="row_title">
+            <div class="title title_trend">환경 정보</div>
           </div>
-          <div class="table-responsive" style="overflow-x:visible;">
 
-          </div>
+          <div class="title_box2" id="temperatureChart"></div>
         </div>
       </div>
       <!--하단1-->
@@ -32,8 +32,121 @@
   </div>
   </div>
   <script>
-    // 작물 생육환경 테이블 구성
-    $('#sensorTable').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
+    let madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+
+    madeSensorChartList.forEach(chartInfo => {
+      makeLineChart(chartInfo)
+    });
+
+
+    Highcharts.setOptions({
+      lang: {
+        months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+        shortMonths: [
+          '1월',
+          '2월',
+          '3월',
+          '4월',
+          '5월',
+          '6월',
+          '7월',
+          '8월',
+          '9월',
+          '10월',
+          '11월',
+          '12월',
+        ],
+        weekdays: ['월', '화', '수', '목', '금', '토', '일'],
+      },
+    });
+
+    function makeLineChart(chartInfo) {
+      if (chartInfo.series.length) {
+        Highcharts.chart(chartInfo.domId, {
+          chart: {
+            type: 'spline',
+            zoomType: 'xy',
+          },
+          title: {
+            text: _.get(chartInfo, 'title', '')
+          },
+          xAxis: {
+            title: {
+              // text: chartDecorator.xAxisTitle
+            },
+            type: 'datetime',
+            // tickWidth: 0,
+            gridLineWidth: 1,
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%e',
+              week: '%m-%e',
+              month: '%y-%m',
+              year: '%Y'
+            },
+          },
+          yAxis: [{ // left y axis
+            title: {
+              text: _.get(chartInfo, 'yAxis[0].yTitle', '')
+            },
+            labels: {
+              align: 'left',
+              x: 3,
+              y: 16,
+              format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[0].dataUnit', '')
+            },
+            showFirstLabel: false
+          }, { // right y axis
+            // linkedTo: 0,
+            // gridLineWidth: 0,
+            opposite: true,
+            title: {
+              text: _.get(chartInfo, 'yAxis[1].yTitle', '')
+            },
+            labels: {
+              align: 'right',
+              x: -3,
+              y: 16,
+              format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[1].dataUnit', '')
+            },
+            showFirstLabel: false
+          }],
+
+          legend: {
+            align: 'left',
+            // verticalAlign: 'top',
+            borderWidth: 0
+          },
+
+          tooltip: {
+            shared: true,
+            crosshairs: true
+          },
+
+          plotOptions: {
+            spline: {
+              states: {
+                hover: {
+                  lineWidth: 5
+                }
+              },
+            },
+          },
+
+          series: chartInfo.series,
+          credits: {
+            enabled: false
+          },
+        });
+      } else {
+        $("#" + chartInfo.domId).html("내역이 존재하지 않습니다.").css({
+          "line-height": "240px",
+          "font-size": "25px"
+        });
+      }
+    }
   </script>
 </body>
 

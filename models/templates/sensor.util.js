@@ -90,23 +90,34 @@ function getMomentFormat(searchRange) {
   let addUnit = 'minutes';
   let addValue = 1;
   let momentFormat = 'YYYY-MM-DD HH:mm:ss';
+
+  const chartStartFormat = {
+    pointStart: moment(searchRange.strStartDate)
+      .add(9, 'hours')
+      .valueOf(),
+    pointInterval: 0,
+  };
   switch (searchInterval) {
     case 'min':
       addUnit = 'minutes';
       momentFormat = 'YYYY-MM-DD HH:mm';
+      chartStartFormat.pointInterval = 1000 * 60;
       break;
     case 'min10':
       addUnit = 'minutes';
       addValue = 10;
       momentFormat = 'YYYY-MM-DD HH:mm';
+      chartStartFormat.pointInterval = 1000 * 60 * 10;
       break;
     case 'hour':
       addUnit = 'hours';
       momentFormat = 'YYYY-MM-DD HH';
+      chartStartFormat.pointInterval = 1000 * 60 * 60;
       break;
     case 'day':
       addUnit = 'days';
       momentFormat = 'YYYY-MM-DD';
+      chartStartFormat.pointInterval = 1000 * 60 * 60 * 24;
       break;
     case 'month':
       addUnit = 'months';
@@ -226,6 +237,8 @@ function makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds) {
     ndId,
     ndName: '',
     dataUnit: '',
+    // chartColor: '',
+    // chartSortRank: 0,
     mergedAvgList: [],
     mergedSumList: [],
     storageList: [],
@@ -238,10 +251,17 @@ function makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds) {
     .forEach((groupedRelationPlaceRows, strNdTargetId) => {
       const foundStorage = _.find(reportStorageList, { ndId: strNdTargetId });
       if (foundStorage) {
-        const { nd_target_name: ndName, data_unit: dataUnit } = _.head(groupedRelationPlaceRows);
+        const {
+          nd_target_name: ndName,
+          data_unit: dataUnit,
+          // chart_color: chartColor,
+          // chart_sort_rank: chartSortRank,
+        } = _.head(groupedRelationPlaceRows);
         foundStorage.ndName = ndName;
         foundStorage.dataUnit = dataUnit;
-        foundStorage.nodePlaceList = groupedRelationPlaceRows;
+        // foundStorage.chartColor = chartColor;
+        // foundStorage.chartSortRank = chartSortRank;
+        foundStorage.nodePlaceList = _.sortBy(groupedRelationPlaceRows, 'chart_sort_rank');
       }
     });
 

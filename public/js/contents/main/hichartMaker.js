@@ -341,3 +341,115 @@ function makeColumnChart(chartOption) {
     },
   });
 }
+
+/**
+ * @param {Object} chartOption
+ * @param {string} chartOption.domId
+ * @param {string=} chartOption.title
+ * @param {string=} chartOption.subtitle
+ * @param {Object} chartOption.xAxis
+ * @param {string=} chartOption.xAxis.title
+ * @param {Object[]} chartOption.yAxis
+ * @param {string=} chartOption.yAxis.title
+ * @param {string=} chartOption.yAxis.dataUnit
+ 
+ * @param {Object[]} chartOption.series
+ * @param {string} chartOption.series.name
+ * @param {number[]} chartOption.series.data
+ * @param {number} chartOption.series.yAxis 0: left, 1: right
+ * @param {string=} chartOption.series.color 카테고리 색상
+ * @param {Object} chartOption.series.tooltip
+ * @param {string} chartOption.series.tooltip.valueSuffix Data Unit
+ */
+function makeLineChart(chartInfo) {
+  if (chartInfo.series.length) {
+    Highcharts.chart(chartInfo.domId, {
+      chart: {
+        type: 'spline',
+        zoomType: 'xy',
+      },
+      title: {
+        text: _.get(chartInfo, 'title', ''),
+      },
+      xAxis: {
+        title: {
+          text: _.get(chartInfo, 'xAxis.title', ''),
+        },
+        type: 'datetime',
+        // tickWidth: 0,
+        gridLineWidth: 1,
+        dateTimeLabelFormats: {
+          second: '%H:%M:%S',
+          minute: '%H:%M',
+          hour: '%H:%M',
+          day: '%m-%e',
+          week: '%m-%e',
+          month: '%y-%m',
+          year: '%Y',
+        },
+      },
+      yAxis: [
+        {
+          // left y axis
+          title: {
+            text: _.get(chartInfo, 'yAxis[0].yTitle', ''),
+          },
+          labels: {
+            align: 'left',
+            x: 3,
+            y: 16,
+            format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[0].dataUnit', ''),
+          },
+          showFirstLabel: false,
+        },
+        {
+          // right y axis
+          // linkedTo: 0,
+          // gridLineWidth: 0,
+          opposite: true,
+          title: {
+            text: _.get(chartInfo, 'yAxis[1].yTitle', ''),
+          },
+          labels: {
+            align: 'right',
+            x: -3,
+            y: 16,
+            format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[1].dataUnit', ''),
+          },
+          showFirstLabel: false,
+        },
+      ],
+
+      legend: {
+        align: 'left',
+        // verticalAlign: 'top',
+        borderWidth: 0,
+      },
+
+      tooltip: {
+        shared: true,
+        crosshairs: true,
+      },
+
+      plotOptions: {
+        spline: {
+          states: {
+            hover: {
+              lineWidth: 5,
+            },
+          },
+        },
+      },
+
+      series: chartInfo.series,
+      credits: {
+        enabled: false,
+      },
+    });
+  } else {
+    $('#' + chartInfo.domId).html('내역이 존재하지 않습니다.').css({
+      'line-height': '240px',
+      'font-size': '25px'
+      });
+  }
+}
