@@ -19,6 +19,8 @@ const CALC_TYPE = {
 class SensorProtocol {
   constructor(siteId) {
     this.pickedNodeDefIdList = [
+      BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
       BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
@@ -27,12 +29,16 @@ class SensorProtocol {
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
       BASE_KEY.r1,
     ];
 
     // 생육 센서 목록
     this.SENSOR_INSIDE_ND_ID_LIST = [
+      BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvUnderlyingSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.lux,
       BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
@@ -45,17 +51,17 @@ class SensorProtocol {
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
-      BASE_KEY.windDirection,
+      // BASE_KEY.windDirection,
       BASE_KEY.windSpeed,
       BASE_KEY.r1,
       BASE_KEY.isRain,
     ];
 
     // 나주를 선택할 경우
-    if (siteId === 1) {
-      this.pickedNodeDefIdList.unshift(BASE_KEY.pvRearTemperature);
-      this.SENSOR_INSIDE_ND_ID_LIST.unshift(BASE_KEY.pvRearTemperature);
-    }
+    // if (siteId === 1) {
+    //   this.pickedNodeDefIdList.unshift(BASE_KEY.pvRearTemperature);
+    //   this.SENSOR_INSIDE_ND_ID_LIST.unshift(BASE_KEY.pvRearTemperature);
+    // }
   }
 
   static get CALC_TYPE() {
@@ -99,26 +105,68 @@ class SensorProtocol {
   get trendViewList() {
     return [
       {
+        domId: 'solarChart',
+        title: '일사량 정보',
+        subtitle: '경사 일사량, 수평 일사량, 모듈 하부 일사량',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.inclinedSolar, BASE_KEY.horizontalSolar, BASE_KEY.pvUnderlyingSolar],
+            mixColors: [null, '#d9480f', '#d9480f'],
+            yTitle: '일사량',
+            dataUnit: ' W/m²',
+          },
+        ],
+      },
+      {
+        domId: 'luxChart',
+        title: '조도 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.lux],
+            mixColors: [null, '#d9480f'],
+            yTitle: '조도',
+            dataUnit: ' lx',
+          },
+        ],
+      },
+      {
+        domId: 'waterValueChart',
+        title: '양액 농도 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.soilWaterValue],
+            mixColors: [null, '#d9480f'],
+            yTitle: '양액 농도',
+            dataUnit: ' %',
+          },
+        ],
+      },
+      {
         domId: 'temperatureChart',
         title: '온도 정보',
+        subtitle: '토양 온도, 외기 온도',
         chartOptionList: [
           {
             keys: [BASE_KEY.soilTemperature, BASE_KEY.outsideAirTemperature],
+            mixColors: [null, '#5c940d'],
             yTitle: '온도',
             dataUnit: ' ℃',
           },
         ],
       },
-      // {
-      //   title: '습도',
-      //   list: [
-      //     {
-      //       left: [BASE_KEY.soilReh, BASE_KEY.outsideAirReh],
-      //       title: '습도',
-      //       dataUnit: '%',
-      //     },
-      //   ],
-      // },
+      {
+        domId: 'rehChart',
+        title: '습도 정보',
+        subtitle: '토양 습도, 외기 습도',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.soilReh, BASE_KEY.outsideAirReh],
+            mixColors: [null, '#d9480f'],
+            yTitle: '습도',
+            dataUnit: ' %',
+          },
+        ],
+      },
     ];
   }
 

@@ -342,24 +342,44 @@ function makeColumnChart(chartOption) {
   });
 }
 
+Highcharts.setOptions({
+  lang: {
+    months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+    shortMonths: [
+      '1월',
+      '2월',
+      '3월',
+      '4월',
+      '5월',
+      '6월',
+      '7월',
+      '8월',
+      '9월',
+      '10월',
+      '11월',
+      '12월',
+    ],
+    weekdays: ['월', '화', '수', '목', '금', '토', '일'],
+  },
+});
+
 /**
- * @param {Object} chartOption
- * @param {string} chartOption.domId
- * @param {string=} chartOption.title
- * @param {string=} chartOption.subtitle
- * @param {Object} chartOption.xAxis
- * @param {string=} chartOption.xAxis.title
- * @param {Object[]} chartOption.yAxis
- * @param {string=} chartOption.yAxis.title
- * @param {string=} chartOption.yAxis.dataUnit
- 
- * @param {Object[]} chartOption.series
- * @param {string} chartOption.series.name
- * @param {number[]} chartOption.series.data
- * @param {number} chartOption.series.yAxis 0: left, 1: right
- * @param {string=} chartOption.series.color 카테고리 색상
- * @param {Object} chartOption.series.tooltip
- * @param {string} chartOption.series.tooltip.valueSuffix Data Unit
+ * @param {Object} chartInfo
+ * @param {string} chartInfo.domId
+ * @param {string=} chartInfo.title
+ * @param {string=} chartInfo.subtitle
+ * @param {Object} chartInfo.xAxis
+ * @param {string=} chartInfo.xAxis.title
+ * @param {Object[]} chartInfo.yAxis
+ * @param {string=} chartInfo.yAxis.title
+ * @param {string=} chartInfo.yAxis.dataUnit
+ * @param {Object[]} chartInfo.series
+ * @param {string} chartInfo.series.name
+ * @param {number[]} chartInfo.series.data
+ * @param {number} chartInfo.series.yAxis 0: left, 1: right
+ * @param {string=} chartInfo.series.color 카테고리 색상
+ * @param {Object} chartInfo.series.tooltip
+ * @param {string} chartInfo.series.tooltip.valueSuffix Data Unit
  */
 function makeLineChart(chartInfo) {
   if (chartInfo.series.length) {
@@ -371,13 +391,16 @@ function makeLineChart(chartInfo) {
       title: {
         text: _.get(chartInfo, 'title', ''),
       },
+      subtitle: {
+        text: _.get(chartInfo, 'subtitle', ''),
+      },
       xAxis: {
         title: {
-          text: _.get(chartInfo, 'xAxis.title', ''),
+          // text: chartDecorator.xAxisTitle
         },
         type: 'datetime',
         // tickWidth: 0,
-        gridLineWidth: 1,
+        // gridLineWidth: 1,
         dateTimeLabelFormats: {
           second: '%H:%M:%S',
           minute: '%H:%M',
@@ -398,7 +421,7 @@ function makeLineChart(chartInfo) {
             align: 'left',
             x: 3,
             y: 16,
-            format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[0].dataUnit', ''),
+            format: `{value:.,0f}${_.get(chartInfo, 'yAxis[0].dataUnit', '')}`,
           },
           showFirstLabel: false,
         },
@@ -414,7 +437,7 @@ function makeLineChart(chartInfo) {
             align: 'right',
             x: -3,
             y: 16,
-            format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[1].dataUnit', ''),
+            format: `{value:.,0f}${_.get(chartInfo, 'yAxis[1].dataUnit', '')}`,
           },
           showFirstLabel: false,
         },
@@ -427,16 +450,17 @@ function makeLineChart(chartInfo) {
       },
 
       tooltip: {
-        shared: true,
-        crosshairs: true,
+        valueDecimals: 2,
+        // shared: true,
+        // crosshairs: true
       },
 
       plotOptions: {
         spline: {
-          states: {
-            hover: {
-              lineWidth: 5,
-            },
+          marker: {
+            radius: 4,
+            lineColor: '#666666',
+            lineWidth: 1,
           },
         },
       },
@@ -447,9 +471,11 @@ function makeLineChart(chartInfo) {
       },
     });
   } else {
-    $('#' + chartInfo.domId).html('내역이 존재하지 않습니다.').css({
-      'line-height': '240px',
-      'font-size': '25px'
+    $(`#${chartInfo.domId}`)
+      .html('내역이 존재하지 않습니다.')
+      .css({
+        'line-height': '240px',
+        'font-size': '25px',
       });
   }
 }

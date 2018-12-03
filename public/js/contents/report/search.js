@@ -142,3 +142,26 @@ function searchReport() {
     window.location.origin
   }/${naviId}/${siteId}/${subCategory}/${subCategoryId}?${queryString}`;
 }
+
+// 검색 클릭 시
+function searchTrend() {
+  const searchInterval = document.querySelector('#searchInterval option:checked').value;
+  const searchType = document.querySelector('#searchType option:checked').value;
+  const strStartDateInputValue = document.getElementById('strStartDateInputValue').value;
+  let strEndDateInputValue = '';
+
+  if (searchType === 'range') {
+    strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
+    if (strStartDateInputValue > strEndDateInputValue) {
+      return alert('종료일이 시작일보다 빠를 수 없습니다.');
+    }
+  }
+
+  const queryString = `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
+
+  $('#loader').removeClass('hidden');
+  $('#loader-ground').removeClass('hidden');
+
+  // 사이트 변경 시
+  location.href = `${window.location.origin}/${naviId}/${siteId}?${queryString}`;
+}

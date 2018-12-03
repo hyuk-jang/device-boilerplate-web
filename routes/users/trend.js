@@ -43,25 +43,25 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      // searchType: 'range',
-      searchInterval: 'min10',
-      strStartDate: '2018-11-23',
-      strEndDate: '',
-      // strEndDate: '2018-11-26',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'days',
+    //   // searchType: 'range',
+    //   searchInterval: 'min10',
+    //   strStartDate: '2018-11-23',
+    //   strEndDate: '',
+    //   // strEndDate: '2018-11-26',
+    // });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
-    const reportInfo = {
+    const trendInfo = {
       siteId,
       strStartDateInputValue: searchRange.strStartDateInputValue,
       strEndDateInputValue: searchRange.strEndDateInputValue,
@@ -69,7 +69,7 @@ router.get(
       searchInterval,
     };
 
-    _.set(req, 'locals.reportInfo', reportInfo);
+    _.set(req, 'locals.trendInfo', trendInfo);
     _.set(req, 'locals.searchRange', searchRange);
     next();
   }),
@@ -125,10 +125,6 @@ router.get(
     sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
     // console.timeEnd('extPlaRelSensorRep');
 
-    // BU.CLIN(placeRelationRows, 2);
-
-    // BU.CLI(sensorGroupRows);
-
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const sensorProtocol = new SensorProtocol(siteId);
 
@@ -149,60 +145,31 @@ router.get(
         .valueOf(),
     );
     console.time('madeSensorChartList');
+    // 생육 환경정보 차트 목록을 생성
+    const madeSensorChartList = sensorProtocol.trendViewList.map(chartConfig =>
+      sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList),
+    );
 
-    const madeSensorChartList = sensorProtocol.trendViewList.map(trendViewInfo => {
-      // 차트 생성하기 위한 설정
-      const { domId, title, chartOptionList } = trendViewInfo;
-
-      // 정제된 차트 정보
-      const chartInfo = { domId, title, yAxis: [], series: [] };
-
-      chartOptionList.forEach(chartOption => {
-        const { dataUnit, yTitle, keys } = chartOption;
-        chartInfo.yAxis.push({
-          yTitle,
-          dataUnit,
-        });
-        keys.forEach(ndId => {
-          const nodeDefStorage = _.find(nodeDefStorageList, { ndId });
-
-          // BU.CLIN(nodeDefStorage);
-          if (!_.isUndefined(nodeDefStorage)) {
-            nodeDefStorage.nodePlaceList.forEach(nodePlace => {
-              const chartSeriesInfo = {
-                name: nodePlace.node_name,
-                color: nodePlace.chart_color,
-                tooltip: {
-                  valueSuffix: dataUnit,
-                },
-                data: _.zip(utcList, _.map(nodePlace.sensorDataRows, 'avg_data')),
-              };
-              chartInfo.series.push(chartSeriesInfo);
-            });
-          }
-        });
-      });
-
-      return chartInfo;
-    });
+    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+    const sensorDomTemplate = _.template(`
+        <div class="title_box2" style="margin-bottom:20px" id="<%= domId %>"></div>
+    `);
+    const sensorDivDomList = madeSensorChartList.map(refinedChart =>
+      sensorDomTemplate({
+        domId: refinedChart.domId,
+      }),
+    );
 
     console.timeEnd('madeSensorChartList');
 
     // BU.CLIN(madeSensorChartList, 4);
 
+    _.set(req, 'locals.dom.sensorDivDomList', sensorDivDomList);
     _.set(req, 'locals.madeSensorChartList', madeSensorChartList);
 
     // TODO: 1. 각종 Chart 작업
 
     // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
-
-    // TODO: 1.2 조도 + 이산화 탄소
-
-    // TODO: 1.3 토양 수분 차트
-
-    // TODO: 1.4 토양 온.습도, 외기 온.습도
-
-    // TODO: 1.5 수평 일사량, 풍속
 
     // BU.CLIN(req.locals);
     res.render('./trend/trend', req.locals);

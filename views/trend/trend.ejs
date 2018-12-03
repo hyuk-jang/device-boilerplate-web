@@ -5,11 +5,13 @@
   <!-- Default Js -->
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/main/hichartMaker.js"></script>
+  <link href="/css/spinner.css" rel="stylesheet" />
   <%- include("./mediaQuery.ejs") %>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 </head>
 
 <body>
+  <%- include("../master/spinner.ejs") %>
   <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
     <div class="center">
       <!-- Header -->
@@ -17,137 +19,92 @@
       <!--메인-->
       <div class="containera">
         <div class="text-center" style="background-color:#fff; height:auto; padding:5px; background-color: rgba(242,242,242,1);">
-          <div class="row_title">
-            <div class="title title_trend">환경 정보</div>
+          <div class="row row_width  top_box" style="padding:5px;">
+            <!-- <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
+              <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
+              <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
+            </div> -->
+            <div class="sel">
+              <div class="sel_box2">
+                <span>조회기간</span>
+                <select id="searchType" class="form-control">
+                  <option value="days">일일</option>
+                  <option value="months">월간</option>
+                  <option value="years">년간</option>
+                  <option value="range">기간선택</option>
+                </select>
+              </div>
+              <div class="sel_box2">
+                <span>조회간격</span>
+                <select id="searchInterval" class="form-control">
+                  <option value="min">1분</option>
+                  <option value="min10">10분</option>
+                  <option value="hour">1시간</option>
+                  <option value="day">1일</option>
+                  <option value="month">1달</option>
+                  <option value="year">1년</option>
+                </select>
+              </div>
+              <!-- <div class="sel_box3">
+                    <span>조회설정</span>
+                    <select id="searchOption" class="form-control">
+                      <option value="merge">병합</option>
+                      <option value="individual">개별</option>
+                    </select>
+                  </div> -->
+              <!--</div>-->
+              <div class="serch_st sel_box_data">
+                날짜 &nbsp;
+                <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
+                <span id="between-start-end" hidden>~</span>
+                <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
+                  style="display: none;">
+                <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">검색</button>
+              </div>
+            </div>
           </div>
-
-          <div class="title_box2" id="temperatureChart"></div>
+          <div style="margin-top: 20px;" class="row_title">
+            <div class="title title_trend">생육 환경 트렌드</div>
+            <div id="sensorArea"></div>
+          </div>
+          <div class="title_box2" id="test"></div>
         </div>
       </div>
       <!--하단1-->
       <div class="container-fluid bg-3 text-center">
-      </div><br>
+      </div>
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
   </div>
   <script>
+    let sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
     let madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+
+    // 초기 시작시 라디오 체크버튼 클릭처리
+    var searchRange = <%- JSON.stringify(searchRange) %>;
+    const {
+      siteId
+    } = <%- JSON.stringify(trendInfo) %>;
+
+    $('#sensorArea').html(sensorDivDomList)
 
     madeSensorChartList.forEach(chartInfo => {
       makeLineChart(chartInfo)
     });
-
-
-    Highcharts.setOptions({
-      lang: {
-        months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-        shortMonths: [
-          '1월',
-          '2월',
-          '3월',
-          '4월',
-          '5월',
-          '6월',
-          '7월',
-          '8월',
-          '9월',
-          '10월',
-          '11월',
-          '12월',
-        ],
-        weekdays: ['월', '화', '수', '목', '금', '토', '일'],
-      },
-    });
-
-    function makeLineChart(chartInfo) {
-      if (chartInfo.series.length) {
-        Highcharts.chart(chartInfo.domId, {
-          chart: {
-            type: 'spline',
-            zoomType: 'xy',
-          },
-          title: {
-            text: _.get(chartInfo, 'title', '')
-          },
-          xAxis: {
-            title: {
-              // text: chartDecorator.xAxisTitle
-            },
-            type: 'datetime',
-            // tickWidth: 0,
-            gridLineWidth: 1,
-            dateTimeLabelFormats: {
-              second: '%H:%M:%S',
-              minute: '%H:%M',
-              hour: '%H:%M',
-              day: '%m-%e',
-              week: '%m-%e',
-              month: '%y-%m',
-              year: '%Y'
-            },
-          },
-          yAxis: [{ // left y axis
-            title: {
-              text: _.get(chartInfo, 'yAxis[0].yTitle', '')
-            },
-            labels: {
-              align: 'left',
-              x: 3,
-              y: 16,
-              format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[0].dataUnit', '')
-            },
-            showFirstLabel: false
-          }, { // right y axis
-            // linkedTo: 0,
-            // gridLineWidth: 0,
-            opposite: true,
-            title: {
-              text: _.get(chartInfo, 'yAxis[1].yTitle', '')
-            },
-            labels: {
-              align: 'right',
-              x: -3,
-              y: 16,
-              format: '{value:.,0f}' + _.get(chartInfo, 'yAxis[1].dataUnit', '')
-            },
-            showFirstLabel: false
-          }],
-
-          legend: {
-            align: 'left',
-            // verticalAlign: 'top',
-            borderWidth: 0
-          },
-
-          tooltip: {
-            shared: true,
-            crosshairs: true
-          },
-
-          plotOptions: {
-            spline: {
-              states: {
-                hover: {
-                  lineWidth: 5
-                }
-              },
-            },
-          },
-
-          series: chartInfo.series,
-          credits: {
-            enabled: false
-          },
-        });
-      } else {
-        $("#" + chartInfo.domId).html("내역이 존재하지 않습니다.").css({
-          "line-height": "240px",
-          "font-size": "25px"
-        });
-      }
-    }
   </script>
+
+  <script src="/js/contents/report/search.js"></script>
+  <!-- 기본 데이터 세팅 -->
+  <script>
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
+
+    // 검색 타입에 따라 적용
+    applySearchType(searchRange.searchType)
+  </script>
+
 </body>
 
 </html>
