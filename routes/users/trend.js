@@ -51,12 +51,12 @@ router.get(
       strEndDate: strEndDateInputValue,
     });
     // const searchRange = biModule.createSearchRange({
-    //   searchType: 'days',
-    //   // searchType: 'range',
+    //   // searchType: 'days',
+    //   searchType: 'range',
     //   searchInterval: 'min10',
     //   strStartDate: '2018-11-23',
-    //   strEndDate: '',
-    //   // strEndDate: '2018-11-26',
+    //   // strEndDate: '',
+    //   strEndDate: '2018-11-26',
     // });
 
     // BU.CLI(searchRange);
@@ -138,17 +138,23 @@ router.get(
 
     // BU.CLIN(nodeDefStorageList, 3);
 
+    // FIXME: 구간 최대 값 차 차트 --> getSensorReport 밑에 저장해둠. 수정 필요.
+
+    // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
+
     // UTC 날짜를 구하기 위하여 서울 기준 UTC +9 시간을 더함
     const utcList = strGroupDateList.map(date =>
       moment(date)
         .add(9, 'hours')
         .valueOf(),
     );
-    console.time('madeSensorChartList');
+    // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
     const madeSensorChartList = sensorProtocol.trendViewList.map(chartConfig =>
-      sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList),
+      sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList, strGroupDateList),
     );
+
+    // BU.CLI(madeSensorChartList);
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const sensorDomTemplate = _.template(`
@@ -160,7 +166,7 @@ router.get(
       }),
     );
 
-    console.timeEnd('madeSensorChartList');
+    // console.timeEnd('madeSensorChartList');
 
     // BU.CLIN(madeSensorChartList, 4);
 

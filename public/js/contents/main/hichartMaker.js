@@ -451,7 +451,7 @@ function makeLineChart(chartInfo) {
 
       tooltip: {
         valueDecimals: 2,
-        // shared: true,
+        shared: true,
         // crosshairs: true
       },
 

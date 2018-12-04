@@ -121,8 +121,15 @@ module.exports = {
           });
 
           // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
-          const { pd_target_name: subName, p_target_name: lastName } = _.head(pRows);
-          const siteName = `${mainName} ${subName || ''} ${lastName || ''}`;
+          const {
+            pd_target_name: subName = '',
+            p_target_name: lastName = '',
+            // p_target_code: lastCode = '',
+          } = _.head(pRows);
+
+          const siteName = `${mainName ? ` ${mainName}` : ''}${subName ? ` ${subName}` : ''}${
+            lastName ? ` ${lastName}` : ''
+          }`;
 
           _.set(insideSensor, 'siteName', siteName);
 

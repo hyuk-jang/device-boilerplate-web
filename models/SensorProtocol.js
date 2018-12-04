@@ -167,6 +167,18 @@ class SensorProtocol {
           },
         ],
       },
+      {
+        domId: 'windSpeedChart',
+        title: '풍속 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.windSpeed],
+            mixColors: [],
+            yTitle: '풍속',
+            dataUnit: ' m/s',
+          },
+        ],
+      },
     ];
   }
 

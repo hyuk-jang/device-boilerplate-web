@@ -43,9 +43,25 @@ class BiDevice extends BiModule {
     return this.db.single(sql, '', false);
   }
 
-  // getSensorReportRange(searchRange, nodeSeqList) {
+  //   SELECT
+  //   t.*,
+  //    if(@prev_node = `node_seq`, ROUND(max_data - @prev, 2), 0) as diff,
+  //  @prev := `max_data`,
+  //   @prev_node := `node_seq`
 
-  // }
+  // FROM
+  // (
+  // SELECT
+  //    node_seq,
+  //    CONCAT(LEFT(DATE_FORMAT(writedate,"%Y-%m-%d %H:%i"), 15), "0")  AS group_date,
+  //    ROUND(MAX(num_data), 1)  AS max_data
+  // FROM dv_sensor_data
+  // WHERE writedate>= "2018-11-23 00:00:00" and writedate<"2018-11-24 00:00:00"
+
+  // GROUP BY LEFT(DATE_FORMAT(writedate,"%Y-%m-%d %H:%i"), 15), node_seq
+  // ORDER BY node_seq, writedate
+  // ) AS t,
+  // (select @prev := null, @prev_node := null) var_init
 
   // /**
   //  *

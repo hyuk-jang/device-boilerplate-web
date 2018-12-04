@@ -118,7 +118,8 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     /** @type {V_DV_PLACE[]} */
-    const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
+    let placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
+    placeRows = _.sortBy(placeRows, 'chart_sort_rank');
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
     _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
 
