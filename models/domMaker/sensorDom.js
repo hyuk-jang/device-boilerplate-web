@@ -16,17 +16,21 @@ module.exports = {
 
     const headerTemplate = _.template('<th scope="col" ><%= ndName %><%= dataUnit %></th>');
 
-    const pickedIdList = _.concat(insideList, outsideList);
-    // BU.CLI(pickedIdList);
-
     // Picked목록에 따라 동적 Header 생성
-    const dynamicHeaderDom = pickedIdList.map(key => {
-      const { nd_target_name: ndName = '', data_unit: dataUnit = '' } = _.find(
-        viewPlaceRelationRows,
-        {
-          nd_target_id: key,
-        },
-      );
+    const dynamicHeaderDom = _.concat(insideList, outsideList).map(key => {
+      const placeRelationRow = _.find(viewPlaceRelationRows, {
+        nd_target_id: key,
+      });
+
+      // 해당 결과물이 없을 경우 ndId는 없는 것으로 판단하고 ndIdList 재조정
+      if (_.isUndefined(placeRelationRow)) {
+        _.pull(insideList, key);
+        _.pull(outsideList, key);
+        return false;
+      }
+
+      const { nd_target_name: ndName = '', data_unit: dataUnit = '' } = placeRelationRow;
+
       return headerTemplate({
         ndName,
         dataUnit: _.isEmpty(dataUnit) ? '' : `(${dataUnit})`,
