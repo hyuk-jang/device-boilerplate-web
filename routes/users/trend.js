@@ -132,7 +132,7 @@ router.get(
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
-      sensorProtocol.pickedNodeDefIdList,
+      _.values(sensorProtocol.BASE_KEY),
     );
     // console.timeEnd('makeNodeDefStorageList');
 

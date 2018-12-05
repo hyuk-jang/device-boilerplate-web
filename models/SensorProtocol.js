@@ -18,6 +18,8 @@ const CALC_TYPE = {
 
 class SensorProtocol {
   constructor(siteId) {
+    this.BASE_KEY = BASE_KEY;
+
     this.pickedNodeDefIdList = [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
@@ -176,6 +178,42 @@ class SensorProtocol {
             mixColors: [],
             yTitle: '풍속',
             dataUnit: ' m/s',
+          },
+        ],
+      },
+      {
+        domId: 'co2Chart',
+        title: '이산화탄소 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.co2],
+            mixColors: [],
+            yTitle: 'co2',
+            dataUnit: ' ppm',
+          },
+        ],
+      },
+      {
+        domId: 'r1Chart',
+        title: '시간당 강우량 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.r1],
+            mixColors: [],
+            yTitle: '강우량',
+            dataUnit: ' mm/h',
+          },
+        ],
+      },
+      {
+        domId: 'isRainChart',
+        title: '강우 감지 여부 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.isRain],
+            mixColors: [],
+            yTitle: '강우 감지 여부',
+            // dataUnit: 'ㅇd',
           },
         ],
       },
