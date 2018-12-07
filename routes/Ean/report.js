@@ -136,7 +136,7 @@ router.get(
 
     // console.time('getSensorReport');
     /** @type {sensorReport[]} */
-    const sensorReportRows = await biDevice.getSensorReport(
+    let sensorReportRows = await biDevice.getSensorReport(
       searchRangeInfo,
       _.map(placeRelationRows, 'node_seq'),
     );
@@ -150,6 +150,9 @@ router.get(
       _.set(req, 'locals.sensorReportRows', sensorReportRows);
       return next();
     }
+
+    // 날짜 내림 차순으로 정렬
+    sensorReportRows = _.reverse(sensorReportRows);
 
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)

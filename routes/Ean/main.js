@@ -102,16 +102,20 @@ router.get(
     const normalRow = _.find(dailyReport, { node_seq: normalCpKwhSeq });
 
     const dailyPowerInfo = {
-      cooling: _.chain(coolRow.max_data)
-        .subtract(coolRow.min_data)
-        .multiply(1000)
-        .round(2)
-        .value(),
-      normal: _.chain(normalRow.max_data)
-        .subtract(normalRow.min_data)
-        .multiply(1000)
-        .round(2)
-        .value(),
+      cooling: _.isEmpty(coolRow)
+        ? 0
+        : _.chain(coolRow.max_data)
+            .subtract(coolRow.min_data)
+            .multiply(1000)
+            .round(2)
+            .value(),
+      normal: _.isEmpty(normalRow)
+        ? 0
+        : _.chain(normalRow.max_data)
+            .subtract(normalRow.min_data)
+            .multiply(1000)
+            .round(2)
+            .value(),
     };
 
     searchRange = biModule.createSearchRange({
@@ -124,8 +128,8 @@ router.get(
     const powerInfo = {
       currPvW: currSensorDataInfo.pvW,
       dailyWh: _.round(_.sum(_.values(dailyPowerInfo)), 2),
-      monthKwh: _.sum(_.map(monthReport, 'interval_data')),
-      cpKwh: _.sum(_.map(monthReport, 'max_data')),
+      monthKwh: _.round(_.sum(_.map(monthReport, 'interval_data')), 3),
+      cpKwh: _.round(_.sum(_.map(monthReport, 'max_data')), 3),
     };
 
     req.locals.powerInfo = powerInfo;

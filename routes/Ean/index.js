@@ -8,7 +8,7 @@ const { BU } = require('base-util-jh');
 
 const main = require('./main');
 const report = require('./report');
-// const users = require('./users');
+const trend = require('./trend');
 
 const webUtil = require('../../models/templates/web.util');
 const commonUtil = require('../../models/templates/common.util');
@@ -61,6 +61,10 @@ router.get(
         name: '메인',
       },
       {
+        href: 'trend',
+        name: '트렌드',
+      },
+      {
         href: 'report',
         name: '보고서',
       },
@@ -85,6 +89,7 @@ router.get(
 );
 
 router.use('/', main);
+router.use('/trend', trend);
 router.use('/report', report);
 
 module.exports = router;

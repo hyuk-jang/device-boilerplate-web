@@ -19,6 +19,7 @@ const CALC_TYPE = {
 class SensorProtocol {
   constructor(siteId) {
     this.BASE_KEY = BASE_KEY;
+    this.EAN_BASE_KEY = EAN_BASE_KEY;
 
     this.pickedNodeDefIdList = [
       BASE_KEY.pvRearTemperature,
@@ -258,6 +259,64 @@ class SensorProtocol {
       key,
       protocol: CALC_TYPE.AVG,
     }));
+  }
+
+  get trendEanViewList() {
+    return [
+      {
+        domId: 'temperature',
+        title: '온도 정보',
+        subtitle: '모듈 후면 온도, 수중 온도, 외기 온도',
+        chartOptionList: [
+          {
+            keys: [
+              EAN_BASE_KEY.pvRearTemperature,
+              EAN_BASE_KEY.waterTemperature,
+              EAN_BASE_KEY.outsideAirTemperature,
+            ],
+            mixColors: [null, '#5c940d'],
+            yTitle: '온도',
+            dataUnit: ' ℃',
+          },
+        ],
+      },
+      {
+        domId: 'pvVol',
+        title: '전압',
+        chartOptionList: [
+          {
+            keys: [EAN_BASE_KEY.pvVol],
+            mixColors: [null, '#d9480f', '#d9480f'],
+            yTitle: '전압',
+            dataUnit: ' V',
+          },
+        ],
+      },
+      {
+        domId: 'pvAmp',
+        title: '전류',
+        chartOptionList: [
+          {
+            keys: [EAN_BASE_KEY.pvAmp],
+            mixColors: [null, '#d9480f'],
+            yTitle: '전류',
+            dataUnit: ' A',
+          },
+        ],
+      },
+      {
+        domId: 'pvW',
+        title: '출력',
+        chartOptionList: [
+          {
+            keys: [EAN_BASE_KEY.pvW],
+            mixColors: [null, '#d9480f'],
+            yTitle: '출력',
+            dataUnit: ' W',
+          },
+        ],
+      },
+    ];
   }
 }
 module.exports = SensorProtocol;
