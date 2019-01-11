@@ -21,7 +21,7 @@ router.get('/login', (req, res) => {
           url: `http://localhost:${process.env.WEB_HTTP_PORT}/${SITE_HEADER}login`,
           headers: req.headers,
           form: {
-            userid: 'tester',
+            userid: 'master',
             password: 'smsoftware',
           },
         },

@@ -48,10 +48,10 @@ router.use((req, res, next) => {
 router.get('/intersection', (req, res) => {
   const grade = _.get(req, 'user.grade');
   switch (grade) {
-    case 'admin':
-      router.use('/admin', admin);
-      res.redirect('/admin');
-      break;
+    // case 'admin':
+    //   router.use('/admin', admin);
+    //   res.redirect('/admin');
+    //   break;
     default:
       router.use('/', selectedRouter);
       _.isString(process.env.DEV_PAGE)

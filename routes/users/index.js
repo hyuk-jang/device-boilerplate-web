@@ -11,7 +11,7 @@ const inverter = require('./inverter');
 const sensor = require('./sensor');
 const trend = require('./trend');
 const report = require('./report');
-// const users = require('./users');
+const control = require('./control');
 
 const webUtil = require('../../models/templates/web.util');
 const commonUtil = require('../../models/templates/common.util');
@@ -39,8 +39,10 @@ router.get(
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
+    const { main_seq: userMainSeq, grade } = user;
+
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = '', siteId = user.main_seq } = req.params;
+    const { naviMenu = '', siteId = userMainSeq } = req.params;
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -104,6 +106,15 @@ router.get(
         name: '보고서',
       },
     ];
+
+    // admin 등급에선 제어 페이지 노출(무안)
+    if (_.eq(grade, 'admin')) {
+      naviList.push({
+        href: 'control',
+        name: '제어',
+      });
+    }
+
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
 
@@ -123,11 +134,13 @@ router.get(
   }),
 );
 
+// Router 추가
 router.use('/', main);
 router.use('/inverter', inverter);
 router.use('/sensor', sensor);
 router.use('/trend', trend);
 router.use('/report', report);
+router.use('/control', control);
 
 // router.use('/users', users);
 

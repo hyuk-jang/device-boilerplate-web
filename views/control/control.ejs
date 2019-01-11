@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+  <%- include("../master/head.ejs") %>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmpeg/0.1/jsmpg.js"></script>
+  <%- include("./mediaQuery.ejs") %>
+</head>
+
+<body>
+  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
+    <div class="center">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="containera">
+        <canvas id="can"></canvas>
+      </div>
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
+      </div><br>
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </div>
+
+  <script>
+    var client = new WebSocket('ws://localhost:9999');
+    var target = document.getElementById('can')
+    console.log(target)
+    // var target = document.querySelector('canvas');
+    var player = new jsmpeg(client, {
+      canvas: target
+    });
+  </script>
+</body>
+
+</html>
