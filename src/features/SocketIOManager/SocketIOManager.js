@@ -6,14 +6,16 @@ const SocketIO = require('socket.io');
 
 const net = require('net');
 
+const AbstSocketIOManager = require('./AbstSocketIOManager');
+
 const {
   requestOrderCommandType,
   combinedOrderType,
   simpleOrderStatus,
-} = require('../../../../../module/default-intelligence').dcmConfigModel;
+} = require('../../../../default-intelligence').dcmConfigModel;
 /** 무안 6kW TB */
 
-module.exports = class {
+class SocketIOManager extends AbstSocketIOManager {
   /**
    * Web Socket 설정
    * @param {HttpServer} httpServer
@@ -214,4 +216,5 @@ module.exports = class {
       clientInfo.socketClient.emit('updateOrderInfo', pickedOrderList);
     });
   }
-};
+}
+module.exports = SocketIOManager;

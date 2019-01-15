@@ -1,12 +1,11 @@
-const EventEmitter = require('events');
 const _ = require('lodash');
 
 const { BU } = require('base-util-jh');
 
 const { BM } = require('base-model-jh');
 
-const AbstApiClient = require('./features/ApiCommunicator/AbstApiClient');
-const AbstSocketIO = require('./features/SocketIO/AbstSocketIO');
+const AbstApiServer = require('./features/ApiCommunicator/AbstApiServer');
+const AbstSocketIOManager = require('./features/SocketIOManager/AbstSocketIOManager');
 const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
 
 const { BaseModel } = require('../../../module/device-protocol-converter-jh');
@@ -34,9 +33,9 @@ class Control {
   }
 
   bindingFeature() {
-    this.apiClient = new AbstApiClient();
-    this.socketIoManager = new AbstSocketIO();
     this.weathercast = new AbstWeathercast();
+    this.apiServer = new AbstApiServer(this);
+    this.socketIoManager = new AbstSocketIOManager(this);
   }
 
   /** 생성된 Feature를 구동시킴 */
@@ -125,21 +124,19 @@ class Control {
   }
 
   /**
-   * SocketIO 설정
-   * @param {Object} httpObj
+   * Field Socket Client의 접속 변화가 생겼을 경우
+   * @param {msInfo} msInfo
    */
-  setSocketIO(httpObj) {
-    // SocketIO Manager에게 객체 생성 요청
-    this.socketIoManager.setSocketIO(httpObj);
+  updateMsFieldClient(msInfo) {
+    this.socketIoManager.submitMsClientStatus(msInfo);
   }
 
   /**
-   * Data Logger와의 접속에 변화가 생겼을 경우 이벤트 발생 핸들러
+   * TODO: 사용자의 요청 명령에 대한 결과 처리 필요 시 작성
    * @param {msInfo} msInfo
+   * @param {defaultFormatToResponse} fieldMessage field 에서 요청한 명령에 대한 응답
    */
-  updateMsClient(msInfo) {
-    this.socketIoManager.submitMsClientStatus(msInfo);
-  }
+  responseFieldMessage(msInfo, fieldMessage) {}
 
   /**
    * SocketServer로 수신받은 DataLogger Node 정보
@@ -147,7 +144,7 @@ class Control {
    * @param {nodeInfo[]} renewalList 갱신된 노드. 차후에 속도에 문제가 된다면 갱신된 노드만 적용토록 해야함.
    */
   updateNodeList(msInfo, renewalList) {
-    this.socketIoManager.submitNodeListToIoClient(msInfo);
+    this.socketIoManager.submitNodeListToIoClient(msInfo, renewalList);
   }
 
   /**
@@ -158,14 +155,5 @@ class Control {
   updateSimpleOrderList(msInfo) {
     this.socketIoManager.submitOrderListToIoClient(msInfo);
   }
-
-  /**
-   * FIXME: 브라우저를 통해 DataLogger로 명령을 요청한 결과를 추적하고 싶다면 해당 브라우저 명령 리스트를 관리하고 이 메소드에서 처리해야함.
-   * 현재는 명령 추적 하지 않음.
-   * @desc SocketServer Observer Method Implement
-   * @param {msInfo} msInfo
-   * @param {defaultFormatToResponse} requestedDataByDataLogger
-   */
-  responsedDataFromDataLogger(msInfo, requestedDataByDataLogger) {}
 }
 module.exports = Control;

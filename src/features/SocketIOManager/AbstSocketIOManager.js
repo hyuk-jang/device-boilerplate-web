@@ -3,7 +3,7 @@ const { BU } = require('base-util-jh');
 
 const net = require('net');
 
-module.exports = class {
+class AbstSocketIOManager {
   /** @param {MainControl} controller */
   constructor(controller) {
     // controller에서 받아옴
@@ -61,4 +61,5 @@ module.exports = class {
    * @param {msInfo} msInfo
    */
   submitOrderListToIoClient(msInfo) {}
-};
+}
+module.exports = AbstSocketIOManager;

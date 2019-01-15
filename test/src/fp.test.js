@@ -10,8 +10,12 @@ const server = require('http').Server(app);
 
 // const rtsp = require('rtsp-ffmpeg');
 
-const Main = require('../../src/Main');
+// const Main = require('../../src/Main');
 const FpRndControl = require('../../src/projects/FP/RnD/FpRndControl');
+
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/index.html`);
+});
 
 server.listen(6147);
 
@@ -29,9 +33,9 @@ const projectInfo = {
 };
 
 async function operation() {
-  const main = new Main({
-    dbInfo,
-  });
+  // const main = new Main({
+  //   dbInfo,
+  // });
 
   // const controller = main.createControl({
   //   projectInfo,
@@ -49,7 +53,7 @@ async function operation() {
   controller.runFeature({
     httpServer: server,
   });
-  BU.CLIN(controller, 3);
+  BU.CLIN(controller, 2);
 }
 
 operation();
