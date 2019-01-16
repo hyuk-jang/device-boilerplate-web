@@ -5,6 +5,7 @@
  */
 
 const debug = require('debug')('device-boilerplate-web:server');
+const _ = require('lodash');
 let http = require('http');
 
 const session = require('express-session');
@@ -12,6 +13,7 @@ const MySQLStore = require('express-mysql-session')(session);
 
 const { BU } = require('base-util-jh');
 const MainControl = require('../src/MainControl');
+const Main = require('../src/Main');
 
 const app = require('../app');
 
@@ -70,6 +72,11 @@ server.listen(port, () => {
 server.on('error', onError);
 server.on('listening', onListening);
 
+const projectInfo = {
+  projectMainId: 'FP',
+  projectSubId: 'RnD',
+};
+
 // 컨트롤러 구동 시작
 async function operationController() {
   try {
@@ -78,6 +85,22 @@ async function operationController() {
     http = http.Server(app);
     const mainControl = new MainControl(app.get('dbInfo'));
     await mainControl.init();
+
+    const main = new Main();
+    const srcManager = main.createControl({
+      projectInfo,
+      dbInfo: app.get('dbInfo'),
+    });
+
+    await srcManager.init();
+
+    srcManager.bindingFeature();
+    srcManager.runFeature({
+      httpServer: server,
+    });
+
+    srcManager.runCctv();
+
     // mainControl.dataStorageManager.setSocketIO(http);
     // 전역 변수로 설정
     // global.mainStorageList = mainControl.dataStorageManager.mainStorageList;
@@ -94,7 +117,7 @@ async function operationController() {
 function normalizePort(val) {
   const parsePort = parseInt(val, 10);
 
-  if (isNaN(parsePort)) {
+  if (_.isNaN(parsePort)) {
     // named pipe
     return val;
   }

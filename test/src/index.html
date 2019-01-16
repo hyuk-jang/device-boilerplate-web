@@ -21,6 +21,14 @@
 
     // var socket = io('http://localhost');
     var socket = io('');
+
+    socket.emit("certifySocket", {
+      sessionUserInfo: {
+        main_seq: 1
+      },
+    });
+
+
     socket.on('data', function (data) {
       // console.log(data);
       // socket.emit('my other event', { my: 'data' });

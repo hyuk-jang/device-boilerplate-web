@@ -18,9 +18,11 @@ const {
 class SocketIOManager extends AbstSocketIOManager {
   /**
    * Web Socket 설정
-   * @param {HttpServer} httpServer
+   * @param {Object} ioConfig SocketIOManager 설정
+   * @param {httpServer} ioConfig.httpServer http 객체
    */
-  init(httpServer) {
+  init(ioConfig) {
+    const { httpServer } = ioConfig;
     this.setSocketIO(httpServer);
   }
 
@@ -32,6 +34,7 @@ class SocketIOManager extends AbstSocketIOManager {
     this.io = new SocketIO(httpServer);
 
     this.io.on('connection', socket => {
+      // BU.CLI('connection');
       // 접속한 Socket 등록
       socket.on('certifySocket', target => {
         /** @type {msUserInfo} */
@@ -39,9 +42,12 @@ class SocketIOManager extends AbstSocketIOManager {
         // 접속한 Socket 정보 정의
         msUser.socketClient = socket;
 
+        const { sessionUserInfo } = msUser;
+        const { main_seq: mainSeq } = sessionUserInfo;
+
         // Main 정보(거점)의 ID가 동일한 객체 탐색
         const foundMsInfo = _.find(this.mainStorageList, msInfo =>
-          _.isEqual(msInfo.msFieldInfo.main_seq, msUser.sessionUserInfo.main_seq),
+          _.isEqual(msInfo.msFieldInfo.main_seq, mainSeq),
         );
 
         // 거점을 찾을 경우 초기 값을 보내줌.

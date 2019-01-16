@@ -6,6 +6,8 @@ const app = require('express')();
 
 const server = require('http').Server(app);
 
+const events = require('events');
+
 // const io = require('socket.io')(server);
 
 // const rtsp = require('rtsp-ffmpeg');
@@ -13,11 +15,21 @@ const server = require('http').Server(app);
 // const Main = require('../../src/Main');
 const FpRndControl = require('../../src/projects/FP/RnD/FpRndControl');
 
+const Emitters = {};
+let controller;
+const initEmitter = feed => {
+  if (!Emitters[feed]) {
+    Emitters[feed] = new events.EventEmitter().setMaxListeners(0);
+  }
+  return Emitters[feed];
+};
+
 app.get('/', (req, res) => {
-  res.sendFile(`${__dirname}/index.html`);
+  res.sendFile(`${__dirname}/stream.html`);
+  // res.sendFile(`${__dirname}/index.html`);
 });
 
-server.listen(6147);
+server.listen(7500);
 
 const dbInfo = {
   host: process.env.WEB_DB_HOST,
@@ -42,7 +54,7 @@ async function operation() {
   //   dbInfo,
   // });
 
-  const controller = new FpRndControl({
+  controller = new FpRndControl({
     projectInfo,
     dbInfo,
   });
@@ -50,10 +62,23 @@ async function operation() {
   await controller.init();
 
   controller.bindingFeature();
+
+  // const rtspUrl = 'rtsp://smsoft.iptime.org:30554/live.sdp';
+  const rtspUrl = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov';
+
   controller.runFeature({
-    httpServer: server,
+    ioConfig: {
+      httpServer: server,
+    },
+    rtspConfig: {
+      app,
+      rtspUrl,
+      webPort: process.env.WEB_HTTP_PORT,
+    },
   });
-  BU.CLIN(controller, 2);
+
+  // controller.runStream(app);
+  // BU.CLIN(controller, 2);
 }
 
 operation();

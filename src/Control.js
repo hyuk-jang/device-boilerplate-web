@@ -6,6 +6,7 @@ const { BM } = require('base-model-jh');
 
 const AbstApiServer = require('./features/ApiCommunicator/AbstApiServer');
 const AbstSocketIOManager = require('./features/SocketIOManager/AbstSocketIOManager');
+const AbstRtspManager = require('./features/RtspManager/AbstRtspManager');
 const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
 
 const { BaseModel } = require('../../../module/device-protocol-converter-jh');
@@ -36,6 +37,7 @@ class Control {
     this.weathercast = new AbstWeathercast();
     this.apiServer = new AbstApiServer(this);
     this.socketIoManager = new AbstSocketIOManager(this);
+    this.rtspManager = new AbstRtspManager(this);
   }
 
   /** 생성된 Feature를 구동시킴 */

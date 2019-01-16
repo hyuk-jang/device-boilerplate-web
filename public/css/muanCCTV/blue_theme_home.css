@@ -1,0 +1,33 @@
+/********** HomePage **************/
+#control-area table {
+  color: #000000;
+}
+
+#configuration-area table {
+  color: #ffffff;
+}
+
+#configuration-area td a {
+  color: #ffffff;
+}
+
+div#page_title {
+  color: #098bd6;
+}
+
+#control-area {
+  background: #c4eaff; /* blue style */
+}
+
+#configuration-area,
+#sidebar-footer {
+  background: #0186d1; /* blue style */
+}
+
+#case-wrapper {
+  background-color: #0186d1;
+}
+
+#video-area {
+  background: #c4eaff; /*blue style*/
+}

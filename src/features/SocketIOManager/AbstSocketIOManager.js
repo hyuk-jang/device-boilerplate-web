@@ -15,10 +15,11 @@ class AbstSocketIOManager {
   }
 
   /**
-   *
-   * @param {HttpServer} httpServer
+   * Web Socket 설정
+   * @param {Object} ioConfig SocketIOManager 설정
+   * @param {httpServer} ioConfig.httpServer http 객체
    */
-  init(httpServer) {}
+  init(ioConfig) {}
 
   /**
    * Web Socket 설정

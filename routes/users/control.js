@@ -13,7 +13,11 @@ router.get(
   ['/'],
   asyncHandler(async (req, res) => {
     BU.CLI('control!!!');
-    res.render('./control/control', req.locals);
+
+    req.locals.sessionID = req.sessionID;
+    req.locals.user = req.user;
+
+    res.render('./control/index', req.locals);
   }),
 );
 

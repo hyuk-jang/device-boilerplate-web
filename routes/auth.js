@@ -21,7 +21,7 @@ router.get('/login', (req, res) => {
           url: `http://localhost:${process.env.WEB_HTTP_PORT}/${SITE_HEADER}login`,
           headers: req.headers,
           form: {
-            userid: 'master',
+            userid: 'muan',
             password: 'smsoftware',
           },
         },
@@ -38,7 +38,7 @@ router.post(
   '/login',
   passport.authenticate('local', {
     successRedirect: '/intersection',
-    failureRedirect: `./${SITE_HEADER}fuck`,
+    failureRedirect: `./${SITE_HEADER}`,
     failureFlash: true,
   }),
 );

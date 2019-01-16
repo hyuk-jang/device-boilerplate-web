@@ -1,4 +1,5 @@
 import { Server } from 'http';
+import express from 'express';
 
 import BiAuth from './models/templates/auth/BiAuth';
 import BiModule from './models/templates/BiModule';
@@ -15,4 +16,5 @@ declare global {
   const PowerModel: PowerModel;
   const MainControl: MainControl;
   const httpServer: Server;
+  const express: express;
 }
