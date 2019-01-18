@@ -1,22 +1,16 @@
 class AbstRtspManager {
-  /** @param {MainControl} controller */
-  constructor(controller) {
-    // controller에서 받아옴
-  }
-
   /**
    * RTSP 통신 초기화
-   * @param {Object} RtspConfig
-   * @param {string} RtspConfig.url RTSP 주소
-   * @param {express} RtspConfig.app express App
+   * @param {Object} rtspConfig Express App
+   * @param {string} rtspConfig.rtspUrl RTSP URL
+   * @param {number} rtspConfig.streamWebPort Local Web Server Port
    */
-  init(RtspConfig) {}
+  init(rtspConfig) {}
 
   /**
-   * 운영 중인 express App에 RTSP Stream 데이터를 연결(pipe) 처리 함.
-   * @param {express} app
+   * @param {SocketIO} socketIo SocketIO 객체
    */
-  appSetting(app) {}
+  bindingSocketIO(socketIo) {}
 
   /**
    * RTSP Server 로 접속

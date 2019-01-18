@@ -445,3 +445,17 @@ p {
 thead {
   background: linear-gradient(#fbfbfb, #e7e7e7);
 }
+
+.rtsp_container {
+  display: flex;
+}
+
+.rtsp_container section:first-child {
+  width: 20%;
+  /* background-color: #c4eaff; */
+}
+
+.rtsp_container section:last-child {
+  width: 80%;
+  background-color: #333;
+}

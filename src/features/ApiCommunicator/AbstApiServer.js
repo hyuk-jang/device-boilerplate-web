@@ -14,9 +14,10 @@ class AbstApiServer {
 
   /**
    * Socket Server 구동
-   * @param {number=} port Web Socket Port
+   * @param {Object} apiConfig API Communicator 설정
+   * @param {number} apiConfig.apiPort API Communicator 설정
    */
-  init(port) {}
+  init(apiConfig) {}
 
   /**
    * Field Client 인증을 하고자 할 경우

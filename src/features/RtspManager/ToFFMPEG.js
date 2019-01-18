@@ -1,6 +1,12 @@
 const events = require('events');
 const { spawn } = require('child_process');
 
+const app = require('express')();
+
+// const server = http.createServer(app);
+const server = require('http').createServer(app);
+// const server = require('http').Server(app);
+
 const { BU } = require('base-util-jh');
 
 const AbstRtspManager = require('./AbstRtspManager');
@@ -14,23 +20,25 @@ class ToFFMPEG extends AbstRtspManager {
   /**
    * RTSP 통신 초기화
    * @param {Object} rtspConfig rtspConfig 설정
-   * @param {express} rtspConfig.app Express App
    * @param {string} rtspConfig.rtspUrl RTSP URL
-   * @param {number} rtspConfig.webPort Local Web Server Port
+   * @param {number} rtspConfig.streamWebPort RTSP 데이터를 변환처리 할 Sub Express Web Server Port
    */
   init(rtspConfig) {
-    const { app, rtspUrl, webPort } = rtspConfig;
+    const { rtspUrl, streamWebPort } = rtspConfig;
 
-    this.appSetting(app);
+    // Sub Server 구동
+    server.listen(streamWebPort);
 
-    this.connectRtspServer(rtspUrl, webPort);
+    this.appSetting(streamWebPort);
+
+    this.connectRtspServer(rtspUrl, streamWebPort);
   }
 
   /**
    * 운영 중인 express App에 RTSP Stream 데이터를 연결(pipe) 처리 함.
-   * @param {express} app cctv stream 주소
+   * @param {express} webPort cctv stream 주소
    */
-  appSetting(app) {
+  appSetting(number) {
     const Emitters = {};
     const initEmitter = feed => {
       if (!Emitters[feed]) {
@@ -81,14 +89,21 @@ class ToFFMPEG extends AbstRtspManager {
   }
 
   /**
+   * @param {SocketIO} socketIo SocketIO 객체
+   */
+  bindingSocketIO(socketIo) {
+    this.io = socketIo;
+  }
+
+  /**
    *
    * @param {string} rtspUrl RTSP URL
    * @param {number} webPort Local Web Server Port
    */
   connectRtspServer(rtspUrl, webPort) {
-    BU.CLI(rtspUrl, webPort);
+    // BU.CLI(rtspUrl, webPort);
     let ffmpegString = `-i ${rtspUrl}`;
-    ffmpegString += ` -f mpegts -c:v mpeg1video -an http://localhost:${webPort}/streamIn/1`;
+    ffmpegString += ` -f mpegts -c:v mpeg1video -s 960x540 -an http://localhost:${webPort}/streamIn/1`;
     ffmpegString += ` -f mpegts -c:v mpeg1video -an http://localhost:${webPort}/streamIn/2`;
     if (ffmpegString.indexOf('rtsp://') > -1) {
       ffmpegString = `-rtsp_transport tcp ${ffmpegString}`;
@@ -96,10 +111,8 @@ class ToFFMPEG extends AbstRtspManager {
     console.log(`Executing : ffmpeg ${ffmpegString}`);
     const ffmpeg = spawn('ffmpeg', ffmpegString.split(' '));
     ffmpeg.on('close', buffer => {
-      console.log('ffmpeg died');
+      console.log('ffmpeg died', buffer);
     });
-
-    BU.CLI(this.io);
 
     // socket.io client commands
     this.io.on('connection', socket => {

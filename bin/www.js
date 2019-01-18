@@ -1,25 +1,23 @@
 #!/usr/bin/env node
-
+require('dotenv').config();
 /**
  * Module dependencies.
  */
 
 const debug = require('debug')('device-boilerplate-web:server');
 const _ = require('lodash');
-let http = require('http');
+const http = require('http');
 
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
 const { BU } = require('base-util-jh');
-const MainControl = require('../src/MainControl');
-const Main = require('../src/Main');
 
 const app = require('../app');
 
-global.app = app;
+const Main = require('../src/Main');
 
-// require('../../default-intelligence');
+global.app = app;
 
 /**
  * Get port from environment and store in Express.
@@ -60,7 +58,6 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
-
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -81,25 +78,32 @@ const projectInfo = {
 async function operationController() {
   try {
     // BU.CLI(process.env.DEV_MODE);
-    /** Web Socket Binding */
-    http = http.Server(app);
-    const mainControl = new MainControl(app.get('dbInfo'));
-    await mainControl.init();
-
     const main = new Main();
-    const srcManager = main.createControl({
+    const srcController = main.createControl({
       projectInfo,
       dbInfo: app.get('dbInfo'),
     });
 
-    await srcManager.init();
+    await srcController.init();
 
-    srcManager.bindingFeature();
-    srcManager.runFeature({
-      httpServer: server,
+    srcController.bindingFeature();
+
+    // const rtspUrl = 'rtsp://admin:yaho1027@192.168.0.73/Streaming/channels/1';
+    const rtspUrl = 'rtsp://smsoft.iptime.org:30554/live.sdp';
+    // const rtspUrl = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov';
+
+    srcController.runFeature({
+      apiConfig: {
+        apiPort: process.env.WEB_SOCKET_PORT,
+      },
+      ioConfig: {
+        httpServer: server,
+      },
+      rtspConfig: {
+        rtspUrl,
+        streamWebPort: 40404,
+      },
     });
-
-    srcManager.runCctv();
 
     // mainControl.dataStorageManager.setSocketIO(http);
     // 전역 변수로 설정

@@ -10,6 +10,7 @@ function writeDateText(domElement) {
   domElement.innerHTML = `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}(${
     week[today.getDay()]
   })`;
+  // domElement.innerHTML = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate() + "(" + week[today.getDay()] + ")";
   // $(`#${domId}`).html(
   //   `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}(${week[today.getDay()]})`,
   // );
@@ -110,7 +111,7 @@ function makeDatePicker(dom, viewMode) {
   }
 
   $(dom).datepicker('remove');
-  
+
   $(dom).datepicker({
     format: dateFormat,
     language: 'kr',

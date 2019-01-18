@@ -6,30 +6,19 @@ const app = require('express')();
 
 const server = require('http').Server(app);
 
-const events = require('events');
-
-// const io = require('socket.io')(server);
-
-// const rtsp = require('rtsp-ffmpeg');
-
-// const Main = require('../../src/Main');
+const Main = require('../../src/Main');
 const FpRndControl = require('../../src/projects/FP/RnD/FpRndControl');
+const ToFFMPEG = require('../../src/features/RtspManager/ToFFMPEG');
+const ToIMG = require('../../src/features/RtspManager/ToIMG');
 
-const Emitters = {};
 let controller;
-const initEmitter = feed => {
-  if (!Emitters[feed]) {
-    Emitters[feed] = new events.EventEmitter().setMaxListeners(0);
-  }
-  return Emitters[feed];
-};
 
 app.get('/', (req, res) => {
   res.sendFile(`${__dirname}/stream.html`);
   // res.sendFile(`${__dirname}/index.html`);
 });
 
-server.listen(7500);
+server.listen(7501);
 
 const dbInfo = {
   host: process.env.WEB_DB_HOST,
@@ -45,36 +34,48 @@ const projectInfo = {
 };
 
 async function operation() {
-  // const main = new Main({
-  //   dbInfo,
-  // });
+  const main = new Main();
 
-  // const controller = main.createControl({
-  //   projectInfo,
-  //   dbInfo,
-  // });
-
-  controller = new FpRndControl({
+  controller = main.createControl({
     projectInfo,
     dbInfo,
   });
+
+  // controller = new FpRndControl({
+  //   projectInfo,
+  //   dbInfo,
+  // });
 
   await controller.init();
 
   controller.bindingFeature();
 
+  // const rtspUrl = 'rtsp://admin:yaho1027@192.168.0.73/Streaming/channels/1';
   // const rtspUrl = 'rtsp://smsoft.iptime.org:30554/live.sdp';
   const rtspUrl = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov';
 
-  controller.runFeature({
-    ioConfig: {
-      httpServer: server,
-    },
-    rtspConfig: {
-      app,
-      rtspUrl,
-      webPort: process.env.WEB_HTTP_PORT,
-    },
+  // controller.runFeature({
+  //   apiConfig: {
+  //     apiPort: 7777,
+  //   },
+  //   ioConfig: {
+  //     httpServer: server,
+  //   },
+  //   rtspConfig: {
+  //     rtspUrl,
+  //     streamWebPort: 7502,
+  //   },
+  // });
+
+  controller.socketIoManager.init({
+    httpServer: server,
+  });
+
+  controller.rtspManager = new ToFFMPEG();
+  controller.rtspManager.bindingSocketIO(controller.socketIoManager.io);
+  controller.rtspManager.init({
+    rtspUrl,
+    streamWebPort: 7502,
   });
 
   // controller.runStream(app);

@@ -44,9 +44,8 @@
 </header>
 
 <script>
-  const {
-    naviId
-  } = <%- JSON.stringify(mainInfo) %>;
+  var naviId = <%- JSON.stringify(mainInfo.naviId) %>;
+  // console.log('naviId', naviId)
 
   // 네비게이션 DOM
   $('#loginAreaDom').html(<%- JSON.stringify(dom.loginAreaDom) %>);
@@ -64,7 +63,7 @@
   })
 
   // 페이지 동적 바인딩이 완료되었을 경우 View 처리
-  window.onload = () => {
+  window.onload = function () {
     $('#wrap').removeClass('hidden')
     // Spinner Loader
     // $('#loader').removeClass('hidden')

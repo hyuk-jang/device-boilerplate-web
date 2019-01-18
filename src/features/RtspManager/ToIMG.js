@@ -15,7 +15,6 @@ class ToIMG extends AbstRtspManager {
    * RTSP 통신 초기화
    * @param {Object} rtspConfig rtspConfig 설정
    * @param {string} rtspConfig.rtspUrl RTSP URL
-   * @param {number} rtspConfig.webPort Local Web Server Port
    */
   init(rtspConfig) {
     const { rtspUrl } = rtspConfig;
@@ -24,16 +23,25 @@ class ToIMG extends AbstRtspManager {
   }
 
   /**
+   * @param {SocketIO} socketIo SocketIO 객체
+   */
+  bindingSocketIO(socketIo) {
+    this.io = socketIo;
+  }
+
+  /**
    *
    * @param {string} rtspUrl RTSP URL
    */
   connectRtspServer(rtspUrl) {
-    const stream = new FFMpeg({ input: rtspUrl });
+    const stream = new FFMpeg({ input: rtspUrl, resolution: '640X480', rate: 5, quality: 5 });
 
     this.io.on('connection', socket => {
       // 접속한 Socket 등록
       const pipeStream = data => {
+        // console.log('pipeStream', data.length);
         socket.emit('data', data.toString('base64'));
+        // stream.removeListener('data', pipeStream);
       };
 
       socket.on('certifySocket', target => {
@@ -43,10 +51,10 @@ class ToIMG extends AbstRtspManager {
         const { sessionUserInfo } = msUser;
         const { user_id: userId } = sessionUserInfo;
 
-        // 거점을 찾을 경우 초기 값을 보내줌.
-        // if (userId === 'muan') {
-        stream.on('data', pipeStream);
-        // }
+        // 로그인 유저가 muan 일 경우에만 데이터 전송
+        if (userId === 'muan') {
+          stream.on('data', pipeStream);
+        }
       });
 
       // 연결 해제한 Socket 제거

@@ -98,3 +98,55 @@ Info : 2018-11-21 09:25:11.113
     at Handshake.<anonymous> (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\Protocol.js:163:17)
 	err Message : mainError
 
+Info : 2019-01-17 10:18:11.719
+    at SocketIOManager.init (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\SocketIOManager\SocketIOManager.js:25:28)
+	err Message : mainError
+
+Info : 2019-01-17 11:01:36.127
+    at ApiServer.init (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\ApiCommunicator\ApiServer.js:18:25)
+	err Message : mainError
+
+Info : 2019-01-17 11:01:57.759
+    at ApiServer.init (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\ApiCommunicator\ApiServer.js:18:25)
+	err Message : mainError
+
+Info : 2019-01-17 11:02:59.820
+    at ApiServer.init (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\ApiCommunicator\ApiServer.js:18:25)
+	err Message : mainError
+
+Info : 2019-01-17 11:11:01.924
+    at new PoolConfig (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\PoolConfig.js:10:38)
+	err Message : mainError
+
+Info : 2019-01-17 11:11:48.231
+    at Handshake.Sequence._packetToError (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2019-01-17 11:13:25.873
+    at Handshake.Sequence._packetToError (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2019-01-17 11:13:31.891
+    at Handshake.Sequence._packetToError (D:\200_Project\uwps\module\module\device-boilerplate-web\node_modules\mysql\lib\protocol\sequences\Sequence.js:47:14)
+	err Message : mainError
+
+Info : 2019-01-17 11:25:38.264
+    at SocketIOManager.init (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\SocketIOManager\SocketIOManager.js:25:28)
+	err Message : mainError
+
+Info : 2019-01-17 13:13:29.733
+    at ToFFMPEG.appSetting (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\RtspManager\ToFFMPEG.js:42:9)
+	err Message : mainError
+
+Info : 2019-01-17 13:14:41.105
+    at ToFFMPEG.appSetting (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\RtspManager\ToFFMPEG.js:43:9)
+	err Message : mainError
+
+Info : 2019-01-17 13:16:21.576
+    at operationController (D:\200_Project\uwps\module\module\device-boilerplate-web\bin\www.js:118:14)
+	err Message : mainError
+
+Info : 2019-01-17 13:16:29.443
+    at ToFFMPEG.appSetting (D:\200_Project\uwps\module\module\device-boilerplate-web\src\features\RtspManager\ToFFMPEG.js:42:9)
+	err Message : mainError
+

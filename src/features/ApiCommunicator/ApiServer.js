@@ -11,10 +11,11 @@ const { dcmWsModel } = require('../../../../default-intelligence');
 class ApiServer extends AbstApiServer {
   /**
    * Socket Server 구동
-   * @param {number=} port Web Socket Port
+   * @param {Object} apiConfig API Communicator 설정
+   * @param {number} apiConfig.apiPort API Communicator 설정
    */
-  init(port) {
-    const socketPort = port || process.env.WEB_SOCKET_PORT;
+  init(apiConfig) {
+    const { apiPort } = apiConfig;
     /**
      * encodingMsg: 수신자에게 메시지를 보낼 때 시작문자와 종료문자 및 체크섬, 전송 종료 문자를 자동으로 붙여주는 메소드
      * decodingMsg: encoding 처리한 Frame을 걷어내는 역할
@@ -29,7 +30,7 @@ class ApiServer extends AbstApiServer {
     const server = net
       .createServer(socket => {
         // socket.end('goodbye\n');
-        console.log(`client is Connected ${socketPort}\n addressInfo: ${socket.remoteAddress}`);
+        console.log(`client is Connected ${apiPort}\n addressInfo: ${socket.remoteAddress}`);
 
         // steram 연결 및 파서 등록
         const stream = socket.pipe(split(EOT));
@@ -73,7 +74,7 @@ class ApiServer extends AbstApiServer {
             socket.write(encodingMsg(responseDataByServer));
           } catch (error) {
             socket.write(encodingMsg(CAN));
-            throw error;
+            // throw error;
           }
         });
 
@@ -107,7 +108,7 @@ class ApiServer extends AbstApiServer {
       });
 
     // grab an arbitrary unused port.
-    server.listen(socketPort, () => {
+    server.listen(apiPort, () => {
       console.log('opened server on', server.address());
     });
 

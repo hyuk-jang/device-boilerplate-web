@@ -4,8 +4,6 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const moment = require('moment');
-
 const { BU } = require('base-util-jh');
 
 /* GET home page. */
@@ -17,7 +15,7 @@ router.get(
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;
 
-    res.render('./control/index', req.locals);
+    res.render('./control/control', req.locals);
   }),
 );
 

@@ -1185,8 +1185,6 @@ function CamControl(parameterKey, parameterValue)
   var cgiBin = '/cgi-bin/camctrl/camctrl.cgi';
   var fullUrl = cctvUrl ? cctvUrl + cgiBin : cgiBin;
 
-  console.log(fullUrl)
-
   $.ajax({
     type: 'GET',
     url: fullUrl + '?' + parameterKey + '=' + parameterValue

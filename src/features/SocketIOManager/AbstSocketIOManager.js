@@ -42,6 +42,7 @@ class AbstSocketIOManager {
   /**
    * 접속한 SocketIO 객체 정보가 등록된 Main Storage를 반환
    * @param {net.Socket} socket
+   * @return {msInfo}
    */
   findMainStorageBySocketClient(socket) {}
 
