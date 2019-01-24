@@ -32,7 +32,7 @@ class FpRndControl extends Control {
    * @param {Object} featureConfig.ioConfig SocketIOManager 설정
    * @param {httpServer} featureConfig.ioConfig.httpServer http 객체
    * @param {Object} featureConfig.apiConfig API Communicator 설정
-   * @param {number} featureConfig.apiConfig.apiPort API Communicator 설정
+   * @param {number} featureConfig.apiConfig.socketPort API Communicator 설정
    * @param {Object} featureConfig.rtspConfig rtspConfig 설정
    * @param {string} featureConfig.rtspConfig.rtspUrl RTSP URL
    * @param {number} featureConfig.rtspConfig.webPort Local Web Server Port
@@ -45,6 +45,7 @@ class FpRndControl extends Control {
     this.apiServer.init(apiConfig);
 
     this.rtspManager.bindingSocketIO(this.socketIoManager.io);
+
     this.rtspManager.init(rtspConfig);
 
     this.createMuanCCTV();

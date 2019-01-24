@@ -14,7 +14,7 @@ const users = require('./users');
 const Ean = require('./Ean');
 
 let selectedRouter;
-switch (process.env.DEV_CATEGORY) {
+switch (process.env.PJ_MAIN_ID) {
   case 'FP':
     selectedRouter = users;
     break;
@@ -31,11 +31,12 @@ switch (process.env.DEV_CATEGORY) {
 // server middleware
 router.use((req, res, next) => {
   // BU.CLI('Main Middile Ware', req.user);
-  if (global.app.get('auth')) {
-    if (!req.user) {
-      return res.redirect('/auth/login');
-    }
+  // if (process.env.DEV_AUTO_AUTH !== '1') {
+  // if (global.app.get('auth')) {
+  if (!req.user) {
+    return res.redirect('/auth/login');
   }
+  // }
 
   next();
 });
@@ -54,9 +55,10 @@ router.get('/intersection', (req, res) => {
     //   break;
     default:
       router.use('/', selectedRouter);
-      _.isString(process.env.DEV_PAGE)
-        ? res.redirect(`/${process.env.DEV_PAGE}`)
-        : res.redirect('/main');
+      _.isString(process.env.DEV_PAGE) && res.redirect(`/${process.env.DEV_PAGE}`);
+      // _.isString(process.env.DEV_PAGE)
+      //   ? res.redirect(`/${process.env.DEV_PAGE}`)
+      //   : res.redirect('/');
       break;
   }
 });

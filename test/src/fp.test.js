@@ -21,11 +21,11 @@ app.get('/', (req, res) => {
 server.listen(7501);
 
 const dbInfo = {
-  host: process.env.WEB_DB_HOST,
-  database: process.env.WEB_DB_DB,
-  port: process.env.WEB_DB_PORT,
-  user: process.env.WEB_DB_USER,
-  password: process.env.WEB_DB_PW,
+  host: process.env.PJ_DB_HOST,
+  database: process.env.PJ_DB_DB,
+  port: process.env.PJ_DB_PORT,
+  user: process.env.PJ_DB_USER,
+  password: process.env.PJ_DB_PW,
 };
 
 const projectInfo = {

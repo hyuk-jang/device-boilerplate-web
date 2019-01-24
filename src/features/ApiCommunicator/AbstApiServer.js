@@ -15,7 +15,7 @@ class AbstApiServer {
   /**
    * Socket Server 구동
    * @param {Object} apiConfig API Communicator 설정
-   * @param {number} apiConfig.apiPort API Communicator 설정
+   * @param {number} apiConfig.socketPort API Communicator 설정
    */
   init(apiConfig) {}
 

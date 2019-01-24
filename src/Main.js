@@ -6,7 +6,11 @@ const FpRndControl = require('./projects/FP/RnD/FpRndControl');
  */
 class Main {
   /**
-   * @param {integratedDataLoggerConfig} config
+   * @param {Object} config
+   * @param {Object} config.projectInfo
+   * @param {string} config.projectInfo.projectMainId
+   * @param {string} config.projectInfo.projectSubId
+   * @param {dbInfo} config.dbInfo
    */
   createControl(config = {}) {
     const { projectInfo = {} } = config;

@@ -13,16 +13,16 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-  if (global.app.get('auth') === 'dev') {
+  if (process.env.DEV_AUTO_AUTH === '1') {
     // global.app.set('auth', true);
     if (!req.user) {
       request.post(
         {
-          url: `http://localhost:${process.env.WEB_HTTP_PORT}/${SITE_HEADER}login`,
+          url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
           headers: req.headers,
           form: {
-            userid: 'muan',
-            password: 'smsoftware',
+            userid: process.env.DEV_USER_ID,
+            password: process.env.DEV_USER_PW,
           },
         },
         (err, httpResponse, msg) => res.redirect('/intersection'),

@@ -8,50 +8,26 @@ const debug = require('debug')('device-boilerplate-web:server');
 const _ = require('lodash');
 const http = require('http');
 
-const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
-
 const { BU } = require('base-util-jh');
 
 const app = require('../app');
 
+global.app = app;
+
 const Main = require('../src/Main');
 
-global.app = app;
+const config = require('./config');
+
+const { projectInfo, dbInfo, webServer } = config;
+const { featureConfig } = projectInfo;
+const { apiConfig, rtspConfig, weathercastConfig } = featureConfig;
 
 /**
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.WEB_HTTP_PORT || '3000');
+const port = webServer.httpPort;
 app.set('port', port);
-
-/**
- * Set Customize
- */
-
-// const dbInfo = {
-//   port: process.env.WEB_DB_PORT || '3306',
-//   host: process.env.WEB_DB_HOST || 'localhost',
-//   user: process.env.WEB_DB_USER || 'root',
-//   password: process.env.WEB_DB_PW || 'test',
-//   database: process.env.WEB_DB_DB || 'test',
-// };
-
-// app.set('dbInfo', dbInfo);
-
-// app.use(
-//   session({
-//     key: 'sid',
-//     secret: BU.GUID(),
-//     store: new MySQLStore(dbInfo),
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: {
-//       maxAge: 1000 * 60 * 60 * 24, // 1일
-//     },
-//   }),
-// );
 
 /**
  * Create HTTP server.
@@ -69,69 +45,29 @@ server.listen(port, () => {
 server.on('error', onError);
 server.on('listening', onListening);
 
-const projectInfo = {
-  projectMainId: 'FP',
-  projectSubId: 'RnD',
-};
-
 // 컨트롤러 구동 시작
 async function operationController() {
   try {
-    // BU.CLI(process.env.DEV_MODE);
+    // // BU.CLI(process.env.DEV_MODE);
     const main = new Main();
     const srcController = main.createControl({
       projectInfo,
-      dbInfo: app.get('dbInfo'),
+      dbInfo,
     });
-
     await srcController.init();
-
     srcController.bindingFeature();
-
-    // const rtspUrl = 'rtsp://admin:yaho1027@192.168.0.73/Streaming/channels/1';
-    const rtspUrl = 'rtsp://smsoft.iptime.org:30554/live.sdp';
-    // const rtspUrl = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov';
-
     srcController.runFeature({
-      apiConfig: {
-        apiPort: process.env.WEB_SOCKET_PORT,
-      },
+      apiConfig,
       ioConfig: {
         httpServer: server,
       },
-      rtspConfig: {
-        rtspUrl,
-        streamWebPort: 40404,
-      },
+      rtspConfig,
+      weathercastConfig,
     });
-
-    // mainControl.dataStorageManager.setSocketIO(http);
-    // 전역 변수로 설정
-    // global.mainStorageList = mainControl.dataStorageManager.mainStorageList;
   } catch (error) {
     BU.CLI(error);
     BU.errorLog('init', 'mainError', error);
   }
-}
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  const parsePort = parseInt(val, 10);
-
-  if (_.isNaN(parsePort)) {
-    // named pipe
-    return val;
-  }
-
-  if (parsePort >= 0) {
-    // port number
-    return parsePort;
-  }
-
-  return false;
 }
 
 /**
