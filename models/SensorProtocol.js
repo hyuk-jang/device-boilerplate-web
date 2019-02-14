@@ -87,6 +87,7 @@ class SensorProtocol {
   get senorReportProtocol() {
     const avgPickList = [
       BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
       BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
@@ -95,6 +96,7 @@ class SensorProtocol {
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
       BASE_KEY.r1,
     ];

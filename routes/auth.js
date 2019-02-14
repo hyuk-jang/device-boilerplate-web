@@ -30,6 +30,7 @@ router.get('/login', (req, res) => {
       );
     }
   } else {
+    // BU.CLI('DEV_AUTO_AUTH false')
     return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error') });
   }
 });

@@ -48,6 +48,7 @@ router.use((req, res, next) => {
 
 router.get('/intersection', (req, res) => {
   const grade = _.get(req, 'user.grade');
+  // BU.CLI(req.user);
   switch (grade) {
     // case 'admin':
     //   router.use('/admin', admin);
@@ -55,10 +56,10 @@ router.get('/intersection', (req, res) => {
     //   break;
     default:
       router.use('/', selectedRouter);
-      _.isString(process.env.DEV_PAGE) && res.redirect(`/${process.env.DEV_PAGE}`);
-      // _.isString(process.env.DEV_PAGE)
-      //   ? res.redirect(`/${process.env.DEV_PAGE}`)
-      //   : res.redirect('/');
+      // _.isString(process.env.DEV_PAGE) && res.redirect(`/${process.env.DEV_PAGE}`);
+      _.isString(process.env.DEV_PAGE)
+        ? res.redirect(`/${process.env.DEV_PAGE}`)
+        : res.redirect('/');
       break;
   }
 });

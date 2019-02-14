@@ -118,7 +118,10 @@ router.get(
 
     // BU.CLIN(sensorReportRows);
 
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, {
+      startHour: 7,
+      endHour: 20,
+    });
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);

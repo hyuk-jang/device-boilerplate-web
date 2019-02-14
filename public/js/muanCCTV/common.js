@@ -1187,7 +1187,11 @@ function CamControl(parameterKey, parameterValue)
 
   $.ajax({
     type: 'GET',
-    url: fullUrl + '?' + parameterKey + '=' + parameterValue
+    url: fullUrl + '?' + parameterKey + '=' + parameterValue,
+    dataType: 'jsonp',
+    jsonpCallback: 'myCallBackMethod',
+    async: false, // this is by default false, so not need to mention
+    crossDomain: true // tell the browser to allow cross domain calls.
   }).done(function (res) {
     // Check for a successful (blank) response
   }).fail(function (req, sts, err) {

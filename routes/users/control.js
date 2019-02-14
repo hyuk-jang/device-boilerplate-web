@@ -10,7 +10,7 @@ const { BU } = require('base-util-jh');
 router.get(
   ['/'],
   asyncHandler(async (req, res) => {
-    BU.CLI('control!!!');
+    // BU.CLI('control!!!');
 
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;

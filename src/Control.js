@@ -18,7 +18,7 @@ class Control {
 
     const { dbInfo } = config;
 
-    BU.CLI(dbInfo);
+    // BU.CLI(dbInfo);
 
     /** @type {dbInfo} */
     this.dbInfo = dbInfo;

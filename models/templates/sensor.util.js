@@ -141,11 +141,14 @@ exports.getMomentFormat = getMomentFormat;
 /**
  * 실제 사용된 데이터 그룹 Union 처리하여 반환
  * @param {searchRange} searchRange
+ * @param {{startHour: number, endHour: number}} controlHour
  */
-function getGroupDateList(searchRange) {
+function getGroupDateList(searchRange, controlHour = {}) {
   // BU.CLI(searchRange);
   const groupDateList = [];
   const { strStartDate, strEndDate } = searchRange;
+
+  const { startHour = 0, endHour = 24 } = controlHour;
 
   const { addUnit, addValue, momentFormat } = getMomentFormat(searchRange);
 
@@ -153,9 +156,10 @@ function getGroupDateList(searchRange) {
   const endMoment = moment(strEndDate);
 
   while (startMoment.format(momentFormat) < endMoment.format(momentFormat)) {
-    // string 날짜로 변환하여 저장
-    groupDateList.push(startMoment.format(momentFormat));
-
+    if (startMoment.get('hour') >= startHour && startMoment.get('hour') < endHour) {
+      // string 날짜로 변환하여 저장
+      groupDateList.push(startMoment.format(momentFormat));
+    }
     // 날짜 간격 더함
     startMoment.add(addValue, addUnit);
   }

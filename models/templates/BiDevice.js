@@ -35,6 +35,7 @@ class BiDevice extends BiModule {
           ROUND(MAX(num_data) - MIN(num_data), ${fixed})  AS interval_data
       FROM dv_sensor_data
       WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+       AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
       ${nodeSeqList.length ? ` AND node_seq IN (${nodeSeqList})` : ''}
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
