@@ -15,7 +15,7 @@ router.get(
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;
 
-    res.render('./control/control', req.locals);
+    res.render('./control/controlStream', req.locals);
   }),
 );
 

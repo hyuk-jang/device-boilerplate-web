@@ -7,8 +7,8 @@ const Weathercast = require('../../../features/Weathercast/Weathercast');
 const SocketIOManager = require('../../../features/SocketIOManager/SocketIOManager');
 const ApiServer = require('../../../features/ApiCommunicator/ApiServer');
 
-// const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
-const RtspManager = require('../../../features/RtspManager/ToIMG');
+const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
+// const RtspManager = require('../../../features/RtspManager/ToIMG');
 
 const DBA = require('../../../../../device-boilerplate-abbreviation');
 

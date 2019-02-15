@@ -11,6 +11,8 @@ module.exports = {
       },
       rtspConfig: {
         rtspUrl: 'rtsp://smsoft.iptime.org:30554/live.sdp',
+        // rtspUrl: 'rtsp://b1.dnsdojo.com:1935/live/sys3.stream',
+        // rtspUrl: 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov',
         streamWebPort: 40404,
       },
       weathercastConfig: {
