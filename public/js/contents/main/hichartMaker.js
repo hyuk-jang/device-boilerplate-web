@@ -36,6 +36,9 @@ const gaugeOptions = {
       y: 16,
     },
   },
+  credits: {
+    enabled: false,
+  },
   plotOptions: {
     solidgauge: {
       dataLabels: {
@@ -76,9 +79,7 @@ function makeGaugeChart(gaugeOption) {
           text: yAxis.title,
         },
       },
-      credits: {
-        enabled: false,
-      },
+      
       series: [
         {
           name: series.name,
@@ -96,6 +97,23 @@ function makeGaugeChart(gaugeOption) {
       ],
     }),
   );
+}
+
+/**
+ * @param {Object} gaugeOption
+ * @param {string} gaugeOption.domId
+ * @param {Object} gaugeOption.yAxis
+ * @param {number=} gaugeOption.yAxis.min
+ * @param {number} gaugeOption.yAxis.max
+ * @param {string} gaugeOption.yAxis.title
+ * @param {Object} gaugeOption.series
+ * @param {string} gaugeOption.series.name
+ * @param {number[]} gaugeOption.series.data
+ * @param {Object} gaugeOption.series.tooltip
+ * @param {string} gaugeOption.series.tooltip.valueSuffix
+ */
+function makeSpeedGaugeChart(gaugeOption) {
+  const { domId, yAxis, series } = gaugeOption;
 }
 
 /**

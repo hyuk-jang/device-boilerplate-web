@@ -39,18 +39,17 @@ footer {
   border: 0;
 }
 
-.navbar-inverse:first-child {
-}
+.navbar-inverse:first-child {}
 
-.navbar-inverse .navbar-nav > li > a {
+.navbar-inverse .navbar-nav>li>a {
   color: #333;
 }
 
-.navbar-inverse .navbar-nav > li > a:hover {
+.navbar-inverse .navbar-nav>li>a:hover {
   color: #fff;
 }
 
-.navbar-inverse .navbar-nav > li:hover {
+.navbar-inverse .navbar-nav>li:hover {
   background-color: #080808;
 }
 
@@ -76,17 +75,17 @@ footer {
 }
 
 /*테이블*/
-.table > thead > tr > th {
+.table>thead>tr>th {
   vertical-align: middle;
   text-align: center;
 }
 
-.table > tbody > tr > td,
-.table > tbody > tr > th,
-.table > tfoot > tr > td,
-.table > tfoot > tr > th,
-.table > thead > tr > td,
-.table > thead > tr > th {
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
   vertical-align: middle;
 }
 
@@ -163,7 +162,7 @@ footer {
   overflow: auto;
 }
 
-.box_5 > p {
+.box_5>p {
   margin-top: 15px;
   font-weight: bold;
   margin-bottom: 20px;
@@ -199,13 +198,13 @@ footer {
   height: 13%;
 }
 
-.box_5_in_sp > p {
+.box_5_in_sp>p {
   color: #fff;
   font-weight: bold;
   line-height: 2;
 }
 
-.box_5_in > input {
+.box_5_in>input {
   height: 50px;
   width: 100%;
 }
@@ -235,14 +234,14 @@ footer {
   margin: 0 5px 15px 10px;
 }
 
-.box_6_in_4 > img {
+.box_6_in_4>img {
   width: 35%;
   height: 38%;
   float: left;
   margin: 13px 0 0 10px;
 }
 
-.box_6_in_4 > p {
+.box_6_in_4>p {
   font-size: 15px;
   font-weight: bold;
   margin-top: 30px;
@@ -299,7 +298,7 @@ footer {
   text-align: left;
 }
 
-.deve > p:first-child {
+.deve>p:first-child {
   font-size: 19px;
   margin: 0;
 }
@@ -311,7 +310,7 @@ footer {
   align-items: center;
 }
 
-.star > p {
+.star>p {
   width: 40%;
   align-items: center;
 }
@@ -323,7 +322,7 @@ footer {
   width: 100%;
 }
 
-.stat > span {
+.stat>span {
   width: 17%;
   text-align: left;
 }
@@ -400,13 +399,13 @@ p {
   line-height: 1;
 }
 
-.nav_row_st_right > img {
+.nav_row_st_right>img {
   height: 30px;
   width: 30px;
   margin: 5px;
 }
 
-.nav_row_st_right > input {
+.nav_row_st_right>input {
   height: 30px;
   width: 100px;
 
@@ -445,7 +444,7 @@ p {
   justify-content: center;
 }
 
-.title > p {
+.title>p {
   display: flex;
   justify-content: center;
 }

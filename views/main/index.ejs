@@ -204,14 +204,31 @@
       },
       series: {
         name: '',
-        data: powerGenerationInfo.dailyPower,
+        data: 333.2,
+        // data: powerGenerationInfo.dailyPower,
         tooltip: {
           valueSuffix: 'kWh'
         }
       },
     })
     // 현재 발전량 차트
-    makeGaugeChart({
+    // makeGaugeChart({
+    //   domId: 'current-power-graph',
+    //   yAxis: {
+    //     min: 0,
+    //     max: powerGenerationInfo.currKwYaxisMax,
+    //     title: ''
+    //   },
+    //   series: {
+    //     name: '',
+    //     data: powerGenerationInfo.currKw,
+    //     tooltip: {
+    //       valueSuffix: 'kW'
+    //     }
+    //   },
+    // })
+
+    makeSpeedGaugeChart({
       domId: 'current-power-graph',
       yAxis: {
         min: 0,
@@ -226,6 +243,130 @@
         }
       },
     })
+
+
+    function makeSpeedGaugeChart(gaugeOption) {
+      const {
+        domId,
+        yAxis,
+        series
+      } = gaugeOption;
+
+      Highcharts.chart('current-power-graph',
+        Highcharts.merge(gaugeOptions, {
+          chart: {
+            type: 'gauge',
+            plotBackgroundColor: null,
+            plotBackgroundImage: null,
+            plotBorderWidth: 0,
+            plotShadow: false
+          },
+
+          title: {
+            text: 'Speedometer'
+          },
+
+          pane: {
+            // center: ['50%', '75%'],
+            size: '140%',
+            // startAngle: -90,
+            // endAngle: 90,
+            background: {
+              // backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#fff',
+              // innerRadius: '100%',
+              // outerRadius: '100%',
+              // shape: 'arc',
+            },
+          },
+
+          // the value axis
+          yAxis: {
+            min: yAxis.min,
+            max: yAxis.max,
+            // lineWidth: 0,
+            tickAmount: undefined,
+
+            // minorTickInterval: 'auto',
+            // minorTickWidth: 0,
+            // minorTickLength: 10,
+            // minorTickPosition: 'inside',
+            // minorTickColor: '#666',
+
+            tickPixelInterval: 50,
+            tickWidth: 1,
+            // tickPosition: 'inside',
+            // tickLength: 10,
+            tickColor: '#999',
+            labels: {
+              step: 2,
+              distance: 15,
+              y: 5
+              // rotation: 'auto'
+            },
+            title: {
+              text: yAxis.title,
+            },
+            // title: {
+            //   text: 'km/h',
+            //   y: -60
+            // },
+            plotBands: [{
+              from: yAxis.min,
+              to: yAxis.max,
+              thickness: '40%',
+              color: {
+                linearGradient: {
+                  x1: 0,
+                  x2: 1,
+                  y1: 1,
+                  y2: 1
+                },
+                stops: [
+                  [0, '#55BF3B'], //green
+                  [0.5, '#DDDF0D'], //yellow
+                  [1, '#DF5353'], //yellow
+                ]
+              }
+            }]
+          },
+          plotOptions: {
+            gauge: {
+              dial: {
+                radius: '90%',
+                // backgroundColor: 'black',
+                // borderColor: 'black',
+                // borderWidth: 1,
+                // baseWidth: 3,
+                // topWidth: 1,
+                baseLength: '90%', // of radius
+                // rearLength: '10%'
+              }
+            }
+          },
+
+          series: [{
+            name: series.name,
+            data: [88.2],
+            type: 'gauge',
+            dataLabels: {
+              borderWidth: 0,
+              inside: false,
+              format: `<div style="text-align:center;border: none"><span style="font-size:25px;color:red}">{y}</span><br/>
+              <span style="font-size:12px;color:silver">${series.tooltip.valueSuffix}</span></div>`,
+            },
+            // tooltip: {
+            //   valueSuffix: series.tooltip.valueSuffix,
+            // },
+          }, ],
+
+
+        }))
+
+
+
+    }
+
+
 
 
     makeColumnChart({

@@ -120,7 +120,7 @@ class SensorProtocol {
         chartOptionList: [
           {
             keys: [BASE_KEY.inclinedSolar, BASE_KEY.horizontalSolar, BASE_KEY.pvUnderlyingSolar],
-            mixColors: [null, '#d9480f', '#d9480f'],
+            mixColors: [null, '#fab005', '#4c6ef5'],
             yTitle: '일사량',
             dataUnit: ' W/m²',
           },
