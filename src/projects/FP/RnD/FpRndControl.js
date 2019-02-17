@@ -44,11 +44,11 @@ class FpRndControl extends Control {
 
     this.apiServer.init(apiConfig);
 
-    this.rtspManager.bindingSocketIO(this.socketIoManager.io);
+    // this.rtspManager.bindingSocketIO(this.socketIoManager.io);
 
-    this.rtspManager.init(rtspConfig);
+    // this.rtspManager.init(rtspConfig);
 
-    this.createMuanCCTV();
+    // this.createMuanCCTV();
   }
 
   /**

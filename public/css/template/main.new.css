@@ -1,0 +1,54 @@
+/*헤더*/
+.wrap {
+  position: relative;
+  overflow: hidden;
+  min-width: 1170px;
+  background: #333;
+  border-top: 1px solid #eee;
+}
+
+
+.containerb {
+  padding: 0px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+
+/* 박스 In Chart  */
+.box_chart_component {
+  border: 1px solid #e9e9e9;
+  background-color: #fff;
+  height: 350px;
+}
+
+.gauge_area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* border: 1px solid #e9e9e9; */
+}
+
+.gauge_chart {
+  widows: 90%; 
+  /* height: 60vw; */
+  height: 300px;
+}
+
+.gauge_area > ul {
+  display: flex;
+  justify-content: flex-start;
+}
+
+
+
+
+.w_20per {
+  width: 20%;
+}
+
+.w_40per {
+  width: 40%;
+}

@@ -79,7 +79,7 @@ function makeGaugeChart(gaugeOption) {
           text: yAxis.title,
         },
       },
-      
+
       series: [
         {
           name: series.name,
