@@ -101,7 +101,7 @@ float: right;
 .city {
 height: 30px;
 padding-left: 10px;
-background: linear-gradient( to bottom, #343535, #272727 );
+background: linear-gradient(to bottom, #343535, #272727);
 font-size: 16px;
 color: #e9e9e9;
 font-weight: bold;
@@ -183,7 +183,7 @@ margin: 0 5px 10px 10px;
 .box_5_in_sp>p {
 color: #fff;
 font-weight: bold;
-line-height: 2;
+line-height: 2.5;
 }
 
 .box_5_in>input {
@@ -338,12 +338,14 @@ text-align: right;
 
 .wed_3 {
 max-width: 80px;
-padding: 2px 8px;
-margin: 11px 2px;
+
+margin: 8px 2px;
 box-sizing: border-box;
-border: 1px solid #e9e9e9;
-color: #333;
-background-color: #fff;
+border: 0px solid #e9e9e9;
+color: #93d30a;
+font-size: 17px;
+font-weight: bold;
+background-color: #051215;
 border-radius: 2px;
 text-align: right;
 }
