@@ -109,6 +109,10 @@ border: 1px solid #e9e9e9;
 border-radius: 3px;
 }
 
+.city option {
+background: #2B2B2B;
+}
+
 .containerb {
 padding: 0px;
 width: 100%;
@@ -150,7 +154,7 @@ display: flex;
 flex-direction: column;
 width: 40%;
 
-background-color: #2a3138;
+/* background-color: #2a3138; */
 height: 350px;
 overflow: auto;
 }
@@ -174,9 +178,9 @@ margin: 0 auto;
 margin: 0 5px 10px 10px;
 } */
 
-.box_5_in:nth-child(4) {
+/* .box_5_in:nth-child(4) {
 margin: 0 5px 10px 10px;
-}
+} */
 
 
 
@@ -413,6 +417,7 @@ align-items: center;
 justify-content: flex-end;
 }
 
+
 .header_w_r:first-child {
 display: flex;
 align-items: center;
@@ -421,15 +426,16 @@ justify-content: flex-start;
 
 /*트랜드/보고서*/
 .title {
-background: #3ca853;
+
 height: 30px;
 width: 40%;
 color: #fff;
 line-height: 2;
-border: solid 1px #ddd;
 display: flex;
-justify-content: center;
+
 }
+
+
 
 .title>p {
 display: flex;
@@ -469,8 +475,10 @@ margin-right: 10px !important;
 }
 
 thead {
-background: linear-gradient(#fbfbfb, #e7e7e7);
+background: linear-gradient(#0F2027, #2C5364);
 }
+
+
 
 .rtsp_container {
 display: flex;

@@ -36,7 +36,11 @@ margin: 0 auto;
 margin-top: 10px;
 
 }
-.fot>p{margin-bottom: 10px; font-size: 12px;}
+
+.fot>p {
+margin-bottom: 10px;
+font-size: 12px;
+}
 
 .glyphicon-log-out:before {
 content: "\e163";
@@ -293,4 +297,10 @@ width: 100%;
 font-size: 15px;
 }
 
-.city>option{ background-image: linear-gradient(#393939, #222222);}
+.city>option {
+background-image: linear-gradient(#393939, #222222);
+}
+
+/* 서브페이지 */
+.title_blue>span{color:#04aaf8; font-weight: bold;}
+.sel>td{color:#333;}
