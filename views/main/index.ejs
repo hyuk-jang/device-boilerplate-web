@@ -12,16 +12,13 @@
 
 <body>
   <div id="wrap" class="wrap hidden">
-    <div class="center">
-      <!-- Header -->
-      <%- include("../master/header.ejs") %>
-      <!--메인-->
-      <div class="containera">
-        <div class="containerb text-center">
-          <div class="box">
-            <div class="cont-box-rotate_f">
-              <div class="cont-box-rotate"></div>
-            </div>
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="containera">
+      <div class="containerb text-center">
+        <div class="box">
+          <div class="gauge_area_m">
             <div class="deve">
               <p>발전현황</p>
               <p>Development status</p>
@@ -52,30 +49,73 @@
                 <input id="co2" class="wed_1" type="text" value="">
                 <span>Ton</span>
               </div> -->
+
+              <img src="/image/development.jpg" width="100%" height="80%">
+
             </div>
           </div>
-          <div class="box_chart_component w_40per">
-            <section class="gauge_area">
+        </div>
+        <div class="box_3">
+          <section class="gauge_area">
+            <article class="gauge_title">
               <p>현재 발전현황</p>
-              <article id="current-power-graph" class="gauge_chart">Graph</article>
-              <ul>
+            </article>
+            <article id="current-power-graph" class="gauge_chart dark_theme">Graph</article>
+            <article class="gauge_contents dark_theme border-success">
+              <ul class="">
                 <li>현재 출력</li>
                 <li>3.72</li>
                 <li>kW</li>
               </ul>
-            </section>
-            <%# <div id="current-power-graph" style="align-self: center;width:90%; height:80%; background-color:#e9e9e9;">Graph</div> %>
-          </div>
-          <div class="box_3">
-            <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
-            <div id="daily-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
-          </div>
+              <ul class="">
+                <li>발전 효율</li>
+                <li>52.1</li>
+                <li>%</li>
+              </ul>
+            </article>
+          </section>
         </div>
-        <div class="text-center containerc">
-          <div class="box_4">
-            <div class="cont-box-rotate_s">
-              <div class="cont-box-rotate_1"></div>
-            </div>
+        <!-- <div class="box_3">
+            <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
+            <div id="current-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
+          </div> -->
+        <div class="box_3">
+          <section class="gauge_area">
+            <article class="gauge_title">
+              <p>금일발전량</p>
+            </article>
+            <article id="daily-power-graph" class="gauge_chart dark_theme">Graph</article>
+            <article class="gauge_contents dark_theme border-success">
+              <ul class="">
+                <li>현재 출력</li>
+                <li>3.72</li>
+                <li>kW</li>
+              </ul>
+              <ul class="">
+                <li>발전 효율</li>
+                <li>52.1</li>
+                <li>%</li>
+              </ul>
+            </article>
+          </section>
+        </div>
+
+        <!-- <div class="box_3">
+          <section class="gauge_area">
+            <article class="gauge_title">
+              <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
+            </article>
+            <div id="daily-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
+          </section>
+        </div> -->
+
+
+
+      </div>
+      <div class="text-center containerc">
+        <div class="box_4">
+          <div class="gauge_area_m2">
+
             <div class="deve">
               <p>생육환경정보</p>
               <p>Growth Environment</p>
@@ -83,42 +123,42 @@
             <div id="growthEnv" class="deve_1">
               <div class="stat">
                 <p><I>일사량</I></p>
-                <input id="inclinedSolar" class="wed_1" type="text" value="">
+                <input id="inclinedSolar" class="wed_2" type="text" value="">
                 <span>W/m²</span>
               </div>
               <div class="stat">
                 <p><I>조도</I></p>
-                <input id="lux" class="wed_1" type="text" value="">
+                <input id="lux" class="wed_2" type="text" value="">
                 <span>lx</span>
               </div>
               <div class="stat">
                 <p><I>CO2</I></p>
-                <input id="co2" class="wed_1" type="text" value="">
+                <input id="co2" class="wed_2" type="text" value="">
                 <span>ppm</span>
               </div>
               <div class="stat">
                 <p><I>외기온도</I></p>
-                <input id="outsideAirTemperature" class="wed_1" type="text" value="">
+                <input id="outsideAirTemperature" class="wed_2" type="text" value="">
                 <span>℃</span>
               </div>
               <div class="stat">
                 <p><I>외기습도</I></p>
-                <input id="outsideAirReh" class="wed_1" type="text" value="">
+                <input id="outsideAirReh" class="wed_2" type="text" value="">
                 <span>%</span>
               </div>
               <div class="stat">
                 <p><I>토양온도</I></p>
-                <input id="soilTemperature" class="wed_1" type="text" value="">
+                <input id="soilTemperature" class="wed_2" type="text" value="">
                 <span>℃</span>
               </div>
               <div class="stat">
                 <p><I>토양습도</I></p>
-                <input id="soilReh" class="wed_1" type="text" value="">
+                <input id="soilReh" class="wed_2" type="text" value="">
                 <span>%</span>
               </div>
               <div class="stat">
                 <p><I>토양수분</I></p>
-                <input id="soilWaterValue" class="wed_1" type="text" value="">
+                <input id="soilWaterValue" class="wed_2" type="text" value="">
                 <span>%</span>
               </div>
             </div>
@@ -129,12 +169,20 @@
               </div>
             </div> -->
           </div>
-          <div class="box_5">
-            <p>인버터 전압/전류</p>
+        </div>
+        <div class="box_5">
+          <section class="gauge_area">
+            <article class="gauge_title">
+              <p style="margin:10px 0;font-weight:bold;">인버터 전압/전류</p>
+            </article>
             <div id="inverterStatus" class="box_5_bg">
               <div class="box_5_in">
-                <div class="box_5_a" style="word-break: keep-all;
+                <!-- <div class="box_5_a" style="word-break: keep-all;
                 word-wrap: break-word; padding: 5px; text-align: left">
+                  <b>
+                  </b>
+                </div> -->
+                <div class="box_5_a">
                   <b>
                   </b>
                 </div>
@@ -152,12 +200,17 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div class="box_2">
-            <p style="margin:10px 0; font-weight:bold;">생육 환경 현황</p>
-            <div id="growthEnvChart" style="align-self: center;width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
-          </div>
-          <!-- <div class="box_6">
+          </section>
+        </div>
+        <div class="box_2">
+          <section class="gauge_area">
+            <article class="gauge_title">
+              <p style="margin:10px 0; font-weight:bold;">생육 환경 현황</p>
+            </article>
+            <div id="growthEnvChart" style="align-self: center;width:90%; height:80%; background-color:#010304!important; margin-top: 20px;">Graph</div>
+          </section>
+        </div>
+        <!-- <div class="box_6">
             <div class="box_6_in">
               <div class="box_6_in_4">
                 <img src="/image/no1.png" />
@@ -181,15 +234,14 @@
               </div>
             </div>
           </div> -->
-        </div>
       </div>
-      <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
-      <%- include("../master/footer.ejs") %>
     </div>
+    <!--하단1-->
+
+    <%- include("../master/footer.ejs") %>
+
   </div>
-  </div>
+
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
     let growthEnv = <%- JSON.stringify(growthEnv) %>;
@@ -203,22 +255,22 @@
     $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
     // 금일 발전량 차트
-    makeGaugeChart({
-      domId: 'daily-power-graph',
-      yAxis: {
-        min: 0,
-        max: powerGenerationInfo.currKwYaxisMax * 6,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: 333.2,
-        // data: powerGenerationInfo.dailyPower,
-        tooltip: {
-          valueSuffix: 'kWh'
-        }
-      },
-    })
+    // makeGaugeChart({
+    //   domId: 'daily-power-graph',
+    //   yAxis: {
+    //     min: 0,
+    //     max: powerGenerationInfo.currKwYaxisMax * 6,
+    //     title: ''
+    //   },
+    //   series: {
+    //     name: '',
+    //     data: 333.2,
+    //     // data: powerGenerationInfo.dailyPower,
+    //     tooltip: {
+    //       valueSuffix: 'kWh'
+    //     }
+    //   },
+    // })
     // 현재 발전량 차트
     // makeGaugeChart({
     //   domId: 'current-power-graph',
@@ -237,6 +289,23 @@
     // })
 
     makeSpeedGaugeChart({
+      domId: 'daily-power-graph',
+      yAxis: {
+        min: 0,
+        max: powerGenerationInfo.currKwYaxisMax * 6,
+        title: ''
+      },
+      series: {
+        name: '',
+        data: 333.2,
+        // data: powerGenerationInfo.dailyPower,
+        tooltip: {
+          valueSuffix: 'kW'
+        }
+      },
+    })
+
+    makeSpeedGaugeChart({
       domId: 'current-power-graph',
       yAxis: {
         min: 0,
@@ -247,7 +316,7 @@
         name: '',
         data: powerGenerationInfo.currKw,
         tooltip: {
-          valueSuffix: 'kW'
+          valueSuffix: 'kWh'
         }
       },
     })
@@ -260,7 +329,7 @@
         series
       } = gaugeOption;
 
-      Highcharts.chart('current-power-graph',
+      Highcharts.chart(domId,
         Highcharts.merge(gaugeOptions, {
           chart: {
             type: 'gauge',
@@ -275,9 +344,9 @@
           },
 
           pane: {
-            center: ['50%', '50%'],
+            center: ['50%', '80%'],
 
-            size: '100%',
+            size: '170%',
             // startAngle: -90,
             // endAngle: 90,
             background: {
@@ -386,13 +455,30 @@
             gauge: {
               dial: {
                 radius: '90%',
-                // backgroundColor: 'black',
-                // borderColor: 'black',
+                backgroundColor: 'red',
+                borderColor: 'red',
                 // borderWidth: 1,
                 // baseWidth: 3,
                 // topWidth: 1,
                 baseLength: '90%', // of radius
                 // rearLength: '10%'
+              },
+              pivot: {
+                radius: 10,
+                borderWidth: 1,
+                borderColor: 'gray',
+                backgroundColor: {
+                  linearGradient: {
+                    x1: 0,
+                    y1: 0,
+                    x2: 1,
+                    y2: 1
+                  },
+                  stops: [
+                    [0, 'white'],
+                    [1, 'gray']
+                  ]
+                }
               }
             }
           },

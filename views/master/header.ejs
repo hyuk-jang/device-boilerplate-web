@@ -1,7 +1,12 @@
 <header>
-  <div id="loginAreaDom" class="header_top"><span>tester님. 환영합니다.</span><a href="/auth/logout">logout</a></div>
-  <nav class="navbar navbar-inverse">
-    <div class="container-fluid">
+  <div class="header_top b_center">
+    <div id="loginAreaDom">
+      <span>tester님. 환영합니다.</span><a href="/auth/logout">logout</a>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse container-fluid">
+    <div class=" b_center">
+      <!-- <div class="b_center"> -->
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
           <span class="icon-bar"></span>
@@ -22,25 +27,32 @@
           <li><a href="/report">보고서</a></li>
         </ul>
       </div>
+      <!-- </div> -->
     </div>
   </nav>
-  <div class="row" style="height:50px; max-width:1024px; margin:0 auto;">
-    <div class="col-md-6 header_w_r">
-      <form>
-        <select id="siteListDom" name="city" class="city">
-        </select>
-      </form>
-    </div>
-    <div class="col-md-6 header_w_r">
-      <div id="weathercastDom" class="nav_row_st_right">
-        <span style="margin-right:40px;" id="currDate"></span>
-        <span>날씨</span>
-        <img id="currWeatherImg">
-        <input type="text" id="currWeatherTemp" readonly class="form-control" style="text-align: center">
-        <span class="Temperature">℃</span>
+  <div class="row" style="background: linear-gradient( to bottom, #343535, #272727 );">
+    <div style="max-width:1024px; margin: 0 auto">
+      <div class="col-md-12" style="">
+        <div class="col-md-6 header_w_r">
+          <form>
+            <select id="siteListDom" name="city" class="city">
+            </select>
+          </form>
+        </div>
+        <div class="col-md-6 header_w_r">
+          <div id="weathercastDom" class="nav_row_st_right">
+            <span style="margin-right:40px;" id="currDate"></span>
+            <span>날씨</span>
+            <img id="currWeatherImg">
+            <input type="text" id="currWeatherTemp" readonly class="form-control" style="text-align: center">
+            <span class="Temperature">℃</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+  <!-- <div class="col-md-12" style="padding:0;     background-image: linear-gradient(#393939, #222222);"> -->
+
 </header>
 
 <script>
