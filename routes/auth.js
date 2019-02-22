@@ -14,6 +14,7 @@ router.get('/', (req, res) => {
 
 router.get('/login', (req, res) => {
   if (process.env.DEV_AUTO_AUTH === '1') {
+    BU.CLI('자동 로그인');
     // global.app.set('auth', true);
     if (!req.user) {
       request.post(

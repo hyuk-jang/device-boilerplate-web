@@ -7,32 +7,13 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const main = require('./main');
-const inverter = require('./inverter');
-const sensor = require('./sensor');
 const trend = require('./trend');
-const report = require('./report');
 const control = require('./control');
 
-const webUtil = require('../../models/templates/web.util');
-const commonUtil = require('../../models/templates/common.util');
-
-const domMakerMaster = require('../../models/domMaker/masterDom');
+const webUtil = require('../../../models/templates/web.util');
+const commonUtil = require('../../../models/templates/common.util');
 
 const DEFAULT_SITE_ID = 'all';
-
-// server middleware
-// router.use((req, res, next) => {
-//   BU.CLI('Main Middile Ware', req.user);
-//   // if (process.env.DEV_AUTO_AUTH !== '1') {
-//   // if (global.app.get('auth')) {
-
-//   if (!req.user) {
-//     return res.redirect('/auth/login');
-//   }
-//   // }
-
-//   next();
-// });
 
 // server middleware
 router.get(
@@ -45,20 +26,27 @@ router.get(
     '/:naviMenu/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
+    BU.CLI('App Main Router');
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
     const { main_seq: userMainSeq, grade } = user;
 
-    // 선택한 SiteId와 인버터 Id를 정의
+    BU.CLI(user);
+
+    // 선택한 SiteId와 메뉴 정의
     const { naviMenu = '', siteId = userMainSeq } = req.params;
+
+    BU.CLI('siteId', siteId);
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
+
+    // BU.CLI(viewPowerProfileRows);
 
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
 
@@ -79,65 +67,20 @@ router.get(
       .value();
     siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
+    BU.CLI('@');
     // _.set(req, 'locals.siteList', siteList);
 
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
 
-    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
-    // 사이트 목록 추가
-    const loginAreaDom = domMakerMaster.makeTopHeader(user);
-    _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
-
-    const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
-    _.set(req, 'locals.dom.siteListDom', siteListDom);
-
-    // 네비게이션 목록 추가
-    const naviList = [
-      {
-        href: 'main',
-        name: '메인',
-      },
-      {
-        href: 'inverter',
-        name: '인버터',
-      },
-      {
-        href: 'sensor',
-        name: '생육환경',
-      },
-      {
-        href: 'trend',
-        name: '트렌드',
-      },
-      {
-        href: 'report',
-        name: '보고서',
-      },
-    ];
-
-    // admin 등급에선 제어 페이지 노출(무안)
-    if (_.eq(grade, 'admin')) {
-      naviList.push({
-        href: 'control',
-        name: '제어',
-      });
-    }
-
-    const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
-    _.set(req, 'locals.dom.naviListDom', naviListDom);
-
     // Site All일 경우 날씨 정보는 로그인 한 User 의 Main 을 기준으로함.
     const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
-    const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
-
+    const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, true);
+    BU.CLI('@@@');
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
-
-    const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
-    _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
     // BU.CLI(req.locals.siteId);
     next();
@@ -146,11 +89,6 @@ router.get(
 
 // Router 추가
 router.use('/', main);
-router.use('/inverter', inverter);
-router.use('/sensor', sensor);
-router.use('/trend', trend);
-router.use('/report', report);
-router.use('/control', control);
 
 // router.use('/users', users);
 

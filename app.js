@@ -23,6 +23,9 @@ const indexRouter = require('./routes/index');
 
 const authRouter = require('./routes/auth');
 
+const appIndexRouter = require('./routes/app/index');
+const appAuthRouter = require('./routes/app/auth');
+
 const passport = require('./bin/passport');
 const { dbInfo } = require('./bin/config');
 
@@ -89,6 +92,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/auth', authRouter);
 app.use('/', indexRouter);
+app.use('/app/auth', appAuthRouter);
+app.use('/app', appIndexRouter);
 // app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

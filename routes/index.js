@@ -26,25 +26,30 @@ switch (process.env.PJ_MAIN_ID) {
     break;
 }
 
-// router.use('/', users);
-
 // server middleware
+
 router.use((req, res, next) => {
   // BU.CLI('Main Middile Ware', req.user);
   // if (process.env.DEV_AUTO_AUTH !== '1') {
   // if (global.app.get('auth')) {
+
+  const excludePathList = ['/favicon'];
+
+  const isExclue = _.some(excludePathList, excludePath => _.includes(req.path, excludePath));
+
+  // BU.CLI(req.path);
+  if (_.includes(req.path, '/app') || isExclue) {
+    return next();
+  }
+
   if (!req.user) {
+    // BU.CLI('웹 자동 로그인');
     return res.redirect('/auth/login');
   }
   // }
 
   next();
 });
-
-// router.get('/', (req, res) => {
-//   BU.CLI(req.user);
-//   res.send('default main');
-// });
 
 router.get('/intersection', (req, res) => {
   const grade = _.get(req, 'user.grade');
@@ -63,26 +68,5 @@ router.get('/intersection', (req, res) => {
       break;
   }
 });
-
-/* GET home page. */
-// router.get('/', (req, res) => {
-//   // BU.CLI(global.app.get('dbInfo'));
-//   // res.render('index', { title: 'Express' });
-// });
-
-// router.get(
-//   '/main',
-//   asyncHandler(async (req, res) => {
-//     BU.CLIN(req.user);
-//     res.render('./main/index', req.locals);
-//   }),
-// );
-
-router.get(
-  '/home',
-  asyncHandler(async (req, res) => {
-    res.render('./templates/Ean/main', req.locals);
-  }),
-);
 
 module.exports = router;
