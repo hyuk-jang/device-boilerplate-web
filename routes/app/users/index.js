@@ -78,9 +78,17 @@ router.get(
     const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, true);
-    BU.CLI('@@@');
+    // BU.CLI('@@@', req.locals);
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
+    req.locals.weathercast = currWeatherCastInfo;
+
+    req.locals.headerInfo = {
+      headerEnv: {
+        currWeatherCastInfo,
+      },
+      baseInfo: req.locals.mainInfo,
+    };
 
     // BU.CLI(req.locals.siteId);
     next();

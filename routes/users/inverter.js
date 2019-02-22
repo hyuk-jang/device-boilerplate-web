@@ -24,7 +24,7 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
@@ -91,11 +91,16 @@ router.get(
     );
 
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
-    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
+    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(
+      validInverterStatusList,
+    );
 
     // const searchRange = biModule.createSearchRange('min10');
     const searchRange = biModule.createSearchRange('min10', '2018-11-01');
-    const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
+    const inverterPowerList = await biModule.getInverterPower(
+      searchRange,
+      inverterSeqList,
+    );
     // BU.CLI(inverterPowerList);
     const chartOption = {
       selectKey: 'avg_grid_kw',
@@ -105,7 +110,10 @@ router.get(
       sortKey: 'chart_sort_rank',
     };
 
-    const inverterPowerChart = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
+    const inverterPowerChart = webUtil.makeDynamicChartData(
+      inverterPowerList,
+      chartOption,
+    );
 
     inverterPowerChart.series.forEach(chartInfo => {
       chartInfo.name = _.get(
@@ -125,7 +133,9 @@ router.get(
 
     req.locals.inverterPowerChart = inverterPowerChart;
     req.locals.measureInfo = {
-      measureTime: `실시간 인버터 모니터링 측정시간 : ${moment().format('YYYY-MM-DD HH:mm')}:00`,
+      measureTime: `실시간 인버터 모니터링 측정시간 : ${moment().format(
+        'YYYY-MM-DD HH:mm',
+      )}:00`,
     };
     // BU.CLIN(req.locals);
     res.render('./inverter/inverter', req.locals);

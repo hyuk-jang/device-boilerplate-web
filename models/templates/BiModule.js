@@ -426,10 +426,16 @@ class BiModule extends BM {
     // deviceType = deviceType || 'all';
     // if (deviceType === 'all' || deviceType === 'inverter') {
     /** @type {PW_INVERTER[]} */
-    let inverterList = await this.getTable('pw_inverter', { inverter_seq: inverterSeqList });
+    let inverterList = await this.getTable('pw_inverter', {
+      inverter_seq: inverterSeqList,
+    });
     inverterList = _.sortBy(inverterList, 'chart_sort_rank');
     _.forEach(inverterList, info => {
-      returnValue.push({ type: 'inverter', seq: info.inverter_seq, target_name: info.target_name });
+      returnValue.push({
+        type: 'inverter',
+        seq: info.inverter_seq,
+        target_name: info.target_name,
+      });
     });
     // }
     // 인버터 이름순으로 정렬

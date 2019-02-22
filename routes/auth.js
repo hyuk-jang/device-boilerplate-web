@@ -17,6 +17,7 @@ router.get('/login', (req, res) => {
     BU.CLI('자동 로그인');
     // global.app.set('auth', true);
     if (!req.user) {
+      BU.CLI('poost!');
       request.post(
         {
           url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
@@ -26,7 +27,10 @@ router.get('/login', (req, res) => {
             password: process.env.DEV_USER_PW,
           },
         },
-        (err, httpResponse, msg) => res.redirect('/intersection'),
+        (err, httpResponse, msg) => {
+          res.redirect('/intersection');
+        },
+        // (err, httpResponse, msg) => res.redirect('/intersection'),
         // (err, httpResponse, msg) => res.redirect(`/${process.env.DEV_PAGE}`),
       );
     }

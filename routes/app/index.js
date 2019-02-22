@@ -59,8 +59,11 @@ router.get('/intersection', (req, res) => {
   switch (userInfo.grade) {
     default:
       router.use('/', selectedRouter);
-      // _.isString(process.env.DEV_PAGE) && res.redirect(`/${process.env.DEV_PAGE}`);
-      res.json(userInfo);
+
+      _.isString(process.env.DEV_PAGE)
+        ? res.redirect(`/${process.env.DEV_PAGE}`)
+        : res.redirect('/app');
+      // res.json(userInfo);
       break;
   }
 });

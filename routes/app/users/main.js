@@ -9,8 +9,6 @@ const { BU } = require('base-util-jh');
 
 const webUtil = require('../../../models/templates/web.util');
 
-const domMakerMain = require('../../../models/domMaker/mainDom');
-
 const commonUtil = require('../../../models/templates/common.util');
 const sensorUtil = require('../../../models/templates/sensor.util');
 
@@ -82,7 +80,6 @@ router.get(
     // 인버터 트렌드 구함
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
     // BU.CLI(inverterTrend);
-    BU.CLI('@');
     // 구한 인버터 Trend는 grouping 구간의 최대 최소 값이므로 오차가 발생. 따라서 이전 grouping 최대 값끼리 비교 연산 필요.
     webUtil.refineDataRows(searchRange, inverterTrend, {
       calcMaxKey: 'max_c_kwh',
@@ -116,7 +113,6 @@ router.get(
     const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', {
       inverter_seq: inverterSeqList,
     });
-    BU.CLI('@');
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq: inverterSeq } = inverterStatus;
@@ -173,16 +169,18 @@ router.get(
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 데이터 동적 생성 돔
-    const inverterStatusListDom = domMakerMain.makeInverterStatusDom(inverterStatusRows);
-
-    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
-
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
-    req.locals.powerGenerationInfo = powerGenerationInfo;
-    req.locals.growthEnv = sensorDataInfo;
-    // BU.CLI(req.locals);
-    res.json(req.locals);
+
+    // const {weathercast, powerGenerationInfo, growthEnv} = req.locals;
+
+    res.json({
+      headerInfo: req.locals.headerInfo,
+      containerInfo: {
+        powerGenerationInfo,
+        growthEnv: sensorDataInfo,
+      },
+    });
   }),
 );
 

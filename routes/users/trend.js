@@ -29,7 +29,7 @@ router.get(
     const biModule = global.app.get('biModule');
 
     // req.param 값 비구조화 할당
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // req.query 값 비구조화 할당
     const {
@@ -84,7 +84,7 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
@@ -97,12 +97,18 @@ router.get(
     // BU.CLI(placeRows);
     // BU.CLI(_.assign(mainWhere, sensorWhere));
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere, false);
+    const placeRelationRows = await biDevice.getTable(
+      'v_dv_place_relation',
+      mainWhere,
+      false,
+    );
 
     // BU.CLIN(placeRelationRows);
 
     // NOTE: IVT가 포함된 장소는 제거.
-    _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(placeRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
@@ -125,7 +131,11 @@ router.get(
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
-    sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
+    sensorUtil.extPlaRelPerfectSenRep(
+      placeRelationRows,
+      sensorReportRows,
+      strGroupDateList,
+    );
     // console.timeEnd('extPlaRelSensorRep');
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
@@ -154,7 +164,12 @@ router.get(
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
     const madeSensorChartList = sensorProtocol.trendViewList.map(chartConfig =>
-      sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList, strGroupDateList),
+      sensorUtil.makeSensorChart(
+        chartConfig,
+        nodeDefStorageList,
+        utcList,
+        strGroupDateList,
+      ),
     );
 
     // BU.CLI(madeSensorChartList);

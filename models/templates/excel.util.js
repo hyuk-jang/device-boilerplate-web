@@ -315,7 +315,10 @@ function makeChartDataToExcelWorkSheet(resource) {
     deviceChartInfo.brineTemperatureChartInfo.sensorChartData.series,
     chartInfo => chartInfo.option,
   );
-  ws.B4 = { t: 's', v: `가중치 미적용 \n${powerName} ${powerChartDecoration.yAxisTitle}` };
+  ws.B4 = {
+    t: 's',
+    v: `가중치 미적용 \n${powerName} ${powerChartDecoration.yAxisTitle}`,
+  };
   ws.B5 = { t: 's', v: '비교(%)' };
   ws.B6 = { t: 's', v: '가중치' };
   ws.B7 = { t: 's', v: `가중치 적용 \n${powerName} ${powerChartDecoration.yAxisTitle}` };
@@ -348,7 +351,9 @@ function makeChartDataToExcelWorkSheet(resource) {
     const subData = _.subtract(_.get(foundOptionIt, 'max'), _.get(foundOptionIt, 'min'));
     const { columnName, target_name } = viewInverterStatusInfo;
     const waterLevel = _.get(
-      _.find(waterLevelDataPacketList, { inverter_seq: viewInverterStatusInfo.inverter_seq }),
+      _.find(waterLevelDataPacketList, {
+        inverter_seq: viewInverterStatusInfo.inverter_seq,
+      }),
       'water_level',
       '',
     );
@@ -358,7 +363,10 @@ function makeChartDataToExcelWorkSheet(resource) {
     ws[`${columnName}4`] = { t: 'n', v: subData };
     XLSX.utils.cell_set_number_format(ws[`${columnName}4`], '#,#0.0##');
     // 가중치 미적용 비교
-    ws[`${columnName}5`] = { t: 'n', f: `${columnName}4/${foundForeginOptionIt.columnName}4` };
+    ws[`${columnName}5`] = {
+      t: 'n',
+      f: `${columnName}4/${foundForeginOptionIt.columnName}4`,
+    };
     XLSX.utils.cell_set_number_format(ws[`${columnName}5`], '0.0%');
     // 가중치
     ws[`${columnName}6`] = { t: 'n', v: _.get(foundOptionIt, 'scale') || '' };
@@ -366,7 +374,10 @@ function makeChartDataToExcelWorkSheet(resource) {
     ws[`${columnName}7`] = { t: 'n', f: `${columnName}4*${columnName}6` };
     XLSX.utils.cell_set_number_format(ws[`${columnName}7`], '#,#0.0##');
     // 가중치 적용 비교
-    ws[`${columnName}8`] = { t: 'n', f: `${columnName}7/${foundForeginOptionIt.columnName}7` };
+    ws[`${columnName}8`] = {
+      t: 'n',
+      f: `${columnName}7/${foundForeginOptionIt.columnName}7`,
+    };
     XLSX.utils.cell_set_number_format(ws[`${columnName}8`], '0.0%');
 
     // 24시간 발전 용량 Wh(kw -> w 1000배, Scale 10 나눔 ---> 100(시간당 발전용량))
@@ -395,7 +406,10 @@ function makeChartDataToExcelWorkSheet(resource) {
     const foundMrtOptionIt = _.find(mrtChartDataOptionList, {
       sort: viewInverterStatusInfo.chart_sort_rank,
     });
-    ws[`${columnName}12`] = { t: 'n', v: _.round(_.get(foundMrtOptionIt, 'aver', ''), 1) };
+    ws[`${columnName}12`] = {
+      t: 'n',
+      v: _.round(_.get(foundMrtOptionIt, 'aver', ''), 1),
+    };
 
     // 모듈 수온
     const foundbtOptionIt = _.find(btChartDataOptionList, {
@@ -405,7 +419,10 @@ function makeChartDataToExcelWorkSheet(resource) {
     if (_.get(foundbtOptionIt, 'aver', '') === '') {
       ws[`${columnName}13`] = { t: 'n', v: '' };
     } else {
-      ws[`${columnName}13`] = { t: 'n', v: _.round(_.get(foundbtOptionIt, 'aver', ''), 1) };
+      ws[`${columnName}13`] = {
+        t: 'n',
+        v: _.round(_.get(foundbtOptionIt, 'aver', ''), 1),
+      };
     }
   });
 

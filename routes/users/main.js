@@ -24,7 +24,7 @@ router.get(
     const biModule = global.app.get('biModule');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
@@ -34,7 +34,10 @@ router.get(
     // BU.CLI(powerProfileRows);
 
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+    const viewSensorProfileRows = await biModule.getTable(
+      'v_dv_sensor_profile',
+      mainWhere,
+    );
 
     const sensorProtocol = new SensorProtocol(siteId);
 
@@ -51,7 +54,10 @@ router.get(
 
     // Site 발전 현황 구성.
     // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
-    let searchRange = biModule.createSearchRange({ searchType: 'months', searchInterval: 'month' });
+    let searchRange = biModule.createSearchRange({
+      searchType: 'months',
+      searchInterval: 'month',
+    });
     // BU.CLI(searchRange);
     // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
     const inverterStatisticsRows = await biModule.getInverterStatistics(
@@ -101,7 +107,11 @@ router.get(
     );
 
     // 차트를 생성하기 위한 옵션.
-    const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
+    const chartOption = {
+      selectKey: 'interval_power',
+      dateKey: 'group_date',
+      hasArea: true,
+    };
     // 데이터 현황에 따라 동적 차트 궝
     const chartData = webUtil.makeDynamicChartData(inverterTrend, chartOption);
 

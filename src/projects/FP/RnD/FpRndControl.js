@@ -39,7 +39,7 @@ class FpRndControl extends Control {
    */
   runFeature(featureConfig) {
     const { ioConfig, apiConfig, rtspConfig } = featureConfig;
-    // this.weathercast.init(this.dbInfo);
+    this.weathercast.init(this.dbInfo);
     this.socketIoManager.init(ioConfig);
 
     this.apiServer.init(apiConfig);

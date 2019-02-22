@@ -52,8 +52,8 @@ router.use((req, res, next) => {
 });
 
 router.get('/intersection', (req, res) => {
-  const grade = _.get(req, 'user.grade');
   // BU.CLI(req.user);
+  const grade = _.get(req, 'user.grade');
   switch (grade) {
     // case 'admin':
     //   router.use('/admin', admin);

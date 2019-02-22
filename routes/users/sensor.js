@@ -19,7 +19,6 @@ router.get(
   asyncHandler(async (req, res) => {
     commonUtil.applyHasNumbericReqToNumber(req);
 
-    // BU.CLI(req.user);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
@@ -29,21 +28,29 @@ router.get(
     const mainSiteList = mainInfo.siteList;
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+    const viewSensorProfileRows = await biModule.getTable(
+      'v_dv_sensor_profile',
+      mainWhere,
+    );
     /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
+    const viewPlaceRelationRows = await biModule.getTable(
+      'v_dv_place_relation',
+      mainWhere,
+    );
 
     // TODO: 각  relation에 동일 node_seq를 사용하고 있다면 profile 현재 데이터 기입, 아니라면 row는 제거
 
     // IVT가 포함된 장소는 제거.
-    _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(viewPlaceRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
 
     // 각 Relation에 해당 데이터 확장
     viewPlaceRelationRows.forEach(placeRelation => {
@@ -78,7 +85,9 @@ router.get(
     _.set(req, 'locals.dom.sensorEnvBodyDom', sensorEnvBodyDom);
 
     req.locals.measureInfo = {
-      measureTime: `생육환경 모니터링 측정시간 : ${moment().format('YYYY-MM-DD HH:mm')}:00`,
+      measureTime: `생육환경 모니터링 측정시간 : ${moment().format(
+        'YYYY-MM-DD HH:mm',
+      )}:00`,
     };
 
     // BU.CLIN(req.locals);

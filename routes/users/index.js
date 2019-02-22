@@ -49,7 +49,10 @@ router.get(
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
-    const { main_seq: userMainSeq, grade } = user;
+    const { grade } = user;
+
+    // 사용자가 Manager 등급이라면 기본 siteId를 all로 지정
+    const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
     const { naviMenu = '', siteId = userMainSeq } = req.params;
@@ -134,7 +137,9 @@ router.get(
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
+    const currWeatherCastInfo = await biModule.getCurrWeatherCast(
+      mainRow.weather_location_seq,
+    );
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

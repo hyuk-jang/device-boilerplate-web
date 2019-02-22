@@ -113,14 +113,15 @@ class BiDevice extends BiModule {
   async getPlaceRelation(receiveObjList) {
     // 장소 SeqList 추출
     const placeSeqList = _.map(receiveObjList, receiveDataInfo =>
-      _.get(receiveDataInfo, 'place_seq'),
+      _.get(receiveDataInfo, 'place_seq', null),
     );
+
     // BU.CLI(placeSeqList);
     // 추출된 seqList를 기준으로 장소 관계를 불러옴
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeList = await this.getTable(
       'v_dv_place_relation',
-      { place_seq: placeSeqList },
+      { place_seq: _.reject(placeSeqList, _.isNil) },
       false,
     );
     return placeList;
@@ -139,7 +140,9 @@ class BiDevice extends BiModule {
       return containedPlaceSeqRows;
     }
     // 검색 조건에 맞는 데이터
-    const containedPickIdRelationPlaceRows = _.filter(relationPlaceRows, { nd_target_id: pickId });
+    const containedPickIdRelationPlaceRows = _.filter(relationPlaceRows, {
+      nd_target_id: pickId,
+    });
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
     if (_.isEmpty(containedPickIdRelationPlaceRows)) {
@@ -154,6 +157,7 @@ class BiDevice extends BiModule {
     const dvSensorProfileRows = await this.getTable('v_dv_sensor_profile', {
       node_seq: nodeSeqList,
     });
+    // BU.CLI('@@');
     // 검색된 노드가 없다면 그냥 반환
     if (_.isEmpty(dvSensorProfileRows)) {
       return containedPlaceSeqRows;
@@ -254,7 +258,9 @@ class BiDevice extends BiModule {
       return returnValue;
     }
     // 검색 조건에 맞는 데이터
-    const filterdPlaceRelationList = _.filter(placeRelationList, { nd_target_id: pickId });
+    const filterdPlaceRelationList = _.filter(placeRelationList, {
+      nd_target_id: pickId,
+    });
     // BU.CLI(filteringPlaceList);
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
