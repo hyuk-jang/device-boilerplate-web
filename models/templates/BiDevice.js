@@ -116,14 +116,13 @@ class BiDevice extends BiModule {
       _.get(receiveDataInfo, 'place_seq', null),
     );
 
+    const remainPlaceList = _.reject(placeSeqList, _.isNil);
+    const where = remainPlaceList.length ? { place_seq: remainPlaceList } : null;
+
     // BU.CLI(placeSeqList);
     // 추출된 seqList를 기준으로 장소 관계를 불러옴
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeList = await this.getTable(
-      'v_dv_place_relation',
-      { place_seq: _.reject(placeSeqList, _.isNil) },
-      false,
-    );
+    const placeList = await this.getTable('v_dv_place_relation', where, false);
     return placeList;
   }
 
@@ -135,6 +134,7 @@ class BiDevice extends BiModule {
    */
   async extendsPlaceDeviceData(containedPlaceSeqRows, pickId) {
     const relationPlaceRows = await this.getPlaceRelation(containedPlaceSeqRows);
+    // BU.CLI(relationPlaceRows);
     // 장소 관계에 관련된 내용이 없다면 그냥 반환
     if (_.isEmpty(relationPlaceRows)) {
       return containedPlaceSeqRows;

@@ -88,6 +88,8 @@ router.get(
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
 
+    // BU.CLI(req.locals.mainInfo);
+
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 사이트 목록 추가
     const loginAreaDom = domMakerMaster.makeTopHeader(user);
@@ -137,9 +139,7 @@ router.get(
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(
-      mainRow.weather_location_seq,
-    );
+    const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

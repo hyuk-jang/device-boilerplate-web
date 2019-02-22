@@ -75,7 +75,7 @@ module.exports = {
   makeNaviListDom(naviList = [], selectedNavi = 'main', userSeq = '') {
     selectedNavi = selectedNavi.length ? selectedNavi : 'main';
     // siteId가 존재할 경우
-    const siteParam = userSeq.length ? `/${userSeq}` : '';
+    const siteParam = userSeq ? `/${userSeq}` : '';
 
     const siteOptionTemplate = _.template(
       '<li class="<%= isSelected %>"><a href="/<%= href %><%= siteParam %>"><%= name %></a></li>',

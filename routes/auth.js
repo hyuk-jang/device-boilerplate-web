@@ -14,10 +14,10 @@ router.get('/', (req, res) => {
 
 router.get('/login', (req, res) => {
   if (process.env.DEV_AUTO_AUTH === '1') {
-    BU.CLI('자동 로그인');
+    // BU.CLI('자동 로그인');
     // global.app.set('auth', true);
     if (!req.user) {
-      BU.CLI('poost!');
+      // BU.CLI('poost!');
       request.post(
         {
           url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,

@@ -34,10 +34,7 @@ router.get(
     // BU.CLI(powerProfileRows);
 
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable(
-      'v_dv_sensor_profile',
-      mainWhere,
-    );
+    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
     const sensorProtocol = new SensorProtocol(siteId);
 

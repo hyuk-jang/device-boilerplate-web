@@ -17,13 +17,12 @@ const SensorProtocol = require('../../../models/SensorProtocol');
 router.get(
   ['/', '/main', '/main/:siteId'],
   asyncHandler(async (req, res) => {
-    BU.CLI('@');
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId = req.user.main_seq } = req.params;
+    const { siteId } = req.locals.mainInfo;
 
     // 모든 Site 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
@@ -36,7 +35,6 @@ router.get(
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
     const sensorProtocol = new SensorProtocol(siteId);
-    BU.CLI('@');
     const sensorDataInfo = {};
     sensorProtocol.mainViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
@@ -57,7 +55,7 @@ router.get(
       searchRange,
       inverterSeqList,
     );
-    BU.CLI('@');
+
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
     const monthPower = webUtil.reduceDataList(inverterStatisticsRows, 'interval_power');
     const cumulativePower = webUtil.calcValue(
@@ -98,15 +96,6 @@ router.get(
       1,
       2,
     );
-
-    // 차트를 생성하기 위한 옵션.
-    const chartOption = { selectKey: 'interval_power', dateKey: 'group_date', hasArea: true };
-    // 데이터 현황에 따라 동적 차트 궝
-    const chartData = webUtil.makeDynamicChartData(inverterTrend, chartOption);
-
-    // 일별 차트로 구성
-    webUtil.applyScaleChart(chartData, 'day');
-    webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
 
     // 인버터 현재 발전 현황
     /** @type {V_PW_INVERTER_STATUS[]} */
@@ -166,13 +155,6 @@ router.get(
         .value(),
       hasAlarm: false, // TODO 알람 정보 작업 필요
     };
-
-    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
-    // 인버터 현재 데이터 동적 생성 돔
-    req.locals.dailyPowerChartData = chartData;
-    // req.locals.moduleStatusList = validModuleStatusList;
-
-    // const {weathercast, powerGenerationInfo, growthEnv} = req.locals;
 
     res.json({
       headerInfo: req.locals.headerInfo,

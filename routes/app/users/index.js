@@ -6,8 +6,8 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const main = require('./main');
-const trend = require('./trend');
+const main = require('./appMain');
+const trend = require('./appTrend');
 const control = require('./control');
 
 const webUtil = require('../../../models/templates/web.util');
@@ -31,14 +31,13 @@ router.get(
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
-    const { main_seq: userMainSeq, grade } = user;
+    const { grade } = user;
 
-    BU.CLI(user);
+    // 사용자가 Manager 등급이라면 기본 siteId를 all로 지정
+    const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 메뉴 정의
     const { naviMenu = '', siteId = userMainSeq } = req.params;
-
-    BU.CLI('siteId', siteId);
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -67,9 +66,6 @@ router.get(
       .value();
     siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
-    BU.CLI('@');
-    // _.set(req, 'locals.siteList', siteList);
-
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
@@ -77,17 +73,16 @@ router.get(
     // Site All일 경우 날씨 정보는 로그인 한 User 의 Main 을 기준으로함.
     const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
-    const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, true);
+    const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
     // BU.CLI('@@@', req.locals);
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
-    req.locals.weathercast = currWeatherCastInfo;
 
     req.locals.headerInfo = {
       headerEnv: {
-        currWeatherCastInfo,
+        currWeatherCastInfo: _.pick(currWeatherCastInfo, ['ws', 'wf', 'temp']),
       },
-      baseInfo: req.locals.mainInfo,
+      headerMenu: req.locals.mainInfo,
     };
 
     // BU.CLI(req.locals.siteId);
@@ -97,6 +92,8 @@ router.get(
 
 // Router 추가
 router.use('/', main);
+router.use('/trend', trend);
+// router.use('/', main);
 
 // router.use('/users', users);
 

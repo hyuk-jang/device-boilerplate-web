@@ -27,14 +27,17 @@ router.get(
     const { siteId } = req.locals.mainInfo;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = BU.isNumberic(siteId) ? { main_seq: Number(siteId) } : null;
+    const mainWhere = BU.isNumberic(siteId)
+      ? {
+          main_seq: Number(siteId),
+        }
+      : null;
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
 
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-
     // 인버터별 경사 일사량을 가져옴
     const powerProfileRowsWithExtendedSolar = await biDevice.extendsPlaceDeviceData(
       powerProfileRows,
@@ -54,7 +57,9 @@ router.get(
       const { inverter_seq, place_seq } = inverterStatus;
       // BU.CLI(foundPlaceData);
       // 인버터 Sequence가 동일한 Power Profile을 가져옴
-      const foundProfile = _.find(powerProfileRows, { inverter_seq });
+      const foundProfile = _.find(powerProfileRows, {
+        inverter_seq,
+      });
       // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
       const {
         m_name: mainName = '',
@@ -66,11 +71,16 @@ router.get(
         _.isString(company) && company.length ? company : ''
       }`;
 
-      inverterSiteNameList.push({ inverter_seq, siteName });
+      inverterSiteNameList.push({
+        inverter_seq,
+        siteName,
+      });
 
       // 경사 일사량 구함
       const foundIncludedInclinedSolarRow = _.chain(powerProfileRowsWithExtendedSolar)
-        .find({ place_seq })
+        .find({
+          place_seq,
+        })
         .get('INCLINED_SOLAR', null)
         .value();
 
@@ -91,16 +101,11 @@ router.get(
     );
 
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
-    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(
-      validInverterStatusList,
-    );
+    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
 
-    // const searchRange = biModule.createSearchRange('min10');
-    const searchRange = biModule.createSearchRange('min10', '2018-11-01');
-    const inverterPowerList = await biModule.getInverterPower(
-      searchRange,
-      inverterSeqList,
-    );
+    const searchRange = biModule.createSearchRange('min10');
+    // const searchRange = biModule.createSearchRange('min10', '2018-11-01');
+    const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
     // BU.CLI(inverterPowerList);
     const chartOption = {
       selectKey: 'avg_grid_kw',
@@ -110,14 +115,13 @@ router.get(
       sortKey: 'chart_sort_rank',
     };
 
-    const inverterPowerChart = webUtil.makeDynamicChartData(
-      inverterPowerList,
-      chartOption,
-    );
+    const inverterPowerChart = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
 
     inverterPowerChart.series.forEach(chartInfo => {
       chartInfo.name = _.get(
-        _.find(inverterSiteNameList, { inverter_seq: Number(chartInfo.name) }),
+        _.find(inverterSiteNameList, {
+          inverter_seq: Number(chartInfo.name),
+        }),
         'siteName',
         '',
       );
@@ -133,9 +137,7 @@ router.get(
 
     req.locals.inverterPowerChart = inverterPowerChart;
     req.locals.measureInfo = {
-      measureTime: `실시간 인버터 모니터링 측정시간 : ${moment().format(
-        'YYYY-MM-DD HH:mm',
-      )}:00`,
+      measureTime: `${moment().format('YYYY-MM-DD HH:mm')}:00`,
     };
     // BU.CLIN(req.locals);
     res.render('./inverter/inverter', req.locals);

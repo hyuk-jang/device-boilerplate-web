@@ -24,7 +24,7 @@ const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 
 const appIndexRouter = require('./routes/app/index');
-const appAuthRouter = require('./routes/app/auth');
+const appAuthRouter = require('./routes/app/appAuth');
 
 const passport = require('./bin/passport');
 const { dbInfo } = require('./bin/config');

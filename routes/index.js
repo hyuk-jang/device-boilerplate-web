@@ -35,11 +35,15 @@ router.use((req, res, next) => {
 
   const excludePathList = ['/favicon'];
 
-  const isExclue = _.some(excludePathList, excludePath => _.includes(req.path, excludePath));
+  const isExclude = _.some(excludePathList, excludePath => _.includes(req.path, excludePath));
 
   // BU.CLI(req.path);
-  if (_.includes(req.path, '/app') || isExclue) {
+  if (_.includes(req.path, '/app')) {
     return next();
+  }
+
+  if (isExclude) {
+    return false;
   }
 
   if (!req.user) {

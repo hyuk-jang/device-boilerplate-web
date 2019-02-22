@@ -7,13 +7,13 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const sensorUtil = require('../../models/templates/sensor.util');
-const excelUtil = require('../../models/templates/excel.util');
-const commonUtil = require('../../models/templates/common.util');
+const sensorUtil = require('../../../models/templates/sensor.util');
+const excelUtil = require('../../../models/templates/excel.util');
+const commonUtil = require('../../../models/templates/common.util');
 
-const webUtil = require('../../models/templates/web.util');
+const webUtil = require('../../../models/templates/web.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const SensorProtocol = require('../../../models/SensorProtocol');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'days';
@@ -157,23 +157,10 @@ router.get(
       sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList, strGroupDateList),
     );
 
-    // BU.CLI(madeSensorChartList);
-
-    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
-    const sensorDomTemplate = _.template(`
-        <div class="title_box2" style="margin-bottom:20px" id="<%= domId %>"></div>
-    `);
-    const sensorDivDomList = madeSensorChartList.map(refinedChart =>
-      sensorDomTemplate({
-        domId: refinedChart.domId,
-      }),
-    );
-
     // console.timeEnd('madeSensorChartList');
 
     // BU.CLIN(madeSensorChartList, 4);
 
-    _.set(req, 'locals.dom.sensorDivDomList', sensorDivDomList);
     _.set(req, 'locals.madeSensorChartList', madeSensorChartList);
 
     // TODO: 1. 각종 Chart 작업
@@ -181,7 +168,13 @@ router.get(
     // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
 
     // BU.CLIN(req.locals);
-    res.render('./trend/trend', req.locals);
+    res.json({
+      headerInfo: req.locals.headerInfo,
+      containerInfo: {
+        inverterTrendList: [],
+        sensorTrendList: madeSensorChartList,
+      },
+    });
   }),
 );
 
