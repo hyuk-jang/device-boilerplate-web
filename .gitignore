@@ -10,6 +10,7 @@ package-lock.json
 **/.vscode/
 **/out/
 **/docs/
+**/snapshot/
 
 # 와일드카드도 사용가능
 # ignore-file*

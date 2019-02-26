@@ -138,6 +138,8 @@ router.get(
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
 
+    _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
+
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
 

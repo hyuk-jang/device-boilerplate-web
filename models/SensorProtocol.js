@@ -71,6 +71,10 @@ class SensorProtocol {
     return CALC_TYPE;
   }
 
+  get appMasterViewList() {
+    return [BASE_KEY.inclinedSolar];
+  }
+
   get mainViewList() {
     return [
       BASE_KEY.lux,

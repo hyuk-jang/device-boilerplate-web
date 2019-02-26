@@ -347,5 +347,29 @@ class BiDevice extends BiModule {
       sensorTrend,
     };
   }
+
+  /**
+   * 카메라 데이터 추출
+   * @param {number[]} cameraSeqList
+   * @param {timeIntervalToValidateInfo} diffInfo
+   */
+  getCameraSnapshot(cameraSeqList, diffInfo = { diffType: 'minutes', duration: 10 }) {
+    // BU.CLI(cameraSeqList);
+    // 카메라 목록이 존재하지 않는다면 빈 배열 반환
+    if (!cameraSeqList.length) return [];
+    const sql = `
+      SELECT csd.* FROM camera_snapshot_data csd
+      INNER JOIN
+        (
+        SELECT MAX(camera_snapshot_data_seq) AS camera_snapshot_data_seq
+        FROM camera_snapshot_data
+        WHERE camera_seq IN (${cameraSeqList})
+        GROUP BY camera_seq
+        ) temp
+       ON csd.camera_snapshot_data_seq = temp.camera_snapshot_data_seq
+    `;
+
+    return this.db.single(sql, null, true);
+  }
 }
 module.exports = BiDevice;

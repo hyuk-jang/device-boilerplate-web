@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
@@ -9,6 +10,9 @@ const { BU } = require('base-util-jh');
 const main = require('./appMain');
 const trend = require('./appTrend');
 const control = require('./control');
+
+const SensorProtocol = require('../../../models/SensorProtocol');
+const sensorUtil = require('../../../models/templates/sensor.util');
 
 const webUtil = require('../../../models/templates/web.util');
 const commonUtil = require('../../../models/templates/common.util');
@@ -45,6 +49,21 @@ router.get(
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
+    // 모든 Site 조회하고자 할 경우 Id를 지정하지 않음
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    /** @type {V_DV_SENSOR_PROFILE[]} */
+    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+
+    const sensorProtocol = new SensorProtocol(siteId);
+    const headerSensorInfo = {};
+    sensorProtocol.appMasterViewList.forEach(ndKey => {
+      const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
+        calcKey: ndKey,
+        standardDate: moment('2018-11-12 09:19:00').toDate(),
+      });
+      _.assign(headerSensorInfo, { [ndKey]: result });
+    });
+
     // BU.CLI(viewPowerProfileRows);
 
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
@@ -80,7 +99,10 @@ router.get(
 
     req.locals.headerInfo = {
       headerEnv: {
-        currWeatherCastInfo: _.pick(currWeatherCastInfo, ['ws', 'wf', 'temp']),
+        currWeatherCastInfo: _.assign(
+          headerSensorInfo,
+          _.pick(currWeatherCastInfo, ['ws', 'wf', 'temp']),
+        ),
       },
       headerMenu: req.locals.mainInfo,
     };

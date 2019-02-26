@@ -89,6 +89,12 @@ app.use(express.json());
 // app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  '/snapshot',
+  express.static(path.join(__dirname, 'snapshot'), {
+    extensions: ['jpg'],
+  }),
+);
 
 app.use('/auth', authRouter);
 app.use('/', indexRouter);

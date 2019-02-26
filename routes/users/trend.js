@@ -43,21 +43,21 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    const searchRange = biModule.createSearchRange({
-      searchType,
-      searchInterval,
-      searchOption,
-      strStartDate: strStartDateInputValue,
-      strEndDate: strEndDateInputValue,
-    });
     // const searchRange = biModule.createSearchRange({
-    //   // searchType: 'days',
-    //   searchType: 'range',
-    //   searchInterval: 'min10',
-    //   strStartDate: '2018-11-23',
-    //   // strEndDate: '',
-    //   strEndDate: '2018-11-26',
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
     // });
+    const searchRange = biModule.createSearchRange({
+      searchType: 'days',
+      // searchType: 'range',
+      searchInterval: 'min10',
+      strStartDate: '2019-02-13',
+      strEndDate: '',
+      // strEndDate: '2019-02-14',
+    });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보

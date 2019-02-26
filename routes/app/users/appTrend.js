@@ -43,21 +43,22 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    const searchRange = biModule.createSearchRange({
-      searchType,
-      searchInterval,
-      searchOption,
-      strStartDate: strStartDateInputValue,
-      strEndDate: strEndDateInputValue,
-    });
     // const searchRange = biModule.createSearchRange({
-    //   // searchType: 'days',
-    //   searchType: 'range',
-    //   searchInterval: 'min10',
-    //   strStartDate: '2018-11-23',
-    //   // strEndDate: '',
-    //   strEndDate: '2018-11-26',
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
     // });
+
+    const searchRange = biModule.createSearchRange({
+      searchType: 'days',
+      // searchType: 'range',
+      searchInterval: 'min',
+      strStartDate: '2019-02-13',
+      strEndDate: '',
+      // strEndDate: '2019-02-14',
+    });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -139,12 +140,6 @@ router.get(
     );
     // console.timeEnd('makeNodeDefStorageList');
 
-    // BU.CLIN(nodeDefStorageList, 3);
-
-    // FIXME: 구간 최대 값 차 차트 --> getSensorReport 밑에 저장해둠. 수정 필요.
-
-    // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
-
     // UTC 날짜를 구하기 위하여 서울 기준 UTC +9 시간을 더함
     const utcList = strGroupDateList.map(date =>
       moment(date)
@@ -162,10 +157,6 @@ router.get(
     // BU.CLIN(madeSensorChartList, 4);
 
     _.set(req, 'locals.madeSensorChartList', madeSensorChartList);
-
-    // TODO: 1. 각종 Chart 작업
-
-    // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
 
     // BU.CLIN(req.locals);
     res.json({

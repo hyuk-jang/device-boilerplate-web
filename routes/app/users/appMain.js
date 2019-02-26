@@ -34,15 +34,19 @@ router.get(
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
+    // BU.CLI(viewSensorProfileRows);
+
     const sensorProtocol = new SensorProtocol(siteId);
     const sensorDataInfo = {};
     sensorProtocol.mainViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
         calcKey: ndKey,
-        // standardDate: moment('2018-11-12 09:19:00').toDate(),
+        standardDate: moment('2018-11-12 09:19:00').toDate(),
       });
       _.assign(sensorDataInfo, { [ndKey]: result });
     });
+
+    BU.CLI(sensorDataInfo);
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
 

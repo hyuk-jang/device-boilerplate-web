@@ -1206,7 +1206,7 @@ function CamControl(parameterKey, parameterValue)
 function clientsidesnapshot() {
   var snapshot = '/cgi-bin/viewer/video.jpg';
   const fullUrl = cctvUrl ? cctvUrl + snapshot : snapshot;
-  console.log('clientsidesnapshot', fullUrl);
+  // console.log('clientsidesnapshot', fullUrl);
 
   const subWindow = window.open(fullUrl, '', 'width=800, height=600, scrollbars=yes, status=yes');
   subWindow.focus();

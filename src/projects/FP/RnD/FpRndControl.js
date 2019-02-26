@@ -7,8 +7,8 @@ const Weathercast = require('../../../features/Weathercast/Weathercast');
 const SocketIOManager = require('../../../features/SocketIOManager/SocketIOManager');
 const ApiServer = require('../../../features/ApiCommunicator/ApiServer');
 
-const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
-// const RtspManager = require('../../../features/RtspManager/ToIMG');
+// const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
+const RtspManager = require('../../../features/RtspManager/ToIMG');
 
 const DBA = require('../../../../../device-boilerplate-abbreviation');
 
@@ -22,8 +22,8 @@ class FpRndControl extends Control {
     /** @type {ApiServer} */
     this.apiServer = new ApiServer(this);
 
-    /** @type {ToFFMPEG} */
-    this.rtspManager = new RtspManager();
+    /** @type {RtspManager} */
+    this.rtspManager = new RtspManager(this);
   }
 
   /**
@@ -49,6 +49,23 @@ class FpRndControl extends Control {
     this.rtspManager.init(rtspConfig);
 
     this.createMuanCCTV();
+  }
+
+  /**
+   * @desc Step 1
+   * Main Storage List를 초기화
+   * @param {dbInfo=} dbInfo
+   */
+  async setMainStorage(dbInfo) {
+    await super.setMainStorage(dbInfo);
+
+    /** @type {CAMERA[]} */
+    const cameraList = await this.biModule.getTable('camera', { is_deleted: 0 });
+
+    // 카메라 목록 설정
+    this.mainStorageList.forEach(msInfo => {
+      msInfo.msCameraList = _.filter(cameraList, { main_seq: msInfo.msFieldInfo.main_seq });
+    });
   }
 
   /**
