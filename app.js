@@ -16,6 +16,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
+const favicon = require('serve-favicon');
 
 const { BU } = require('base-util-jh');
 
@@ -27,7 +28,10 @@ const appIndexRouter = require('./routes/app/index');
 const appAuthRouter = require('./routes/app/appAuth');
 
 const passport = require('./bin/passport');
-const { dbInfo } = require('./bin/config');
+const {
+  dbInfo,
+  projectInfo: { projectMainId },
+} = require('./bin/config');
 
 const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
@@ -49,6 +53,20 @@ app.use(flash());
  * Set Customize
  */
 
+let faviPath = '';
+switch (projectMainId) {
+  case 'FP':
+    faviPath = 'farm_icon_SFk_icon.ico';
+    break;
+  case 'UPSAS':
+    faviPath = 'favicon.ico';
+    break;
+  default:
+    faviPath = 'favicon.ico';
+    break;
+}
+
+app.use(favicon(path.resolve('public/image', faviPath)));
 app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
@@ -86,7 +104,7 @@ if (app.get('env') === 'development') {
 }
 
 app.use(express.json());
-// app.use(express.urlencoded({extended: false}));
+// app.use(express.urlencoded({extended: `fa`lse}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(

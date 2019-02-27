@@ -54,6 +54,10 @@ async function operationController() {
       projectInfo,
       dbInfo,
     });
+
+    // 전역 변수로 등록
+    global.srcController = srcController;
+
     await srcController.init();
     srcController.bindingFeature();
     srcController.runFeature({

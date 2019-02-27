@@ -125,7 +125,7 @@ class FpRndControl extends Control {
    * 무안 30kW 급 CCTV를 제어하기 위한 임시 로직
    */
   async controlMuanCCTV(controlValue) {
-    // BU.CLI('controlMuanCCTV', controlValue);
+    BU.CLI('controlMuanCCTV', controlValue);
     await this.muanDBA.init();
     // BU.CLI('init complate');
     try {

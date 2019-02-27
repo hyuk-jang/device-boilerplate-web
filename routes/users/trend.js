@@ -43,21 +43,21 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      // searchType: 'range',
-      searchInterval: 'min10',
-      strStartDate: '2019-02-13',
-      strEndDate: '',
-      // strEndDate: '2019-02-14',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   // searchType: 'days',
+    //   searchType: 'range',
+    //   searchInterval: 'min',
+    //   strStartDate: '2019-02-13',
+    //   // strEndDate: '',
+    //   strEndDate: '2019-02-14',
+    // });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -118,10 +118,24 @@ router.get(
 
     // BU.CLIN(sensorReportRows);
 
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, {
-      startHour: 7,
-      endHour: 20,
-    });
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    let strGroupDateList = [];
+    // plotSeries 를 구하기 위한 객체
+    let momentFormat;
+
+    // 하루 단위로 검색할 경우에만 시간 제한을 둠
+    if (searchRangeInfo.searchType === 'days') {
+      const rangeInfo = {
+        startHour: 7,
+        endHour: 20,
+      };
+      strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
+      momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
+    } else {
+      strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+      momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    }
+
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
@@ -145,16 +159,10 @@ router.get(
 
     // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
 
-    // UTC 날짜를 구하기 위하여 서울 기준 UTC +9 시간을 더함
-    const utcList = strGroupDateList.map(date =>
-      moment(date)
-        .add(9, 'hours')
-        .valueOf(),
-    );
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
-    const madeSensorChartList = sensorProtocol.trendViewList.map(chartConfig =>
-      sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList, strGroupDateList),
+    const madeSensorLineChartList = sensorProtocol.trendViewList.map(chartConfig =>
+      sensorUtil.makeSimpleLineChart(chartConfig, nodeDefStorageList, momentFormat.plotSeries),
     );
 
     // BU.CLI(madeSensorChartList);
@@ -163,7 +171,7 @@ router.get(
     const sensorDomTemplate = _.template(`
         <div class="title_box2" style="margin-bottom:20px" id="<%= domId %>"></div>
     `);
-    const sensorDivDomList = madeSensorChartList.map(refinedChart =>
+    const sensorDivDomList = madeSensorLineChartList.map(refinedChart =>
       sensorDomTemplate({
         domId: refinedChart.domId,
       }),
@@ -174,7 +182,7 @@ router.get(
     // BU.CLIN(madeSensorChartList, 4);
 
     _.set(req, 'locals.dom.sensorDivDomList', sensorDivDomList);
-    _.set(req, 'locals.madeSensorChartList', madeSensorChartList);
+    _.set(req, 'locals.madeSensorChartList', madeSensorLineChartList);
 
     // TODO: 1. 각종 Chart 작업
 

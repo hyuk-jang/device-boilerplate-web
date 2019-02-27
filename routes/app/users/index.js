@@ -9,7 +9,8 @@ const { BU } = require('base-util-jh');
 
 const main = require('./appMain');
 const trend = require('./appTrend');
-const control = require('./control');
+const control = require('./appControl');
+const cctv = require('./appCCTV');
 
 const SensorProtocol = require('../../../models/SensorProtocol');
 const sensorUtil = require('../../../models/templates/sensor.util');
@@ -59,7 +60,7 @@ router.get(
     sensorProtocol.appMasterViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
         calcKey: ndKey,
-        standardDate: moment('2018-11-12 09:19:00').toDate(),
+        // standardDate: moment('2018-11-12 09:19:00').toDate(),
       });
       _.assign(headerSensorInfo, { [ndKey]: result });
     });
@@ -93,6 +94,8 @@ router.get(
     const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
+
+    _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
     // BU.CLI('@@@', req.locals);
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
@@ -115,6 +118,8 @@ router.get(
 // Router 추가
 router.use('/', main);
 router.use('/trend', trend);
+router.use('/cctv', cctv);
+router.use('/control', control);
 // router.use('/', main);
 
 // router.use('/users', users);

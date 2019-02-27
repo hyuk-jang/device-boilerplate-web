@@ -83,16 +83,17 @@ exports.getDistinctGroupDateList = getDistinctGroupDateList;
 /**
  * searchRange 형태를 분석하여 addUnit, addValue, momentFormat을 반환
  * @param {searchRange} searchRange
+ * @param {string=} strStartDate 시작 날짜
  */
-function getMomentFormat(searchRange) {
+function getMomentFormat(searchRange, strStartDate = searchRange.strStartDate) {
   const { searchInterval } = searchRange;
 
   let addUnit = 'minutes';
   let addValue = 1;
   let momentFormat = 'YYYY-MM-DD HH:mm:ss';
 
-  const chartStartFormat = {
-    pointStart: moment(searchRange.strStartDate)
+  const plotSeries = {
+    pointStart: moment(strStartDate)
       .add(9, 'hours')
       .valueOf(),
     pointInterval: 0,
@@ -101,23 +102,23 @@ function getMomentFormat(searchRange) {
     case 'min':
       addUnit = 'minutes';
       momentFormat = 'YYYY-MM-DD HH:mm';
-      chartStartFormat.pointInterval = 1000 * 60;
+      plotSeries.pointInterval = 1000 * 60;
       break;
     case 'min10':
       addUnit = 'minutes';
       addValue = 10;
       momentFormat = 'YYYY-MM-DD HH:mm';
-      chartStartFormat.pointInterval = 1000 * 60 * 10;
+      plotSeries.pointInterval = 1000 * 60 * 10;
       break;
     case 'hour':
       addUnit = 'hours';
       momentFormat = 'YYYY-MM-DD HH';
-      chartStartFormat.pointInterval = 1000 * 60 * 60;
+      plotSeries.pointInterval = 1000 * 60 * 60;
       break;
     case 'day':
       addUnit = 'days';
       momentFormat = 'YYYY-MM-DD';
-      chartStartFormat.pointInterval = 1000 * 60 * 60 * 24;
+      plotSeries.pointInterval = 1000 * 60 * 60 * 24;
       break;
     case 'month':
       addUnit = 'months';
@@ -134,6 +135,7 @@ function getMomentFormat(searchRange) {
     addUnit,
     addValue,
     momentFormat,
+    plotSeries,
   };
 }
 exports.getMomentFormat = getMomentFormat;
@@ -478,3 +480,74 @@ function makeSensorChart(chartConfig, nodeDefStorageList, utcList) {
   return refinedChart;
 }
 exports.makeSensorChart = makeSensorChart;
+/**
+ *
+ * @param {Object} chartConfig 차트를 만들기 위한 생성 정보
+ * @param {string} chartConfig.domId
+ * @param {string} chartConfig.title
+ * @param {string} chartConfig.subtitle
+ * @param {Object[]} chartConfig.chartOptionList
+ * @param {string[]} chartConfig.chartOptionList.keys
+ * @param {string[]} chartConfig.chartOptionList.mixColors
+ * @param {string} chartConfig.chartOptionList.yTitle
+ * @param {string} chartConfig.chartOptionList.dataUnit
+ * @param {nodeDefStorage[]} nodeDefStorageList
+ * @param {Object} plotSeries
+ * @param {number} plotSeries.pointStart 시작 UTC
+ * @param {number} plotSeries.pointInterval 시간 Interval
+ */
+function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
+  // BU.CLI(plotSeries)
+  // 차트 생성하기 위한 설정
+  const { domId, title = '', subtitle = '', chartOptionList } = chartConfig;
+  // 정제된 차트 정보
+  const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
+  // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
+  chartOptionList.forEach(chartOption => {
+    // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
+    // 보여줄 축 정보
+    const { dataUnit, yTitle, keys, mixColors } = chartOption;
+    // Y축 표현 정보 삽입
+    refinedChart.yAxis.push({
+      yTitle,
+      dataUnit,
+    });
+    // Node Def ID 목록을 순회하면서 Nod Def Storage 정보를 바탕으로 차트 정보를 구성
+    keys.forEach((ndId, index) => {
+      // 표현할 Node Def Storage 목록에 해당 ndId를 가진 객체를 찾음.
+      const nodeDefStorage = _.find(nodeDefStorageList, { ndId });
+
+      // BU.CLIN(nodeDefStorage);
+      // Node Def ID를 가진 저장소가 있을 경우
+      if (!_.isUndefined(nodeDefStorage)) {
+        nodeDefStorage.nodePlaceList.forEach(nodePlace => {
+          const { node_name: ndName = '' } = nodePlace;
+          let { chart_color: chartColor = '' } = nodePlace;
+
+          // 같은 Place에 위치한 Node의 경우 색상이 같으므로 색상 표현을 다르게 하기 위한 논리
+          if (_.isString(chartColor) && chartColor.length && _.isString(mixColors[index])) {
+            // keys 와 mixColors는 서로 대칭을 이루므로 해당 index의 mixColors를 가져옴
+            chartColor = BU.blendColors(chartColor, mixColors[index], 0.5);
+          }
+
+          const chartSeriesInfo = {
+            // 차트 컬럼 개체 명
+            name: ndName,
+            // 차트 컬럼 개체 색상
+            color: chartColor,
+            // 차트를 마우스 오버 하였을 경우 나타나는 단위
+            tooltip: {
+              valueSuffix: dataUnit,
+            },
+            // dataTable. 각 데이터는 [[utc, data][...]] 이룸
+            data: _.map(nodePlace.sensorDataRows, 'avg_data'),
+          };
+          refinedChart.series.push(chartSeriesInfo);
+        });
+      }
+    });
+  });
+
+  return refinedChart;
+}
+exports.makeSimpleLineChart = makeSimpleLineChart;

@@ -373,6 +373,9 @@ Highcharts.setOptions({
  * @param {Object[]} chartInfo.yAxis
  * @param {string=} chartInfo.yAxis.title
  * @param {string=} chartInfo.yAxis.dataUnit
+ * @param {Object=} chartInfo.plotSeries
+ * @param {number} chartInfo.plotSeries.pointStart 시작 UTC
+ * @param {number} chartInfo.plotSeries.pointInterval 시간 Interval
  * @param {Object[]} chartInfo.series
  * @param {string} chartInfo.series.name
  * @param {number[]} chartInfo.series.data
@@ -463,6 +466,7 @@ function makeLineChart(chartInfo) {
             lineWidth: 1,
           },
         },
+        series: _.get(chartInfo, 'plotSeries', {}),
       },
 
       series: chartInfo.series,

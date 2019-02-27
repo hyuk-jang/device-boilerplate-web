@@ -3,10 +3,9 @@ const request = require('request');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
 const base64Img = require('base64-img');
+const moment = require('moment');
 
 const router = express.Router();
-
-const fs = require('fs');
 
 const { BU } = require('base-util-jh');
 
@@ -25,23 +24,22 @@ router.get(
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     /** @type {CAMERA[]} */
-    const cameraList = await biDevice.getTable('camera', mainWhere, true);
+    const cameraList = await biDevice.getTable('camera', mainWhere, false);
 
     /** @type {CAMERA_SNAPSHOT_DATA[]} */
     const snapshotDataRows = await biDevice.getCameraSnapshot(_.map(cameraList, 'camera_seq'));
 
-    BU.CLI(snapshotDataRows);
-
     const snapshotStorageList = [];
 
     snapshotDataRows.forEach(snapshotDataRow => {
-      const { snapshot_uuid: snapshotPath, camera_seq } = snapshotDataRow;
+      const { snapshot_uuid: snapshotPath, camera_seq, writedate } = snapshotDataRow;
       const cameraInfo = _.find(cameraList, { camera_seq });
 
       const snapshotStorage = {
         cameraSeq: cameraInfo.camera_seq,
         cameraName: cameraInfo.camera_name,
         snapshotPath: `snapshot/${uuid}/${snapshotPath}`,
+        snapshotTime: moment(writedate).format('YYYY-MM-DD hh:mm:ss'),
       };
 
       snapshotStorageList.push(snapshotStorage);
@@ -51,8 +49,6 @@ router.get(
 
       // res.end(img, 'binary');
     });
-
-    BU.CLI(snapshotStorageList);
 
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;

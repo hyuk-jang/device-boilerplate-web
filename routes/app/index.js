@@ -27,7 +27,7 @@ router.use((req, res, next) => {
   // BU.CLI('Main Middile Ware', req.user);
   // if (process.env.DEV_AUTO_AUTH !== '1') {
   // if (global.app.get('auth')) {
-  BU.CLI('App Router', req.user);
+  // BU.CLI('App Router', req.user);
   if (!req.user) {
     if (process.env.DEV_AUTO_AUTH === '1') {
       BU.CLI('App 자동 로그인 요청');

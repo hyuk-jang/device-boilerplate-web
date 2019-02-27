@@ -349,6 +349,7 @@ class BiDevice extends BiModule {
   }
 
   /**
+   * FIXME: 스냅샷의 유효성 검증 처리 하지 않음. 필요시 처리
    * 카메라 데이터 추출
    * @param {number[]} cameraSeqList
    * @param {timeIntervalToValidateInfo} diffInfo
@@ -369,7 +370,7 @@ class BiDevice extends BiModule {
        ON csd.camera_snapshot_data_seq = temp.camera_snapshot_data_seq
     `;
 
-    return this.db.single(sql, null, true);
+    return this.db.single(sql, null, false);
   }
 }
 module.exports = BiDevice;

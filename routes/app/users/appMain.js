@@ -46,8 +46,6 @@ router.get(
       _.assign(sensorDataInfo, { [ndKey]: result });
     });
 
-    BU.CLI(sensorDataInfo);
-
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
 
     // Site 발전 현황 구성.
