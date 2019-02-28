@@ -87,32 +87,24 @@ input:focus {
 .links a {
   margin-left: 4px;
 }
-/* 
-@media screen and (max-device-width: 900px) {
-  h3 {
-    color: fuchsia;
-  }
 
+@media screen and (max-width: 560px) {
   .container {
-    width: 100%;
+    padding: 0;
   }
 
   .card {
-    width: 90%;
+    width: 100%;
   }
 
-  .desc:after {
-    content: " In fact, it's between 500px and 600px wide.";
+  .card-header h3 {
+    color: white;
+    margin-top: 0.5em;
+    font-size: 1.5em;
+    text-align: center;
+  }
+
+  .card-body {
+    padding: 1.25rem 0;
   }
 }
-
-@media screen and (max-device-width: 640px) {
-  .container {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .card {
-    width: 100%;
-  }
-} */

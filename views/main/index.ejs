@@ -255,22 +255,22 @@
     $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
     // 금일 발전량 차트
-    // makeGaugeChart({
-    //   domId: 'daily-power-graph',
-    //   yAxis: {
-    //     min: 0,
-    //     max: powerGenerationInfo.currKwYaxisMax * 6,
-    //     title: ''
-    //   },
-    //   series: {
-    //     name: '',
-    //     data: 333.2,
-    //     // data: powerGenerationInfo.dailyPower,
-    //     tooltip: {
-    //       valueSuffix: 'kWh'
-    //     }
-    //   },
-    // })
+    makeGaugeChart({
+      domId: 'daily-power-graph',
+      yAxis: {
+        min: 0,
+        max: powerGenerationInfo.currKwYaxisMax * 6,
+        title: ''
+      },
+      series: {
+        name: '',
+        data: 333.2,
+        // data: powerGenerationInfo.dailyPower,
+        tooltip: {
+          valueSuffix: 'kWh'
+        }
+      },
+    })
     // 현재 발전량 차트
     // makeGaugeChart({
     //   domId: 'current-power-graph',
@@ -288,22 +288,22 @@
     //   },
     // })
 
-    makeSpeedGaugeChart({
-      domId: 'daily-power-graph',
-      yAxis: {
-        min: 0,
-        max: powerGenerationInfo.currKwYaxisMax * 6,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: 333.2,
-        // data: powerGenerationInfo.dailyPower,
-        tooltip: {
-          valueSuffix: 'kW'
-        }
-      },
-    })
+    // makeSpeedGaugeChart({
+    //   domId: 'daily-power-graph',
+    //   yAxis: {
+    //     min: 0,
+    //     max: powerGenerationInfo.currKwYaxisMax * 6,
+    //     title: ''
+    //   },
+    //   series: {
+    //     name: '',
+    //     data: 333.2,
+    //     // data: powerGenerationInfo.dailyPower,
+    //     tooltip: {
+    //       valueSuffix: 'kW'
+    //     }
+    //   },
+    // })
 
     makeSpeedGaugeChart({
       domId: 'current-power-graph',
@@ -328,6 +328,11 @@
         yAxis,
         series
       } = gaugeOption;
+
+      var yMax = yAxis.max;
+      var data = [_.random(0, 100)];
+
+      var scale = _.divide(data, yMax)
 
       Highcharts.chart(domId,
         Highcharts.merge(gaugeOptions, {
@@ -392,7 +397,20 @@
             //   from: 0,
             //   to: 20,
             //   thickness: '40%',
-            //   color: '#2b8a3e' // green
+            //   color: {
+            //     linearGradient: {
+            //       x1: 0,
+            //       x2: 1,
+            //       y1: 1,
+            //       y2: 0
+            //     },
+            //     stops: [
+            //       [0, '#55BF3B'], //green
+            //       [0.5, '#DDDF0D'], //yellow
+            //       [1, '#DF5353'], //yellow
+            //     ]
+            //   },
+            //   // color: '#2b8a3e' // green
             // }, {
             //   from: 20,
             //   to: 40,
@@ -414,9 +432,27 @@
             //   thickness: '40%',
             //   color: '#d9480f' // red
             // }],
+            plotBands: [{
+              from: 0,
+              to: data,
+              thickness: '40%',
+              color: {
+                linearGradient: {
+                  x1: 0,
+                  x2: 1,
+                  y1: 1,
+                  y2: 1
+                },
+                stops: [
+                  [0, '#55BF3B'], //green
+                  [0.5, '#DDDF0D'], //yellow
+                  [1, '#DF5353'], //yellow
+                ]
+              }
+            }],
             // plotBands: [{
-            //   from: 0,
-            //   to: 88.2,
+            //   from: yAxis.min,
+            //   to: yAxis.max,
             //   thickness: '40%',
             //   color: {
             //     linearGradient: {
@@ -431,27 +467,16 @@
             //       [1, '#DF5353'], //yellow
             //     ]
             //   }
-            // }],
-            plotBands: [{
-              from: yAxis.min,
-              to: yAxis.max,
-              thickness: '40%',
-              color: {
-                linearGradient: {
-                  x1: 0,
-                  x2: 1,
-                  y1: 1,
-                  y2: 1
-                },
-                stops: [
-                  [0, '#04aaf8'], //blue
-                  // [0.5, '#4dc1f7'], //yellow
-                  // [1, '#e6e6e6'], //yellow
-                ]
-              }
-            }]
+            // }]
           },
           plotOptions: {
+            // solidgauge: {
+            //   dataLabels: {
+            //     y: 10,
+            //     borderWidth: 0,
+            //     useHTML: true,
+            //   },
+            // },
             gauge: {
               dial: {
                 radius: '90%',
@@ -485,7 +510,7 @@
 
           series: [{
             name: series.name,
-            data: [88.2],
+            data: data,
             type: 'gauge',
             dataLabels: {
               borderWidth: 0,
