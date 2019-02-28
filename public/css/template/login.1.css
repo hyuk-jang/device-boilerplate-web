@@ -1,12 +1,13 @@
-body {}
+body {
+  background-image: url('../../image/bg_1025.jpg');
+}
 
 /*################################ LOGIN ###############################*/
 
 .login_full {
-
-    width: 100%;
-    margin: 0 auto;
-    padding: 20% 20%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20% 20%;
 }
 
 .login {
@@ -24,8 +25,8 @@ body {}
 
 .login_top {
   height: 75px;
-  background-color: #3F8EB9;
-  color: #FFFFFF;
+  background-color: #3f8eb9;
+  color: #ffffff;
   font-size: 25px;
   text-align: center;
   line-height: 3;
@@ -36,13 +37,13 @@ body {}
 .login_mid {
   padding: 30px 0;
   background-color: #f3f3f4;
-  border-bottom: 1px solid #FFFFFF;
+  border-bottom: 1px solid #ffffff;
 }
 
 .login_mid input {
-    width: 90%;
-    height: 65%;
-    border-radius: 5px;
+  width: 90%;
+  height: 65%;
+  border-radius: 5px;
 }
 
 .login_mid td {
@@ -50,15 +51,16 @@ body {}
 }
 
 .login_bot {
-
   background-color: #f3f3f4;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 }
 
-.login_bot_left {}
+.login_bot_left {
+}
 
-.login_bot_right {}
+.login_bot_right {
+}
 
 .table_login {
   width: 80%;
@@ -67,7 +69,7 @@ body {}
 }
 
 .button {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   color: #2f4050;
   border: 1px solid #253848;
   border-radius: 5px;
@@ -80,7 +82,7 @@ body {}
 .button:hover {
   background-color: #2f4050;
   border: 1px solid #253848;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 12px;
   padding: 6px 20px;
   cursor: pointer;
