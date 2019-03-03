@@ -16,22 +16,22 @@
     "build": "pkg . --out-path dist",
     "build:win": "pkg . --out-path dist --targets node8-win-x64",
     "build:linux": "pkg . --out-path dist --targets node8-linux-x64",
-    "build:macos": "pkg . --out-path dist --targets node8-macos-x64"
+    "build:macos": "pkg . --out-path dist --targets node8-macos-x64",
+    "fix-code": "prettier-eslint --write 'src/**/*.{js,jsx}' ",
+    "fix-styles": "prettier-stylelint --write 'public/**/*.{css,scss}' "
   },
   "devDependencies": {
     "@types/lodash": "^4.14.118",
     "docdash": "^1.0.2",
     "dotenv": "^6.2.0",
-    "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^4.0.0",
+    "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "jsdoc": "^3.5.5",
-    "pkg": "^4.3.7",
-    "prettier": "^1.16.4"
+    "pkg": "^4.3.7"
   },
   "dependencies": {
     "base-model-jh": "^1.2.5",
