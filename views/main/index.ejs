@@ -20,7 +20,7 @@
     <div class="containera">
       <div class="containerb text-center">
         <div class="box">
-          <div class="gauge_area_m">
+          <div class="component_side_area side_box_first">
             <div class="deve">
               <p>발전현황</p>
               <p>Development status</p>
@@ -58,66 +58,51 @@
           </div>
         </div>
         <div class="box_3">
-          <section class="gauge_area">
-            <article class="gauge_title">
-              <p>현재 발전현황</p>
-            </article>
-            <article id="current-power-graph" class="gauge_chart">Graph</article>
-            <article class="gauge_contents  border-success">
-              <ul class="">
-                <li>현재 출력</li>
-                <li>3.72</li>
-                <li>kW</li>
-              </ul>
-              <ul class="">
-                <li>발전 효율</li>
-                <li>52.1</li>
-                <li>%</li>
-              </ul>
-            </article>
-          </section>
+          <article class="component_piece_area">
+            <header>
+              현재 발전현황
+            </header>
+            <div class="component_piece_body ">
+              <div id="current-power-graph" class="gauge_chart">Graph</div>
+              <div class="gauge_contents  ">
+                <ul class="">
+                  <li>현재 출력</li>
+                  <li>3.72</li>
+                  <li>kW</li>
+                </ul>
+                <ul class="">
+                  <li>발전 효율</li>
+                  <li>52.1</li>
+                  <li>%</li>
+                </ul>
+              </div>
+            </div>
+          </article>
         </div>
-        <!-- <div class="box_3">
-            <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
-            <div id="current-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
-          </div> -->
         <div class="box_3">
-          <section class="gauge_area">
-            <article class="gauge_title">
-              <p>금일발전량</p>
-            </article>
-            <article id="daily-power-graph" class="gauge_chart">Graph</article>
-            <article class="gauge_contents border-success">
-              <ul class="">
-                <li>현재 출력</li>
-                <li>3.72</li>
-                <li>kW</li>
-              </ul>
-              <ul class="">
-                <li>발전 효율</li>
-                <li>52.1</li>
-                <li>%</li>
-              </ul>
-            </article>
-          </section>
+          <article class="component_piece_area">
+            <header>금일발전량</header>
+            <div class="component_piece_body pt_1rem">
+              <div id="daily-power-graph" class="gauge_chart">Graph</div>
+              <div class="gauge_contents">
+                <ul class="">
+                  <li>현재 출력</li>
+                  <li>3.72</li>
+                  <li>kWh</li>
+                </ul>
+                <ul class="">
+                  <li>발전 효율</li>
+                  <li>52.1</li>
+                  <li>%</li>
+                </ul>
+              </div>
+            </div>
+          </article>
         </div>
-
-        <!-- <div class="box_3">
-          <section class="gauge_area">
-            <article class="gauge_title">
-              <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
-            </article>
-            <div id="daily-power-graph" style="align-self: center; width:90%; height:80%; background-color:#e9e9e9;">Graph</div>
-          </section>
-        </div> -->
-
-
-
       </div>
       <div class="text-center containerc">
         <div class="box_4">
-          <div class="gauge_area_m2">
-
+          <div class="component_side_area side_box_second">
             <div class="deve">
               <p>생육환경정보</p>
               <p>Growth Environment</p>
@@ -172,45 +157,37 @@
             </div> -->
           </div>
         </div>
-        <div class="box_5">
-          <section class="gauge_area">
-            <article class="gauge_title">
-              <p style="margin:10px 0;font-weight:bold;">인버터 전압/전류</p>
-            </article>
-            <div id="inverterStatus" class="box_5_bg">
-              <div class="box_5_in">
-                <!-- <div class="box_5_a" style="word-break: keep-all;
-                word-wrap: break-word; padding: 5px; text-align: left">
-                  <b>
-                  </b>
-                </div> -->
-                <div class="box_5_a">
-                  <b>
-                  </b>
+        <div class="box_3">
+          <article class="component_piece_area">
+            <header>인버터 전압/전류(AC)</header>
+            <section id="inverterStatus" class="component_piece_body">
+              <article class="component_ele_status">
+                <header>나주 고정식 33 kW급 쏠라테크</header>
+                <div class="ele_status_area">
+                  <article class="ele_data_status">
+                    <div class="ele_data_name">
+                      전압
+                    </div>
+                    <div class="ele_data_value_area">
+                      <span class="ele_data_value">196</span><span> A</span>
+                    </div>
+                  </article>
+                  <article class="ele_data_status">
+                    <div class="ele_data_name">전류</div>
+                    <div class="ele_data_value_area">
+                      <span class="ele_data_value">343.3</span><span> A</span>
+                    </div>
+                  </article>
                 </div>
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전압</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span> V</span></div>
-                </div>
-                <div class="box_5_a">
-                  <div class="box_5_in_sp">
-                    <p>AC전류</p>
-                  </div>
-                  <div> <input class="wed_3" type="text"><span> A</span></div>
-                </div>
-              </div>
-            </div>
-          </section>
+              </article>
+            </section>
+          </article>
         </div>
-        <div class="box_2">
-          <section class="gauge_area">
-            <article class="gauge_title">
-              <p style="margin:10px 0; font-weight:bold;">생육 환경 현황</p>
-            </article>
-            <div id="growthEnvChart" style="align-self: center;width:90%; height:80%; background-color:#010304!important; margin-top: 20px;">Graph</div>
-          </section>
+        <div class="box_3">
+          <article class="component_piece_area">
+            <header>생육 환경 현황</header>
+            <div id="growthEnvChart" class="component_piece_body p_column_rem">Graph</div>
+          </article>
         </div>
         <!-- <div class="box_6">
             <div class="box_6_in">
@@ -243,295 +220,6 @@
     <%- include("../master/footer.ejs") %>
 
   </div>
-
-  <script>
-    Highcharts.theme = {
-      colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066',
-        '#eeaaee', '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'
-      ],
-      chart: {
-        backgroundColor: {
-          linearGradient: {
-            x1: 0,
-            y1: 0,
-            x2: 1,
-            y2: 1
-          },
-          stops: [
-            [0, '#2a2a2b'],
-            [1, '#3e3e40']
-          ]
-        },
-        style: {
-          fontFamily: '\'Unica One\', sans-serif'
-        },
-        plotBorderColor: '#606063'
-      },
-      title: {
-        style: {
-          color: '#E0E0E3',
-          textTransform: 'uppercase',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        style: {
-          color: '#E0E0E3',
-          textTransform: 'uppercase'
-        }
-      },
-      xAxis: {
-        gridLineColor: '#707073',
-        labels: {
-          style: {
-            color: '#E0E0E3'
-          }
-        },
-        lineColor: '#707073',
-        minorGridLineColor: '#505053',
-        tickColor: '#707073',
-        title: {
-          style: {
-            color: '#A0A0A3'
-
-          }
-        }
-      },
-      yAxis: {
-        gridLineColor: '#707073',
-        labels: {
-          style: {
-            color: '#E0E0E3'
-          }
-        },
-        lineColor: '#707073',
-        minorGridLineColor: '#505053',
-        tickColor: '#707073',
-        tickWidth: 1,
-        title: {
-          style: {
-            color: '#A0A0A3'
-          }
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        style: {
-          color: '#F0F0F0'
-        }
-      },
-      plotOptions: {
-        series: {
-          dataLabels: {
-            color: '#B0B0B3'
-          },
-          marker: {
-            lineColor: '#333'
-          }
-        },
-        boxplot: {
-          fillColor: '#505053'
-        },
-        candlestick: {
-          lineColor: 'white'
-        },
-        errorbar: {
-          color: 'white'
-        }
-      },
-      legend: {
-        itemStyle: {
-          color: '#E0E0E3'
-        },
-        itemHoverStyle: {
-          color: '#FFF'
-        },
-        itemHiddenStyle: {
-          color: '#606063'
-        }
-      },
-      credits: {
-        style: {
-          color: '#666'
-        }
-      },
-      labels: {
-        style: {
-          color: '#707073'
-        }
-      },
-
-      drilldown: {
-        activeAxisLabelStyle: {
-          color: '#F0F0F3'
-        },
-        activeDataLabelStyle: {
-          color: '#F0F0F3'
-        }
-      },
-
-      navigation: {
-        buttonOptions: {
-          symbolStroke: '#DDDDDD',
-          theme: {
-            fill: '#505053'
-          }
-        }
-      },
-
-      // scroll charts
-      rangeSelector: {
-        buttonTheme: {
-          fill: '#505053',
-          stroke: '#000000',
-          style: {
-            color: '#CCC'
-          },
-          states: {
-            hover: {
-              fill: '#707073',
-              stroke: '#000000',
-              style: {
-                color: 'white'
-              }
-            },
-            select: {
-              fill: '#000003',
-              stroke: '#000000',
-              style: {
-                color: 'white'
-              }
-            }
-          }
-        },
-        inputBoxBorderColor: '#505053',
-        inputStyle: {
-          backgroundColor: '#333',
-          color: 'silver'
-        },
-        labelStyle: {
-          color: 'silver'
-        }
-      },
-
-      navigator: {
-        handles: {
-          backgroundColor: '#666',
-          borderColor: '#AAA'
-        },
-        outlineColor: '#CCC',
-        maskFill: 'rgba(255,255,255,0.1)',
-        series: {
-          color: '#7798BF',
-          lineColor: '#A6C7ED'
-        },
-        xAxis: {
-          gridLineColor: '#505053'
-        }
-      },
-
-      scrollbar: {
-        barBackgroundColor: '#808083',
-        barBorderColor: '#808083',
-        buttonArrowColor: '#CCC',
-        buttonBackgroundColor: '#606063',
-        buttonBorderColor: '#606063',
-        rifleColor: '#FFF',
-        trackBackgroundColor: '#404043',
-        trackBorderColor: '#404043'
-      },
-
-      // special colors for some of the
-      legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
-      background2: '#505053',
-      dataLabelsColor: '#B0B0B3',
-      textColor: '#C0C0C0',
-      contrastTextColor: '#F0F0F3',
-      maskColor: 'rgba(255,255,255,0.3)'
-    };
-
-    // Apply the theme
-    Highcharts.setOptions(Highcharts.theme);
-
-    var gaugeOption = {
-
-      chart: {
-        type: 'solidgauge'
-      },
-
-      title: null,
-
-      pane: {
-        center: ['50%', '85%'],
-        size: '140%',
-        startAngle: -90,
-        endAngle: 90,
-        background: {
-          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
-          innerRadius: '60%',
-          outerRadius: '100%',
-          shape: 'arc'
-        }
-      },
-
-      tooltip: {
-        enabled: false
-      },
-
-      // the value axis
-      yAxis: {
-        stops: [
-          [0.1, '#55BF3B'], // green
-          [0.5, '#DDDF0D'], // yellow
-          [0.9, '#DF5353'] // red
-        ],
-        lineWidth: 0,
-        minorTickInterval: null,
-        tickAmount: 2,
-        title: {
-          y: -70
-        },
-        labels: {
-          y: 16
-        }
-      },
-
-      plotOptions: {
-        solidgauge: {
-          dataLabels: {
-            y: 5,
-            borderWidth: 0,
-            useHTML: true
-          }
-        }
-      }
-    };
-
-    // The speed gauge
-    var chartSpeed = Highcharts.chart('daily-power-graph', Highcharts.merge(gaugeOption, {
-      yAxis: {
-        min: 0,
-        max: 200,
-        title: {
-          text: 'Speed',
-          y: -90
-        }
-      },
-      series: [{
-        name: 'Speed',
-        data: [80],
-        dataLabels: {
-          format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-            ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-            '<span style="font-size:12px;color:silver">km/h</span></div>'
-        },
-        tooltip: {
-          valueSuffix: ' km/h'
-        }
-      }]
-
-    }));
-  </script>
 
   <script>
     let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;

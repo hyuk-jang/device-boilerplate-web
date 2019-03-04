@@ -5,8 +5,8 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '75%'],
-    size: '120%',
+    center: ['50%', '85%'],
+    size: '155%',
     startAngle: -90,
     endAngle: 90,
     background: {
@@ -49,6 +49,7 @@ const gaugeOptions = {
     },
   },
 };
+
 
 const defaultGaugeOptions = {
   chart: {

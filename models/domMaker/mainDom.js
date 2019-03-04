@@ -7,23 +7,25 @@ module.exports = {
   makeInverterStatusDom(inverterStatusRows) {
     // <input class="input-tx" type="text" value="<%= siteName %>">
     const inverterStatusTemplate = _.template(`
-    <div class="box_5_in">
-    <div class="box_5_a" style="display:flex; align-items: center; min-height:50px; word-break: keep-all;word-wrap: break-word; padding: 5px; text-align: left">
-      <b><%= siteName %> </b>
-    </div>
-    <div class="box_5_a">
-      <div class="box_5_in_sp">
-        <p>AC전압</p>
+  <article class="component_ele_status">
+      <header><%= siteName %></header>
+      <div class="ele_status_area">
+        <article class="ele_data_status">
+          <div class="ele_data_name">
+            전압
+          </div>
+          <div class="ele_data_value_area">
+            <span class="ele_data_value"><%= grid_rs_v %></span><span> A</span>
+          </div>
+        </article>
+        <article class="ele_data_status">
+          <div class="ele_data_name">전류</div>
+          <div class="ele_data_value_area">
+            <span class="ele_data_value"><%= grid_r_a %></span><span> A</span>
+          </div>
+        </article>
       </div>
-      <div> <input class="wed_3" type="text" value="<%= grid_rs_v %>"><span> V</span></div>
-    </div>
-    <div class="box_5_a">
-      <div class="box_5_in_sp">
-        <p>AC전류</p>
-      </div>
-      <div> <input class="wed_3" type="text" value="<%= grid_r_a %>"><span> A</span></div>
-    </div>
-  </div>
+    </article>
     `);
     const madeDom = inverterStatusRows.map(row => inverterStatusTemplate(row));
 
