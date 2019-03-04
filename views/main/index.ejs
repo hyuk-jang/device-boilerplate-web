@@ -20,15 +20,38 @@
     <div class="containera">
       <div class="containerb text-center">
         <div class="box">
-          <div class="component_side_area side_box_first">
-            <div class="deve">
-              <p>발전현황</p>
-              <p>Development status</p>
-            </div>
-            <div id="powerStatus" class="deve_1">
+          <article class="component_side_area side_box_first">
+            <header>
+              <h3>발전현황</h3>
+              <h4>Development status</h4>
+            </header>
+
+            <section id="powerStatus" class="data_view_section">
+              <article class="ele_data_status">
+                <div class="ele_data_name_area"><span>현재 출력</span></div>
+                <div class="ele_data_value_area"><span class="color_green fs_1_7rem">196</span></div>
+                <div class="ele_data_unit_area"><span> A</span></div>
+              </article>
+              <article class="ele_data_status">
+                <div class="ele_data_name_area"><span>금일발전량</span></div>
+                <div class="ele_data_value_area"><span class="color_green fs_1_7rem">123.2</span></div>
+                <div class="ele_data_unit_area"><span> kWh</span></div>
+              </article>
+
+              <%#  <section class="data_status_section">
+                <ul>
+                  <li>현재 출력</li>
+                  <li>55</li>
+                  <li>kW</li>
+                </ul>
+
+              </section> %>
+            </section>
+
+            <div id="" class="deve_1">
               <div class="stat">
                 <p><I>현재출력</I></p>
-                <input id="currKw" class="wed_1" style="margin-left:13px;" type="text" value="">
+                <input id="" class="wed_1" style="margin-left:13px;" type="text" value="">
                 <span>kW</span>
               </div>
               <div class="stat">
@@ -52,10 +75,10 @@
                 <span>Ton</span>
               </div> -->
 
-              <img src="/image/development.jpg" width="100%" height="50%">
+              <%# <img src="/image/development.jpg" width="100%" height="50%"> %>
 
             </div>
-          </div>
+          </article>
         </div>
         <div class="box_3">
           <article class="component_piece_area">
@@ -64,17 +87,35 @@
             </header>
             <div class="component_piece_body ">
               <div id="current-power-graph" class="gauge_chart">Graph</div>
-              <div class="gauge_contents  ">
-                <ul class="">
-                  <li>현재 출력</li>
-                  <li>3.72</li>
-                  <li>kW</li>
-                </ul>
-                <ul class="">
-                  <li>발전 효율</li>
-                  <li>52.1</li>
-                  <li>%</li>
-                </ul>
+              <div class="gauge_contents">
+                <article class="ele_data_status">
+                  <div class="ele_data_name_area">
+                    <span class="">현재 출력</span>
+                  </div>
+                  <div class="ele_data_value_area">
+                    <span class="color_green fs_2_5rem">196</span>
+                  </div>
+                  <div class="ele_data_unit_area">
+                    <span> A</span>
+                  </div>
+                </article>
+
+                <%# <section class="data_status_section">
+                  <ul class="">
+                    <li>현재 출력</li>
+                    <li>
+                      <span>3.72</span>
+                      <span></span></li>
+                    <li>kW</li>
+                  </ul>
+                </section> %>
+                <section class="data_status_section">
+                  <ul class="">
+                    <li>발전 효율</li>
+                    <li>52.1</li>
+                    <li>%</li>
+                  </ul>
+                </section>
               </div>
             </div>
           </article>
@@ -85,16 +126,20 @@
             <div class="component_piece_body pt_1rem">
               <div id="daily-power-graph" class="gauge_chart">Graph</div>
               <div class="gauge_contents">
-                <ul class="">
-                  <li>현재 출력</li>
-                  <li>3.72</li>
-                  <li>kWh</li>
-                </ul>
-                <ul class="">
-                  <li>발전 효율</li>
-                  <li>52.1</li>
-                  <li>%</li>
-                </ul>
+                <section class="data_status_section">
+                  <ul class="">
+                    <li>현재 출력</li>
+                    <li>3.72</li>
+                    <li>kWh</li>
+                  </ul>
+                </section>
+                <section class="data_status_section">
+                  <ul class="">
+                    <li>발전 효율</li>
+                    <li>52.1</li>
+                    <li>%</li>
+                  </ul>
+                </section>
               </div>
             </div>
           </article>
@@ -169,13 +214,13 @@
                       전압
                     </div>
                     <div class="ele_data_value_area">
-                      <span class="ele_data_value">196</span><span> A</span>
+                      <span class="data_value_color_first data_value_fs_first">196</span><span> A</span>
                     </div>
                   </article>
                   <article class="ele_data_status">
                     <div class="ele_data_name">전류</div>
                     <div class="ele_data_value_area">
-                      <span class="ele_data_value">343.3</span><span> A</span>
+                      <span class="data_value_color_first">343.3</span><span> A</span>
                     </div>
                   </article>
                 </div>
