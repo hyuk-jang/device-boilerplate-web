@@ -6,7 +6,6 @@
 
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
-  <script src="/js/hichart/dark-unica.theme.js"></script>
   <script src="/js/contents/main/hichartMaker.js"></script>
   <%- include("./mediaQuery.ejs") %>
 </head>
@@ -15,69 +14,43 @@
   <div id="wrap" class="wrap hidden">
     <!-- Header -->
     <%- include("../master/header.ejs") %>
-
     <!--메인-->
-    <div class="containera">
-      <div class="containerb text-center">
+    <div class="container_body">
+      <div class="container_row">
         <div class="box">
-          <article class="component_side_area side_box_first">
-            <header>
-              <h3>발전현황</h3>
-              <h4>Development status</h4>
-            </header>
-
-            <section id="powerStatus" class="data_view_section">
-              <article class="ele_data_status">
-                <div class="ele_data_name_area"><span>현재 출력</span></div>
-                <div class="ele_data_value_area"><span class="color_green fs_1_7rem">196</span></div>
-                <div class="ele_data_unit_area"><span> A</span></div>
-              </article>
-              <article class="ele_data_status">
-                <div class="ele_data_name_area"><span>금일발전량</span></div>
-                <div class="ele_data_value_area"><span class="color_green fs_1_7rem">123.2</span></div>
-                <div class="ele_data_unit_area"><span> kWh</span></div>
-              </article>
-
-              <%#  <section class="data_status_section">
-                <ul>
-                  <li>현재 출력</li>
-                  <li>55</li>
-                  <li>kW</li>
-                </ul>
-
-              </section> %>
-            </section>
-
-            <div id="" class="deve_1">
-              <div class="stat">
-                <p><I>현재출력</I></p>
-                <input id="" class="wed_1" style="margin-left:13px;" type="text" value="">
-                <span>kW</span>
-              </div>
-              <div class="stat">
-                <p><I>금일발전량</I></p>
-                <input id="dailyPower" class="wed_1" type="text" value="">
-                <span>kWh</span>
-              </div>
-              <div class="stat">
-                <p><I>당월발전량</I></p>
-                <input id="monthPower" class="wed_1" type="text" value="">
-                <span>kWh</span>
-              </div>
-              <div class="stat">
-                <p><I>누적발전량</I></p>
-                <input id="cumulativePower" class="wed_1" type="text" value="">
-                <span>MWh</span>
-              </div>
-              <!-- <div class="stat">
-                <p><I>CO2저감량</I></p>
-                <input id="co2" class="wed_1" type="text" value="">
-                <span>Ton</span>
-              </div> -->
-
-              <%# <img src="/image/development.jpg" width="100%" height="50%"> %>
-
+          <article class="component_side_area side_section_power">
+            <div class="deve">
+              <p>발전현황</p>
+              <p>Development status</p>
             </div>
+            <section id="powerStatus" class="data_view_section fs_150rem">
+              <article class="sensor_data_view sdv_w_side">
+                <p>현재 출력</p>
+                <p id="currKw">-</p>
+                <p>A</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>금일발전량</p>
+                <p id="dailyPower">-</p>
+                <p>kWh</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>당월발전량</p>
+                <p id="monthPower">-</p>
+                <p>kWh</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>누적발전량</p>
+                <p id="cumulativePower">-</p>
+                <p>MWh</p>
+              </article>
+              <!-- <article class="sensor_data_view sdv_w_side">
+                <p>CO2저감량</p>
+                <p id="co2">123.2</p>
+                <p>Ton</p>
+              </article> -->
+            </section>
+            <!-- <img src="/image/development.jpg" width="100%" height="50%"> -->
           </article>
         </div>
         <div class="box_3">
@@ -87,36 +60,18 @@
             </header>
             <div class="component_piece_body ">
               <div id="current-power-graph" class="gauge_chart">Graph</div>
-              <div class="gauge_contents">
-                <article class="ele_data_status">
-                  <div class="ele_data_name_area">
-                    <span class="">현재 출력</span>
-                  </div>
-                  <div class="ele_data_value_area">
-                    <span class="color_green fs_2_5rem">196</span>
-                  </div>
-                  <div class="ele_data_unit_area">
-                    <span> A</span>
-                  </div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>현재 출력</p>
+                  <p class="fs_150em">196</p>
+                  <p>A</p>
                 </article>
-
-                <%# <section class="data_status_section">
-                  <ul class="">
-                    <li>현재 출력</li>
-                    <li>
-                      <span>3.72</span>
-                      <span></span></li>
-                    <li>kW</li>
-                  </ul>
-                </section> %>
-                <section class="data_status_section">
-                  <ul class="">
-                    <li>발전 효율</li>
-                    <li>52.1</li>
-                    <li>%</li>
-                  </ul>
-                </section>
-              </div>
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>금일발전량</p>
+                  <p class="fs_150em">196</p>
+                  <p>kWh</p>
+                </article>
+              </section>
             </div>
           </article>
         </div>
@@ -125,81 +80,71 @@
             <header>금일발전량</header>
             <div class="component_piece_body pt_1rem">
               <div id="daily-power-graph" class="gauge_chart">Graph</div>
-              <div class="gauge_contents">
-                <section class="data_status_section">
-                  <ul class="">
-                    <li>현재 출력</li>
-                    <li>3.72</li>
-                    <li>kWh</li>
-                  </ul>
-                </section>
-                <section class="data_status_section">
-                  <ul class="">
-                    <li>발전 효율</li>
-                    <li>52.1</li>
-                    <li>%</li>
-                  </ul>
-                </section>
-              </div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>현재 출력</p>
+                  <p class="fs_150em">196</p>
+                  <p>A</p>
+                </article>
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>금일발전량</p>
+                  <p class="fs_150em">196</p>
+                  <p>kWh</p>
+                </article>
+              </section>
             </div>
           </article>
         </div>
       </div>
-      <div class="text-center containerc">
-        <div class="box_4">
-          <div class="component_side_area side_box_second">
+      <div class="container_row">
+        <div class="box">
+          <div class="component_side_area side_section_growth">
             <div class="deve">
               <p>생육환경정보</p>
               <p>Growth Environment</p>
             </div>
-            <div id="growthEnv" class="deve_1">
-              <div class="stat">
-                <p><I>일사량</I></p>
-                <input id="inclinedSolar" class="wed_2" type="text" value="">
-                <span>W/m²</span>
-              </div>
-              <div class="stat">
-                <p><I>조도</I></p>
-                <input id="lux" class="wed_2" type="text" value="">
-                <span>lx</span>
-              </div>
-              <div class="stat">
-                <p><I>CO2</I></p>
-                <input id="co2" class="wed_2" type="text" value="">
-                <span>ppm</span>
-              </div>
-              <div class="stat">
-                <p><I>외기온도</I></p>
-                <input id="outsideAirTemperature" class="wed_2" type="text" value="">
-                <span>℃</span>
-              </div>
-              <div class="stat">
-                <p><I>외기습도</I></p>
-                <input id="outsideAirReh" class="wed_2" type="text" value="">
-                <span>%</span>
-              </div>
-              <div class="stat">
-                <p><I>토양온도</I></p>
-                <input id="soilTemperature" class="wed_2" type="text" value="">
-                <span>℃</span>
-              </div>
-              <div class="stat">
-                <p><I>토양습도</I></p>
-                <input id="soilReh" class="wed_2" type="text" value="">
-                <span>%</span>
-              </div>
-              <div class="stat">
-                <p><I>토양수분</I></p>
-                <input id="soilWaterValue" class="wed_2" type="text" value="">
-                <span>%</span>
-              </div>
-            </div>
-            <!-- <div class="deve_1">
-              <div class="stat">
-                <p><I>기계</I></p>
-                <input class="wed_1" type="text" value="정상">
-              </div>
-            </div> -->
+            <section id="growthEnv" class="data_view_section fs_150rem">
+              <article class="sensor_data_view sdv_w_side">
+                <p>일사량</p>
+                <p id="inclinedSolar">-</p>
+                <p>W/m²</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>조도</p>
+                <p id="lux">-</p>
+                <p>lx</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>CO2</p>
+                <p id="co2">-</p>
+                <p>ppm</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>외기온도</p>
+                <p id="outsideAirTemperature">-</p>
+                <p>℃</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>외기습도</p>
+                <p id="outsideAirReh">-</p>
+                <p>%</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>토양온도</p>
+                <p id="soilTemperature">-</p>
+                <p>℃</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>토양습도</p>
+                <p id="soilReh">-</p>
+                <p>%</p>
+              </article>
+              <article class="sensor_data_view sdv_w_side">
+                <p>토양EC</p>
+                <p id="soilWaterValue">-</p>
+                <p>%</p>
+              </article>
+            </section>
           </div>
         </div>
         <div class="box_3">
@@ -208,22 +153,18 @@
             <section id="inverterStatus" class="component_piece_body">
               <article class="component_ele_status">
                 <header>나주 고정식 33 kW급 쏠라테크</header>
-                <div class="ele_status_area">
-                  <article class="ele_data_status">
-                    <div class="ele_data_name">
-                      전압
-                    </div>
-                    <div class="ele_data_value_area">
-                      <span class="data_value_color_first data_value_fs_first">196</span><span> A</span>
-                    </div>
+                <section class="sensor_data_view sddv_w35">
+                  <article class="sensor_data_view sdv_w541 fs_150rem">
+                    <p>전압</p>
+                    <p>243.3</p>
+                    <p>V</p>
                   </article>
-                  <article class="ele_data_status">
-                    <div class="ele_data_name">전류</div>
-                    <div class="ele_data_value_area">
-                      <span class="data_value_color_first">343.3</span><span> A</span>
-                    </div>
+                  <article class="sensor_data_view sdv_w541 fs_150rem">
+                    <p>전류</p>
+                    <p>43.3</p>
+                    <p>A</p>
                   </article>
-                </div>
+                </section>
               </article>
             </section>
           </article>
@@ -234,30 +175,6 @@
             <div id="growthEnvChart" class="component_piece_body p_column_rem">Graph</div>
           </article>
         </div>
-        <!-- <div class="box_6">
-            <div class="box_6_in">
-              <div class="box_6_in_4">
-                <img src="/image/no1.png" />
-                <p>일사량</p>
-                <input id="inclinedSolar" class="wed_4" type="text" value=""><span> W/㎥</span>
-              </div>
-              <div class="box_6_in_4">
-                <img src="/image/no2.png" />
-                <p>모듈온도</p>
-                <input class="wed_4" type="text" value="7.1"><span> ℃</span>
-              </div>
-              <div class="box_6_in_4">
-                <img src="/image/no3.png" />
-                <p>인버터</p>
-                <input class="wed_4" type="text" value="STOP">
-              </div>
-              <div class="box_6_in_4">
-                <img src="/image/no4.png" />
-                <p>경보</p>
-                <input class="wed_4" type="text" value="정상">
-              </div>
-            </div>
-          </div> -->
       </div>
     </div>
     <!--하단1-->
@@ -273,8 +190,8 @@
     document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
 
     // 발전 현황 셋팅
-    setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'value', 'id')
-    setDomElementValueWithJson(document.getElementById('growthEnv'), growthEnv, 'value', 'id')
+    setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'innerHTML', 'id')
+    setDomElementValueWithJson(document.getElementById('growthEnv'), growthEnv, 'innerHTML', 'id')
 
     $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
