@@ -10,7 +10,6 @@
 }
 
 header {
-  margin-bottom: 10px;
   border-bottom: #091219 solid 1px;
 }
 
@@ -124,9 +123,7 @@ footer {
   background-color: #f2f2f2;
   padding: 12px;
   margin-top: auto;
-}
-
-.footer_area {
+  border-top: 1px solid #ddd;
   display: flex;
   justify-content: center;
 }
@@ -152,8 +149,8 @@ footer {
 /***************************************/
 /* 가장 기본적으로 쓰일 컴포넌트 스타일 */
 .default_area {
-  /* background-image: linear-gradient(to bottom right, #5353af, #7575e0); */
-  background: #fff;
+  background-image: linear-gradient(to bottom right, #f3f3f3, #fafafa);
+  /* background: #fff; */
   box-shadow: 5px 2px 10px #144c77;
 }
 
@@ -169,10 +166,10 @@ footer {
 }
 
 .container_row {
-  padding: 0px;
+  /* padding: 0px;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; */
 }
 
 .container_body .min-table {
@@ -243,6 +240,10 @@ footer {
   padding: 0 1rem;
 }
 
+.power_img {
+  background-image: url('../../image/development.jpg');
+}
+
 /***************************************/
 /*         Container - Body            */
 /***************************************/
@@ -295,7 +296,6 @@ footer {
 }
 
 /* 표 */
-
 .box_2 {
   display: flex;
   flex-direction: column;
@@ -306,8 +306,8 @@ footer {
 }
 
 .box_3 {
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   width: 40%;
 
   /* background-color: #2a3138; */
@@ -506,18 +506,10 @@ p {
   justify-content: flex-start;
 }
 
-/*트랜드/보고서*/
 /* 아래에 나오는 테이블을 설명하기 위한 Descrition 영역 */
 .table_desc_area {
-  margin: 0.5rem 0;
-  text-indent: 1rem;
-  width: 50%;
   background-image: linear-gradient(#3baf69, #349059);
-  box-shadow: 2px 1px 5px #144c77;
-  height: 3rem;
-  color: #fff;
-  display: flex;
-  align-items: center;
+  box-shadow: 0.3em 0.2em 0.3em #144c77;
 }
 
 .table_desc_area > span {

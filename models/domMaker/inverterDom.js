@@ -8,20 +8,20 @@ module.exports = {
    */
   makeInverterStatusList(inverterStatusList) {
     const inverterStatusTemplate = _.template(`
-    <tr class="sel">
-    <td scope="row"><%= siteName %></td>
-    <td > <%= inclinedSolar %> </td>
-    <td> <%= pv_a %> </td>
-    <td> <%= pv_v %> </td>
-    <td> <%= pv_kw %> </td>
-    <td> <%= grid_r_a %> </td>
-    <td> <%= grid_rs_v %> </td>
-    <td> <%= line_f %> </td>
-    <td> <%= power_kw %> </td>
-    <td> <%= power_f %> </td>
-    <td> <%= daily_power_kwh %> </td>
-    <td> <%= power_total_kwh %> </td>
-    <td class="center_ball">
+    <tr>
+    <td title="<%= siteName %>"><%= siteName %></td>
+    <td class="text-right"> <%= inclinedSolar %> </td>
+    <td class="text-right"> <%= pv_a %> </td>
+    <td class="text-right"> <%= pv_v %> </td>
+    <td class="text-right"> <%= pv_kw %> </td>
+    <td class="text-right"> <%= grid_r_a %> </td>
+    <td class="text-right"> <%= grid_rs_v %> </td>
+    <td class="text-right"> <%= line_f %> </td>
+    <td class="text-right"> <%= power_kw %> </td>
+    <td class="text-right"> <%= power_f %> </td>
+    <td class="text-right"> <%= daily_power_kwh %> </td>
+    <td class="text-right"> <%= power_total_kwh %> </td>
+    <td class="text-center">
       <img src="/image/<%= operImgName %>" />
     </td>
   </tr>

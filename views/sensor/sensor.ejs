@@ -13,17 +13,28 @@
     <!-- Header -->
     <%- include("../master/header.ejs") %>
     <!--메인-->
-
     <div class="container_body">
-      <div class="text-center" style="background-color:#2a3138; height:auto;">
-        <div class="title">
-          <p id="sensorMeasureTime"> 실시간 작물 생육환경 모니터링 측정시간 : 2018-10-17 10:27:00</p>
-        </div>
-
-
-
-        <div class="table-responsive" style="overflow-x:visible;">
-          <table class="table table-bordered" style="width:100%; background:#fff;">
+      <div class="container_row flex_dir_col">
+        <p class="table_desc_area">
+          실시간 작물 생육환경 모니터링 측정시간 &nbsp; <span id="sensorMeasureTime"> 2018-10-17 10:27:00</span>
+        </p>
+        <div class="table-responsive">
+          <table class="table table-bordered default_area">
+            <colgroup>
+              <col width="12%" />
+              <col width="8%" />
+              <col width="7%" />
+              <col width="7%" />
+              <col width="7%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="6%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="5%" />
+            </colgroup>
             <thead id="sensorEnvHeaderDom">
               <tr>
                 <th scope="col" style="width:18%"></th>

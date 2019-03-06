@@ -6,7 +6,6 @@
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
   <script src="/js/contents/inverter/setInverter.js"></script>
-  <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
@@ -15,32 +14,47 @@
     <%- include("../master/header.ejs") %>
     <!--메인-->
     <div class="container_body">
-      <div class="container_row">
+      <div class="container_row flex_dir_col">
         <p class="table_desc_area">
           실시간 인버터 모니터링 측정시간 &nbsp; <span id="inverterMeasureTime"> 2018-10-17 10:27:00</span>
         </p>
-        <div class="table-responsive" style="overflow-x:visible;">
+        <div class="table-responsive">
           <table class="table table-bordered default_area">
-            <thead>
+            <colgroup>
+              <col width="12%" />
+              <col width="8%" />
+              <col width="7%" />
+              <col width="7%" />
+              <col width="7%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="6%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="5%" />
+            </colgroup>
+            <thead class="text-center">
               <tr>
-                <th scope="col" rowspan="2" style="width:10%"></th>
-                <th scope="col" colspan="4" style="text-align:center; width:30%">태양광</th>
-                <th scope="col" colspan="3" style="text-align:center; width:20%">인버터</th>
-                <th scope="col" colspan="5" style="text-align:center; width:40%">발전현황</th>
+                <th rowspan="2"></th>
+                <th colspan="4">태양광</th>
+                <th colspan="3">인버터</th>
+                <th colspan="5">발전현황</th>
               </tr>
               <tr>
-                <td style="width:8%;">경사일사량W/㎥</td>
-                <td style="width:7%;">DC전류(A)</td>
-                <td style="width:7%;">DC전압(V)</td>
-                <td style="width:7%;">DC전력(kW)</td>
-                <td style="width:8%;">AC전류(A)</td>
-                <td style="width:8%;">AC전압(V)</td>
-                <td style="width:8%;">주파수(Hz)</td>
-                <td style="width:8%;">현재전력(kW)</td>
-                <td style="width:6%;">효율</td>
-                <td style="width:8%;">금일발전량(kWh)</td>
-                <td style="width:8%;">누적발전량(kWh)</td>
-                <td style="width:5%;">동작여부</td>
+                <td>경사일사량(W/㎥)</td>
+                <td>DC전류(A)</td>
+                <td>DC전압(V)</td>
+                <td>DC전력(kW)</td>
+                <td>AC전류(A)</td>
+                <td>AC전압(V)</td>
+                <td>주파수(Hz)</td>
+                <td>현재전력(kW)</td>
+                <td>효율</td>
+                <td>금일발전량(kWh)</td>
+                <td>누적발전량(kWh)</td>
+                <td>동작여부</td>
               </tr>
             </thead>
             <tbody id="inverterStatus">
@@ -48,13 +62,12 @@
           </table>
         </div>
       </div>
-      <div class="container_row">
+      <div class="container_row flex_dir_col">
         <p class="table_desc_area">
           금일 시간 별 전력
         </p>
         <article id="chart_div" class="w_100per default_area text-center">
         </article>
-        <!-- <div id="chart_div" style="width:100%; height:300px; background-color:#fff;"></div> -->
       </div>
     </div>
     <!--하단1-->
@@ -87,18 +100,15 @@
         },
         xAxis: {
           type: 'datetime',
-          // opposite: true,
           title: {
             text: '시간(시)'
           },
           labels: {
             overflow: 'justify'
           },
-          // tickInterval: 6,
           categories: inverterPowerChart.range
         },
         yAxis: {
-          // max: yMax,
           title: {
             text: '전력(kW)'
           },
@@ -117,9 +127,6 @@
             marker: {
               enabled: false
             },
-            // pointInterval: 1000 * 60 * 10, // 10 min
-            // // pointStart: Date.UTC(2018, 1, 13, 0, 0, 0)
-            // pointStart: _.head(inverterPowerChart.range)
           }
         },
         legend: { //범례

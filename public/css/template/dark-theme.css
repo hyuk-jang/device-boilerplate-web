@@ -42,6 +42,13 @@ thead {
 }
 
 /***************************************/
+/************ Footer Master ************/
+/***************************************/
+footer {
+  border-top: 1px solid #31373a;
+}
+
+/***************************************/
 /************** Container **************/
 /***************************************/
 
@@ -80,6 +87,10 @@ thead {
   color: #93d30a;
 }
 
+.power_img {
+  background-image: url('../../image/development.jpg');
+}
+
 /***************************************/
 /*         Container - Body            */
 /***************************************/
@@ -111,11 +122,6 @@ thead {
   color: #fff934;
 }
 
-.box_4 {
-  width: 20%;
-  height: 350px;
-}
-
 .component_ele_status {
   border: 0.1rem solid #e9e9e9;
   margin: 2rem 0;
@@ -127,10 +133,6 @@ thead {
 
 .city > option {
   background-image: linear-gradient(#393939, #222222);
-}
-
-.sel > td {
-  color: #333;
 }
 
 .form-control {
