@@ -226,7 +226,7 @@ module.exports = app => {
         solarRadiation: _.get(validWeatherDevice, 'hasValidData')
           ? validWeatherDevice.data.solar
           : '',
-        hasOperationInverter: _.every(
+        isOperationInverter: _.every(
           _.values(_.map(validInverterDataList, data => data.hasValidData)),
         ),
         hasAlarm: false, // TODO 알람 정보 작업 필요

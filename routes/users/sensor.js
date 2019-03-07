@@ -58,12 +58,12 @@ router.get(
         const diffMinutes = moment().diff(moment(foundIt.writedate), 'minutes');
         // BU.CLI(foundIt.node_name, diffMinutes);
         // 10분 이상 지난 데이터라면 가치 없음
-        if (diffMinutes < 10) {
-          _.assign(placeRelation, {
-            [foundIt.nd_target_id]: foundIt.node_data,
-            writedate: foundIt.writedate,
-          });
-        }
+        // if (diffMinutes < 10) {
+        _.assign(placeRelation, {
+          [foundIt.nd_target_id]: foundIt.node_data,
+          writedate: foundIt.writedate,
+        });
+        // }
       }
     });
 
@@ -83,7 +83,7 @@ router.get(
     _.set(req, 'locals.dom.sensorEnvBodyDom', sensorEnvBodyDom);
 
     req.locals.measureInfo = {
-      measureTime: `생육환경 모니터링 측정시간  ${moment().format('YYYY-MM-DD HH:mm')}:00`,
+      measureTime: `${moment().format('YYYY-MM-DD HH:mm')}:00`,
     };
 
     // BU.CLIN(req.locals);

@@ -1,4 +1,61 @@
 /***************************************/
+/************ Header Master ************/
+/***************************************/
+.container-fluid {
+  background: linear-gradient(#fbfbfb, #e8e8e8);
+  width: 100%;
+}
+
+.max_w1024 {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.header_home_area {
+  padding: 15px 15px 15px;
+  color: #333 !important;
+  font-weight: bold;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+}
+
+.header_home_area > img {
+  width: 30px;
+  height: 30px;
+  margin: 0px;
+  margin-right: 5px;
+}
+
+.header_home_area > span {
+  font-size: 1.7rem;
+}
+
+.navbar-inverse .navbar-nav > li:hover {
+  background: #080808;
+}
+
+.header_sub_area {
+  background: linear-gradient(to bottom, #343535, #272727);
+}
+
+/* Site 선택지 */
+.siteList {
+  height: 30px;
+  padding-left: 10px;
+  background: #fff;
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  border: 1px solid #333;
+  border-radius: 3px;
+}
+
+.siteList option {
+  background: #fff;
+}
+
+/***************************************/
 /************** Container **************/
 /***************************************/
 .container_body {
@@ -15,7 +72,7 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 1rem auto;
+  margin: 2rem auto;
 }
 
 .component_side_box {
@@ -25,6 +82,10 @@
 
 .flex_dir_col {
   flex-direction: column;
+}
+
+.flex_jus_end {
+  justify-content: flex-end;
 }
 
 /***************************************/
@@ -83,7 +144,7 @@
 }
 
 .component_piece_body input {
-  background-color: transparent;
+  background: transparent;
 }
 
 /* 센서 데이터 뷰 */
@@ -116,10 +177,6 @@
 /***************************************/
 /************** Table 영역 *************/
 /***************************************/
-.table {
-  table-layout: fixed;
-  overflow-x: visible;
-}
 
 .elipsis {
   word-break: break-word;
@@ -128,7 +185,26 @@
   overflow: hidden;
 }
 
-.table tbody td {
+/* Numerical Talbe 수치 테이블   */
+.number_table {
+  table-layout: fixed;
+  overflow-x: visible;
+  margin-bottom: 0;
+}
+
+.number_table thead th {
+  word-break: keep-all;
+  /* white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden; */
+}
+
+.number_table tbody {
+  text-align: right;
+}
+
+.number_table tbody td:first-child {
+  text-align: left;
   word-break: break-word;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -150,10 +226,6 @@
 }
 
 /* 센서 데이터 뷰 50% 40% 10% */
-article.sdv_w541 {
-  /* font-size: 1.5rem; */
-}
-
 article.sdv_w541 > p:first-child {
   width: 50%;
 }
@@ -162,9 +234,6 @@ article.sdv_w541 > p:nth-child(2) {
 }
 article.sdv_w541 > p:last-child {
   width: 10%;
-}
-
-article.sdv_w_side {
 }
 
 article.sdv_w_side > p:first-child {
@@ -183,6 +252,52 @@ article.sdv_w_side > p:last-child {
 /* Sensor Data Dual View(SDDV) */
 .sddv_w35 > article {
   width: 35%;
+}
+
+/* 검색 박스 */
+.search_area {
+  display: flex;
+  justify-content: start;
+  padding: 1rem;
+}
+
+.search_box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 3rem;
+}
+
+.search_box > .search_title {
+  font-size: 1.5rem;
+  height: 2.3rem;
+}
+
+.search_box > .btn {
+  width: 10rem;
+  height: 80%;
+  font-size: 2rem;
+  text-align: center;
+  border-radius: 1rem;
+  transition: all 0.4s ease;
+}
+
+.search_box input {
+  height: 34px;
+  width: 100px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.search_range_box {
+  width: 15%;
+  min-width: 130px;
+}
+
+.search_interval_box {
+  width: 10%;
+  min-width: 100px;
 }
 
 /***************************************/
@@ -234,6 +349,10 @@ article.sdv_w_side > p:last-child {
   color: #93d30a;
 }
 
+.w_10per {
+  width: 10%;
+}
+
 .w_20per {
   width: 20%;
 }
@@ -250,23 +369,28 @@ article.sdv_w_side > p:last-child {
   width: 100%;
 }
 
+.mt0 {
+  margin-top: 0;
+}
+
 @media all and (max-width: 942px) {
+  .container_body {
+    max-width: none;
+    margin: auto 0;
+  }
+
+  .container_row {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   .component_side_box {
     width: 100%;
     height: auto;
   }
   .component_piece_box {
     width: 100%;
-  }
-
-  .container_row {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .container_body {
-    max-width: none;
-    margin: auto 0;
   }
 
   .component_side_area,
@@ -300,6 +424,36 @@ article.sdv_w_side > p:last-child {
 
   .data_view_section .sensor_data_view {
     width: 40%;
+  }
+}
+
+@media all and (max-width: 700px) {
+  .search_area {
+    flex-direction: column;
+  }
+
+  .search_box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    margin: 0;
+    padding: 1rem 3%;
+  }
+
+  .search_box .search_title {
+    text-align: right;
+    margin-right: 2rem;
+    width: 20%;
+  }
+
+  .search_box select {
+    width: 80%;
+  }
+
+  .search_box > .btn {
+    width: 100%;
+    margin: 0;
   }
 }
 

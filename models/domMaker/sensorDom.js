@@ -14,7 +14,7 @@ module.exports = {
     // place_seq를 기준으로 grouping 후 총 지점 개수를 구함
     const groupByMainSeqRelation = _.groupBy(viewPlaceRelationRows, 'main_seq');
 
-    const headerTemplate = _.template('<th scope="col" ><%= ndName %><%= dataUnit %></th>');
+    const headerTemplate = _.template('<th><%= ndName %><%= dataUnit %></th>');
 
     // Picked목록에 따라 동적 Header 생성
     const dynamicHeaderDom = _.concat(insideList, outsideList).map(key => {
@@ -40,7 +40,7 @@ module.exports = {
     // 만들어진 동적 Table Header Dom
     const sensorEnvHeaderDom = `
         <tr>
-        <th scope="col" style="width:14%"></th>
+        <th style="width:14%"></th>
         ${dynamicHeaderDom}
         </tr>
       `;
@@ -59,14 +59,14 @@ module.exports = {
 
     const partBodyTemplate = _.template(
       `<tr>
-      <td scope="row"><%= siteName %></td>
+      <td title="<%= siteName %>"><%= siteName %></td>
       ${dynamicInsideBodyTemplate.toString()}
       </tr>`,
     );
 
     const fullBodyTemplate = _.template(
       `<tr>
-      <td scope="row"><%= siteName %></td>
+      <td><%= siteName %></td>
       ${_.concat(dynamicInsideBodyTemplate, dynamicOutsideBodyTemplate).toString()}
       </tr>`,
     );
@@ -99,6 +99,8 @@ module.exports = {
           _.set(outsideSensor, 'rainStatus', '');
         }
 
+        BU.toLocaleString(outsideSensor);
+
         // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
         _.forEach(outsideList, ndId => {
           !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
@@ -123,6 +125,8 @@ module.exports = {
           _.forEach(insideList, ndId => {
             !_.has(insideSensor, ndId) && _.set(insideSensor, ndId, '');
           });
+
+          BU.toLocaleString(insideSensor);
 
           // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
           const {
@@ -172,7 +176,7 @@ module.exports = {
     // rowsPan을 포함한 TR을 생성하기 위한 템플릿
     const firstTemplateTR = _.template(
       `<tr>
-        <td scope="row"><%= siteName %></td>
+        <td><%= siteName %></td>
         <td><%= lux %></td>
         <td><%= co2 %></td>
         <td><%= soilWaterValue %></td>
@@ -191,7 +195,7 @@ module.exports = {
     // 생육 센서만을 표현하기 위한 TR 템플릿
     const secondRowTemplateTR = _.template(
       `<tr>
-        <td scope="row"><%= siteName %></td>
+        <td><%= siteName %></td>
         <td><%= lux %></td>
         <td><%= co2 %></td>
         <td><%= soilWaterValue %></td>
@@ -275,8 +279,6 @@ module.exports = {
           isFirst = false;
           // rowsPan 입력
           _.set(insideSensor, 'rowsPan', rowsLength);
-
-          BU.CLIS(insideSensor, outsideSensor);
 
           return firstTemplateTR(_.assign(insideSensor, outsideSensor));
         }

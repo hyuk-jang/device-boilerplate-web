@@ -89,8 +89,8 @@ module.exports = app => {
 
       // 모듈 데이터 삽입
       validModuleStatusList.forEach(validInfo => {
-        const hasOperation = validInfo.hasValidData;
-        // let hasOperation = true;
+        const isOperation = validInfo.hasValidData;
+        // let isOperation = true;
         const { amp, vol, moduleRearTemperature, brineTemperature } = validInfo.data;
 
         const findIt = _.find(refinedConnectorList, {
@@ -98,7 +98,7 @@ module.exports = app => {
         });
         // 객체 확장
         _.assign(findIt, {
-          hasOperation,
+          isOperation,
           amp: '',
           vol: '',
           power: '',
@@ -106,7 +106,7 @@ module.exports = app => {
           brineTemperature: '',
         });
 
-        if (hasOperation) {
+        if (isOperation) {
           findIt.amp = amp;
           findIt.vol = vol;
           findIt.power = _.round(amp * vol, 1);
@@ -114,11 +114,11 @@ module.exports = app => {
           findIt.brineTemperature = brineTemperature;
         }
 
-        // findIt.hasOperation = hasOperation;
-        // findIt.amp = hasOperation ? amp : '';
-        // findIt.vol = hasOperation ? vol : '';
+        // findIt.isOperation = isOperation;
+        // findIt.amp = isOperation ? amp : '';
+        // findIt.vol = isOperation ? vol : '';
         // findIt.power =
-        //   hasOperation && _.isNumber(amp) && _.isNumber(vol)
+        //   isOperation && _.isNumber(amp) && _.isNumber(vol)
         //     ? webUtil.calcValue(amp * vol, 1, 1)
         //     : '';
         //     findIt.moduleTemperature = moduleRearTemperature
@@ -139,7 +139,7 @@ module.exports = app => {
           'power',
           'moduleTemperature',
           'brineTemperature',
-          'hasOperation',
+          'isOperation',
         ],
         maxModuleViewNum,
       );

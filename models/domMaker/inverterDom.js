@@ -1,5 +1,7 @@
 const _ = require('lodash');
 
+const { BU } = require('base-util-jh');
+
 module.exports = {
   /**
    * 인버터 현재 상태
@@ -10,24 +12,25 @@ module.exports = {
     const inverterStatusTemplate = _.template(`
     <tr>
     <td title="<%= siteName %>"><%= siteName %></td>
-    <td class="text-right"> <%= inclinedSolar %> </td>
-    <td class="text-right"> <%= pv_a %> </td>
-    <td class="text-right"> <%= pv_v %> </td>
-    <td class="text-right"> <%= pv_kw %> </td>
-    <td class="text-right"> <%= grid_r_a %> </td>
-    <td class="text-right"> <%= grid_rs_v %> </td>
-    <td class="text-right"> <%= line_f %> </td>
-    <td class="text-right"> <%= power_kw %> </td>
-    <td class="text-right"> <%= power_f %> </td>
-    <td class="text-right"> <%= daily_power_kwh %> </td>
-    <td class="text-right"> <%= power_total_kwh %> </td>
+    <td> <%= inclinedSolar %> </td>
+    <td> <%= pv_a %> </td>
+    <td> <%= pv_v %> </td>
+    <td> <%= pv_kw %> </td>
+    <td> <%= grid_r_a %> </td>
+    <td> <%= grid_rs_v %> </td>
+    <td> <%= line_f %> </td>
+    <td> <%= power_kw %> </td>
+    <td> <%= power_f %> </td>
+    <td> <%= daily_power_kwh %> </td>
+    <td> <%= power_total_kwh %> </td>
     <td class="text-center">
       <img src="/image/<%= operImgName %>" />
     </td>
   </tr>
     `);
     const madeDom = inverterStatusList.dataList.map(inverterStatusInfo => {
-      const operImgName = inverterStatusInfo.hasOperation ? 'green.png' : 'red.png';
+      BU.toLocaleString(inverterStatusInfo);
+      const operImgName = inverterStatusInfo.isOperation ? 'green.png' : 'red.png';
       inverterStatusInfo.operImgName = operImgName;
 
       return inverterStatusTemplate(inverterStatusInfo);

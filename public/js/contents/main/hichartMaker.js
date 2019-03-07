@@ -381,7 +381,7 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
  * @param {string} chartOption.series.tooltip.valueSuffix Data Unit
  */
 function makeColumnChart(chartOption) {
-  console.log(chartOption.yAxis);
+  // console.log(chartOption.yAxis);
   Highcharts.chart(chartOption.domId, {
     chart: {
       type: 'column',

@@ -38,6 +38,17 @@ class SensorProtocol {
     ];
 
     // 생육 센서 목록
+    this.SENSOR_INSIDE_ND_ID_LISTs = [
+      BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvUnderlyingSolar,
+      BASE_KEY.inclinedSolar,
+      BASE_KEY.lux,
+      BASE_KEY.co2,
+      BASE_KEY.soilWaterValue,
+      BASE_KEY.soilTemperature,
+      BASE_KEY.soilReh,
+    ];
+
     this.SENSOR_INSIDE_ND_ID_LIST = [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,

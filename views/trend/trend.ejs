@@ -4,13 +4,11 @@
 <head>
   <!-- Default Js -->
   <%- include("../master/head.ejs") %>
-  <script src="/js/hichart/dark-unica.theme.js"></script>
   <script src="/js/hichart/exporting.js"></script>
   <script src="/js/hichart/export-data.js"></script>
   <script src="/js/contents/master/mainUtil.js"></script>
   <script src="/js/contents/main/hichartMaker.js"></script>
   <link href="/css/spinner.css" rel="stylesheet" />
-  <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
@@ -19,17 +17,11 @@
     <!-- Header -->
     <%- include("../master/header.ejs") %>
     <!--메인-->
-
     <div class="container_body">
-      <div class="text-center" style=height:auto; ">
-        <div class=" row row_width top_box" style="padding:5px; background-color:#2a506c; ">
-        <!-- <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
-              <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
-              <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
-            </div> -->
-        <div class="sel">
-          <div class="sel_box2">
-            <span>조회기간</span>
+      <div class="container_row flex_jus_end default_search_area">
+        <div class="search_area">
+          <div class="search_box search_range_box">
+            <span class="search_title">조회기간</span>
             <select id="searchType" class="form-control">
               <option value="days">일일</option>
               <option value="months">월간</option>
@@ -37,8 +29,8 @@
               <option value="range">기간선택</option>
             </select>
           </div>
-          <div class="sel_box2">
-            <span>조회간격</span>
+          <div class="search_box search_interval_box">
+            <span class="search_title">조회간격</span>
             <select id="searchInterval" class="form-control">
               <option value="min">1분</option>
               <option value="min10">10분</option>
@@ -48,34 +40,29 @@
               <option value="year">1년</option>
             </select>
           </div>
-          <!-- <div class="sel_box3">
-                    <span>조회설정</span>
-                    <select id="searchOption" class="form-control">
-                      <option value="merge">병합</option>
-                      <option value="individual">개별</option>
-                    </select>
-                  </div> -->
-          <!--</div>-->
-          <div class="serch_st sel_box_data">
-            날짜 &nbsp;
-            <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
-            <span id="between-start-end" hidden>~</span>
-            <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden" style="display: none;">
+          <div class="search_box">
+            <span class="search_title">날짜</span>
+            <div>
+              <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
+              <span id="between-start-end" hidden>~</span>
+              <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
+                style="display: none;">
+            </div>
+          </div>
+          <div class="search_box">
             <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">검색</button>
           </div>
         </div>
       </div>
-      <div style="margin-top: 20px;" class="row_title">
-        <div class="title title_trend">생육 환경 트렌드</div>
+      <div class="container_row flex_dir_col mt0">
+        <p class="table_desc_area">
+          생육환경 트렌드
+        </p>
         <div id="sensorArea"></div>
       </div>
-      <div class="title_box2" id="test"></div>
     </div>
-  </div>
-  <!--하단1-->
-  <div class="container-fluid bg-3 text-center">
-  </div>
-  <%- include("../master/footer.ejs") %>
+    <!--하단1-->
+    <%- include("../master/footer.ejs") %>
 
   </div>
   </div>

@@ -44,7 +44,7 @@ body a {
 }
 
 .navbar-toggle {
-  background-color: #333;
+  background: #333;
 }
 
 .wrap {
@@ -62,65 +62,12 @@ body a {
 /***************************************/
 /************ Header Master ************/
 /***************************************/
-.container-fluid {
-  background-image: linear-gradient(#fbfbfb, #e8e8e8);
-  width: 100%;
-}
-
-.max_w1024 {
-  max-width: 1024px;
-  margin: 0 auto;
-}
-
-.header_home_area {
-  padding: 15px 15px 15px;
-  color: #333 !important;
-  font-weight: bold;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-}
-
-.header_home_area > img {
-  width: 30px;
-  height: 30px;
-  margin: 0px;
-  margin-right: 5px;
-}
-
-.header_home_area > span {
-  font-size: 1.7rem;
-}
-
-.navbar-inverse .navbar-nav > li:hover {
-  background-color: #080808;
-}
-
-.header_sub_area {
-  background: linear-gradient(to bottom, #343535, #272727);
-}
-
-/* Site 선택지 */
-.siteList {
-  height: 30px;
-  padding-left: 10px;
-  background: linear-gradient(to bottom, #343535, #272727);
-  font-size: 16px;
-  color: #e9e9e9;
-  font-weight: bold;
-  border: 1px solid #e9e9e9;
-  border-radius: 3px;
-}
-
-.siteList option {
-  background: #2b2b2b;
-}
 
 /***************************************/
 /************ Footer Master ************/
 /***************************************/
 footer {
-  background-color: #f2f2f2;
+  background: #f2f2f2;
   padding: 12px;
   margin-top: auto;
   border-top: 1px solid #ddd;
@@ -149,7 +96,7 @@ footer {
 /***************************************/
 /* 가장 기본적으로 쓰일 컴포넌트 스타일 */
 .default_area {
-  background-image: linear-gradient(to bottom right, #f3f3f3, #fafafa);
+  background: linear-gradient(to bottom right, #f3f3f3, #fafafa);
   /* background: #fff; */
   box-shadow: 5px 2px 10px #144c77;
 }
@@ -174,7 +121,7 @@ footer {
 
 .container_body .min-table {
   min-height: 500px;
-  background-color: white;
+  background: white;
 }
 
 /***************************************/
@@ -209,7 +156,7 @@ footer {
 
 /* 발전 현황 정보 */
 .side_section_power {
-  background-color: #92b912;
+  background: #92b912;
   box-shadow: 5px 2px 10px #0b3524;
 }
 
@@ -220,7 +167,7 @@ footer {
 
 /* 생육 환경 정보 */
 .side_section_growth {
-  background-color: #3f8eb9;
+  background: #3f8eb9;
   box-shadow: 5px 2px 10px #0d2e47;
 }
 
@@ -230,7 +177,7 @@ footer {
 }
 
 .component_side_area > header {
-  background-color: inherit;
+  background: inherit;
   border: 0;
   text-align: left;
   padding: 0 2rem;
@@ -241,7 +188,7 @@ footer {
 }
 
 .power_img {
-  background-image: url('../../image/development.jpg');
+  background: url('../../image/development.jpg');
 }
 
 /***************************************/
@@ -250,13 +197,13 @@ footer {
 
 /* 박스 In Chart */
 .component_piece_area {
-  /* background-image: linear-gradient(to bottom right, #5353af, #7575e0); */
+  /* background: linear-gradient(to bottom right, #5353af, #7575e0); */
   background: #fff;
   box-shadow: 5px 2px 10px #144c77;
 }
 
 .component_piece_area > header {
-  background-image: linear-gradient(#cbdbff, #87a3c7);
+  background: linear-gradient(#cbdbff, #87a3c7);
   border-top: 1px solid #a0b8dc;
   border-bottom: 1px solid #7f9dc1;
 }
@@ -278,7 +225,7 @@ footer {
 
 .component_ele_status > header {
   color: #fff;
-  background-image: linear-gradient(#497b18, #5d9a22);
+  background: linear-gradient(#497b18, #5d9a22);
   margin: 0;
   width: 100%;
   font-weight: bold;
@@ -301,7 +248,7 @@ footer {
   flex-direction: column;
   width: 40%;
 
-  /* background-color: #2a3138; */
+  /* background: #2a3138; */
   height: 350px;
 }
 
@@ -310,7 +257,7 @@ footer {
   flex-direction: column; */
   width: 40%;
 
-  /* background-color: #2a3138; */
+  /* background: #2a3138; */
   height: 350px;
 }
 
@@ -326,7 +273,7 @@ footer {
   flex-direction: column;
   width: 40%;
 
-  /* background-color: #2a3138; */
+  /* background: #2a3138; */
   height: 350px;
   overflow: auto;
 }
@@ -366,9 +313,9 @@ margin: 0 5px 10px 10px;
 .box_6 {
   display: flex;
   flex-direction: column;
-  background-color: #ffd800;
+  background: #ffd800;
 
-  background-color: #2a3138;
+  background: #2a3138;
   width: 40%;
   height: 350px;
 }
@@ -381,7 +328,7 @@ margin: 0 5px 10px 10px;
 }
 
 .box_6_in_4 {
-  background-color: #e9e9e9;
+  background: #e9e9e9;
   width: 45%;
   height: 46%;
   float: left;
@@ -492,7 +439,7 @@ p {
 }
 
 .header_w_r {
-  /* background-image: linear-gradient(#393939, #222222); */
+  /* background: linear-gradient(#393939, #222222); */
   padding: 0 2rem;
   height: 50px;
   display: flex;
@@ -508,7 +455,7 @@ p {
 
 /* 아래에 나오는 테이블을 설명하기 위한 Descrition 영역 */
 .table_desc_area {
-  background-image: linear-gradient(#3baf69, #349059);
+  background: linear-gradient(#3baf69, #349059);
   box-shadow: 0.3em 0.2em 0.3em #144c77;
 }
 
@@ -517,8 +464,17 @@ p {
   /* color: #04aaf8; */
 }
 
+.search_box > button {
+  border: 1px solid #19462b;
+  background: linear-gradient(#3baf69, #349059);
+}
+
+.search_box > button:hover {
+  background: linear-gradient(#359b5d, #2c774a);
+}
+
 .top_box {
-  background-color: #2a3138;
+  background: #2a3138;
 }
 
 .row_width {
@@ -543,10 +499,10 @@ p {
   width: 100px;
 }
 
-#search {
+/* #search {
   padding: 2px 10px !important;
   margin-right: 10px !important;
-}
+} */
 
 .rtsp_container {
   display: flex;
@@ -555,10 +511,10 @@ p {
 .rtsp_container section:first-child {
   width: 20%;
 
-  /* background-color: #c4eaff; */
+  /* background: #c4eaff; */
 }
 
 .rtsp_container section:last-child {
   width: 80%;
-  background-color: #333;
+  background: #333;
 }
