@@ -59,14 +59,14 @@ module.exports = {
 
     const partBodyTemplate = _.template(
       `<tr>
-      <td title="<%= siteName %>"><%= siteName %></td>
+      <td class="table_title" title="<%= siteName %>"><%= siteName %></td>
       ${dynamicInsideBodyTemplate.toString()}
       </tr>`,
     );
 
     const fullBodyTemplate = _.template(
       `<tr>
-      <td><%= siteName %></td>
+      <td class="table_title"><%= siteName %></td>
       ${_.concat(dynamicInsideBodyTemplate, dynamicOutsideBodyTemplate).toString()}
       </tr>`,
     );
@@ -176,7 +176,7 @@ module.exports = {
     // rowsPan을 포함한 TR을 생성하기 위한 템플릿
     const firstTemplateTR = _.template(
       `<tr>
-        <td><%= siteName %></td>
+        <td class="table_title"><%= siteName %></td>
         <td><%= lux %></td>
         <td><%= co2 %></td>
         <td><%= soilWaterValue %></td>
@@ -195,7 +195,7 @@ module.exports = {
     // 생육 센서만을 표현하기 위한 TR 템플릿
     const secondRowTemplateTR = _.template(
       `<tr>
-        <td><%= siteName %></td>
+        <td class="table_title"><%= siteName %></td>
         <td><%= lux %></td>
         <td><%= co2 %></td>
         <td><%= soilWaterValue %></td>

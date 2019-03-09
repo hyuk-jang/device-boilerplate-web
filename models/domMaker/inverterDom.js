@@ -11,7 +11,7 @@ module.exports = {
   makeInverterStatusList(inverterStatusList) {
     const inverterStatusTemplate = _.template(`
     <tr>
-    <td title="<%= siteName %>"><%= siteName %></td>
+    <td class="table_title" title="<%= siteName %>"><%= siteName %></td>
     <td> <%= inclinedSolar %> </td>
     <td> <%= pv_a %> </td>
     <td> <%= pv_v %> </td>

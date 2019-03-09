@@ -7,103 +7,94 @@
   <%- include("../master/excel.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
   <link href="/css/spinner.css" rel="stylesheet" />
-  <%- include("./mediaQuery.ejs") %>
 </head>
-
 
 <body>
   <%- include("../master/spinner.ejs") %>
   <div id="wrap" class="wrap hidden">
-    <div class="center">
-      <!-- Header -->
-      <%- include("../master/header.ejs") %>
-      <!--메인-->
-      <div class="container_body">
-        <div class="text-center" style="background-color:#fff; height:auto;">
-          <div class="row row_width  top_box" style="padding:5px;">
-            <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
-              <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
-              <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
-            </div>
-            <div class="sel">
-              <div class="col-xs-2 pad sel_box" style="margin-left: 0px">
-                생육 환경
-                <select class="form-control form-control_st" id="subSelectBoxDom" name="device_seq">
-                </select>
-              </div>
-              <div class="sel_box2">
-                <span>조회기간</span>
-                <select id="searchType" class="form-control">
-                  <option value="days">일일</option>
-                  <option value="months">월간</option>
-                  <option value="years">년간</option>
-                  <option value="range">기간선택</option>
-                </select>
-              </div>
-              <div class="sel_box2">
-                <span>조회간격</span>
-                <select id="searchInterval" class="form-control">
-                  <option value="min">1분</option>
-                  <option value="min10">10분</option>
-                  <option value="hour">1시간</option>
-                  <option value="day">1일</option>
-                  <option value="month">1달</option>
-                  <option value="year">1년</option>
-                </select>
-              </div>
-              <!-- <div class="sel_box3">
-                <span>조회설정</span>
-                <select id="searchOption" class="form-control">
-                  <option value="merge">병합</option>
-                  <option value="individual">개별</option>
-                </select>
-              </div> -->
-              <!--</div>-->
-              <div class="serch_st sel_box_data">
-                날짜 &nbsp;
-                <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
-                <span id="between-start-end" hidden>~</span>
-                <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
-                  style="display: none;">
-                <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
-                <input type="image" id="downloadExcel" src="/image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc">
-              </div>
-            </div>
-          </div>
-          <div class="min-table table-responsive" style="overflow-x:visible;">
-            <table class="table table-bordered" style="width:100%;background:#fff;">
-              <thead id="sensorReportHeaderDom">
-                <tr>
-                  <th scope="col" style="width:5%">번호</th>
-                  <th scope="col" style="width:9%">일시</th>
-                  <th scope="col" style="width:7%">모듈후면온도(℃)</th>
-                  <th scope="col" style="width:7%">조도(lx)</th>
-                  <th scope="col" style="width:7%">이산화탄소(ppm)</th>
-                  <th scope="col" style="width:7%">토양수분(%)</th>
-                  <th scope="col" style="width:7%">토양온도(℃)</th>
-                  <th scope="col" style="width:7%">토양습도(%)</th>
-                  <th scope="col" style="width:7%">외기온도(℃)</th>
-                  <th scope="col" style="width:7%">외기습도(%)</th>
-                  <th scope="col" style="width:7%">수평일사량(W/m2)</th>
-                  <!-- <th scope="col" style="width:7%">풍향</th> -->
-                  <th scope="col" style="width:7%">풍속(km/h)</th>
-                  <th scope="col" style="width:6%">강우량(mm/hr)</th>
-                  <!-- <th scope="col" style="width:6%">강우상황</th> -->
-                </tr>
-              </thead>
-              <tbody id="sensorReportBodyDom">
-              </tbody>
-            </table>
-          </div>
-          <nav id="paginationDom" aria-label="...">
-          </nav>
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="container_body">
+      <div class="container_row mb_50rem">
+        <div id="subCategoryDom" class="report_category">
+          <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
+          <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
         </div>
       </div>
-      <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
-      <%- include("../master/footer.ejs") %>
+      <div class="container_row flex_jus_end default_search_area mt0">
+        <div class="search_area">
+          <div class="search_box search_category_box ml0">
+            <span class="search_title">생육 환경</span>
+            <select id="subSelectBoxDom" class="form-control">
+            </select>
+          </div>
+          <div class="search_box search_range_box">
+            <span class="search_title">조회기간</span>
+            <select id="searchType" class="form-control">
+              <option value="days">일일</option>
+              <option value="months">월간</option>
+              <option value="years">년간</option>
+              <option value="range">기간선택</option>
+            </select>
+          </div>
+          <div class="search_box search_interval_box">
+            <span class="search_title">조회간격</span>
+            <select id="searchInterval" class="form-control">
+              <option value="min">1분</option>
+              <option value="min10">10분</option>
+              <option value="hour">1시간</option>
+              <option value="day">1일</option>
+              <option value="month">1달</option>
+              <option value="year">1년</option>
+            </select>
+          </div>
+          <div class="search_box">
+            <span class="search_title">날짜</span>
+            <div class="search_body">
+              <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly>
+              <span id="between-start-end" hidden>~</span>
+              <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly hidden>
+            </div>
+          </div>
+          <div class="submit_box">
+            <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
+            <input type="image" id="downloadExcel" class="icon" src="/image/common/excel-icon.jpg">
+          </div>
+        </div>
+      </div>
+      <div class="container_row flex_dir_col ">
+        <div class="table-responsive default_area">
+          <table class="table table-bordered number_table">
+            <thead id="sensorReportHeaderDom">
+              <tr>
+                <th scope="col" style="width:5%">번호</th>
+                <th scope="col" style="width:9%">일시</th>
+                <th scope="col" style="width:7%">모듈후면온도(℃)</th>
+                <th scope="col" style="width:7%">조도(lx)</th>
+                <th scope="col" style="width:7%">이산화탄소(ppm)</th>
+                <th scope="col" style="width:7%">토양수분(%)</th>
+                <th scope="col" style="width:7%">토양온도(℃)</th>
+                <th scope="col" style="width:7%">토양습도(%)</th>
+                <th scope="col" style="width:7%">외기온도(℃)</th>
+                <th scope="col" style="width:7%">외기습도(%)</th>
+                <th scope="col" style="width:7%">수평일사량(W/m2)</th>
+                <!-- <th scope="col" style="width:7%">풍향</th> -->
+                <th scope="col" style="width:7%">풍속(km/h)</th>
+                <th scope="col" style="width:6%">강우량(mm/hr)</th>
+                <!-- <th scope="col" style="width:6%">강우상황</th> -->
+              </tr>
+            </thead>
+            <tbody id="sensorReportBodyDom">
+            </tbody>
+          </table>
+        </div>
+        <div id="paginationDom" class="table_pagenation"></div>
+      </div>
     </div>
+    <!--하단1-->
+    <%- include("../master/footer.ejs") %>
+
   </div>
 
   <script>
