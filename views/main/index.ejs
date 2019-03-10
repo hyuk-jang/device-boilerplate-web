@@ -18,9 +18,9 @@
       <div class="container_row">
         <div class="component_side_box">
           <article class="component_side_area side_section_power">
-            <div class="deve">
-              <p>발전현황</p>
-              <p>Development status</p>
+            <div class="data_title_section">
+              <h4>발전현황</h4>
+              <h5>Development status</h5>
             </div>
             <section id="powerStatus" class="data_view_section fs_150rem">
               <article class="sensor_data_view sdv_w_side">
@@ -58,17 +58,17 @@
               현재 발전현황
             </header>
             <div class="component_piece_body ">
-              <div id="current-power-graph" class="gauge_chart">Graph</div>
-              <section class="gauge_contents">
+              <div id="current_power_graph" class="gauge_chart">Graph</div>
+              <section id="current_power_data" class="gauge_contents">
                 <article class="sensor_data_view sdv_w541 fs_170rem">
                   <p>현재 출력</p>
-                  <p class="fs_150em">196</p>
-                  <p>A</p>
+                  <p class="fs_150em" data-id="currKw">196</p>
+                  <p>kW</p>
                 </article>
                 <article class="sensor_data_view sdv_w541 fs_170rem">
-                  <p>금일발전량</p>
-                  <p class="fs_150em">196</p>
-                  <p>kWh</p>
+                  <p>발전 효율</p>
+                  <p class="fs_150em" data-id="currPf">196</p>
+                  <p>%</p>
                 </article>
               </section>
             </div>
@@ -78,17 +78,17 @@
           <article class="component_piece_area">
             <header>금일발전량</header>
             <div class="component_piece_body pt_1rem">
-              <div id="daily-power-graph" class="gauge_chart">Graph</div>
-              <section class="gauge_contents">
+              <div id="daily_power_graph" class="gauge_chart">Graph</div>
+              <section id="daily_power_data" class="gauge_contents">
                 <article class="sensor_data_view sdv_w541 fs_170rem">
-                  <p>현재 출력</p>
-                  <p class="fs_150em">196</p>
-                  <p>A</p>
+                  <p>당월 발전량</p>
+                  <p class="fs_150em" data-id="monthPower">196</p>
+                  <p>kWh</p>
                 </article>
                 <article class="sensor_data_view sdv_w541 fs_170rem">
-                  <p>금일발전량</p>
-                  <p class="fs_150em">196</p>
-                  <p>kWh</p>
+                  <p>누적 발전량</p>
+                  <p class="fs_150em" data-id="cumulativePower">196</p>
+                  <p>MWh</p>
                 </article>
               </section>
             </div>
@@ -98,9 +98,9 @@
       <div class="container_row">
         <div class="component_side_box">
           <div class="component_side_area side_section_growth">
-            <div class="deve">
-              <p>생육환경정보</p>
-              <p>Growth Environment</p>
+            <div class="data_title_section">
+              <h4>생육환경정보</h4>
+              <h5>Growth Environment</h5>
             </div>
             <section id="growthEnv" class="data_view_section fs_150rem">
               <article class="sensor_data_view sdv_w_side">
@@ -189,6 +189,9 @@
     document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
 
     // 발전 현황 셋팅
+    setDomElementValueWithJson(document.getElementById('current_power_data'), powerGenerationInfo, 'innerHTML',
+      'data-id')
+    setDomElementValueWithJson(document.getElementById('daily_power_data'), powerGenerationInfo, 'innerHTML', 'data-id')
     setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'innerHTML', 'id')
     setDomElementValueWithJson(document.getElementById('growthEnv'), growthEnv, 'innerHTML', 'id')
 
@@ -196,7 +199,7 @@
 
     // 금일 발전량 차트
     makeGaugeChart({
-      domId: 'daily-power-graph',
+      domId: 'daily_power_graph',
       yAxis: {
         min: 0,
         max: powerGenerationInfo.currKwYaxisMax * 6,
@@ -213,7 +216,7 @@
     })
     // 현재 발전량 차트
     makeGaugeChart({
-      domId: 'current-power-graph',
+      domId: 'current_power_graph',
       yAxis: {
         min: 0,
         max: powerGenerationInfo.currKwYaxisMax,

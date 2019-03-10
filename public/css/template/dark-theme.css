@@ -1,7 +1,9 @@
-/* Init Setting */
+/***************************************/
+/************ Master ************/
+/***************************************/
 
 body {
-	color: aliceblue;
+	color: #fff;
 	background: #3c4854;
 }
 
@@ -168,46 +170,11 @@ footer {
 	background: linear-gradient(#359b5d, #2c774a);
 }
 
-.city > option {
-	background: linear-gradient(#393939, #222222);
-}
-
 .form-control {
 	color: #fff;
 	background: #12222f;
 }
 
-.sel_box {
-	background: #2a506c !important;
-	font-weight: bold;
-	border-radius: 0px;
-}
-
-.sel_box2 {
-	background: #2a506c !important;
-	font-weight: bold;
-	border-radius: 0px;
-}
-
-/* .btn-success {
-	background: #d1391d;
-	border: solid 1px #fff;
-}
-
-.btn-success:hover {
-	background: #d1391d;
-	border: solid 1px #fff;
-} */
-
 .input_tre {
 	color: #333;
-}
-
-.sel_box3 {
-	background: #2a506c !important;
-	width: 15% !important;
-}
-
-.nav_row_st_right > input {
-	color: #333 !important;
 }
