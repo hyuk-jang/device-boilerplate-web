@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "base-model-jh": "^1.2.5",
-    "base-util-jh": "^1.2.1",
+    "base-util-jh": "^1.2.2",
     "base64-img": "^1.0.4",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",

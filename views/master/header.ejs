@@ -1,7 +1,4 @@
 <header>
-  <div class="header_top max_w1024">
-    <div id="loginAreaDom"><span>tester님. 환영합니다.</span><a href="/auth/logout">logout</a></div>
-  </div>
   <nav class="navbar navbar-inverse container-fluid">
     <div class="max_w1024">
       <!-- <div class="max_w1024"> -->
@@ -28,21 +25,27 @@
       <!-- </div> -->
     </div>
   </nav>
-  <div class="row header_sub_area">
+  <div class="header_sub_area">
     <div class="max_w1024">
-      <div class="col-md-12">
-        <div class="col-md-6 header_w_r">
+      <div class="header_sub_box">
+        <div class="header_w_r">
           <select id="siteListDom" name="siteList" class="siteList" label="siteList"> </select>
         </div>
-        <div class="col-md-6 header_w_r">
+        <div class="header_w_r">
           <div id="weathercastDom" class="nav_row_st_right">
-            <span style="margin-right:40px;" id="currDate"></span>
-            <span>날씨</span>
-            <img id="currWeatherImg" />
-            <input type="text" id="currWeatherTemp" readonly class="form-control" />
-            <span class="Temperature">℃</span>
+            <span>2019.03.12(화)</span>
+            <span class="weacast_txt">날씨</span>
+            <img />
+            <input type="text" class="weathercast_temp" id="currWeatherTemp" value="12.3" readonly />
+            <span class="weathercast_data_unit">℃</span>
+          </div>
+          <div class="user_box" id="loginAreaDom">
+            <span class="user_id">tester</span><span class="user_nim">님</span>
+            <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />
           </div>
         </div>
+        <!-- <div class="header_w_r user_area">
+        </div> -->
       </div>
     </div>
   </div>

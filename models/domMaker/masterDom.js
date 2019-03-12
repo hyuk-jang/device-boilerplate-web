@@ -14,7 +14,8 @@ module.exports = {
   makeTopHeader(userInfo) {
     // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
-      '<span style="font-weight:bold"><%= name %></span>님. 환영합니다. <a href="/auth/logout" style="color: black"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></a>',
+      `<span class="user_id"><%= name %></span><span class="user_nim">님</span>
+      <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
     );
 
     const madeMap = loginAreaTemplate(userInfo);
@@ -29,11 +30,11 @@ module.exports = {
   makeWeathercastDom(currWeatherCastInfo) {
     const { wf, temp } = currWeatherCastInfo;
     const weatherCastTemplate = _.template(
-      `<span style="margin-right:40px;"><%= currDate %></span>
-      <span>날씨</span>
+      `<span><%= currDate %></span>
+      <span class="weacast_txt">날씨</span>
       <img src="/image/weather/weather_<%= wf %>.png">
-      <input type="text" readonly value="<%= temp %>" class="form-control" style="text-align: center">
-      <span class="Temperature">℃</span>`,
+      <input type="text" class="weathercast_temp" readonly value="<%= temp %>">
+      <span class="weathercast_data_unit">℃</span>`,
     );
 
     const currDate = moment().format('YYYY.MM.DD(ddd)');

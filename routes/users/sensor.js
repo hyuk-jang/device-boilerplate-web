@@ -58,12 +58,12 @@ router.get(
         const diffMinutes = moment().diff(moment(foundIt.writedate), 'minutes');
         // BU.CLI(foundIt.node_name, diffMinutes);
         // 10분 이상 지난 데이터라면 가치 없음
-        // if (diffMinutes < 10) {
-        _.assign(placeRelation, {
-          [foundIt.nd_target_id]: foundIt.node_data,
-          writedate: foundIt.writedate,
-        });
-        // }
+        if (diffMinutes < 10) {
+          _.assign(placeRelation, {
+            [foundIt.nd_target_id]: foundIt.node_data,
+            writedate: foundIt.writedate,
+          });
+        }
       }
     });
 
