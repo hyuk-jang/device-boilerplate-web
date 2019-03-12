@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
-const moment = require('moment');
 
 const router = express.Router();
 
@@ -157,18 +156,31 @@ router.get(
       .map('ivt_amount')
       .sum();
 
+    // Curr PV 전력
+    const sumPvKw = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
+      1,
+      3,
+    );
+    // Curr Power 전력
+    const currKw = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
+      1,
+      3,
+    );
+
+    // 현재 발전 효율
+    const currPf = _.divide(currKw, sumPvKw);
+
     const powerGenerationInfo = {
-      currKw: webUtil.calcValue(
-        webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
-        1,
-        3,
-      ),
+      currKw,
+      currPf: _.isNaN(currPf) ? '-' : currPf,
       currKwYaxisMax: _.round(ivtAmount),
       dailyPower,
       monthPower,
       cumulativePower,
       // co2: _.round(cumulativePower * 0.424, 3),
-      hasOperationInverter: _.chain(validInverterDataList)
+      isOperationInverter: _.chain(validInverterDataList)
         .map('hasValidData')
         .values()
         .every(Boolean)

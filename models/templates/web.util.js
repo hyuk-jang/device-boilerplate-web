@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const moment = require('moment');
-const BU = require('base-util-jh').baseUtil;
+const { BU } = require('base-util-jh');
 
 /**
  * 기상청 날씨 변경
@@ -362,7 +362,7 @@ exports.calcScaleRowDataPacket = calcScaleRowDataPacket;
  * 접속반 메뉴에서 사용될 데이터 선언 및 부분 정의
  * @param {V_UPSAS_PROFILE[]} viewUpsasProfile DB에서
  * @param {number|string} connector_seq 선택한 접속반
- * @return {Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, hasOperation: boolean }>}
+ * @return {Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, isOperation: boolean }>}
  */
 function refineSelectedConnectorList(viewUpsasProfile) {
   // let sortedList = _.flatten(_.map(_.groupBy(viewUpsasProfile, profile => profile.connector_seq), group => _.sortBy(group, 'connector_ch')));
@@ -386,7 +386,7 @@ function refineSelectedConnectorList(viewUpsasProfile) {
       vol: '',
       power: '',
       temperature: '',
-      hasOperation: false,
+      isOperation: false,
     });
   });
   return returnArray;
@@ -418,7 +418,7 @@ exports.convertColumn2Rows = convertColumn2Rows;
 /**
  * 인버터 메뉴에서 사용될 데이터 선언 및 부분 정의
  * @param {{hasValidData: boolean, data: INVERTER}[]} validInverterStatus DB에서
- * @return {{totalInfo: {in_kw: number=, out_kw: number=, d_kwh: number=, c_mwh: number=}, dataList: Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, hasOperation: boolean }>}}
+ * @return {{totalInfo: {in_kw: number=, out_kw: number=, d_kwh: number=, c_mwh: number=}, dataList: Array.<{photovoltaic_seq:number, connector_ch: number, pv_target_name:string, pv_manufacturer: string, cnt_target_name: string, ivt_target_name: string, install_place: string, writedate: Date, amp: number, vol: number, isOperation: boolean }>}}
  */
 function refineSelectedInverterStatus(validInverterStatus) {
   const INCLINED_SOLAR = 'inclinedSolar';
@@ -434,7 +434,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
 
     // if (true) {
     if (hasValidData) {
-      data.hasOperation = true;
+      data.isOperation = true;
       data.power_f = _.round(_.divide(data.power_kw, data.pv_kw) * 100, 1);
       _.set(data, INCLINED_SOLAR, _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '');
     } else {
@@ -452,7 +452,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
       data.power_kw = '';
       // data.daily_power_kwh = '';
       // data.power_total_kwh = '';
-      data.hasOperation = false;
+      data.isOperation = false;
       data[INCLINED_SOLAR] = '';
     }
 

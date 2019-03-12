@@ -1,5 +1,7 @@
 const _ = require('lodash');
 
+const { BU } = require('base-util-jh');
+
 module.exports = {
   /**
    * 인버터 현재 상태
@@ -8,9 +10,9 @@ module.exports = {
    */
   makeInverterStatusList(inverterStatusList) {
     const inverterStatusTemplate = _.template(`
-    <tr class="sel">
-    <td scope="row"><%= siteName %></td>
-    <td > <%= inclinedSolar %> </td>
+    <tr>
+    <td class="table_title" title="<%= siteName %>"><%= siteName %></td>
+    <td> <%= inclinedSolar %> </td>
     <td> <%= pv_a %> </td>
     <td> <%= pv_v %> </td>
     <td> <%= pv_kw %> </td>
@@ -21,13 +23,14 @@ module.exports = {
     <td> <%= power_f %> </td>
     <td> <%= daily_power_kwh %> </td>
     <td> <%= power_total_kwh %> </td>
-    <td class="center_ball">
+    <td class="text-center">
       <img src="/image/<%= operImgName %>" />
     </td>
   </tr>
     `);
     const madeDom = inverterStatusList.dataList.map(inverterStatusInfo => {
-      const operImgName = inverterStatusInfo.hasOperation ? 'green.png' : 'red.png';
+      BU.toLocaleString(inverterStatusInfo);
+      const operImgName = inverterStatusInfo.isOperation ? 'green.png' : 'red.png';
       inverterStatusInfo.operImgName = operImgName;
 
       return inverterStatusTemplate(inverterStatusInfo);

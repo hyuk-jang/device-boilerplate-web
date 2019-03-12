@@ -5,52 +5,49 @@
   <!-- Default Js -->
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
-  <%- include("./mediaQuery.ejs") %>
 </head>
 
 <body>
-  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
-    <div class="center">
-      <!-- Header -->
-      <%- include("../master/header.ejs") %>
-      <!--메인-->
-      <div class="containera">
-        <div class="text-center" style="background-color:#fff; height:auto; padding:5px; background-color: rgba(242,242,242,1);">
-          <div class="title">
-            <p id="sensorMeasureTime"> 실시간 작물 생육환경 모니터링 측정시간 : 2018-10-17 10:27:00</p>
-          </div>
-          <div class="table-responsive" style="overflow-x:visible;">
-            <table class="table table-bordered" style="width:100%; background:#fff;">
-              <thead id="sensorEnvHeaderDom">
-                <tr>
-                  <th scope="col" style="width:18%"></th>
-                  <th scope="col" style="text-align:center; width:7%">조도(lx)</th>
-                  <th scope="col" style="text-align:center; width:7%">이산화탄소(ppm)</th>
-                  <th scope="col" style="text-align:center; width:7%">토양수분(%)</th>
-                  <th scope="col" style="text-align:center; width:7%">토양온도(℃)</th>
-                  <th scope="col" style="text-align:center; width:7%">토양습도(%)</th>
-                  <th scope="col" style="text-align:center; width:7%">외기온도(℃)</th>
-                  <th scope="col" style="text-align:center; width:7%">외기습도(%)</th>
-                  <th scope="col" style="text-align:center; width:7%">수평일사량(W/m2)</th>
-                  <th scope="col" style="text-align:center; width:7%">풍향</th>
-                  <th scope="col" style="text-align:center; width:7%">풍속(km/h)</th>
-                  <th scope="col" style="text-align:center; width:6%">강우량(mm/hr)</th>
-                  <th scope="col" style="text-align:center; width:6%">강우상황</th>
-                </tr>
-              </thead>
-              <tbody id="sensorEnvBodyDom">
-              </tbody>
-            </table>
-          </div>
+  <div id="wrap" class="wrap hidden">
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="container_body">
+      <div class="container_row flex_dir_col">
+        <p class="table_desc_area">
+          생육환경 모니터링 측정시간 &nbsp; <span id="sensorMeasureTime"> 2018-10-17 10:27:00</span>
+        </p>
+        <div class="table-responsive default_area">
+          <table class="table table-bordered number_table">
+            <thead id="sensorEnvHeaderDom">
+              <tr>
+                <th></th>
+                <th>조도(lx)</th>
+                <th>이산화탄소(ppm)</th>
+                <th>토양수분(%)</th>
+                <th>토양온도(℃)</th>
+                <th>토양습도(%)</th>
+                <th>외기온도(℃)</th>
+                <th>외기습도(%)</th>
+                <th>수평일사량(W/m2)</th>
+                <th>풍향</th>
+                <th>풍속(km/h)</th>
+                <th>강우량(mm/hr)</th>
+                <th>강우상황</th>
+              </tr>
+            </thead>
+            <tbody id="sensorEnvBodyDom">
+            </tbody>
+          </table>
         </div>
       </div>
-      <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
-      <%- include("../master/footer.ejs") %>
     </div>
+    <!--하단1-->
+
+    <%- include("../master/footer.ejs") %>
+
   </div>
-  </div>
+
   <script>
     // 센서 측정 시간 입력
     document.getElementById('sensorMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;

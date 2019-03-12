@@ -5,95 +5,109 @@
   <!-- Default Js -->
   <%- include("../master/head.ejs") %>
   <script src="/js/contents/master/mainUtil.js"></script>
-  <%- include("./mediaQuery.ejs") %>
+  <link href="/css/spinner.css" rel="stylesheet" />
 </head>
 
 <body>
-  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
-    <div class="center">
-      <!-- Header -->
-      <%- include("../master/header.ejs") %>
-      <!--메인-->
-      <div class="containera">
-        <div class="text-center" style="background-color:#fff; height:auto;">
-          <div class="row row_width  top_box" style="padding:5px;">
-            <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
-              <button type="button" value="sensor" class="btn btn-default btn1">생육환경</button>
-              <button type="button" value="inverter" class="btn btn-success btn2">인버터</button>
-            </div>
-            <div class="sel">
-              <div class="col-xs-2 pad sel_box" style="margin-left: 0px">
-                인버터
-                <select class="form-control form-control_st" id="subSelectBoxDom" name="device_seq">
-                </select>
-              </div>
-              <div class="sel_box2">
-                <span>조회기간</span>
-                <select id="searchType" class="form-control">
-                  <option value="hour">일일</option>
-                  <option value="day">월간</option>
-                  <option value="month">년간</option>
-                  <option value="range">기간선택</option>
-                </select>
-              </div>
-              <div class="sel_box3">
-                <span>조회간격</span>
-                <select id="searchInterval" class="form-control">
-                  <option value="min">1분</option>
-                  <option value="min10">10분</option>
-                  <option value="hour">1시간</option>
-                  <option value="day">1일</option>
-                  <option value="month">1달</option>
-                  <option value="year">1년</option>
-                </select>
-              </div>
-              <!--</div>-->
-              <div class="serch_st sel_box_data">
-                날짜 &nbsp;
-                <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
-                <span id="between-start-end" hidden>~</span>
-                <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
-                  style="display: none;">
-                <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
-                <input type="image" id="downloadExcel" src="/image/2000px-Microsoft_Excel_2013_logo.svg.png" class="exc">
-              </div>
-            </div>
-          </div>
-          <div class="min-table table-responsive" style="overflow-x:visible;">
-            <table class="table table-bordered" style="width:100%;background:#fff;">
-              <thead>
-                <tr>
-                  <th scope="col" rowspan="2" style="width:5%">번호</th>
-                  <th scope="col" rowspan="2" style="width:9%">일시</th>
-                  <th scope="col" colspan="3" style="width:30%">태양광</th>
-                  <th scope="col" colspan="3" style="width:20%">인버터</th>
-                  <th scope="col" colspan="3" style="width:40%">발전현황</th>
-                </tr>
-                <tr>
-                  <th style="width:7%;">DC전류(A)</th>
-                  <th style="width:7%;">DC전압(V)</th>
-                  <th style="width:7%;">DC전력(kW)</th>
-                  <th style="width:8%;">AC전류(A)</th>
-                  <th style="width:8%;">AC전압(V)</th>
-                  <th style="width:8%;">주파수(Hz)</th>
-                  <th style="width:8%;">현재전력(kW)</th>
-                  <th style="width:6%;">효율</th>
-                  <th style="width:8%;">누적발전량(kWh)</th>
-                </tr>
-              </thead>
-              <tbody id="reportDom">
-              </tbody>
-            </table>
-          </div>
-          <nav id="paginationDom" aria-label="...">
-          </nav>
+  <%- include("../master/spinner.ejs") %>
+  <div id="wrap" class="wrap hidden">
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="container_body">
+      <div class="container_row mb_50rem">
+        <div id="subCategoryDom" class="report_category">
+          <button type="button" value="sensor" class="btn btn-default btn1">생육환경</button>
+          <button type="button" value="inverter" class="btn btn-success btn2">인버터</button>
         </div>
       </div>
-      <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
-      <%- include("../master/footer.ejs") %>
+      <div class="container_row flex_jus_end default_search_area mt0">
+        <div class="search_area">
+          <div class="search_box search_category_box ml0">
+            <span class="search_title">인버터</span>
+            <select id="subSelectBoxDom" class="form-control">
+            </select>
+          </div>
+          <div class="search_box search_range_box">
+            <span class="search_title">조회기간</span>
+            <select id="searchType" class="form-control">
+              <option value="days">일일</option>
+              <option value="months">월간</option>
+              <option value="years">년간</option>
+              <option value="range">기간선택</option>
+            </select>
+          </div>
+          <div class="search_box search_interval_box">
+            <span class="search_title">조회간격</span>
+            <select id="searchInterval" class="form-control">
+              <option value="min">1분</option>
+              <option value="min10">10분</option>
+              <option value="hour">1시간</option>
+              <option value="day">1일</option>
+              <option value="month">1달</option>
+              <option value="year">1년</option>
+            </select>
+          </div>
+          <div class="search_box">
+            <span class="search_title">날짜</span>
+            <div class="search_body">
+              <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly>
+              <span id="between-start-end" hidden>~</span>
+              <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly hidden>
+            </div>
+          </div>
+          <div class="submit_box">
+            <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">검색</button>
+            <input type="image" id="downloadExcel" class="icon" src="/image/common/excel-icon.jpg">
+          </div>
+        </div>
+      </div>
+      <div class="container_row flex_dir_col">
+        <div class="table-responsive default_area">
+          <table class="table table-bordered number_table">
+            <colgroup>
+              <col width="8%" />
+              <col width="14%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="8%" />
+              <col width="11%" />
+              <col width="8%" />
+              <col width="11%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th rowspan="2">번호</th>
+                <th rowspan="2">일시</th>
+                <th colspan="3">태양광</th>
+                <th colspan="3">인버터</th>
+                <th colspan="3">발전현황</th>
+              </tr>
+              <tr>
+                <th>DC 전류(A)</th>
+                <th>DC 전압(V)</th>
+                <th>DC 전력(kW)</th>
+                <th>AC 전류(A)</th>
+                <th>AC 전압(V)</th>
+                <th>주파수(Hz)</th>
+                <th>기간 발전량(kW)</th>
+                <th>효율 (%)</th>
+                <th>누적 발전량(kWh)</th>
+              </tr>
+            </thead>
+            <tbody id="reportDom">
+            </tbody>
+          </table>
+        </div>
+        <div id="paginationDom" class="table_pagenation"></div>
+      </div>
     </div>
+    <!--하단1-->
+    <%- include("../master/footer.ejs") %>
+
   </div>
   <script>
     // 인버터 목록 돔

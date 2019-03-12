@@ -38,6 +38,17 @@ class SensorProtocol {
     ];
 
     // 생육 센서 목록
+    this.SENSOR_INSIDE_ND_ID_LISTs = [
+      BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvUnderlyingSolar,
+      BASE_KEY.inclinedSolar,
+      BASE_KEY.lux,
+      BASE_KEY.co2,
+      BASE_KEY.soilWaterValue,
+      BASE_KEY.soilTemperature,
+      BASE_KEY.soilReh,
+    ];
+
     this.SENSOR_INSIDE_ND_ID_LIST = [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
@@ -120,7 +131,7 @@ class SensorProtocol {
         chartOptionList: [
           {
             keys: [BASE_KEY.inclinedSolar, BASE_KEY.horizontalSolar, BASE_KEY.pvUnderlyingSolar],
-            mixColors: [null, '#d9480f', '#d9480f'],
+            mixColors: [null, '#fab005', '#4c6ef5'],
             yTitle: '일사량',
             dataUnit: ' W/m²',
           },

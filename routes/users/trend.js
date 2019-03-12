@@ -51,9 +51,9 @@ router.get(
       strEndDate: strEndDateInputValue,
     });
     // const searchRange = biModule.createSearchRange({
-    //   // searchType: 'days',
-    //   searchType: 'range',
-    //   searchInterval: 'min',
+    //   searchType: 'days',
+    //   // searchType: 'range',
+    //   searchInterval: 'hour',
     //   strStartDate: '2019-02-13',
     //   // strEndDate: '',
     //   strEndDate: '2019-02-14',

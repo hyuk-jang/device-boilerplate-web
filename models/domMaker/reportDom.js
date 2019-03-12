@@ -86,9 +86,7 @@ module.exports = {
     const firstRowNum = (page - 1) * pageListCount;
 
     // 동적으로 Table Header를 구성하기 위한 템플릿 초안 정의
-    const headerTemplate = _.template(
-      '<th scope="col" style="width:7%"><%= ndName %><%= dataUnit %></th>',
-    );
+    const headerTemplate = _.template('<th style="width:7%"><%= ndName %><%= dataUnit %></th>');
 
     // Picked목록에 따라 동적 Header 생성
     const dynamicHeaderDom = pickedNodeDefIdList.map(key => {
@@ -104,8 +102,8 @@ module.exports = {
     // 만들어진 동적 Table Header Dom
     const sensorReportHeaderDom = `
       <tr>
-      <th scope="col" style="width:5%">번호</th>
-      <th scope="col" style="width:9%">일시</th>
+      <th style="width:5%">번호</th>
+      <th style="width:9%">일시</th>
       ${dynamicHeaderDom}
       </tr>
     `;
@@ -115,8 +113,8 @@ module.exports = {
     // 기본으로 생성할 TR 열 틀에 해당 동적 템플릿을 삽입
     const sensorReportTemplate = _.template(`
         <tr>
-        <td><%= num %></td>
-        <td><%= group_date %></td>
+        <td class="text-center"><%= num %></td>
+        <td class="text-left"><%= group_date %></td>
         ${dynamicTemplate.toString()}
       </tr>
     `);
@@ -155,9 +153,7 @@ module.exports = {
 
     const { pickedSensorKeys = [], viewStrDateList = [], searchRangeInfo } = reportOption;
 
-    const headerTemplate = _.template(
-      '<th scope="col" style="width:7%"><%= ndName %><%= dataUnit %></th>',
-    );
+    const headerTemplate = _.template('<th style="width:7%"><%= ndName %><%= dataUnit %></th>');
 
     const dynamicHeaderDom = pickedSensorKeys.map(key => {
       const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, { ndId: key });
@@ -169,9 +165,9 @@ module.exports = {
 
     const sensorReportHeaderDom = `
     <tr>
-    <th scope="col" style="width:5%">번호</th>
-    <th scope="col" style="width:9%">일시</th>
-    <th scope="col" style="width:9%">장소</th>
+    <th class="text-center">
+    <th class="text-left" style="width:9%">일시</th>
+    <th style="width:9%">장소</th>
     ${dynamicHeaderDom}
     </tr>
     `;
@@ -180,8 +176,8 @@ module.exports = {
 
     const sensorReportTemplate = _.template(`
         <tr>
-        <td><%= num %></td>
-        <td><%= group_date %></td>
+        <td class="text-center"><%= num %></td>
+        <td class="text-left" ><%= group_date %></td>
         <td><%= placeName %></td>
         ${dynamicTemplate.toString()}
       </tr>

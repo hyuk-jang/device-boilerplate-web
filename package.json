@@ -32,11 +32,12 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "jsdoc": "^3.5.5",
-    "pkg": "^4.3.7"
+    "pkg": "^4.3.7",
+    "prettier": "^1.16.4"
   },
   "dependencies": {
     "base-model-jh": "^1.2.5",
-    "base-util-jh": "^1.2.1",
+    "base-util-jh": "^1.2.2",
     "base64-img": "^1.0.4",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",

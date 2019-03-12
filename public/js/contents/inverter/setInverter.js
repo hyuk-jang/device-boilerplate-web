@@ -25,7 +25,7 @@ function setInverterList(domElement, inverterStatusList) {
   </tr>
     `);
   const optionList = inverterStatusList.dataList.map(inverterStatusInfo => {
-    const operImgName = inverterStatusInfo.hasOperation ? 'green.png' : 'red.png';
+    const operImgName = inverterStatusInfo.isOperation ? 'green.png' : 'red.png';
     inverterStatusInfo.operImgName = operImgName;
 
     return inverterStatusTemplate(inverterStatusInfo);
