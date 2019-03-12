@@ -64,20 +64,18 @@
     <%- include("../master/footer.ejs") %>
 
   </div>
-  </div>
   <script>
-    let sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
-    let madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+    var sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
+    var madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
 
     // 초기 시작시 라디오 체크버튼 클릭처리
     var searchRange = <%- JSON.stringify(searchRange) %>;
-    const {
-      siteId
-    } = <%- JSON.stringify(trendInfo) %>;
+    var trendInfo = <%- JSON.stringify(trendInfo) %>;
+    var siteId = _.get(trendInfo, 'siteId');
 
     $('#sensorArea').html(sensorDivDomList)
 
-    madeSensorChartList.forEach(chartInfo => {
+    madeSensorChartList.forEach(function (chartInfo) {
       makeLineChart(chartInfo)
     });
   </script>

@@ -26,10 +26,16 @@
 .wrap {
   position: relative;
   overflow: hidden;
-
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+}
+
+_:-ms-input-placeholder,
+:root .wrap {
+  overflow: inherit;
+  display: block;
+  min-height: unset;
 }
 
 /***************************************/
@@ -44,9 +50,15 @@ footer {
   justify-content: center;
 }
 
+_:-ms-input-placeholder,
+:root .footer_area {
+  margin-top: 5rem;
+}
+
 .footer_copyright {
   margin-bottom: 0.5rem;
   font-size: 1.2rem;
+  text-align: center;
 }
 
 .footer_logo {
@@ -662,6 +674,10 @@ article.sdv_w_side > p:last-child {
   .component_side_box {
     width: 100%;
     height: auto;
+  }
+
+  .power_img {
+    display: none;
   }
 
   .component_piece_box {

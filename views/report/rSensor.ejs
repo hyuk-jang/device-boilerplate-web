@@ -106,12 +106,11 @@
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
     // 초기 시작시 라디오 체크버튼 클릭처리
     var searchRange = <%- JSON.stringify(searchRange) %>;
-    // console.log(searchRange)
-    const {
-      siteId,
-      subCategory,
-      subCategoryId
-    } = <%- JSON.stringify(reportInfo) %>;
+    var reportInfo = <%- JSON.stringify(reportInfo) %>;
+
+    var siteId = _.get(reportInfo, 'siteId');
+    var subCategory = _.get(reportInfo, 'subCategory');
+    var subCategoryId = _.get(reportInfo, 'subCategoryId');
   </script>
 
   <script src="/js/contents/report/search.js"></script>
