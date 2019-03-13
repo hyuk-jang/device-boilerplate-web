@@ -48,7 +48,7 @@ class FpRndControl extends Control {
 
     this.rtspManager.init(rtspConfig);
 
-    // this.createMuanCCTV();
+    this.createMuanCCTV();
   }
 
   /**
