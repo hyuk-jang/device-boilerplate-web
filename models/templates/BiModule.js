@@ -211,10 +211,10 @@ class BiModule extends BM {
   /**
    * 접속반 메뉴 에서 쓸 데이터
    * @param {searchRange} searchRange  검색 옵션
-   * @param {number[]=} module_seq_list null, String, Array
+   * @param {number[]=} moduleSeqList null, String, Array
    * @return {Promise} SQL 실행 결과
    */
-  getConnectorPower(searchRange, module_seq_list) {
+  getConnectorPower(searchRange, moduleSeqList) {
     searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
@@ -232,11 +232,7 @@ class BiModule extends BM {
         LEFT OUTER JOIN photovoltaic pv
         ON pv.photovoltaic_seq = md.photovoltaic_seq        
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-    `;
-    if (module_seq_list) {
-      sql += `AND md.photovoltaic_seq IN (${module_seq_list})`;
-    }
-    sql += `
+        ${moduleSeqList.length ? ` AND md.photovoltaic_seq IN (${moduleSeqList})` : ''}
           GROUP BY ${dateFormat.firstGroupByFormat}, md.photovoltaic_seq
           ORDER BY md.photovoltaic_seq, writedate
     `;
@@ -522,7 +518,7 @@ class BiModule extends BM {
     let sql = `
       SELECT
         inverter_seq,
-        ROUND(MAX(power_total_kwh), 1) AS max_c_kwh
+        ROUND(MAX(power_c_kwh), 1) AS max_c_kwh
       FROM pw_inverter_data
       `;
     if (typeof inverterSeqList === 'number' || Array.isArray(inverterSeqList)) {
@@ -557,9 +553,9 @@ class BiModule extends BM {
           SELECT
                 inverter_seq,
                 ${selectGroupDate},
-                MAX(power_total_kwh) AS max_c_kwh,
-                MIN(power_total_kwh) AS min_c_kwh,       
-                ROUND((MAX(power_total_kwh) - MIN(power_total_kwh)), 1) AS interval_power
+                MAX(power_c_kwh) AS max_c_kwh,
+                MIN(power_c_kwh) AS min_c_kwh,       
+                ROUND((MAX(power_c_kwh) - MIN(power_c_kwh)), 1) AS interval_power
           FROM pw_inverter_data
           WHERE writedate >= "${searchRange.strStartDate}" 
            AND writedate < "${searchRange.strEndDate}"
@@ -595,16 +591,12 @@ class BiModule extends BM {
             ${dateFormat.selectViewDate},
             ${dateFormat.selectGroupDate},
             ROUND(AVG(power_kw), 1)  AS avg_grid_kw,
-            MAX(power_total_kwh) AS max_c_kwh,
-            MIN(power_total_kwh) AS min_c_kwh,       
-            ROUND((MAX(power_total_kwh) - MIN(power_total_kwh)), 1) AS interval_power
+            MAX(power_c_kwh) AS max_c_kwh,
+            MIN(power_c_kwh) AS min_c_kwh,       
+            ROUND((MAX(power_c_kwh) - MIN(power_c_kwh)), 1) AS interval_power
         FROM pw_inverter_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-        `;
-    if (Array.isArray(inverterSeqList)) {
-      sql += ` AND inverter_seq IN (${inverterSeqList})`;
-    }
-    sql += `        
+        ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
     GROUP BY ${dateFormat.groupByFormat}, inverter_seq
     ) AS main
     LEFT OUTER JOIN pw_inverter ivt
@@ -713,14 +705,14 @@ class BiModule extends BM {
               AVG(line_f) AS avg_line_f,
               AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
               AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
-              MIN(power_total_kwh) AS min_c_kwh,
-              MAX(power_total_kwh) AS max_c_kwh,
+              MIN(power_c_kwh) AS min_c_kwh,
+              MAX(power_c_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
       FROM pw_inverter_data id
             WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
       searchRange.strEndDate
     }"
-    AND id.inverter_seq IN (${inverterSeqList})
+    ${inverterSeqList.length ? ` AND id.inverter_seq IN (${inverterSeqList})` : ''}
       GROUP BY ${firstGroupByFormat}, id.inverter_seq
       ORDER BY id.inverter_seq, writedate) AS id_group
       LEFT OUTER JOIN pw_inverter ivt
@@ -772,11 +764,7 @@ class BiModule extends BM {
           DATE_FORMAT(writedate,"%H") AS hour_time
           FROM module_data md
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-    `;
-    if (moduleSeqList.length) {
-      sql += `AND photovoltaic_seq IN (${moduleSeqList})`;
-    }
-    sql += `
+        ${moduleSeqList.length ? ` AND photovoltaic_seq IN (${moduleSeqList})` : ''}
         GROUP BY ${dateFormat.firstGroupByFormat}, photovoltaic_seq
         ORDER BY photovoltaic_seq, writedate
       ) md_group
@@ -967,10 +955,10 @@ class BiModule extends BM {
    * 인버터 Report
    * @param {searchRange} searchRange createSearchRange() Return 객체
    * @param {{page: number, pageListCount: number}} pageInfo
-   * @param {number=|Array=} inverterSeq [inverter_seq]
+   * @param {number=|Array=} inverterSeqList [inverter_seq]
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
-  async getInverterReport(searchRange, pageInfo, inverterSeq) {
+  async getInverterReport(searchRange, pageInfo, inverterSeqList) {
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
     let { page = 1, pageListCount = 10 } = pageInfo;
     page = Number(page);
@@ -1030,11 +1018,11 @@ class BiModule extends BM {
           AVG(line_f) AS avg_line_f,
           AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
           AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
-          MIN(power_total_kwh) AS min_c_kwh,
-          MAX(power_total_kwh) AS max_c_kwh
+          MIN(power_c_kwh) AS min_c_kwh,
+          MAX(power_c_kwh) AS max_c_kwh
         FROM pw_inverter_data id
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-      AND inverter_seq IN (${inverterSeq})
+        ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
         GROUP BY ${dateFormat.firstGroupByFormat}, inverter_seq
         ORDER BY inverter_seq, writedate) AS id_group
       GROUP BY inverter_seq, ${dateFormat.groupByFormat}) AS id_report

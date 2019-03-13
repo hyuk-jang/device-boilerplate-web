@@ -56,7 +56,10 @@ app.use(flash());
 let faviPath = '';
 switch (projectMainId) {
   case 'FP':
-    faviPath = 'farm_icon_SFk_icon.ico';
+    faviPath = 'fp.ico';
+    break;
+  case 'S2W':
+    faviPath = 's2w.ico';
     break;
   case 'UPSAS':
     faviPath = 'favicon.ico';
@@ -66,7 +69,7 @@ switch (projectMainId) {
     break;
 }
 
-app.use(favicon(path.resolve('public/image', faviPath)));
+app.use(favicon(path.resolve('public/image/icon', faviPath)));
 app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));

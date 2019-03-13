@@ -47,7 +47,7 @@ router.get(
     });
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
     // Site 발전 현황 구성.
     // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
     let searchRange = biModule.createSearchRange({
@@ -117,9 +117,7 @@ router.get(
 
     // 인버터 현재 발전 현황
     /** @type {V_PW_INVERTER_STATUS[]} */
-    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', {
-      inverter_seq: inverterSeqList,
-    });
+    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
 
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {

@@ -177,7 +177,7 @@ _:-ms-input-placeholder,
 }
 
 .navbar-inverse .navbar-nav > li:hover {
-  background: #080808;
+  background: #817e7e;
 }
 
 .header_sub_area {
@@ -376,6 +376,15 @@ _:-ms-input-placeholder,
 
 .table_pagenation {
   display: flex;
+  justify-content: center;
+}
+
+.lineChart_box {
+  text-align: center;
+  margin-bottom: 2rem;
+  height: 40rem;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 

@@ -22,6 +22,21 @@ module.exports = {
 
     return madeMap;
   },
+  /**
+   *
+   * @param {MEMBER} userInfo
+   */
+  makeWayHeader(userInfo) {
+    // console.log('userInfo', userInfo);
+    const loginAreaTemplate = _.template(
+      `<span class="user_id"><%= name %></span><span class="user_nim">님</span>
+      <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
+    );
+
+    const madeMap = loginAreaTemplate(userInfo);
+
+    return madeMap;
+  },
 
   /**
    * 금일 날짜 생성

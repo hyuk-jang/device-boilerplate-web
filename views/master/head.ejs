@@ -32,14 +32,3 @@
 
 <link href="/css/template/normal-theme.css" rel="stylesheet" />
 <link href="/css/template/dark-theme.css" rel="stylesheet" />
-
-<script type="text/javascript">
-  $(document).ready(function () {
-    $(".sel").each(function () {
-      $(this).click(function () {
-        $(this).addClass("active"); //클릭된 부분을 상단에 정의된 CCS인 selected클래스로 적용
-        $(this).siblings().removeClass("active"); //siblings:형제요소들,    removeClass:선택된 클래스의 특성을 없앰
-      });
-    });
-  });
-</script>

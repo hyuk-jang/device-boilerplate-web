@@ -451,7 +451,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
       data.power_f = '';
       data.power_kw = '';
       // data.daily_power_kwh = '';
-      // data.power_total_kwh = '';
+      // data.power_c_kwh = '';
       data.isOperation = false;
       data[INCLINED_SOLAR] = '';
     }
@@ -469,7 +469,7 @@ function refineSelectedInverterStatus(validInverterStatus) {
     3,
   );
   returnValue.totalInfo.c_kwh = calcValue(
-    reduceDataList(currInverterDataList, 'power_total_kwh'),
+    reduceDataList(currInverterDataList, 'power_c_kwh'),
     1,
     3,
   );

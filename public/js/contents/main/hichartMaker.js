@@ -549,11 +549,6 @@ function makeLineChart(chartInfo) {
       },
     });
   } else {
-    $(`#${chartInfo.domId}`)
-      .html('내역이 존재하지 않습니다.')
-      .css({
-        'line-height': '240px',
-        'font-size': '25px',
-      });
+    $(`#${chartInfo.domId}`).html(`<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`);
   }
 }

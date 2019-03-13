@@ -65,6 +65,20 @@ router.get(
 
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
 
+
+    // FIXME: 농병과 태양광 이모작 분기를 위함
+    // switch (process.env.PJ_MAIN_ID) {
+    //   case 'FP':
+    //     selectedRouter = users;
+    //     break;
+    //   case 'Ean':
+    //     selectedRouter = Ean;
+    //     break;
+    //   default:
+    //     selectedRouter = users;
+    //     break;
+    // }
+
     let totalSiteAmount = 0;
     const siteList = _(viewPowerProfileRows)
       .groupBy('main_seq')
@@ -137,6 +151,7 @@ router.get(
     const mainSeq = _.eq(siteId, DEFAULT_SITE_ID) ? user.main_seq : siteId;
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
+    // BU.CLI(mainRow)
 
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 

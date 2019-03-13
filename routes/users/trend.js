@@ -169,7 +169,7 @@ router.get(
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const sensorDomTemplate = _.template(`
-        <div class="title_box2" style="margin-bottom:20px" id="<%= domId %>"></div>
+        <div class="lineChart_box default_area" id="<%= domId %>"></div>
     `);
     const sensorDivDomList = madeSensorLineChartList.map(refinedChart =>
       sensorDomTemplate({

@@ -66,7 +66,7 @@
         <p class="table_desc_area">
           금일 시간 별 전력
         </p>
-        <article id="chart_div" class="w_100per default_area text-center">
+        <article id="chart_div" class="lineChart_box default_area">
         </article>
       </div>
     </div>
@@ -141,10 +141,7 @@
         },
       });
     } else {
-      $("#chart_div").html("발전 내역이 존재하지 않습니다.").css({
-        "line-height": "300px",
-        "font-size": "25px"
-      });
+      $("#chart_div").html("<h3>발전 내역이 존재하지 않습니다.</h3>");
     }
   </script>
 </body>

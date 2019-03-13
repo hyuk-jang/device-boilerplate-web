@@ -35,9 +35,11 @@ router.get(
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+    // BU.CLI(powerProfileRows);
 
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
     // 인버터별 경사 일사량을 가져옴
     const powerProfileRowsWithExtendedSolar = await biDevice.extendsPlaceDeviceData(
       powerProfileRows,
@@ -45,9 +47,7 @@ router.get(
     );
 
     /** @type {V_INVERTER_STATUS[]} */
-    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', {
-      inverter_seq: inverterSeqList,
-    });
+    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
 
     /** @type {{inverter_seq: number, siteName: string}[]} */
     const inverterSiteNameList = [];

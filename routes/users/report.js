@@ -22,8 +22,6 @@ const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
-const { BaseModel } = require('../../../device-protocol-converter-jh');
-
 const SensorProtocol = require('../../models/SensorProtocol');
 
 // report middleware
@@ -41,10 +39,7 @@ router.get(
 
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
-    const {
-      subCategory = DEFAULT_CATEGORY,
-      subCategoryId = DEFAULT_SUB_SITE,
-    } = req.params;
+    const { subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
     // req.query 값 비구조화 할당
     const {
@@ -133,9 +128,7 @@ router.get(
     // BU.CLIN(placeRelationRows);
 
     // NOTE: IVT가 포함된 장소는 제거.
-    _.remove(placeRelationRows, placeRelation =>
-      _.includes(placeRelation.place_id, 'IVT'),
-    );
+    _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
@@ -193,13 +186,13 @@ router.get(
     if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
       // 동일 Node Def Id 를 사용하는 저장소 데이터를 GroupDate 별로 합산처리
       sensorUtil.calcMergedReportStorageList(nodeDefStorageList, sensorGroupDateInfo);
-      const {
-        sensorReportHeaderDom,
-        sensorReportBodyDom,
-      } = reportDom.makeSensorReportDomByCombine(nodeDefStorageList, {
-        pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdList,
-        groupDateInfo: sensorGroupDateInfo,
-      });
+      const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
+        nodeDefStorageList,
+        {
+          pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdList,
+          groupDateInfo: sensorGroupDateInfo,
+        },
+      );
       _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
       _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
     }
@@ -255,11 +248,7 @@ router.get(
 
     // Place Relation Rows 확장
     // console.time('extPlaRelPerfectSenRep');
-    sensorUtil.extPlaRelPerfectSenRep(
-      placeRelationRows,
-      sensorReportRows,
-      strGroupDateList,
-    );
+    sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
     // console.timeEnd('extPlaRelPerfectSenRep');
     // BU.CLIN(placeRelationRows)
 
@@ -324,9 +313,7 @@ router.get(
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-    const inverterWhere = _.isNumber(subCategoryId)
-      ? { inverter_seq: subCategoryId }
-      : null;
+    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
@@ -369,10 +356,7 @@ router.get(
     _.set(req, 'locals.paginationInfo', paginationInfo);
 
     // 인버터 사이트 목록 돔 추가
-    const inverterSiteDom = reportDom.makeInverterSiteDom(
-      powerProfileRows,
-      subCategoryId,
-    );
+    const inverterSiteDom = reportDom.makeInverterSiteDom(powerProfileRows, subCategoryId);
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
     // 인버터 보고서 돔 추가
