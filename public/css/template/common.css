@@ -347,6 +347,7 @@ _:-ms-input-placeholder,
 .sensor_data_view > p:first-child {
   text-align: left;
   font-size: 1.5rem;
+  text-indent: 10%;
 }
 
 .sensor_data_view > p:nth-child(2) {
