@@ -65,20 +65,6 @@ router.get(
 
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
 
-
-    // FIXME: 농병과 태양광 이모작 분기를 위함
-    // switch (process.env.PJ_MAIN_ID) {
-    //   case 'FP':
-    //     selectedRouter = users;
-    //     break;
-    //   case 'Ean':
-    //     selectedRouter = Ean;
-    //     break;
-    //   default:
-    //     selectedRouter = users;
-    //     break;
-    // }
-
     let totalSiteAmount = 0;
     const siteList = _(viewPowerProfileRows)
       .groupBy('main_seq')
@@ -97,7 +83,9 @@ router.get(
     siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
     // _.set(req, 'locals.siteList', siteList);
+    const projectSource = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
 
+    _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
@@ -105,6 +93,8 @@ router.get(
     // BU.CLI(req.locals.mainInfo);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
+    // 프로젝트 홈
+    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectTitle(projectSource));
     // 사이트 목록 추가
     const loginAreaDom = domMakerMaster.makeTopHeader(user);
     _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);

@@ -22,18 +22,18 @@ module.exports = {
 
     return madeMap;
   },
+
   /**
-   *
-   * @param {MEMBER} userInfo
+   * 프로젝트 Home 생성
+   * @param {{string: projectName, projectImg}} projectSource
    */
-  makeWayHeader(userInfo) {
-    // console.log('userInfo', userInfo);
-    const loginAreaTemplate = _.template(
-      `<span class="user_id"><%= name %></span><span class="user_nim">님</span>
-      <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
+  makeProjectTitle(projectSource) {
+    const projectTitle = _.template(
+      `<img src="/image/icon/<%= projectImg %>" />
+      <span><%= projectName %></span>`,
     );
 
-    const madeMap = loginAreaTemplate(userInfo);
+    const madeMap = projectTitle(projectSource);
 
     return madeMap;
   },

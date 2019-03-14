@@ -1,6 +1,30 @@
 const _ = require('lodash');
-const moment = require('moment');
 const BU = require('base-util-jh').baseUtil;
+
+/**
+ *
+ * @param {string} projectMainId
+ */
+function convertProjectSource(projectMainId) {
+  let projectName = '';
+  let projectImg = '';
+
+  switch (projectMainId) {
+    case 'FP':
+      projectImg = 'fp_logo.png';
+      projectName = '농업병행 태양광발전 모니터링';
+      break;
+    case 'S2W':
+      projectImg = 's2w_logo.png';
+      projectName = '태양광 이모작 모니터링';
+      break;
+    default:
+      break;
+  }
+
+  return { projectName, projectImg };
+}
+exports.convertProjectSource = convertProjectSource;
 
 /**
  *
