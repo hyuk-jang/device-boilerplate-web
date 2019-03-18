@@ -31,7 +31,7 @@ router.get(
     '/:naviMenu/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    BU.CLI('App Main Router');
+    BU.CLI('App Index Router');
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
@@ -65,8 +65,6 @@ router.get(
       _.assign(headerSensorInfo, { [ndKey]: result });
     });
 
-    // BU.CLI(viewPowerProfileRows);
-
     _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
 
     let totalSiteAmount = 0;
@@ -81,10 +79,10 @@ router.get(
         totalSiteAmount += totalAmount;
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
         const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
-        return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
+        return { siteId: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
-    siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
+    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
@@ -96,7 +94,6 @@ router.get(
     const mainRow = await biModule.getTableRow('main', { main_seq: mainSeq }, false);
 
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
-    // BU.CLI('@@@', req.locals);
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
 
@@ -110,7 +107,6 @@ router.get(
       headerMenu: req.locals.mainInfo,
     };
 
-    // BU.CLI(req.locals.siteId);
     next();
   }),
 );

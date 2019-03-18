@@ -57,7 +57,7 @@ router.get(
     //   // strEndDate: '2019-02-14',
     // });
 
-    // BU.CLI(searchRange);
+    BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
     const trendInfo = {
       siteId,

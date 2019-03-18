@@ -63,21 +63,21 @@ module.exports = {
   },
   /**
    * 지점 목록 생성
-   * @param {{siteid: string, name: string}[]} siteList
-   * @param {string} siteId
+   * @param {{siteId: string, name: string}[]} siteList
+   * @param {string} selectedSiteId
    */
-  makeSiteListDom(siteList, siteId) {
-    siteId = siteId.toString();
+  makeSiteListDom(siteList, selectedSiteId) {
+    selectedSiteId = selectedSiteId.toString();
     const siteOptionTemplate = _.template(
-      '<option <%= isSelected %> value="<%= siteid %>"><%= name %></option>',
+      '<option <%= isSelected %> value="<%= siteId %>"><%= name %></option>',
     );
     const madeDom = siteList.map(siteInfo => {
-      const { siteid, name } = siteInfo;
+      const { siteId, name } = siteInfo;
       let isSelected = '';
-      if (siteId.toString() === siteid) {
+      if (selectedSiteId === siteId) {
         isSelected = 'selected';
       }
-      return siteOptionTemplate({ siteid, name, isSelected });
+      return siteOptionTemplate({ siteId, name, isSelected });
     });
     return madeDom;
   },

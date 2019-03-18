@@ -72,12 +72,11 @@
   // 사이트 변경 시
   $('#siteListDom').change(function () {
     location.href = window.location.origin + '/' + naviId + '/' + $(this).val();
-    // location.href = window.location.pathname + '/' + $(this).val()
   })
 
   // 페이지 동적 바인딩이 완료되었을 경우 View 처리
   window.onload = function () {
-    $('#wrap').removeClass('hidden')
+    $('#wrap').removeClass('hidden');
     // Spinner Loader
     // $('#loader').removeClass('hidden')
     // $('#loader-ground').removeClass('hidden')
