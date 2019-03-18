@@ -114,7 +114,7 @@ module.exports = {
     const sensorReportTemplate = _.template(`
         <tr>
         <td class="text-center"><%= num %></td>
-        <td class="text-left"><%= group_date %></td>
+        <td class="text-center"><%= group_date %></td>
         ${dynamicTemplate.toString()}
       </tr>
     `);
@@ -132,6 +132,8 @@ module.exports = {
       _.forEach(reportStorageListByPickedNdIdList, reportStorage => {
         _.assign(sensorData, { [reportStorage.ndId]: reportStorage.mergedAvgList[index] });
       });
+
+      BU.toLocaleString(sensorData);
 
       // 확장한 sensorData를 템플릿에 반영
       return sensorReportTemplate(sensorData);
@@ -166,8 +168,8 @@ module.exports = {
     const sensorReportHeaderDom = `
     <tr>
     <th class="text-center">
-    <th class="text-left" style="width:9%">일시</th>
-    <th style="width:9%">장소</th>
+    <th>일시</th>
+    <th>장소</th>
     ${dynamicHeaderDom}
     </tr>
     `;
@@ -177,7 +179,7 @@ module.exports = {
     const sensorReportTemplate = _.template(`
         <tr>
         <td class="text-center"><%= num %></td>
-        <td class="text-left" ><%= group_date %></td>
+        <td class="text-center" ><%= group_date %></td>
         <td><%= placeName %></td>
         ${dynamicTemplate.toString()}
       </tr>
@@ -232,6 +234,8 @@ module.exports = {
       _.set(row, 'num', firstRowNum + index + 1);
       // 발전 효율
       _.set(row, 'powerFactor', _.round(_.divide(powerKw, pvKw) * 100, 1));
+
+      BU.toLocaleString(row);
 
       return inverterReportTemplate(row);
     });
