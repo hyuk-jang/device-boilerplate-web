@@ -63,6 +63,7 @@ router.get('/intersection', (req, res) => {
       // _.isString(process.env.DEV_PAGE)
       //   ? res.redirect(`/${process.env.DEV_PAGE}`)
       //   : res.redirect('/app');
+      BU.CLI(userInfo);
       res.json(userInfo);
       break;
   }

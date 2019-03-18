@@ -506,7 +506,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
   chartOptionList.forEach(chartOption => {
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
     // 보여줄 축 정보
-    const { dataUnit, yTitle, keys, mixColors } = chartOption;
+    const { dataUnit = '', yTitle, keys, mixColors } = chartOption;
     // Y축 표현 정보 삽입
     refinedChart.yAxis.push({
       yTitle,

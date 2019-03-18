@@ -24,7 +24,7 @@ router.get(
 
     // 기본 정보 불러옴
     const { mainInfo } = req.locals;
-    /** @type {{siteid: string, m_name: string}[]} */
+    /** @type {{siteId: string, m_name: string}[]} */
     const mainSiteList = mainInfo.siteList;
 
     // Site Sequence.지점 Id를 불러옴

@@ -6,7 +6,7 @@ module.exports = {
    *
    * @param {V_DV_PLACE_RELATION[]} viewPlaceRelationRows
    * @param {{insideList: string[], outsideList: string[]}} pickedIdInfo
-   * @param {{siteid: string, m_name: string}[]} mainSiteList
+   * @param {{siteId: string, m_name: string}[]} mainSiteList
    */
   makeDynamicSensorDom(viewPlaceRelationRows, pickedIdInfo, mainSiteList) {
     // BU.CLI(viewPlaceRelationRows);
@@ -75,7 +75,7 @@ module.exports = {
     const sensorEnvBodyDomList = _.map(
       groupByMainSeqRelation,
       (groupPlaceRelationRows, strMainSeq) => {
-        const siteInfo = _.find(mainSiteList, { siteid: strMainSeq });
+        const siteInfo = _.find(mainSiteList, { siteId: strMainSeq });
         const mainName = _.get(siteInfo, 'm_name', '');
         // 공통으로 들어갈 외기 환경 부분을 추출
         const outsidePlaceRows = groupPlaceRelationRows.filter(row =>
@@ -167,7 +167,7 @@ module.exports = {
   /**
    *
    * @param {V_INVERTER_STATUS[]} viewPlaceRelationRows
-   * @param {{siteid: string, m_name: string}[]} mainSiteList
+   * @param {{siteId: string, m_name: string}[]} mainSiteList
    */
   makeSensorStatusDom(viewPlaceRelationRows, mainSiteList) {
     // place_seq를 기준으로 grouping 후 총 지점 개수를 구함
@@ -220,7 +220,7 @@ module.exports = {
 
     // main Site 지점별 목록 순회
     const madeDom = _.map(groupByMainSeqRelation, (groupPlaceRelationRows, strMainSeq) => {
-      const siteInfo = _.find(mainSiteList, { siteid: strMainSeq });
+      const siteInfo = _.find(mainSiteList, { siteId: strMainSeq });
       const mainName = _.get(siteInfo, 'm_name', '');
       // 공통으로 들어갈 외기 환경 부분을 추출
       const outsidePlaceRows = groupPlaceRelationRows.filter(row =>

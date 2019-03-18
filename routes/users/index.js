@@ -55,7 +55,7 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = '', siteId = userMainSeq } = req.params;
+    const { naviMenu = 'main', siteId = userMainSeq } = req.params;
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -77,10 +77,10 @@ router.get(
         totalSiteAmount += totalAmount;
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
         const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
-        return { siteid: strMainSeq.toString(), name: siteName, m_name: siteMainName };
+        return { siteId: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
-    siteList.unshift({ siteid: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
+    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
 
     // _.set(req, 'locals.siteList', siteList);
     const projectSource = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
