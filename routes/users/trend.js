@@ -119,22 +119,22 @@ router.get(
     // BU.CLIN(sensorReportRows);
 
     // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
-    let strGroupDateList = [];
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
     // plotSeries 를 구하기 위한 객체
-    let momentFormat;
+    const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
 
     // 하루 단위로 검색할 경우에만 시간 제한을 둠
-    if (searchRangeInfo.searchType === 'days') {
-      const rangeInfo = {
-        startHour: 7,
-        endHour: 20,
-      };
-      strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
-      momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
-    } else {
-      strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-      momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
-    }
+    // if (searchRangeInfo.searchType === 'days') {
+    //   const rangeInfo = {
+    //     startHour: 7,
+    //     endHour: 20,
+    //   };
+    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
+    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
+    // } else {
+    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    // }
 
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
