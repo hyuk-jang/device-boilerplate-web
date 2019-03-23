@@ -18,7 +18,7 @@ router.get('/login', (req, res) => {
   if (!req.user) {
     request.post(
       {
-        url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
+        url: `http://localhost:${process.env.PJ_HTTP_PORT || 7500}/${SITE_HEADER}login`,
         headers: req.headers,
         form: {
           userid: process.env.DEV_USER_ID || 'admin',

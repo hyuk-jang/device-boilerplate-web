@@ -3,7 +3,7 @@ const ENV = process.env;
 /** ENV에 등록되는 설정 정보 나열. */
 module.exports = {
   projectInfo: {
-    projectMainId: ENV.PJ_MAIN_ID || 'FP',
+    projectMainId: ENV.PJ_MAIN_ID || 'SOLAR',
     projectSubId: ENV.PJ_SUB_ID || 'RnD',
     featureConfig: {
       apiConfig: {
@@ -27,7 +27,7 @@ module.exports = {
     port: ENV.PJ_DB_PORT || '3306',
     host: ENV.PJ_DB_HOST || 'localhost',
     user: ENV.PJ_DB_USER || 'root',
-    password: ENV.PJ_DB_PW || 'qwer1234',
+    password: ENV.PJ_DB_PW || 'smsoftware',
     database: ENV.PJ_DB_DB || 'solar',
   },
   dev: {

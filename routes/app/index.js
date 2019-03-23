@@ -33,7 +33,7 @@ router.use((req, res, next) => {
       BU.CLI('App 자동 로그인 요청');
       return request.post(
         {
-          url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}auth/login`,
+          url: `http://localhost:${process.env.PJ_HTTP_PORT || 7500}/${SITE_HEADER}auth/login`,
           headers: req.headers,
           form: {
             userid: process.env.DEV_USER_ID,

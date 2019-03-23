@@ -1,4 +1,3 @@
-// process.env.NODE_ENV = 'production';
 process.env.NODE_ENV = 'development';
 
 process.env.NODE_ENV === 'development' && require('dotenv').config();
@@ -69,7 +68,7 @@ switch (projectMainId) {
     break;
 }
 
-app.use(favicon(path.resolve('public/image/icon', faviPath)));
+// app.use(favicon(path.resolve(process.cwd(), 'public/image/icon', faviPath)));
 app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
