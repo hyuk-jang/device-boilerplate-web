@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+
+  <%- include("../master/head.ejs") %>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/main/hichartMaker.js"></script>
+
+  <style>
+    /* 센서 데이터 뷰 50% 40% 10% */
+    article.sdv_w541>p:first-child {
+      text-align: center;
+      width: 40%;
+    }
+
+    article.sdv_w541>p:nth-child(2) {
+      text-align: center;
+      width: 60%;
+    }
+
+    article.sdv_w541>p:last-child {
+      width: 0%;
+    }
+
+    @media all and (min-width: 942px) {
+      .component_piece_box {
+        width: 49%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrap" class="wrap hidden">
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="container_body">
+      <div class="container_row">
+        <div class="component_piece_box">
+          <article class="component_piece_area">
+            <header>
+              일사량 A
+            </header>
+            <div class="component_piece_body ">
+              <div id="S_A" class="gauge_chart">Graph</div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>갱신일</p>
+                  <p id="S_A_date">243.3</p>
+                  <p></p>
+                </article>
+              </section>
+            </div>
+          </article>
+        </div>
+        <div class="component_piece_box">
+          <article class="component_piece_area">
+            <header>일사량 B</header>
+            <div class="component_piece_body pt_1rem">
+              <div id="S_B" class="gauge_chart">Graph</div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>갱신일</p>
+                  <p id="S_B_date">243.3</p>
+                  <p></p>
+                </article>
+              </section>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="container_row">
+        <div class="component_piece_box">
+          <article class="component_piece_area">
+            <header>
+              일사량 C
+            </header>
+            <div class="component_piece_body ">
+              <div id="S_C" class="gauge_chart">Graph</div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>갱신일</p>
+                  <p id="S_C_date">243.3</p>
+                  <p></p>
+                </article>
+              </section>
+            </div>
+          </article>
+        </div>
+        <div class="component_piece_box">
+          <article class="component_piece_area">
+            <header>일사량 D</header>
+            <div class="component_piece_body pt_1rem">
+              <div id="S_D" class="gauge_chart">Graph</div>
+              <section class="gauge_contents">
+                <article class="sensor_data_view sdv_w541 fs_170rem">
+                  <p>갱신일</p>
+                  <p id="S_D_date">243.3</p>
+                  <p></p>
+                </article>
+              </section>
+            </div>
+          </article>
+        </div>
+      </div>
+
+    </div>
+    <!--하단1-->
+
+    <%- include("../master/footer.ejs") %>
+
+  </div>
+
+  <script>
+    var solarData = <%- JSON.stringify(solarData) %>;
+    var solarList = <%- JSON.stringify(solarList) %>;
+
+    solarList.forEach(function (solarInfo) {
+      makeGaugeChart({
+        domId: solarInfo.solar_id,
+        yAxis: {
+          min: 0,
+          max: 1500,
+          title: ''
+        },
+        series: {
+          name: '일사량',
+          data: solarInfo.solar,
+          tooltip: {
+            valueSuffix: 'W/m²'
+          }
+        },
+      })
+      console.log("#" + solarInfo.solar_id + "_date");
+      $("#" + solarInfo.solar_id + "_date").html(solarInfo.writedate);
+    })
+
+    setDomElementValueWithJson(document.getElementById('main'), solarData, 'innerHTML', 'key')
+  </script>
+
+
+</body>
+
+</html>

@@ -18,6 +18,10 @@ function convertProjectSource(projectMainId) {
       projectImg = 's2w_logo.png';
       projectName = '태양광 이모작 모니터링';
       break;
+    case 'SOLAR':
+      projectImg = 'solar.png';
+      projectName = '일사량 모니터링';
+      break;
     default:
       break;
   }

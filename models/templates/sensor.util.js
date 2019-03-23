@@ -551,3 +551,105 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
   return refinedChart;
 }
 exports.makeSimpleLineChart = makeSimpleLineChart;
+/**
+ *
+ * @param {Object} chartConfig 차트를 만들기 위한 생성 정보
+ * @param {string} chartConfig.domId
+ * @param {string} chartConfig.title
+ * @param {string} chartConfig.subtitle
+ * @param {Object[]} chartConfig.chartOptionList
+ * @param {string[]} chartConfig.chartOptionList.keys
+ * @param {string[]} chartConfig.chartOptionList.mixColors
+ * @param {string} chartConfig.chartOptionList.yTitle
+ * @param {string} chartConfig.chartOptionList.dataUnit
+ * @param {nodeDefStorage[]} dataRows
+ * @param {Object} plotSeries
+ * @param {number} plotSeries.pointStart 시작 UTC
+ * @param {number} plotSeries.pointInterval 시간 Interval
+ */
+function makeSolarLineChart(chartConfig, dataRows, plotSeries = {}) {
+  // BU.CLI(plotSeries)
+  // 차트 생성하기 위한 설정
+  const { domId, title = '', subtitle = '', chartOptionList } = chartConfig;
+  // 정제된 차트 정보
+  const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
+  // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
+  chartOptionList.forEach(chartOption => {
+    // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
+    // 보여줄 축 정보
+    const { dataUnit = '', yTitle, keys, mixColors } = chartOption;
+    // Y축 표현 정보 삽입
+    refinedChart.yAxis.push({
+      yTitle,
+      dataUnit,
+    });
+    // Node Def ID 목록을 순회하면서 Nod Def Storage 정보를 바탕으로 차트 정보를 구성
+    // keys.forEach((ndId, index) => {
+    // 표현할 Node Def Storage 목록에 해당 ndId를 가진 객체를 찾음.
+    // const groupData = _.groupBy(dataRows, 'solar_seq');
+
+    _.forEach(dataRows, (rows, solarSeq) => {
+      const chartSeriesInfo = {
+        // 차트 컬럼 개체 명
+        name: solarSeq,
+        // 차트 컬럼 개체 색상
+        // color: chartColor,
+        // 차트를 마우스 오버 하였을 경우 나타나는 단위
+        tooltip: {
+          valueSuffix: dataUnit,
+        },
+        // dataTable. 각 데이터는 [[utc, data][...]] 이룸
+        data: _.map(rows, 'avg_num_data'),
+      };
+      refinedChart.series.push(chartSeriesInfo);
+    });
+    // });
+  });
+
+  return refinedChart;
+}
+exports.makeSolarLineChart = makeSolarLineChart;
+
+/**
+ * 1. DB에서 검색한 Sensor 데이터 결과를 완전한 날짜를 지닌 Rows로 변환
+ * 2. 해당 node_seq를 사용하는 PlaceRelation에 결합
+ * Extends Place Realtion Rows With Perfect Sensor Report Rows
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {sensorReport[]} solarReportRows
+ * @param {string[]} strGroupDateList
+ */
+function sortSolarData(placeRelationRows, solarReportRows, strGroupDateList) {
+  // Node Seq 별로 그룹
+  const groupedSolarReport = _.groupBy(solarReportRows, 'solar_seq');
+
+  _.keys(groupedSolarReport).forEach(key => {
+    // 모든 날짜 목록을 순회하면서 빈 데이터 목록 생성
+    const emptySensorReportRows = _.map(strGroupDateList, strGroupDate => ({
+      solar_seq: Number(key),
+      group_date: strGroupDate,
+      avg_num_data: null,
+    }));
+
+    // BU.CLIN(emptySensorReportRows);
+    // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣은 후 날짜 순으로 정렬
+    const unionSensorReportRows = _(groupedSolarReport[key])
+      .unionBy(emptySensorReportRows, 'group_date')
+      .sortBy('group_date')
+      .value();
+
+    // BU.CLIN(unionSensorReportRows);
+    //  union 처리 된 결과물을 재 정의
+    _.set(groupedSolarReport, key, unionSensorReportRows);
+  });
+
+  return groupedSolarReport;
+
+  // _(groupedSolarReport).forEach((groupRows, strNodeSeq) => {
+  //   // BU.CLI(groupRows);
+  //   _.filter(placeRelationRows, { solar_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
+  //     placeRelationRow.sensorDataRows = groupRows;
+  //     // _.set(placeRelationRow, 'sensorGroupList', groupRows);
+  //   });
+  // });
+}
+exports.sortSolarData = sortSolarData;

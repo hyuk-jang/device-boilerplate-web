@@ -7,7 +7,9 @@ const { BM } = require('base-model-jh');
 const AbstApiServer = require('./features/ApiCommunicator/AbstApiServer');
 const AbstSocketIOManager = require('./features/SocketIOManager/AbstSocketIOManager');
 const AbstRtspManager = require('./features/RtspManager/AbstRtspManager');
-const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
+// const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
+
+const AbstWeathercast = require('./features/Weathercast/Weathercast');
 
 const { BaseModel } = require('../../../module/device-protocol-converter-jh');
 
@@ -53,10 +55,13 @@ class Control {
    * @param {string} featureConfig.rtspConfig.rtspUrl RTSP URL
    * @param {number} featureConfig.rtspConfig.streamWebPort RTSP 데이터를 변환처리 할 Sub Express Web Server Port
    */
-  runFeature(featureConfig) {}
+  runFeature(featureConfig) {
+    // BU.CLI('runFeature', this.dbInfo);
+    this.weathercast.init(this.dbInfo);
+  }
 
   async init() {
-    await this.setMainStorage();
+    // await this.setMainStorage();
   }
 
   /**

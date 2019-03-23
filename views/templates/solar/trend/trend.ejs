@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+  <%- include("../master/head.ejs") %>
+  <script src="/js/hichart/exporting.js"></script>
+  <script src="/js/hichart/export-data.js"></script>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/main/hichartMaker.js"></script>
+  <link href="/css/spinner.css" rel="stylesheet" />
+</head>
+
+<body>
+  <%- include("../master/spinner.ejs") %>
+  <div id="wrap" class="wrap hidden">
+    <!-- Header -->
+    <%- include("../master/header.ejs") %>
+    <!--메인-->
+    <div class="container_body">
+      <div class="container_row flex_jus_end default_search_area">
+        <div class="search_area">
+          <div class="search_box search_range_box">
+            <span class="search_title">조회기간</span>
+            <select id="searchType" class="form-control">
+              <option value="days">일일</option>
+              <option value="months">월간</option>
+              <option value="years">년간</option>
+              <option value="range">기간선택</option>
+            </select>
+          </div>
+          <div class="search_box search_interval_box">
+            <span class="search_title">조회간격</span>
+            <select id="searchInterval" class="form-control">
+              <option value="min">1분</option>
+              <option value="min10">10분</option>
+              <option value="hour">1시간</option>
+              <option value="day">1일</option>
+              <option value="month">1달</option>
+              <option value="year">1년</option>
+            </select>
+          </div>
+          <div class="search_box">
+            <span class="search_title">날짜</span>
+            <div class="search_body">
+              <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly>
+              <span id="between-start-end" hidden>~</span>
+              <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly hidden>
+            </div>
+          </div>
+          <div class="submit_box">
+            <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">검색</button>
+          </div>
+        </div>
+      </div>
+      <div class="container_row flex_dir_col mt0">
+        <p class="table_desc_area">
+          일사량
+        </p>
+        <div id="sensorArea"></div>
+      </div>
+    </div>
+    <!--하단1-->
+    <%- include("../master/footer.ejs") %>
+
+  </div>
+  <script>
+    var refineChart = <%- JSON.stringify(refineChart) %>;
+    var searchRange = <%- JSON.stringify(searchRange) %>;
+    var trendInfo = <%- JSON.stringify(trendInfo) %>;
+    // console.log(searchRange)
+
+    // 초기 시작시 라디오 체크버튼 클릭처리
+    var siteId = _.get(trendInfo, 'siteId');
+
+    makeLineChart(refineChart)
+  </script>
+
+  <script src="/js/contents/report/search.js"></script>
+  <!-- 기본 데이터 세팅 -->
+  <script>
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
+
+    // 검색 타입에 따라 적용
+    applySearchType(searchRange.searchType)
+  </script>
+
+</body>
+
+</html>

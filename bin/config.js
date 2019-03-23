@@ -27,8 +27,8 @@ module.exports = {
     port: ENV.PJ_DB_PORT || '3306',
     host: ENV.PJ_DB_HOST || 'localhost',
     user: ENV.PJ_DB_USER || 'root',
-    password: ENV.PJ_DB_PW || 'smsoftware',
-    database: ENV.PJ_DB_DB || 'farm_parallel',
+    password: ENV.PJ_DB_PW || 'qwer1234',
+    database: ENV.PJ_DB_DB || 'solar',
   },
   dev: {
     devMode: ENV.NODE_ENV || 'production',

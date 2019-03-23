@@ -13,30 +13,24 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-  if (process.env.DEV_AUTO_AUTH === '1') {
-    // BU.CLI('자동 로그인');
-    // global.app.set('auth', true);
-    if (!req.user) {
-      // BU.CLI('poost!');
-      request.post(
-        {
-          url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
-          headers: req.headers,
-          form: {
-            userid: process.env.DEV_USER_ID,
-            password: process.env.DEV_USER_PW,
-          },
+  // BU.CLI('자동 로그인');
+  // global.app.set('auth', true);
+  if (!req.user) {
+    request.post(
+      {
+        url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
+        headers: req.headers,
+        form: {
+          userid: process.env.DEV_USER_ID || 'admin',
+          password: process.env.DEV_USER_PW || 'smsoftware',
         },
-        (err, httpResponse, msg) => {
-          res.redirect('/intersection');
-        },
-        // (err, httpResponse, msg) => res.redirect('/intersection'),
-        // (err, httpResponse, msg) => res.redirect(`/${process.env.DEV_PAGE}`),
-      );
-    }
-  } else {
-    // BU.CLI('DEV_AUTO_AUTH false')
-    return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error') });
+      },
+      (err, httpResponse, msg) => {
+        res.redirect('/intersection');
+      },
+      // (err, httpResponse, msg) => res.redirect('/intersection'),
+      // (err, httpResponse, msg) => res.redirect(`/${process.env.DEV_PAGE}`),
+    );
   }
 });
 

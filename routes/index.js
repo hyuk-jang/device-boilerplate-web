@@ -12,6 +12,7 @@ const admin = require('./admin/users');
 // const guest = require('./guest/users');
 const users = require('./users');
 const Ean = require('./Ean');
+const solar = require('./solar');
 
 let selectedRouter;
 switch (process.env.PJ_MAIN_ID) {
@@ -22,7 +23,7 @@ switch (process.env.PJ_MAIN_ID) {
     selectedRouter = Ean;
     break;
   default:
-    selectedRouter = users;
+    selectedRouter = solar;
     break;
 }
 

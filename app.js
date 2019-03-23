@@ -65,7 +65,7 @@ switch (projectMainId) {
     faviPath = 'favicon.ico';
     break;
   default:
-    faviPath = 'favicon.ico';
+    faviPath = 'solar.ico';
     break;
 }
 

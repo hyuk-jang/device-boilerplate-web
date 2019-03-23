@@ -39,7 +39,37 @@ class BiDevice extends BiModule {
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
     `;
-      // AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
+    // AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
+
+    return this.db.single(sql, '', false);
+  }
+
+  /**
+   * 센서 장치 데이터를 구해옴
+   * @param {searchRange} searchRange
+   * @param {number[]} solarSeqList
+   * @param {number=} 소수점 절삭 자리수 default: 1
+   * @return {sensorReport[]}
+   */
+  getSolarReport(searchRange = this.createSearchRange(), solarSeqList, fixed = 1) {
+    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+
+    const sql = `
+      SELECT 
+      solar_seq,
+          ${dateFormat.selectViewDate},
+          ${dateFormat.selectGroupDate},
+          ROUND(AVG(solar), ${fixed})  AS avg_data,
+          ROUND(MIN(solar), ${fixed})  AS min_data,
+          ROUND(MAX(solar), ${fixed})  AS max_data,
+          ROUND(MAX(solar) - MIN(solar), ${fixed})  AS interval_data
+      FROM solar_data
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      ${solarSeqList.length ? ` AND solar_seq IN (${solarSeqList})` : ''}
+      GROUP BY ${dateFormat.groupByFormat}, solar_seq
+      ORDER BY solar_seq, writedate
+    `;
+    // AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
 
     return this.db.single(sql, '', false);
   }
@@ -226,6 +256,32 @@ class BiDevice extends BiModule {
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
     `;
+
+    return this.db.single(sql, '', false);
+  }
+
+  /**
+   * 센서 장치 데이터를 구해옴
+   * @param {searchRange} searchRange
+   * @param {number[]} nodeSeqList
+   */
+  getSolarTrend(searchRange, nodeSeqList) {
+    searchRange = searchRange || this.createSearchRange();
+    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+
+    const sql = `
+      SELECT 
+          *,
+          ${dateFormat.selectViewDate},
+          ${dateFormat.selectGroupDate},
+          ROUND(AVG(solar), 1)  AS avg_num_data
+      FROM solar_data
+      WHERE solar_seq IN (${nodeSeqList})
+        AND writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        GROUP BY ${dateFormat.groupByFormat}, solar_seq
+        ORDER BY solar_seq, writedate
+        `;
+    // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
 
     return this.db.single(sql, '', false);
   }
