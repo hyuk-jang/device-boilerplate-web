@@ -5,6 +5,8 @@ const passport = require('passport');
 const request = require('request');
 const { BU, DU, EU } = require('base-util-jh');
 
+const commonUtil = require('../models/templates/common.util');
+
 // const SITE_HEADER = '';
 const SITE_HEADER = 'auth/';
 
@@ -13,6 +15,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
+  const { projectName } = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
   if (process.env.DEV_AUTO_AUTH === '1') {
     // BU.CLI('자동 로그인');
     // global.app.set('auth', true);
@@ -36,7 +39,7 @@ router.get('/login', (req, res) => {
     }
   } else {
     // BU.CLI('DEV_AUTO_AUTH false')
-    return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error') });
+    return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error'), projectName });
   }
 });
 
