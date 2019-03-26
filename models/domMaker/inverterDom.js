@@ -22,7 +22,7 @@ module.exports = {
     <td> <%= power_kw %> </td>
     <td> <%= power_f %> </td>
     <td> <%= daily_power_kwh %> </td>
-    <td> <%= power_c_kwh %> </td>
+    <td> <%= power_cp_kwh %> </td>
     <td class="text-center">
       <img src="/image/<%= operImgName %>" />
     </td>
