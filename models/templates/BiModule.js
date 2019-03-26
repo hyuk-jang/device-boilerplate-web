@@ -518,7 +518,7 @@ class BiModule extends BM {
     let sql = `
       SELECT
         inverter_seq,
-        ROUND(MAX(power_c_kwh), 1) AS max_c_kwh
+        ROUND(MAX(power_cp_kwh), 1) AS max_c_kwh
       FROM pw_inverter_data
       `;
     if (typeof inverterSeqList === 'number' || Array.isArray(inverterSeqList)) {
@@ -553,9 +553,9 @@ class BiModule extends BM {
           SELECT
                 inverter_seq,
                 ${selectGroupDate},
-                MAX(power_c_kwh) AS max_c_kwh,
-                MIN(power_c_kwh) AS min_c_kwh,       
-                ROUND((MAX(power_c_kwh) - MIN(power_c_kwh)), 1) AS interval_power
+                MAX(power_cp_kwh) AS max_c_kwh,
+                MIN(power_cp_kwh) AS min_c_kwh,       
+                ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 1) AS interval_power
           FROM pw_inverter_data
           WHERE writedate >= "${searchRange.strStartDate}" 
            AND writedate < "${searchRange.strEndDate}"
@@ -591,9 +591,9 @@ class BiModule extends BM {
             ${dateFormat.selectViewDate},
             ${dateFormat.selectGroupDate},
             ROUND(AVG(power_kw), 1)  AS avg_grid_kw,
-            MAX(power_c_kwh) AS max_c_kwh,
-            MIN(power_c_kwh) AS min_c_kwh,       
-            ROUND((MAX(power_c_kwh) - MIN(power_c_kwh)), 1) AS interval_power
+            MAX(power_cp_kwh) AS max_c_kwh,
+            MIN(power_cp_kwh) AS min_c_kwh,       
+            ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 1) AS interval_power
         FROM pw_inverter_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
@@ -705,8 +705,8 @@ class BiModule extends BM {
               AVG(line_f) AS avg_line_f,
               AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
               AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
-              MIN(power_c_kwh) AS min_c_kwh,
-              MAX(power_c_kwh) AS max_c_kwh,
+              MIN(power_cp_kwh) AS min_c_kwh,
+              MAX(power_cp_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
       FROM pw_inverter_data id
             WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
@@ -1018,8 +1018,8 @@ class BiModule extends BM {
           AVG(line_f) AS avg_line_f,
           AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
           AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
-          MIN(power_c_kwh) AS min_c_kwh,
-          MAX(power_c_kwh) AS max_c_kwh
+          MIN(power_cp_kwh) AS min_c_kwh,
+          MAX(power_cp_kwh) AS max_c_kwh
         FROM pw_inverter_data id
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}

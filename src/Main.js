@@ -1,5 +1,6 @@
 const Control = require('./Control');
 const FpRndControl = require('./projects/FP/RnD/FpRndControl');
+const S2WRndControl = require('./projects/S2W/RnD/S2WRndControl');
 
 /**
  * 프로젝트에 따라 Control과 Model을 생성.
@@ -33,6 +34,15 @@ class Main {
         switch (projectSubId) {
           case 'RnD':
             MainControl = FpRndControl;
+            break;
+          default:
+            break;
+        }
+        break;
+      case 'S2W':
+        switch (projectSubId) {
+          case 'RnD':
+            MainControl = S2WRndControl;
             break;
           default:
             break;
