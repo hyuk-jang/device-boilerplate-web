@@ -74,8 +74,8 @@ router.get(
     const { sensorEnvHeaderDom, sensorEnvBodyDom } = sensorDom.makeDynamicSensorDom(
       viewPlaceRelationRows,
       {
-        insideList: sensorProtocol.SENSOR_INSIDE_ND_ID_LIST,
-        outsideList: sensorProtocol.SENSOR_OUTSIDE_ND_ID_LIST,
+        insideList: sensorProtocol.sInsideNdIdList,
+        outsideList: sensorProtocol.sOutsideNdIdList,
       },
       mainSiteList,
     );

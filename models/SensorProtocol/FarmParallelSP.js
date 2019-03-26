@@ -1,27 +1,15 @@
-const _ = require('lodash');
-const { BU, DU } = require('base-util-jh');
+const { BaseModel } = require('../../../device-protocol-converter-jh');
 
-const { BaseModel } = require('../../device-protocol-converter-jh');
-
-// 가져올려는 Report Key로 필터링
 const { BASE_KEY } = BaseModel.FarmParallel;
-const EAN_BASE_KEY = BaseModel.Sensor.BASE_KEY;
 
-const CALC_TYPE = {
-  // 평균 값
-  AVG: 'AVG',
-  // 시간 당 데이터로 환산 (searchRange 필요)
-  AMOUNT: 'AMOUNT',
-  // 두 날짜 간격 사이의 데이터 중 큰 값의 차
-  INTERVAL_MAX: 'INTERVAL_MAX',
-};
+const SensorProtocol = require('./SensorProtocol');
 
-class SensorProtocol {
-  constructor(siteId) {
-    this.BASE_KEY = BASE_KEY;
-    this.EAN_BASE_KEY = EAN_BASE_KEY;
-
-    this.pickedNodeDefIdList = [
+class FarmParallelSP extends SensorProtocol {
+  /**
+   * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
+   */
+  get pickedNodeDefIdList() {
+    return [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
@@ -36,9 +24,13 @@ class SensorProtocol {
       BASE_KEY.windSpeed,
       BASE_KEY.r1,
     ];
+  }
 
-    // 생육 센서 목록
-    this.sInsideNdIdLists = [
+  /**
+   * @return {string[]} 내부 센서 ND ID 목록
+   */
+  get sInsideNdIdList() {
+    return [
       BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.inclinedSolar,
@@ -48,20 +40,13 @@ class SensorProtocol {
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
     ];
+  }
 
-    this.sInsideNdIdList = [
-      BASE_KEY.pvRearTemperature,
-      BASE_KEY.pvUnderlyingSolar,
-      BASE_KEY.inclinedSolar,
-      BASE_KEY.lux,
-      BASE_KEY.co2,
-      BASE_KEY.soilWaterValue,
-      BASE_KEY.soilTemperature,
-      BASE_KEY.soilReh,
-    ];
-
-    // 외기 센서 목록
-    this.sOutsideNdIdList = [
+  /**
+   * @return {string[]} 외기 센서 ND ID 목록
+   */
+  get sOutsideNdIdList() {
+    return [
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
@@ -70,22 +55,12 @@ class SensorProtocol {
       BASE_KEY.r1,
       BASE_KEY.isRain,
     ];
-
-    // 나주를 선택할 경우
-    // if (siteId === 1) {
-    //   this.pickedNodeDefIdList.unshift(BASE_KEY.pvRearTemperature);
-    //   this.sInsideNdIdList.unshift(BASE_KEY.pvRearTemperature);
-    // }
   }
 
-  static get CALC_TYPE() {
-    return CALC_TYPE;
-  }
-
-  get appMasterViewList() {
-    return [BASE_KEY.inclinedSolar];
-  }
-
+  /**
+   * Main 화면에 나타낼 데이터 목록
+   * @return {string[]} Node Def Id List
+   */
   get mainViewList() {
     return [
       BASE_KEY.lux,
@@ -99,6 +74,10 @@ class SensorProtocol {
     ];
   }
 
+  /**
+   * 레포트 - 센서 페이지에서 나타낼 목록
+   * @return {{key: string, protocol: string}[]} key: ND ID, protocol: CALC_TYPE
+   */
   get senorReportProtocol() {
     const avgPickList = [
       BASE_KEY.pvRearTemperature,
@@ -118,10 +97,14 @@ class SensorProtocol {
 
     return avgPickList.map(key => ({
       key,
-      protocol: CALC_TYPE.AVG,
+      protocol: this.CALC_TYPE.AVG,
     }));
   }
 
+  /**
+   * 트렌드 생성 정보
+   * @return {trendDomConfig[]}
+   */
   get trendViewList() {
     return [
       {
@@ -238,102 +221,13 @@ class SensorProtocol {
     ];
   }
 
-  /** 이안용 */
-  get mainEanViewList() {
-    return [
-      EAN_BASE_KEY.pvRearTemperature,
-      EAN_BASE_KEY.waterTemperature,
-      EAN_BASE_KEY.outsideAirTemperature,
-      EAN_BASE_KEY.pvW,
-      EAN_BASE_KEY.powerCpKwh,
-    ];
-  }
-
-  get pickedNodeDefIdListEan() {
-    return [
-      EAN_BASE_KEY.pvAmp,
-      EAN_BASE_KEY.pvVol,
-      EAN_BASE_KEY.pvW,
-      EAN_BASE_KEY.powerCpKwh,
-      EAN_BASE_KEY.pvRearTemperature,
-      EAN_BASE_KEY.waterTemperature,
-      EAN_BASE_KEY.outsideAirTemperature,
-    ];
-  }
-
-  get senorReportProtocolEan() {
-    const avgPickList = [
-      EAN_BASE_KEY.pvAmp,
-      EAN_BASE_KEY.pvVol,
-      EAN_BASE_KEY.pvW,
-      EAN_BASE_KEY.powerCpKwh,
-      EAN_BASE_KEY.pvRearTemperature,
-      EAN_BASE_KEY.waterTemperature,
-      EAN_BASE_KEY.outsideAirTemperature,
-    ];
-
-    return avgPickList.map(key => ({
-      key,
-      protocol: CALC_TYPE.AVG,
-    }));
-  }
-
-  get trendEanViewList() {
-    return [
-      {
-        domId: 'temperature',
-        title: '온도 정보',
-        subtitle: '모듈 후면 온도, 수중 온도, 외기 온도',
-        chartOptionList: [
-          {
-            keys: [
-              EAN_BASE_KEY.pvRearTemperature,
-              EAN_BASE_KEY.waterTemperature,
-              EAN_BASE_KEY.outsideAirTemperature,
-            ],
-            mixColors: [null, '#5c940d'],
-            yTitle: '온도',
-            dataUnit: ' ℃',
-          },
-        ],
-      },
-      {
-        domId: 'pvVol',
-        title: '전압',
-        chartOptionList: [
-          {
-            keys: [EAN_BASE_KEY.pvVol],
-            mixColors: [null, '#d9480f', '#d9480f'],
-            yTitle: '전압',
-            dataUnit: ' V',
-          },
-        ],
-      },
-      {
-        domId: 'pvAmp',
-        title: '전류',
-        chartOptionList: [
-          {
-            keys: [EAN_BASE_KEY.pvAmp],
-            mixColors: [null, '#d9480f'],
-            yTitle: '전류',
-            dataUnit: ' A',
-          },
-        ],
-      },
-      {
-        domId: 'pvW',
-        title: '출력',
-        chartOptionList: [
-          {
-            keys: [EAN_BASE_KEY.pvW],
-            mixColors: [null, '#d9480f'],
-            yTitle: '출력',
-            dataUnit: ' W',
-          },
-        ],
-      },
-    ];
+  /**
+   * @desc App
+   * @return {string[]} 앱 Master로 쓸 센서  ND ID 목록
+   */
+  get appMasterViewList() {
+    return [BASE_KEY.inclinedSolar];
   }
 }
-module.exports = SensorProtocol;
+
+module.exports = FarmParallelSP;

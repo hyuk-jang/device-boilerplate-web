@@ -155,20 +155,20 @@ router.get(
       .sum();
 
     // Curr PV 전력
-    const sumPvKw = webUtil.calcValue(
+    const pvKw = webUtil.calcValue(
       webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
       1,
       3,
     );
     // Curr Power 전력
     const currKw = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
+      webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
       1,
       3,
     );
 
     // 현재 발전 효율
-    const currPf = _.divide(currKw, sumPvKw);
+    const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
 
     const powerGenerationInfo = {
       currKw,
