@@ -63,14 +63,14 @@ class FarmParallelSP extends SensorProtocol {
    */
   get mainViewList() {
     return [
+      BASE_KEY.inclinedSolar,
       BASE_KEY.lux,
-      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
-      BASE_KEY.inclinedSolar,
+      BASE_KEY.co2,
     ];
   }
 

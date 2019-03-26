@@ -194,8 +194,8 @@
       'data-id')
     setDomElementValueWithJson(document.getElementById('daily_power_data'), powerGenerationInfo, 'innerHTML', 'data-id')
     setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'innerHTML', 'id')
-    setDomElementValueWithJson(document.getElementById('growthEnv'), growthEnv, 'innerHTML', 'id')
 
+    $('#growthEnv').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
     $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
     // 금일 발전량 차트

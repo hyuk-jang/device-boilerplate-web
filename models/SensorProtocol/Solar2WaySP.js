@@ -64,13 +64,14 @@ class Solar2WaySP extends SensorProtocol {
    */
   get mainViewList() {
     return [
+      BASE_KEY.horizontalSolar,
+      BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
-      BASE_KEY.horizontalSolar,
     ];
   }
 
