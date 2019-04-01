@@ -1,28 +1,28 @@
 const { BaseModel } = require('../../../device-protocol-converter-jh');
 
-const { BASE_KEY } = BaseModel.S2W;
+const { BASE_KEY } = BaseModel.FarmParallel;
 
-const SensorProtocol = require('./SensorProtocol');
+const DeviceProtocol = require('./DeviceProtocol');
 
-class Solar2WaySP extends SensorProtocol {
+class FarmParallelDP extends DeviceProtocol {
   /**
    * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
    */
   get pickedNodeDefIdList() {
     return [
-      // BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
-      // BASE_KEY.co2,
+      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
-      // BASE_KEY.inclinedSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
-      // BASE_KEY.r1,
+      BASE_KEY.r1,
     ];
   }
 
@@ -31,17 +31,14 @@ class Solar2WaySP extends SensorProtocol {
    */
   get sInsideNdIdList() {
     return [
-      // BASE_KEY.pvRearTemperature,
+      BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
-      BASE_KEY.horizontalSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.lux,
+      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
-      BASE_KEY.outsideAirTemperature,
-      BASE_KEY.outsideAirReh,
-      BASE_KEY.windSpeed,
-      BASE_KEY.windDirection,
     ];
   }
 
@@ -50,11 +47,13 @@ class Solar2WaySP extends SensorProtocol {
    */
   get sOutsideNdIdList() {
     return [
-      // BASE_KEY.outsideAirTemperature,
-      // BASE_KEY.outsideAirReh,
-      // BASE_KEY.horizontalSolar,
+      BASE_KEY.outsideAirTemperature,
+      BASE_KEY.outsideAirReh,
+      BASE_KEY.horizontalSolar,
       // BASE_KEY.windDirection,
-      // BASE_KEY.windSpeed,
+      BASE_KEY.windSpeed,
+      BASE_KEY.r1,
+      BASE_KEY.isRain,
     ];
   }
 
@@ -64,14 +63,14 @@ class Solar2WaySP extends SensorProtocol {
    */
   get mainViewList() {
     return [
-      BASE_KEY.horizontalSolar,
-      BASE_KEY.pvUnderlyingSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.lux,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
+      BASE_KEY.co2,
     ];
   }
 
@@ -81,16 +80,19 @@ class Solar2WaySP extends SensorProtocol {
    */
   get senorReportProtocol() {
     const avgPickList = [
+      BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
-      BASE_KEY.horizontalSolar,
       BASE_KEY.lux,
+      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
+      BASE_KEY.horizontalSolar,
+      BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
-      BASE_KEY.windDirection,
+      BASE_KEY.r1,
     ];
 
     return avgPickList.map(key => ({
@@ -132,12 +134,12 @@ class Solar2WaySP extends SensorProtocol {
       },
       {
         domId: 'waterValueChart',
-        title: '토양 EC',
+        title: '양액 농도 정보',
         chartOptionList: [
           {
             keys: [BASE_KEY.soilWaterValue],
             mixColors: [null, '#d9480f'],
-            yTitle: '토양 EC',
+            yTitle: '양액 농도',
             dataUnit: ' %',
           },
         ],
@@ -168,6 +170,54 @@ class Solar2WaySP extends SensorProtocol {
           },
         ],
       },
+      {
+        domId: 'windSpeedChart',
+        title: '풍속 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.windSpeed],
+            mixColors: [],
+            yTitle: '풍속',
+            dataUnit: ' m/s',
+          },
+        ],
+      },
+      {
+        domId: 'co2Chart',
+        title: '이산화탄소 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.co2],
+            mixColors: [],
+            yTitle: 'co2',
+            dataUnit: ' ppm',
+          },
+        ],
+      },
+      {
+        domId: 'r1Chart',
+        title: '시간당 강우량 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.r1],
+            mixColors: [],
+            yTitle: '강우량',
+            dataUnit: ' mm/h',
+          },
+        ],
+      },
+      {
+        domId: 'isRainChart',
+        title: '강우 감지 여부 정보',
+        chartOptionList: [
+          {
+            keys: [BASE_KEY.isRain],
+            mixColors: [],
+            yTitle: '강우 감지 여부',
+            // dataUnit: 'ㅇd',
+          },
+        ],
+      },
     ];
   }
 
@@ -176,8 +226,8 @@ class Solar2WaySP extends SensorProtocol {
    * @return {string[]} 앱 Master로 쓸 센서  ND ID 목록
    */
   get appMasterViewList() {
-    return [BASE_KEY.horizontalSolar];
+    return [BASE_KEY.inclinedSolar];
   }
 }
 
-module.exports = Solar2WaySP;
+module.exports = FarmParallelDP;

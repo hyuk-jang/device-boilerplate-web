@@ -59,6 +59,12 @@
         </p>
         <div id="sensorArea"></div>
       </div>
+      <div class="container_row flex_dir_col mt0">
+        <p class="table_desc_area">
+          인버터 트렌드
+        </p>
+        <div id="inverterArea"></div>
+      </div>
     </div>
     <!--하단1-->
     <%- include("../master/footer.ejs") %>
@@ -89,6 +95,69 @@
 
     // 검색 타입에 따라 적용
     applySearchType(searchRange.searchType)
+  </script>
+
+
+  <script>
+    // 차트를 그리기 위한 데이터
+    let inverterPowerChart = <%- JSON.stringify(inverterPowerChart) %>;
+
+    if (inverterPowerChart.series.length) {
+      var yMax = 1500;
+
+      $('#inverterArea').highcharts({
+        chart: {
+          type: "spline",
+          zoomType: 'xy',
+        },
+        title: {
+          text: ''
+        },
+        xAxis: {
+          type: 'datetime',
+          title: {
+            text: '시간(시)'
+          },
+          labels: {
+            overflow: 'justify'
+          },
+          categories: inverterPowerChart.range
+        },
+        yAxis: {
+          title: {
+            text: '전력(kW)'
+          },
+        },
+        plotOptions: {
+          series: {
+            pointStart: 0
+          },
+          spline: {
+            lineWidth: 2,
+            states: {
+              hover: {
+                lineWidth: 3
+              }
+            },
+            marker: {
+              enabled: false
+            },
+          }
+        },
+        legend: { //범례
+          // layout: 'vertical',
+          align: 'center',
+          verticalAlign: 'bottom',
+          borderWidth: 0,
+        },
+        series: inverterPowerChart.series,
+        credits: {
+          enabled: false
+        },
+      });
+    } else {
+      // $("#inverterArea").html("<h3>발전 내역이 존재하지 않습니다.</h3>");
+    }
   </script>
 
 </body>

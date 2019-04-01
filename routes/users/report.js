@@ -22,7 +22,7 @@ const DEFAULT_CATEGORY = 'sensor';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 // report middleware
 router.get(
@@ -53,19 +53,19 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'hour',
-      strStartDate: '2019-03-28',
-      strEndDate: '',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'days',
+    //   searchInterval: 'hour',
+    //   strStartDate: '2019-03-28',
+    //   strEndDate: '',
+    // });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -161,13 +161,13 @@ router.get(
     // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
-      sensorProtocol.pickedNodeDefIdList,
+      deviceProtocol.pickedNodeDefIdList,
     );
     // console.timeEnd('makeNodeDefStorageList');
 
@@ -189,7 +189,7 @@ router.get(
       const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
         nodeDefStorageList,
         {
-          pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdList,
+          pickedNodeDefIdList: deviceProtocol.pickedNodeDefIdList,
           groupDateInfo: sensorGroupDateInfo,
         },
       );
@@ -256,12 +256,12 @@ router.get(
     // console.time('reportStorageList');
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const { siteId } = req.locals.mainInfo;
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
     // PlaceRows --> nodeDefList --> nodePlaceList  --> sensorDataRows
     const finalPlaceRows = sensorUtil.extPlaWithPlaRel(
       placeRows,
       placeRelationRows,
-      sensorProtocol.senorReportProtocol,
+      deviceProtocol.senorReportProtocol,
     );
     // console.timeEnd('reportStorageList');
 
@@ -409,6 +409,9 @@ router.get(
 
     // 인버터 트렌드를 구함
     const inverterTrendRows = await powerModel.getInverterTrend(searchRangeInfo, inverterSeqList);
+    // BU.CLI(inverterTrendRows);
+
+    const deviceProtocol = new DeviceProtocol();
 
     // 인버터 별로 그루핑
     const groupedInverterTrend = _.groupBy(inverterTrendRows, 'inverter_seq');
@@ -427,18 +430,7 @@ router.get(
         blockName,
         searchRangeInfo,
         strGroupDateList,
-        pickTrendList: [
-          {
-            dataKey: 'avg_pv_v',
-            dataName: 'PV 전압',
-            dataUnit: 'V',
-          },
-          {
-            dataKey: 'avg_pv_kw',
-            dataName: 'PV 전력',
-            dataUnit: 'kW',
-          },
-        ],
+        blockViewOptionList: deviceProtocol.reportInverterViewList,
       });
     });
 

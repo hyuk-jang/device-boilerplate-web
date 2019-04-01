@@ -2,9 +2,9 @@ const { BaseModel } = require('../../../device-protocol-converter-jh');
 
 const { BASE_KEY } = BaseModel.Sensor;
 
-const SensorProtocol = require('./SensorProtocol');
+const DeviceProtocol = require('./DeviceProtocol');
 
-class EanTB1 extends SensorProtocol {
+class EanTB1 extends DeviceProtocol {
   /**
    * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
    */

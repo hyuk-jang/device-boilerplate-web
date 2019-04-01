@@ -7,6 +7,8 @@ const { BaseModel } = require('../../../device-protocol-converter-jh');
 const { BASE_KEY } = BaseModel.FarmParallel;
 const EAN_BASE_KEY = BaseModel.Sensor.BASE_KEY;
 
+require('./deviceProtocolFormat');
+
 const CALC_TYPE = {
   // 평균 값
   AVG: 'AVG',
@@ -16,7 +18,7 @@ const CALC_TYPE = {
   INTERVAL_MAX: 'INTERVAL_MAX',
 };
 
-class SensorProtocol {
+class DeviceProtocol {
   constructor(siteId) {
     this.BASE_KEY = BASE_KEY;
 
@@ -79,17 +81,13 @@ class SensorProtocol {
   get trendViewList() {
     return [];
   }
-}
-module.exports = SensorProtocol;
 
-/**
- * @typedef {Object} trendDomConfig 트렌드 페이지를 생성하기 위한 차트별 설정 정보
- * @property {string} domId Dom Element ID
- * @property {string} title 차트 메인 제목
- * @property {string} subtitle 차트 서브 제목
- * @property {Object[]} chartOptionList 생성할 차트 내용 목록
- * @property {string[]} chartOptionList.keys ND ID List
- * @property {string[]} chartOptionList.mixColors ND ID List에 대응하는 index Line Color에 Mixing 할 색상
- * @property {string} chartOptionList.yTitle Y축 제목
- * @property {string} chartOptionList.dataUnit 마우스 오버시 나타날 단위
- */
+  /**
+   * 인버터 레포트 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get reportInverterViewList() {
+    return [];
+  }
+}
+module.exports = DeviceProtocol;

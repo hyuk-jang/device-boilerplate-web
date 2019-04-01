@@ -1,28 +1,28 @@
 const { BaseModel } = require('../../../device-protocol-converter-jh');
 
-const { BASE_KEY } = BaseModel.FarmParallel;
+const { BASE_KEY } = BaseModel.S2W;
 
-const SensorProtocol = require('./SensorProtocol');
+const DeviceProtocol = require('./DeviceProtocol');
 
-class FarmParallelSP extends SensorProtocol {
+class Solar2WayDP extends DeviceProtocol {
   /**
    * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
    */
   get pickedNodeDefIdList() {
     return [
-      BASE_KEY.pvRearTemperature,
+      // BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
-      BASE_KEY.co2,
+      // BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
-      BASE_KEY.inclinedSolar,
+      // BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
-      BASE_KEY.r1,
+      // BASE_KEY.r1,
     ];
   }
 
@@ -31,14 +31,17 @@ class FarmParallelSP extends SensorProtocol {
    */
   get sInsideNdIdList() {
     return [
-      BASE_KEY.pvRearTemperature,
+      // BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
-      BASE_KEY.inclinedSolar,
+      BASE_KEY.horizontalSolar,
       BASE_KEY.lux,
-      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
+      BASE_KEY.outsideAirTemperature,
+      BASE_KEY.outsideAirReh,
+      BASE_KEY.windSpeed,
+      BASE_KEY.windDirection,
     ];
   }
 
@@ -47,13 +50,11 @@ class FarmParallelSP extends SensorProtocol {
    */
   get sOutsideNdIdList() {
     return [
-      BASE_KEY.outsideAirTemperature,
-      BASE_KEY.outsideAirReh,
-      BASE_KEY.horizontalSolar,
+      // BASE_KEY.outsideAirTemperature,
+      // BASE_KEY.outsideAirReh,
+      // BASE_KEY.horizontalSolar,
       // BASE_KEY.windDirection,
-      BASE_KEY.windSpeed,
-      BASE_KEY.r1,
-      BASE_KEY.isRain,
+      // BASE_KEY.windSpeed,
     ];
   }
 
@@ -63,14 +64,14 @@ class FarmParallelSP extends SensorProtocol {
    */
   get mainViewList() {
     return [
-      BASE_KEY.inclinedSolar,
+      BASE_KEY.horizontalSolar,
+      BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
-      BASE_KEY.co2,
     ];
   }
 
@@ -80,19 +81,16 @@ class FarmParallelSP extends SensorProtocol {
    */
   get senorReportProtocol() {
     const avgPickList = [
-      BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
+      BASE_KEY.horizontalSolar,
       BASE_KEY.lux,
-      BASE_KEY.co2,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
-      BASE_KEY.horizontalSolar,
-      BASE_KEY.inclinedSolar,
       BASE_KEY.windSpeed,
-      BASE_KEY.r1,
+      BASE_KEY.windDirection,
     ];
 
     return avgPickList.map(key => ({
@@ -134,12 +132,12 @@ class FarmParallelSP extends SensorProtocol {
       },
       {
         domId: 'waterValueChart',
-        title: '양액 농도 정보',
+        title: '토양 EC',
         chartOptionList: [
           {
             keys: [BASE_KEY.soilWaterValue],
             mixColors: [null, '#d9480f'],
-            yTitle: '양액 농도',
+            yTitle: '토양 EC',
             dataUnit: ' %',
           },
         ],
@@ -170,53 +168,66 @@ class FarmParallelSP extends SensorProtocol {
           },
         ],
       },
+    ];
+  }
+
+  /**
+   * 인버터 레포트 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get reportInverterViewList() {
+    /** @type {blockViewMakeOption} */
+    return [
       {
-        domId: 'windSpeedChart',
-        title: '풍속 정보',
-        chartOptionList: [
-          {
-            keys: [BASE_KEY.windSpeed],
-            mixColors: [],
-            yTitle: '풍속',
-            dataUnit: ' m/s',
-          },
-        ],
+        dataKey: 'avg_pv_v',
+        dataName: 'DC 전압',
+        dataUnit: 'V',
       },
       {
-        domId: 'co2Chart',
-        title: '이산화탄소 정보',
-        chartOptionList: [
-          {
-            keys: [BASE_KEY.co2],
-            mixColors: [],
-            yTitle: 'co2',
-            dataUnit: ' ppm',
-          },
-        ],
+        dataKey: 'avg_pv_a',
+        dataName: 'DC 전류',
+        dataUnit: 'V',
       },
       {
-        domId: 'r1Chart',
-        title: '시간당 강우량 정보',
-        chartOptionList: [
-          {
-            keys: [BASE_KEY.r1],
-            mixColors: [],
-            yTitle: '강우량',
-            dataUnit: ' mm/h',
-          },
-        ],
+        dataKey: 'avg_pv_kw',
+        dataName: 'DC 전력',
+        dataUnit: 'kW',
       },
       {
-        domId: 'isRainChart',
-        title: '강우 감지 여부 정보',
-        chartOptionList: [
-          {
-            keys: [BASE_KEY.isRain],
-            mixColors: [],
-            yTitle: '강우 감지 여부',
-            // dataUnit: 'ㅇd',
-          },
-        ],
+        dataKey: 'avg_grid_rs_v',
+        dataName: 'AC 전압',
+        dataUnit: 'V',
+      },
+      {
+        dataKey: 'avg_grid_r_a',
+        dataName: 'AC 전류',
+        dataUnit: 'A',
+      },
+      {
+        dataKey: 'avg_line_f',
+        dataName: '주파수',
+        dataUnit: 'Hz',
+      },
+      {
+        dataKey: 'avg_power_kw',
+        dataName: '평균 출력',
+        dataUnit: 'kW',
+      },
+      {
+        dataKey: 'interval_power',
+        dataName: '기간 발전량',
+        dataUnit: 'kWh',
+      },
+      {
+        dataKey: 'avg_p_f',
+        dataName: '효율',
+        dataUnit: '%',
+      },
+      {
+        dataKey: 'max_c_kwh',
+        dataName: '누적 발전량',
+        dataUnit: 'MWh',
+        scale: 0.001,
       },
     ];
   }
@@ -226,8 +237,8 @@ class FarmParallelSP extends SensorProtocol {
    * @return {string[]} 앱 Master로 쓸 센서  ND ID 목록
    */
   get appMasterViewList() {
-    return [BASE_KEY.inclinedSolar];
+    return [BASE_KEY.horizontalSolar];
   }
 }
 
-module.exports = FarmParallelSP;
+module.exports = Solar2WayDP;

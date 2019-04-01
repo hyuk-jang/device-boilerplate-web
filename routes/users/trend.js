@@ -13,7 +13,7 @@ const commonUtil = require('../../models/templates/common.util');
 
 const webUtil = require('../../models/templates/web.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'days';
@@ -52,11 +52,9 @@ router.get(
     });
     // const searchRange = biModule.createSearchRange({
     //   searchType: 'days',
-    //   // searchType: 'range',
     //   searchInterval: 'hour',
-    //   strStartDate: '2019-02-13',
-    //   // strEndDate: '',
-    //   strEndDate: '2019-02-14',
+    //   strStartDate: '2019-03-28',
+    //   strEndDate: '',
     // });
 
     // BU.CLI(searchRange);
@@ -82,6 +80,8 @@ router.get(
 
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
@@ -143,13 +143,13 @@ router.get(
     // console.timeEnd('extPlaRelSensorRep');
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
-      _.values(sensorProtocol.BASE_KEY),
+      _.values(deviceProtocol.BASE_KEY),
     );
     // console.timeEnd('makeNodeDefStorageList');
 
@@ -161,7 +161,7 @@ router.get(
 
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
-    const madeSensorLineChartList = sensorProtocol.trendViewList.map(chartConfig =>
+    const madeSensorLineChartList = deviceProtocol.trendViewList.map(chartConfig =>
       sensorUtil.makeSimpleLineChart(chartConfig, nodeDefStorageList, momentFormat.plotSeries),
     );
 
@@ -176,6 +176,84 @@ router.get(
         domId: refinedChart.domId,
       }),
     );
+
+    /**
+     * 인버터 트렌드 시작
+     */
+
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+
+    // 인버터 Seq 목록
+    const inverterSeqList = _(powerProfileRows)
+      .map('inverter_seq')
+      .value();
+
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+    /** @type {V_PW_PROFILE[]} */
+    const pwProfileRows = await powerModel.getTable('v_pw_profile', inverterWhere);
+
+    /** @type {{inverter_seq: number, siteName: string}[]} */
+    const inverterSiteNameList = _.map(pwProfileRows, profileRow => {
+      return {
+        inverter_seq: profileRow.inverter_seq,
+        siteName: `${profileRow.m_name} ${profileRow.ivt_target_name}`,
+      };
+    });
+
+    const inverterPowerList = await powerModel.getInverterPower(searchRangeInfo, inverterSeqList);
+
+    // BU.CLI(inverterPowerList);
+    const chartOption = {
+      selectKey: 'avg_grid_kw',
+      dateKey: 'view_date',
+      groupKey: 'inverter_seq',
+      colorKey: 'chart_color',
+      sortKey: 'chart_sort_rank',
+    };
+
+    // const betweenDatePoint = BU.getBetweenDatePoint(
+    //   searchRangeInfo.strBetweenEnd,
+    //   searchRangeInfo.strBetweenStart,
+    //   searchRangeInfo.searchInterval,
+    //   {
+    //     startHour: 0,
+    //     endHour: 24,
+    //   },
+    // );
+
+    const inverterPowerChart = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
+
+    inverterPowerChart.series.forEach(chartInfo => {
+      chartInfo.name = _.get(
+        _.find(inverterSiteNameList, {
+          inverter_seq: Number(chartInfo.name),
+        }),
+        'siteName',
+        '',
+      );
+    });
+
+    // BU.CLI(inverterPowerChart);
+
+    req.locals.inverterPowerChart = inverterPowerChart;
+
+    /** searchRange를 기준으로 검색 Column Date를 정함  */
+    // const betweenDatePoint = BU.getBetweenDatePoint(
+    //   searchRangeInfo.strBetweenEnd,
+    //   searchRangeInfo.strBetweenStart,
+    //   searchRangeInfo.searchInterval,
+    // );
+    // BU.CLI(betweenDatePoint);
+
+    // const inverterTrendRows = await powerModel.getInverterLineChart(
+    //   searchRangeInfo,
+    //   inverterSeqList,
+    //   betweenDatePoint,
+    //   momentFormat.plotSeries,
+    // );
+    // BU.CLI(inverterTrendRows.inverterPowerChartData);
 
     // console.timeEnd('madeSensorChartList');
 

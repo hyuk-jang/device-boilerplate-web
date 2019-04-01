@@ -74,13 +74,19 @@ function getNextAlphabet(char, nextIndex) {
  * Trend를 기준 날짜에 매칭시켜 Report 형태로 변환 후 반환
  * @param {[]} excelDataRows
  * @param {string[]} baseDateList
- * @param {{blockRows: Object[], pickDataKeyList: string[]}} blockTable
+ * @param {{blockRows: Object[], blockViewOptionList[]}} blockTable
  */
 function makeBlockToTable(excelDataRows, baseDateList, blockTable = {}) {
   const returnValue = excelDataRows;
 
-  const { blockRows = [], pickDataKeyList = [] } = blockTable;
+  const { blockRows = [], blockViewOptionList } = blockTable;
 
+  const blockDataKeyList = _(blockViewOptionList)
+    .map('dataKey')
+    .values()
+    .value();
+
+  // 기준이 되는 날짜를 기준으로 매칭되는 객체를 찾은 후 해당 객체에서 데이터를 반복해서 가져와 삽입
   baseDateList.forEach((strDate, index) => {
     returnValue[index] = _.isUndefined(returnValue[index]) ? [] : returnValue[index];
     // BU.CLI(returnValue[index]);
@@ -88,15 +94,39 @@ function makeBlockToTable(excelDataRows, baseDateList, blockTable = {}) {
       returnValue[index].push(strDate);
     }
 
+    // 날짜 값이 같은 개체를 찾음
     const foundBlock = _.find(blockRows, { group_date: strDate });
-    // BU.CLI(foundBlock)
+    // BU.CLI(foundBlock);
 
+    // 있다면 데이터 삽입 준비
     if (foundBlock) {
-      const dataList = _(foundBlock)
-        .pick(pickDataKeyList)
-        .values()
-        .value();
-      returnValue[index] = _.concat(returnValue[index], dataList);
+      _.map(blockViewOptionList, blockViewInfo => {
+        // 가져올 객체 Key, 배율, 소수점 이하 자리수
+        const { dataKey, scale, toFixed } = blockViewInfo;
+        // 데이터 객체에서 Key가 매칭되는 데이터를 가져옴
+        let dataValue = _.get(foundBlock, [dataKey], null);
+        // 데이터가 존재하고 배율 옵션이 있다면 처리
+        if (dataValue && _.isNumber(scale)) {
+          if (_.isNumber(toFixed)) {
+            dataValue = _.round(_.multiply(dataValue, scale), toFixed);
+          } else {
+            dataValue = _.multiply(dataValue, scale);
+          }
+        }
+        // 기존 데이터 객체에 덮어씌움.
+        _.set(foundBlock, dataKey, dataValue);
+      });
+      // BU.CLI(foundBlock);
+      // 찾은 데이터 객체에서 사용될 데이터 Key 목록으로 데이터를 구성함
+      const dataTable = _.map(blockDataKeyList, key => {
+        return _.get(foundBlock, key, null);
+      });
+
+      // 기존 excelDataList에 붙임
+      returnValue[index] = _.concat(returnValue[index], dataTable);
+    } else {
+      const dataTable = _.map(blockDataKeyList, () => null);
+      returnValue[index] = _.concat(returnValue[index], dataTable);
     }
   });
   return returnValue;
@@ -809,17 +839,20 @@ exports.makeEWSWithPlaceRow = makeEWSWithPlaceRow;
  * @param {string[]} makeOption.strGroupDateList
  * @param {searchRange} makeOption.searchRangeInfo
  * @param {string} makeOption.blockName
- * @param {Object[]} makeOption.pickTrendList EWS를 구성할 Data Table 정보
- * @param {string} makeOption.pickTrendList.dataKey 가져올 데이터 Key
- * @param {string} makeOption.pickTrendList.dataName 데이터 Key 이름
- * @param {string=} makeOption.pickTrendList.dataUnit 데이터 단위
+ * @param {blockViewMakeOption[]} makeOption.blockViewOptionList EWS를 구성할 Data Table 정보
  */
 function makeEWSWithBlock(trendList, makeOption) {
   try {
     const ws = XLSX.utils.aoa_to_sheet([]);
 
-    const { searchRangeInfo, strGroupDateList, blockName: placeName, pickTrendList } = makeOption;
+    const {
+      searchRangeInfo,
+      strGroupDateList,
+      blockName: placeName,
+      blockViewOptionList,
+    } = makeOption;
 
+    BU.CLI(blockViewOptionList);
     // 검색 기간
     const { rangeStart, rangeEnd = '' } = searchRangeInfo;
     // const strSearchRange = `${rangeStart}${rangeEnd && ` ~ ${rangeEnd}`}`;
@@ -833,17 +866,19 @@ function makeEWSWithBlock(trendList, makeOption) {
     const dataBodyList = [];
 
     // 시트별 Data Table 제목 목록 생성
-    _.forEach(pickTrendList, pickTrendInfo => {
+    _.forEach(blockViewOptionList, pickTrendInfo => {
       const { dataName, dataUnit } = pickTrendInfo;
       // 헤더 명 추가
       const headerName = `${dataName}${!_.isEmpty(dataUnit) ? ` (${dataUnit})` : ''}`;
       dataHeaderList.push(headerName);
     });
 
+    BU.CLI(blockViewOptionList);
     // Array Data Table 을 생성
     makeBlockToTable(dataBodyList, strGroupDateList, {
       blockRows: trendList,
-      pickDataKeyList: _.map(pickTrendList, 'dataKey'),
+      // pickDataKeyList: _.map(blockViewOptionList, 'dataKey'),
+      blockViewOptionList,
     });
 
     // BU.CLI(dataBodyList);
@@ -876,7 +911,6 @@ function makeEWSWithBlock(trendList, makeOption) {
   }
 }
 exports.makeEWSWithBlock = makeEWSWithBlock;
-
 
 // 누적 발전량 (쓰이지 않음)
 // let maxList = _.pluck(optionList, 'max');

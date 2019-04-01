@@ -10,7 +10,7 @@ const { BU } = require('base-util-jh');
 const sensorUtil = require('../../models/templates/sensor.util');
 const commonUtil = require('../../models/templates/common.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'days';
@@ -122,13 +122,13 @@ router.get(
     // console.timeEnd('extPlaRelSensorRep');
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
-      _.values(sensorProtocol.EAN_BASE_KEY),
+      _.values(deviceProtocol.EAN_BASE_KEY),
     );
     // console.timeEnd('makeNodeDefStorageList');
 
@@ -140,7 +140,7 @@ router.get(
     );
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
-    const madeSensorChartList = sensorProtocol.trendEanViewList.map(chartConfig =>
+    const madeSensorChartList = deviceProtocol.trendEanViewList.map(chartConfig =>
       sensorUtil.makeSensorChart(chartConfig, nodeDefStorageList, utcList, strGroupDateList),
     );
 
