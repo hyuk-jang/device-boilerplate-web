@@ -31,7 +31,7 @@ router.get(
     '/:siteId',
     '/:siteId/:subCategory',
     '/:siteId/:subCategory/:subCategoryId',
-    '/:siteId/sensor/:subCategoryId/:finalCategory',
+    '/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
     /** @type {BiModule} */
@@ -53,19 +53,19 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    const searchRange = biModule.createSearchRange({
-      searchType,
-      searchInterval,
-      searchOption,
-      strStartDate: strStartDateInputValue,
-      strEndDate: strEndDateInputValue,
-    });
     // const searchRange = biModule.createSearchRange({
-    //   searchType: 'days',
-    //   searchInterval: 'hour',
-    //   strStartDate: '2018-11-10',
-    //   strEndDate: '',
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
     // });
+    const searchRange = biModule.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'hour',
+      strStartDate: '2019-03-28',
+      strEndDate: '',
+    });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -296,8 +296,13 @@ router.get(
 
 /** 인버터 레포트 */
 router.get(
-  ['/:siteId', '/:siteId/inverter', '/:siteId/inverter/:subCategoryId'],
-  asyncHandler(async (req, res) => {
+  [
+    '/:siteId',
+    '/:siteId/inverter',
+    '/:siteId/inverter/:subCategoryId',
+    '/:siteId/inverter/:subCategoryId/:finalCategory',
+  ],
+  asyncHandler(async (req, res, next) => {
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
@@ -327,9 +332,16 @@ router.get(
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
+    // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
+    if (_.get(req.params, 'finalCategory', '') === 'excel') {
+      // BU.CLI('인버터 엑셀 출력 Next', searchRangeInfo);
+      _.set(req, 'locals.powerProfileRows', powerProfileRows);
+      _.set(req, 'locals.inverterSeqList', inverterSeqList);
+      return next();
+    }
+
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
     // BU.CLI(req.query);
-    // BU.CLI(searchRangeInfo);
     // 레포트 추출 --> 총 개수, TableRows 반환
     const { reportRows, totalCount } = await powerModel.getInverterReport(
       searchRangeInfo,
@@ -364,6 +376,84 @@ router.get(
     _.set(req, 'locals.dom.reportDom', inverterReportDom);
 
     res.render('./report/rInverter', req.locals);
+  }),
+);
+
+/** 인버터 엑셀 다운로드 */
+router.get(
+  ['/:siteId/inverter/:subCategoryId/excel'],
+  asyncHandler(async (req, res) => {
+    // BU.CLI('인버터 엑셀 다운');
+    commonUtil.applyHasNumbericReqToNumber(req);
+
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
+
+    /** @type {searchRange} */
+    const searchRangeInfo = _.get(req, 'locals.searchRange');
+
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+
+    // /** @type {MEMBER} */
+    // const { siteId } = req.locals.mainInfo;
+    // req.param 값 비구조화 할당
+    // const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
+
+    // const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    // const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
+
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.get(req, 'locals.powerProfileRows', []);
+    /** @type {number[]} */
+    const inverterSeqList = _.get(req, 'locals.inverterSeqList', []);
+
+    // 인버터 트렌드를 구함
+    const inverterTrendRows = await powerModel.getInverterTrend(searchRangeInfo, inverterSeqList);
+
+    // 인버터 별로 그루핑
+    const groupedInverterTrend = _.groupBy(inverterTrendRows, 'inverter_seq');
+
+    // 인버터 별로 엑셀 시트를 생성
+    const excelWorkSheetList = _.map(groupedInverterTrend, (trendRows, strInverterSeq) => {
+      // BU.CLI(strInverterSeq, trendRows);
+      // 현재 인버터의 이름을 알기 위해서 찾아옴
+      const foundPowerProfile = _.find(powerProfileRows, { inverter_seq: Number(strInverterSeq) });
+      let blockName = '';
+      if (foundPowerProfile) {
+        blockName = `${foundPowerProfile.m_name} ${foundPowerProfile.ivt_target_name}`;
+      }
+      // 엑셀 시트 생성
+      return excelUtil.makeEWSWithBlock(trendRows, {
+        blockName,
+        searchRangeInfo,
+        strGroupDateList,
+        pickTrendList: [
+          {
+            dataKey: 'avg_pv_v',
+            dataName: 'PV 전압',
+            dataUnit: 'V',
+          },
+          {
+            dataKey: 'avg_pv_kw',
+            dataName: 'PV 전력',
+            dataUnit: 'kW',
+          },
+        ],
+      });
+    });
+
+    // BU.CLI(excelWorkSheetList);
+
+    // console.time('makeExcelWorkBook');
+    const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);
+    // console.timeEnd('makeExcelWorkBook');
+
+    // BU.CLIN(excelWorkBook);
+
+    // // res.send('hi');
+    const { rangeStart, rangeEnd } = searchRangeInfo;
+    const fileName = `${rangeStart}${rangeEnd.length ? ` ~ ${rangeEnd}` : ''}`;
+    res.send({ fileName, workBook: excelWorkBook });
   }),
 );
 
