@@ -12,7 +12,7 @@ const sensorDom = require('../../models/domMaker/sensorDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 router.get(
   ['/', '/:siteId'],
@@ -68,14 +68,14 @@ router.get(
     });
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     const { sensorEnvHeaderDom, sensorEnvBodyDom } = sensorDom.makeDynamicSensorDom(
       viewPlaceRelationRows,
       {
-        insideList: sensorProtocol.sInsideNdIdList,
-        outsideList: sensorProtocol.sOutsideNdIdList,
+        insideList: deviceProtocol.sInsideNdIdList,
+        outsideList: deviceProtocol.sOutsideNdIdList,
       },
       mainSiteList,
     );

@@ -13,7 +13,7 @@ const domMakerMain = require('../../models/domMaker/mainDom');
 
 const INCLINED_SOLAR = 'inclinedSolar';
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 const commonUtil = require('../../models/templates/common.util');
 const sensorUtil = require('../../models/templates/sensor.util');
@@ -52,11 +52,11 @@ router.get(
       _.includes(placeCoolingSeqList, row.node_seq),
     );
 
-    const sensorProtocol = new SensorProtocol();
+    const deviceProtocol = new DeviceProtocol();
 
     // 센서 평균 합산
     const currSensorDataInfo = {};
-    sensorProtocol.mainEanViewList.forEach(ndKey => {
+    deviceProtocol.mainEanViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
         calcKey: ndKey,
       });
@@ -65,7 +65,7 @@ router.get(
 
     // 일반 센서
     const currNormalSensorDataInfo = {};
-    sensorProtocol.mainEanViewList.forEach(ndKey => {
+    deviceProtocol.mainEanViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(normalSensorProfileRows, {
         calcKey: ndKey,
       });
@@ -74,7 +74,7 @@ router.get(
 
     // 냉각형 센서
     const currCoolingSensorDataInfo = {};
-    sensorProtocol.mainEanViewList.forEach(ndKey => {
+    deviceProtocol.mainEanViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(coolingSensorProfileRows, {
         calcKey: ndKey,
       });

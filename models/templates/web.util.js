@@ -577,6 +577,7 @@ function makeStaticChartData(tableRows, baseRange, chartOption) {
   // 같은 Key 끼리 그루핑
   if (groupKey) {
     const groupedTableInfo = _.groupBy(tableRows, groupKey);
+    BU.CLI(groupedTableInfo);
 
     returnValue.series = [];
     _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
@@ -631,7 +632,7 @@ function makeStaticChartData(tableRows, baseRange, chartOption) {
 
     returnValue.series.push(addObj);
   }
-  // BU.CLI(returnValue);
+  BU.CLI(returnValue);
   return returnValue;
 }
 exports.makeStaticChartData = makeStaticChartData;

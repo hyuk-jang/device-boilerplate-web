@@ -24,7 +24,7 @@ const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
 const { BaseModel } = require('../../../device-protocol-converter-jh');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 // report middleware
 router.get(
@@ -164,13 +164,13 @@ router.get(
     // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
       placeRelationRows,
-      sensorProtocol.pickedNodeDefIdListEan,
+      deviceProtocol.pickedNodeDefIdListEan,
     );
     // console.timeEnd('makeNodeDefStorageList');
 
@@ -192,7 +192,7 @@ router.get(
       const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
         nodeDefStorageList,
         {
-          pickedNodeDefIdList: sensorProtocol.pickedNodeDefIdListEan,
+          pickedNodeDefIdList: deviceProtocol.pickedNodeDefIdListEan,
           groupDateInfo: sensorGroupDateInfo,
         },
       );
@@ -258,12 +258,12 @@ router.get(
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('reportStorageList');
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol();
+    const deviceProtocol = new DeviceProtocol();
     // PlaceRows --> nodeDefList --> nodePlaceList  --> sensorDataRows
     const finalPlaceRows = sensorUtil.extPlaWithPlaRel(
       placeRows,
       placeRelationRows,
-      sensorProtocol.senorReportProtocolEan,
+      deviceProtocol.senorReportProtocolEan,
     );
     // console.timeEnd('reportStorageList');
 

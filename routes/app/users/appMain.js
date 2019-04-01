@@ -12,7 +12,7 @@ const webUtil = require('../../../models/templates/web.util');
 const commonUtil = require('../../../models/templates/common.util');
 const sensorUtil = require('../../../models/templates/sensor.util');
 
-const SensorProtocol = require('../../../models/SensorProtocol');
+const DeviceProtocol = require('../../../models/DeviceProtocol');
 
 router.get(
   ['/', '/main', '/main/:siteId'],
@@ -37,9 +37,9 @@ router.get(
 
     // BU.CLI(viewSensorProfileRows);
 
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
     const sensorDataInfo = {};
-    sensorProtocol.mainViewList.forEach(ndKey => {
+    deviceProtocol.mainViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
         calcKey: ndKey,
         standardDate: moment('2018-11-12 09:19:00').toDate(),

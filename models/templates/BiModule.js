@@ -218,7 +218,7 @@ class BiModule extends BM {
     searchRange = searchRange || this.createSearchRange();
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
-    let sql = `
+    const sql = `
       SELECT
         md.photovoltaic_seq,
         ROUND(AVG(amp / 10), 1) AS amp,
@@ -579,7 +579,7 @@ class BiModule extends BM {
     // let dateFormat = this.convertSearchType2DateFormat(searchRange.searchType);
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
     // BU.CLI(dateFormat);
-    let sql = `
+    const sql = `
     SELECT
           main.*,
           ivt.target_id, ivt.chart_color, ivt.chart_sort_rank
@@ -745,7 +745,7 @@ class BiModule extends BM {
 
     const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
 
-    let sql = `
+    const sql = `
       SELECT
         md_group.photovoltaic_seq,
         ${dateFormat.selectViewDate},

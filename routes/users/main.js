@@ -13,7 +13,7 @@ const domMakerMain = require('../../models/domMaker/mainDom');
 const commonUtil = require('../../models/templates/common.util');
 const sensorUtil = require('../../models/templates/sensor.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 require('../../models/jsdoc/domGuide');
 
@@ -40,12 +40,12 @@ router.get(
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     const sensorDataInfo = {};
     // 생육환경 현황을 만들기 위한 센서 돔 재료 정보 목록 생성
     const sensorStatusList = [];
-    sensorProtocol.mainViewList.forEach(ndId => {
+    deviceProtocol.mainViewList.forEach(ndId => {
       // ndId가 동일한 Node Define List를 가져옴
       const nodeDefRow = _.find(viewNodeDefRows, { nd_target_id: ndId });
       if (nodeDefRow) {
