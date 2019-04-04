@@ -12,7 +12,7 @@ const trend = require('./appTrend');
 const control = require('./appControl');
 const cctv = require('./appCCTV');
 
-const SensorProtocol = require('../../../models/SensorProtocol');
+const DeviceProtocol = require('../../../models/DeviceProtocol');
 const sensorUtil = require('../../../models/templates/sensor.util');
 
 const webUtil = require('../../../models/templates/web.util');
@@ -55,9 +55,9 @@ router.get(
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
     const headerSensorInfo = {};
-    sensorProtocol.appMasterViewList.forEach(ndKey => {
+    deviceProtocol.appMasterViewList.forEach(ndKey => {
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
         calcKey: ndKey,
         // standardDate: moment('2018-11-12 09:19:00').toDate(),

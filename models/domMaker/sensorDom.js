@@ -5,27 +5,27 @@ module.exports = {
   /**
    *
    * @param {V_DV_PLACE_RELATION[]} viewPlaceRelationRows
-   * @param {{insideList: string[], outsideList: string[]}} pickedIdInfo
+   * @param {{rowsNdIdList: string[], rowspanNdIdList: string[]}} pickedIdInfo
    * @param {{siteId: string, m_name: string}[]} mainSiteList
    */
   makeDynamicSensorDom(viewPlaceRelationRows, pickedIdInfo, mainSiteList) {
     // BU.CLI(viewPlaceRelationRows);
-    const { insideList = [], outsideList = [] } = pickedIdInfo;
+    const { rowsNdIdList = [], rowspanNdIdList = [] } = pickedIdInfo;
     // place_seq를 기준으로 grouping 후 총 지점 개수를 구함
     const groupByMainSeqRelation = _.groupBy(viewPlaceRelationRows, 'main_seq');
 
     const headerTemplate = _.template('<th><%= ndName %><%= dataUnit %></th>');
 
     // Picked목록에 따라 동적 Header 생성
-    const dynamicHeaderDom = _.concat(insideList, outsideList).map(key => {
+    const dynamicHeaderDom = _.concat(rowsNdIdList, rowspanNdIdList).map(key => {
       const placeRelationRow = _.find(viewPlaceRelationRows, {
         nd_target_id: key,
       });
 
       // 해당 결과물이 없을 경우 ndId는 없는 것으로 판단하고 ndIdList 재조정
       if (_.isUndefined(placeRelationRow)) {
-        _.pull(insideList, key);
-        _.pull(outsideList, key);
+        _.pull(rowsNdIdList, key);
+        _.pull(rowspanNdIdList, key);
         return false;
       }
 
@@ -49,25 +49,25 @@ module.exports = {
 
     // Picked 목록에 따라 동적으로 만들 Table Tr TD 템플릿 초안 정의
     // 외기 환경을 제외한 Body
-    const dynamicInsideBodyTemplate = insideList.map(
+    const dynamicRowsBodyTemplate = rowsNdIdList.map(
       key => `<td style="width:6%" ><%= ${key} %></td>`,
     );
     // 외기 환경을 포함한 Body
-    const dynamicOutsideBodyTemplate = outsideList.map(
+    const dynamicRowspanBodyTemplate = rowspanNdIdList.map(
       key => `<td style="width:6%" rowspan=<%= rowsPan %>><%= ${key} %></td>`,
     );
 
     const partBodyTemplate = _.template(
       `<tr>
       <td class="table_title" title="<%= siteName %>"><%= siteName %></td>
-      ${dynamicInsideBodyTemplate.toString()}
+      ${dynamicRowsBodyTemplate.toString()}
       </tr>`,
     );
 
     const fullBodyTemplate = _.template(
       `<tr>
       <td class="table_title"><%= siteName %></td>
-      ${_.concat(dynamicInsideBodyTemplate, dynamicOutsideBodyTemplate).toString()}
+      ${_.concat(dynamicRowsBodyTemplate, dynamicRowspanBodyTemplate).toString()}
       </tr>`,
     );
 
@@ -77,33 +77,19 @@ module.exports = {
       (groupPlaceRelationRows, strMainSeq) => {
         const siteInfo = _.find(mainSiteList, { siteId: strMainSeq });
         const mainName = _.get(siteInfo, 'm_name', '');
+
         // 공통으로 들어갈 외기 환경 부분을 추출
-        const outsidePlaceRows = groupPlaceRelationRows.filter(row =>
-          _.includes(row.place_id, 'OS_'),
+        const rowspanSensor = _.assign(
+          ..._.map(groupPlaceRelationRows, row => _.pick(row, rowspanNdIdList)),
         );
 
-        const outsideSensor = _.assign(..._.map(outsidePlaceRows, row => _.pick(row, outsideList)));
-
-        // 풍향 재설정
-        _.set(
-          outsideSensor,
-          'windDirection',
-          BU.getWindDirection(_.get(outsideSensor, 'windDirection', '')),
-        );
-
-        if (_.get(outsideSensor, 'isRain', '') === 1) {
-          _.set(outsideSensor, 'rainStatus', 'O');
-        } else if (_.get(outsideSensor, 'isRain', '') === 0) {
-          _.set(outsideSensor, 'rainStatus', 'X');
-        } else {
-          _.set(outsideSensor, 'rainStatus', '');
-        }
-
-        BU.toLocaleString(outsideSensor);
-
+        // 데이터 가공
+        this.convertData(rowspanSensor);
+        // 천단위 기호 삽입
+        BU.toLocaleString(rowspanSensor);
         // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
-        _.forEach(outsideList, ndId => {
-          !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
+        _.forEach(rowspanNdIdList, ndId => {
+          !_.has(rowspanSensor, ndId) && _.set(rowspanSensor, ndId, '');
         });
 
         // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
@@ -120,13 +106,16 @@ module.exports = {
         const groupByPlaceSeqRelation = _.groupBy(groupPlaceRelationRows, 'place_seq');
 
         const sensorTable = _.map(groupByPlaceSeqRelation, pRows => {
-          const insideSensor = _.assign(..._.map(pRows, row => _.pick(row, insideList)));
-          // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
-          _.forEach(insideList, ndId => {
-            !_.has(insideSensor, ndId) && _.set(insideSensor, ndId, '');
-          });
+          const rowsSensor = _.assign(..._.map(pRows, row => _.pick(row, rowsNdIdList)));
 
-          BU.toLocaleString(insideSensor);
+          // 데이터 가공
+          this.convertData(rowsSensor);
+          // 천단위 기호 삽입
+          BU.toLocaleString(rowsSensor);
+          // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
+          _.forEach(rowsNdIdList, ndId => {
+            !_.has(rowsSensor, ndId) && _.set(rowsSensor, ndId, '');
+          });
 
           // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
           const {
@@ -139,17 +128,17 @@ module.exports = {
             lastName ? ` ${lastName}` : ''
           }`;
 
-          _.set(insideSensor, 'siteName', siteName);
+          _.set(rowsSensor, 'siteName', siteName);
 
           // Site의 첫번째를 구성할 경우에는 rowsPan 처리를 하여야 하므로 외기 환경과의 데이터를 합침
           if (isFirst) {
             isFirst = false;
             // rowsPan 입력
-            _.set(insideSensor, 'rowsPan', rowsLength);
-
-            return fullBodyTemplate(_.assign(insideSensor, outsideSensor));
+            _.set(rowsSensor, 'rowsPan', rowsLength);
+            // BU.CLIS(insideSensor, outsideSensor);
+            return fullBodyTemplate(_.assign(rowsSensor, rowspanSensor));
           }
-          return partBodyTemplate(insideSensor);
+          return partBodyTemplate(rowsSensor);
         });
 
         return sensorTable;
@@ -162,6 +151,38 @@ module.exports = {
     };
 
     // return _.flatten(sensorEnvBodyDomList);
+  },
+
+  /**
+   * 데이터를 가공
+   * @param {Object} sensorInfo
+   */
+  convertData(sensorInfo) {
+    // 풍향 재설정
+    if (_.has(sensorInfo, 'windDirection')) {
+      _.set(
+        sensorInfo,
+        'windDirection',
+        BU.getWindDirection(_.get(sensorInfo, 'windDirection', '')),
+      );
+    }
+
+    // 우천 감지 재설정
+    if (_.has(sensorInfo, 'isRain')) {
+      const isRain = _.get(sensorInfo, 'isRain', '');
+      let rainValue = '';
+      switch (isRain) {
+        case 0:
+          rainValue = 'X';
+          break;
+        case 1:
+          rainValue = 'O';
+          break;
+        default:
+          break;
+      }
+      _.set(sensorInfo, 'rainStatus', rainValue);
+    }
   },
 
   /**

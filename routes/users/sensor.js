@@ -12,7 +12,7 @@ const sensorDom = require('../../models/domMaker/sensorDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
 
 router.get(
   ['/', '/:siteId'],
@@ -48,6 +48,10 @@ router.get(
     // IVT가 포함된 장소는 제거.
     _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
 
+    // BU.CLI(viewSensorProfileRows);
+
+    // BU.CLI(viewPlaceRelationRows);
+
     // 각 Relation에 해당 데이터 확장
     viewPlaceRelationRows.forEach(placeRelation => {
       const foundIt = _.find(viewSensorProfileRows, {
@@ -68,14 +72,14 @@ router.get(
     });
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const sensorProtocol = new SensorProtocol(siteId);
+    const { rowsNdIdList, rowspanNdIdList } = new DeviceProtocol(siteId);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     const { sensorEnvHeaderDom, sensorEnvBodyDom } = sensorDom.makeDynamicSensorDom(
       viewPlaceRelationRows,
       {
-        insideList: sensorProtocol.SENSOR_INSIDE_ND_ID_LIST,
-        outsideList: sensorProtocol.SENSOR_OUTSIDE_ND_ID_LIST,
+        rowsNdIdList,
+        rowspanNdIdList,
       },
       mainSiteList,
     );

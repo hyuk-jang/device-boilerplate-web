@@ -13,7 +13,9 @@ const domMakerMain = require('../../models/domMaker/mainDom');
 const commonUtil = require('../../models/templates/common.util');
 const sensorUtil = require('../../models/templates/sensor.util');
 
-const SensorProtocol = require('../../models/SensorProtocol');
+const DeviceProtocol = require('../../models/DeviceProtocol');
+
+require('../../models/jsdoc/domGuide');
 
 router.get(
   ['/', '/main', '/main/:siteId'],
@@ -32,18 +34,40 @@ router.get(
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
     // BU.CLI(powerProfileRows);
 
+    /** @type {V_DV_NODE_DEF[]} */
+    const viewNodeDefRows = await biModule.getTable('v_dv_node_def');
+
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
 
-    const sensorProtocol = new SensorProtocol(siteId);
+    const deviceProtocol = new DeviceProtocol(siteId);
 
     const sensorDataInfo = {};
-    sensorProtocol.mainViewList.forEach(ndKey => {
+    // 생육환경 현황을 만들기 위한 센서 돔 재료 정보 목록 생성
+    const sensorStatusList = [];
+    deviceProtocol.mainViewList.forEach(ndId => {
+      // ndId가 동일한 Node Define List를 가져옴
+      const nodeDefRow = _.find(viewNodeDefRows, { nd_target_id: ndId });
+      if (nodeDefRow) {
+        // Nd Def 정보에서 Node Name, DataUnit을 가져옴
+        /** @type {domMainSensor} */
+        const sensorStatus = {
+          ndId,
+          ndName: BU.replaceAll(nodeDefRow.nd_target_name, ' ', ''),
+          dataUnit: nodeDefRow.data_unit,
+          value: sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
+            calcKey: ndId,
+            // standardDate: moment('2018-11-12 09:19:00').toDate(),
+          }),
+        };
+        sensorStatusList.push(sensorStatus);
+      }
+
       const result = sensorUtil.calcSensorProfileRows(viewSensorProfileRows, {
-        calcKey: ndKey,
+        calcKey: ndId,
         // standardDate: moment('2018-11-12 09:19:00').toDate(),
       });
-      _.assign(sensorDataInfo, { [ndKey]: result });
+      _.assign(sensorDataInfo, { [ndId]: result });
     });
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
@@ -65,7 +89,7 @@ router.get(
     const cumulativePower = webUtil.calcValue(
       webUtil.reduceDataList(inverterStatisticsRows, 'max_c_kwh'),
       0.001,
-      3,
+      2,
     );
 
     // 금일 발전 현황 데이터
@@ -155,20 +179,20 @@ router.get(
       .sum();
 
     // Curr PV 전력
-    const sumPvKw = webUtil.calcValue(
+    const pvKw = webUtil.calcValue(
       webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
       1,
       3,
     );
     // Curr Power 전력
     const currKw = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
+      webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
       1,
-      3,
+      2,
     );
 
     // 현재 발전 효율
-    const currPf = _.divide(currKw, sumPvKw);
+    const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
 
     const powerGenerationInfo = {
       currKw,
@@ -187,10 +211,17 @@ router.get(
     };
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
+    _.set(
+      req,
+      'locals.dom.sensorStatusListDom',
+      domMakerMain.makeSensorStatusDom(sensorStatusList),
+    );
     // 인버터 현재 데이터 동적 생성 돔
-    const inverterStatusListDom = domMakerMain.makeInverterStatusDom(inverterStatusRows);
-
-    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
+    _.set(
+      req,
+      'locals.dom.inverterStatusListDom',
+      domMakerMain.makeInverterStatusDom(validInverterDataList),
+    );
 
     req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
