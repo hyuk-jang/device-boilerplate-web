@@ -27,7 +27,7 @@
               <article class="sensor_data_view sdv_w_side">
                 <p>현재 출력</p>
                 <p id="currKw">-</p>
-                <p>A</p>
+                <p>kW</p>
               </article>
               <article class="sensor_data_view sdv_w_side">
                 <p>금일발전량</p>
@@ -203,7 +203,7 @@
       domId: 'daily_power_graph',
       yAxis: {
         min: 0,
-        max: powerGenerationInfo.currKwYaxisMax * 6,
+        max: powerGenerationInfo.currKwYaxisMax * 8,
         title: ''
       },
       series: {
@@ -285,7 +285,7 @@
           }
         },
         {
-          name: '토양EC',
+          name: '토양 EC',
           data: [growthEnv.soilWaterValue],
           yAxis: 1,
           tooltip: {

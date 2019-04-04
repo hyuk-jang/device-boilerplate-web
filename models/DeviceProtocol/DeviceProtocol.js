@@ -39,14 +39,14 @@ class DeviceProtocol {
   /**
    * @return {string[]} 내부 센서 ND ID 목록
    */
-  get sInsideNdIdList() {
+  get rowsNdIdList() {
     return [];
   }
 
   /**
    * @return {string[]} 외기 센서 ND ID 목록
    */
-  get sOutsideNdIdList() {
+  get rowspanNdIdList() {
     return [];
   }
 

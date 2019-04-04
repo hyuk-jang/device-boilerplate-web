@@ -89,7 +89,7 @@ router.get(
     const cumulativePower = webUtil.calcValue(
       webUtil.reduceDataList(inverterStatisticsRows, 'max_c_kwh'),
       0.001,
-      3,
+      2,
     );
 
     // 금일 발전 현황 데이터
@@ -188,7 +188,7 @@ router.get(
     const currKw = webUtil.calcValue(
       webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
       1,
-      3,
+      2,
     );
 
     // 현재 발전 효율

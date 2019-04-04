@@ -23,7 +23,7 @@ class EanTB1 extends DeviceProtocol {
   /**
    * @return {string[]} 내부 센서 ND ID 목록
    */
-  get sInsideNdIdList() {
+  get rowsNdIdList() {
     return [
       // BASE_KEY.pvRearTemperature,
       BASE_KEY.pvUnderlyingSolar,
@@ -42,7 +42,7 @@ class EanTB1 extends DeviceProtocol {
   /**
    * @return {string[]} 외기 센서 ND ID 목록
    */
-  get sOutsideNdIdList() {
+  get rowspanNdIdList() {
     return [];
   }
 
