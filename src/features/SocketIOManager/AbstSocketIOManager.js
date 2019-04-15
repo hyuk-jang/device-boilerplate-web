@@ -35,9 +35,9 @@ class AbstSocketIOManager {
 
   /**
    * 노드 정보에서 UI에 보여줄 내용만을 반환
-   * @param {simpleOrderInfo[]} simpleOrderList
+   * @param {contractCmdInfo[]} contractCmdList
    */
-  pickSimpleOrderList(simpleOrderList) {}
+  pickContractCmdList(contractCmdList) {}
 
   /**
    * 접속한 SocketIO 객체 정보가 등록된 Main Storage를 반환
