@@ -155,7 +155,7 @@ class ApiServer extends AbstApiServer {
         }
       });
     } else {
-      responseFieldMessage.errorStack = '등록되지 않은 거점입니다.';
+      responseFieldMessage.message = '등록되지 않은 거점입니다.';
     }
     return responseFieldMessage;
   }
@@ -188,7 +188,7 @@ class ApiServer extends AbstApiServer {
       const responseDataByServer = {
         commandId,
         isError: 0,
-        errorStack: '',
+        message: '',
       };
 
       const msInfo = this.findMainStorage(fieldClient);
@@ -209,12 +209,12 @@ class ApiServer extends AbstApiServer {
             break;
           default:
             responseDataByServer.isError = 1;
-            responseDataByServer.errorStack = `${commandId}은 등록되지 않은 명령입니다.`;
+            responseDataByServer.message = `${commandId}은 등록되지 않은 명령입니다.`;
         }
         return responseDataByServer;
       }
       responseDataByServer.isError = 1;
-      responseDataByServer.errorStack = '사용자 인증이 필요합니다.';
+      responseDataByServer.message = '사용자 인증이 필요합니다.';
       return responseDataByServer;
     } catch (error) {
       throw error;
