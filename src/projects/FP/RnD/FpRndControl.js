@@ -115,7 +115,7 @@ class FpRndControl extends Control {
 
         // 접속 ID가 무안 관리자 일 경우 명령 처리
         if (_.eq(userInfo.user_id, 'muan')) {
-          this.controlMuanCCTV(defaultFormatToRequestInfo.contents.controlValue);
+          this.controlMuanCCTV(defaultFormatToRequestInfo.contents.singleControlType);
         }
       });
     });
@@ -124,13 +124,13 @@ class FpRndControl extends Control {
   /**
    * 무안 30kW 급 CCTV를 제어하기 위한 임시 로직
    */
-  async controlMuanCCTV(controlValue) {
-    BU.CLI('controlMuanCCTV', controlValue);
+  async controlMuanCCTV(singleControlType) {
+    BU.CLI('controlMuanCCTV', singleControlType);
     await this.muanDBA.init();
     // BU.CLI('init complate');
     try {
       let command = '';
-      switch (controlValue) {
+      switch (singleControlType) {
         case 0:
           command = '@off';
           break;
