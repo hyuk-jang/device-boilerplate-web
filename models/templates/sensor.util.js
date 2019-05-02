@@ -521,7 +521,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
       // Node Def ID를 가진 저장소가 있을 경우
       if (!_.isUndefined(nodeDefStorage)) {
         nodeDefStorage.nodePlaceList.forEach(nodePlace => {
-          const { node_name: ndName = '' } = nodePlace;
+          const { node_name: ndName = '', place_node_name: placeNodeName } = nodePlace;
           let { chart_color: chartColor = '' } = nodePlace;
 
           // 같은 Place에 위치한 Node의 경우 색상이 같으므로 색상 표현을 다르게 하기 위한 논리
