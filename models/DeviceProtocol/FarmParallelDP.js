@@ -39,14 +39,6 @@ class FarmParallelDP extends DeviceProtocol {
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
       BASE_KEY.soilReh,
-    ];
-  }
-
-  /**
-   * @return {string[]} 외기 센서 ND ID 목록
-   */
-  get rowspanNdIdList() {
-    return [
       BASE_KEY.outsideAirTemperature,
       BASE_KEY.outsideAirReh,
       BASE_KEY.horizontalSolar,
@@ -55,6 +47,13 @@ class FarmParallelDP extends DeviceProtocol {
       BASE_KEY.r1,
       BASE_KEY.isRain,
     ];
+  }
+
+  /**
+   * @return {string[]} 외기 센서 ND ID 목록
+   */
+  get rowspanNdIdList() {
+    return [];
   }
 
   /**
@@ -134,12 +133,12 @@ class FarmParallelDP extends DeviceProtocol {
       },
       {
         domId: 'waterValueChart',
-        title: '양액 농도 정보',
+        title: '토양 EC 정보',
         chartOptionList: [
           {
             keys: [BASE_KEY.soilWaterValue],
             mixColors: [null, '#d9480f'],
-            yTitle: '양액 농도',
+            yTitle: '토양 EC',
             dataUnit: ' %',
           },
         ],
