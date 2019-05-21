@@ -15,6 +15,53 @@ class BiDevice extends BiModule {
   }
 
   /**
+   *
+   * @param {Object} whereInfo
+   */
+  getSensorProfile(whereInfo = {}) {
+    let sql = `
+          SELECT
+            r_dsd.num_data AS node_data,
+            r_dsd.writedate,
+            vdn.*
+      FROM  v_dv_node vdn
+      JOIN 
+      (
+        SELECT 
+              dsd.node_seq,
+              dsd.num_data,
+              dsd.writedate
+        FROM dv_sensor_data dsd
+        JOIN
+        (
+          SELECT MAX(sensor_data_seq) AS sensor_data_seq
+          FROM dv_sensor_data
+          GROUP BY node_seq
+        ) temp
+        ON dsd.sensor_data_seq = temp.sensor_data_seq
+      ) r_dsd
+      ON r_dsd.node_seq = vdn.node_seq 
+    `;
+
+    if (_.isObject(whereInfo) && !_.isEmpty(whereInfo)) {
+      sql += ' WHERE ';
+      let index = 0;
+      _.forEach(whereInfo, (value, key) => {
+        if (index) {
+          sql += ' AND ';
+        }
+        if (_.isString(value)) {
+          value = `'${value}'`;
+        }
+        sql += Array.isArray(value) ? `r_dsd.${key} IN (${value})` : `${key} = ${value}`;
+        index += 1;
+      });
+    }
+
+    return this.db.single(sql, '', false);
+  }
+
+  /**
    * 센서 장치 데이터를 구해옴
    * @param {searchRange} searchRange
    * @param {number[]} nodeSeqList
@@ -39,7 +86,7 @@ class BiDevice extends BiModule {
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
     `;
-      // AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
+    // AND DATE_FORMAT(writedate, '%H') >= '07' AND DATE_FORMAT(writedate, '%H') < '20'
 
     return this.db.single(sql, '', false);
   }
@@ -154,9 +201,13 @@ class BiDevice extends BiModule {
 
     // 장소 관계 리스트에서 nodeSeq 리스트를 추출하고 해당 장치의 최신 데이터를 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const dvSensorProfileRows = await this.getTable('v_dv_sensor_profile', {
+    const dvSensorProfileRows = await this.getSensorProfile({
       node_seq: nodeSeqList,
     });
+    // BU.CLI(dvSensorProfileRows);
+    // const dvSensorProfileRows = await this.getTable('v_dv_sensor_profile', {
+    //   node_seq: nodeSeqList,
+    // });
     // BU.CLI('@@');
     // 검색된 노드가 없다면 그냥 반환
     if (_.isEmpty(dvSensorProfileRows)) {

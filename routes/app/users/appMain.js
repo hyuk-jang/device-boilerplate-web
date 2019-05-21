@@ -21,6 +21,8 @@ router.get(
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
@@ -33,7 +35,7 @@ router.get(
     // BU.CLI(powerProfileRows);
 
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+    const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
 
     // BU.CLI(viewSensorProfileRows);
 

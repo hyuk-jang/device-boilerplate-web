@@ -46,6 +46,8 @@ router.get(
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
 
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
@@ -53,7 +55,7 @@ router.get(
     // 모든 Site 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+    const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
 
     const deviceProtocol = new DeviceProtocol(siteId);
     const headerSensorInfo = {};
