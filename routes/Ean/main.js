@@ -28,7 +28,7 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile');
+    const viewSensorProfileRows = await biDevice.getSensorProfile();
     /** @type {V_DV_PLACE_RELATION[]} */
     const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation');
 

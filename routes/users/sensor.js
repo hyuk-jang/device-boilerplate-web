@@ -21,6 +21,8 @@ router.get(
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+    /** @type {BiDevice} */
+    const biDevice = global.app.get('biDevice');
 
     // 기본 정보 불러옴
     const { mainInfo } = req.locals;
@@ -39,7 +41,8 @@ router.get(
 
     // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
-    const viewSensorProfileRows = await biModule.getTable('v_dv_sensor_profile', mainWhere);
+    const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
+
     /** @type {V_DV_PLACE_RELATION[]} */
     const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
 
