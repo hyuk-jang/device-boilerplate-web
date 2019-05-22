@@ -748,49 +748,82 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
     //   .value();
 
     const dataHeaderList = ['날짜'];
+    const dataSubHeaderList = [''];
     // const dataBodyList = [strGroupDateList]
 
     // BU.CLIN(nodeDefStorageList, 3);
 
     // 데이터 개요를 구성
     const reportList = [];
-    const dataBodyList = _.map(nodeDefStorageList, nodeDefStorage => {
+    const dataBodyList = [];
+    _.forEach(nodeDefStorageList, nodeDefStorage => {
       const { ndName = '', dataUnit = '', nodePlaceList = [] } = nodeDefStorage;
       // 헤더 명 추가
       const headerName = `${ndName}${!_.isEmpty(dataUnit) ? ` (${dataUnit})` : ''}`;
-      dataHeaderList.push(headerName);
-      // FIXME: 임시로 평균 값 산출
+
+      // ND가 여러개라면 목록 만큼 빈 공간 추가
+      for (let index = 0; index < nodePlaceList.length; index += 1) {
+        index === 0 ? dataHeaderList.push(headerName) : dataHeaderList.push('');
+        dataSubHeaderList.push(_.get(nodePlaceList[index], 'node_name', ''));
+      }
+
       // 장소에 해당 ND를 가진 데이터 장치가 하나일 경우
-      let dataBody = [];
+      const dataBody = [];
       if (nodePlaceList.length === 1) {
         const nodePlace = _.head(nodePlaceList);
 
-        dataBody = _(nodePlace.sensorDataRows)
-          .map('avg_data')
-          .value();
+        dataBodyList.push(
+          _(nodePlace.sensorDataRows)
+            .map('avg_data')
+            .value(),
+        );
 
         // dataBody = makeTrendToReport(reportList, strGroupDateList, [
         //   { pickValueKeyList: ['avg_data'], trend: nodePlace.sensorDataRows },
         // ]);
       } else {
-        const mapData = _(nodePlaceList)
-          .map('sensorDataRows')
-          .flatten()
-          .value();
-
-        if (!mapData.length) return [];
-
-        strGroupDateList.map((strDate, index) => {
-          const mean = _(mapData)
-            .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
-            .map('avg_data')
-            .mean();
-          return _.isNaN(mean) ? '' : _.round(mean, 1);
+        nodePlaceList.forEach(nodePlace => {
+          dataBodyList.push(
+            _(nodePlace.sensorDataRows)
+              .map('avg_data')
+              .value(),
+          );
         });
       }
+      // // FIXME: 임시로 평균 값 산출
+      // else {
+      //   const mapData = _(nodePlaceList)
+      //     .map('sensorDataRows')
+      //     .flatten()
+      //     .value();
 
-      return dataBody;
+      //   if (!mapData.length) return [];
+
+      //   strGroupDateList.map((strDate, index) => {
+      //     const mean = _(mapData)
+      //       .filter(info => _.eq(_.get(info, 'group_date', ''), strDate))
+      //       .map('avg_data')
+      //       .mean();
+      //     return _.isNaN(mean) ? '' : _.round(mean, 1);
+      //   });
+      // }
+
+      // return dataBody;
     });
+
+    // dataBodyList = _.flatten(dataBodyList);
+
+    // nodePlaceList.forEach(nodePlaceInfo => {
+    //   dataBody = _(nodePlaceInfo.sensorDataRows)
+    //     .map('avg_data')
+    //     .value();
+
+    //   const dataContents = _.map(strGroupDateList, (strDate, index) => {
+    //     const dataRows = _.map(dataBodyList, bodyList => bodyList[index]);
+    //     // dataRows.unshift(strDate);
+    //     return dataRows;
+    //   });
+    // });
 
     // BU.CLI(dataHeaderList);
     // 날짜 Header 입력
@@ -804,6 +837,7 @@ function makeEWSWithPlaceRow(placeRow, makeOption) {
       return dataRows;
     });
 
+    dataContents.unshift(dataSubHeaderList);
     dataContents.unshift(dataHeaderList);
 
     const wb = XLSX.utils.book_new();
