@@ -106,8 +106,21 @@ module.exports = {
         const groupByPlaceSeqRelation = _.groupBy(groupPlaceRelationRows, 'place_seq');
 
         const sensorTable = _.map(groupByPlaceSeqRelation, pRows => {
-          const rowsSensor = _.assign(..._.map(pRows, row => _.pick(row, rowsNdIdList)));
+          // Place Rows에서 Node Def Id Key를 가진 요소 추출하여 배열 생성 ex) [{lux: 34}, {co2: 11}, {lux: 11}, {windSpeed: 2.1}]
+          const pRowsSensorDataRows = _.map(pRows, row => _.pick(row, rowsNdIdList));
 
+          // 중복된 Key를 가진 객체는 평균치로 환산하고 없는 데이터는 제거.
+          // 완전한 하나의 데이터 객체로 만듬 ex) {lux: 15, co2: 66, windSpeed: 2.1}
+          const rowsSensor = _.assign(
+            // Node Def Id 목록 만큼 데이터 객체를 생성 한 후 해체처리
+            ..._.map(rowsNdIdList, ndId => {
+              // ndId에 맞는 Rows. ex) [{lux: 15}, {lux: 23}]
+              const filterdRows = _.filter(pRowsSensorDataRows, row => _.has(row, ndId));
+              // 데이터가 존재할 경우에만 평균치 객체 생성
+              return filterdRows.length ? { [ndId]: _.round(_.meanBy(filterdRows, ndId), 1) } : {};
+            }),
+          );
+          // const rowsSensor = _.assign(..._.map(pRows, row => _.pick(row, rowsNdIdList)));
           // 데이터 가공
           this.convertData(rowsSensor);
           // 천단위 기호 삽입
