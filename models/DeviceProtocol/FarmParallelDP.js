@@ -62,7 +62,7 @@ class FarmParallelDP extends DeviceProtocol {
    */
   get mainViewList() {
     return [
-      BASE_KEY.inclinedSolar,
+      BASE_KEY.pvUnderlyingSolar,
       BASE_KEY.lux,
       BASE_KEY.soilWaterValue,
       BASE_KEY.soilTemperature,
