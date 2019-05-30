@@ -88,11 +88,6 @@ router.get(
     );
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
     const monthPower = webUtil.reduceDataList(inverterStatisticsRows, 'interval_power');
-    const cumulativePower = webUtil.calcValue(
-      webUtil.reduceDataList(inverterStatisticsRows, 'max_c_kwh'),
-      0.001,
-      2,
-    );
 
     // 금일 발전 현황 데이터
     searchRange = biModule.createSearchRange({
@@ -120,13 +115,6 @@ router.get(
         minRequiredCountKey: 'total_count',
       },
     });
-
-    // 금일 발전량
-    const dailyPower = webUtil.calcValue(
-      webUtil.reduceDataList(inverterTrend, 'interval_power'),
-      1,
-      2,
-    );
 
     // 차트를 생성하기 위한 옵션.
     const chartOption = {
@@ -191,6 +179,18 @@ router.get(
       webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
       1,
       2,
+    );
+
+    // 금일 발전량
+    const dailyPower = _(inverterStatusRows)
+      .map('daily_power_kwh')
+      .sum();
+
+    // Curr Power 전력
+    const cumulativePower = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', true),
+      0.001,
+      3,
     );
 
     // 현재 발전 효율
