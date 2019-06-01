@@ -886,7 +886,7 @@ function makeEWSWithBlock(trendList, makeOption) {
       blockViewOptionList,
     } = makeOption;
 
-    BU.CLI(blockViewOptionList);
+    // BU.CLI(blockViewOptionList);
     // 검색 기간
     const { rangeStart, rangeEnd = '' } = searchRangeInfo;
     // const strSearchRange = `${rangeStart}${rangeEnd && ` ~ ${rangeEnd}`}`;
@@ -907,7 +907,7 @@ function makeEWSWithBlock(trendList, makeOption) {
       dataHeaderList.push(headerName);
     });
 
-    BU.CLI(blockViewOptionList);
+    // BU.CLI(blockViewOptionList);
     // Array Data Table 을 생성
     makeBlockToTable(dataBodyList, strGroupDateList, {
       blockRows: trendList,
