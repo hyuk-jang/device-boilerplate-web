@@ -227,6 +227,67 @@ class FarmParallelDP extends DeviceProtocol {
   get appMasterViewList() {
     return [BASE_KEY.inclinedSolar];
   }
+
+  /**
+   * 인버터 레포트 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get reportInverterViewList() {
+    /** @type {blockViewMakeOption} */
+    return [
+      {
+        dataKey: 'avg_pv_v',
+        dataName: 'DC 전압',
+        dataUnit: 'V',
+      },
+      {
+        dataKey: 'avg_pv_a',
+        dataName: 'DC 전류',
+        dataUnit: 'V',
+      },
+      {
+        dataKey: 'avg_pv_kw',
+        dataName: 'DC 전력',
+        dataUnit: 'kW',
+      },
+      {
+        dataKey: 'avg_grid_rs_v',
+        dataName: 'AC 전압',
+        dataUnit: 'V',
+      },
+      {
+        dataKey: 'avg_grid_r_a',
+        dataName: 'AC 전류',
+        dataUnit: 'A',
+      },
+      {
+        dataKey: 'avg_line_f',
+        dataName: '주파수',
+        dataUnit: 'Hz',
+      },
+      {
+        dataKey: 'avg_power_kw',
+        dataName: '평균 출력',
+        dataUnit: 'kW',
+      },
+      {
+        dataKey: 'interval_power',
+        dataName: '기간 발전량',
+        dataUnit: 'kWh',
+      },
+      {
+        dataKey: 'avg_p_f',
+        dataName: '효율',
+        dataUnit: '%',
+      },
+      {
+        dataKey: 'max_c_kwh',
+        dataName: '누적 발전량',
+        dataUnit: 'MWh',
+        scale: 0.001,
+      },
+    ];
+  }
 }
 
 module.exports = FarmParallelDP;
