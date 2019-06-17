@@ -12,7 +12,7 @@ const webUtil = require('../../models/templates/web.util');
 
 const domMakerInverter = require('../../models/domMaker/inverterDom');
 
-const INCLINED_SOLAR = 'inclinedSolar';
+const HORIZONTAL_SOLAR = 'horizontalSolar';
 
 /* GET home page. */
 router.get(
@@ -40,11 +40,13 @@ router.get(
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
     const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-    // 인버터별 경사 일사량을 가져옴
+    // 인버터별 수평 일사량을 가져옴
     const powerProfileRowsWithExtendedSolar = await biDevice.extendsPlaceDeviceData(
       powerProfileRows,
-      INCLINED_SOLAR,
+      HORIZONTAL_SOLAR,
     );
+
+    // BU.CLI(powerProfileRowsWithExtendedSolar);
 
     /** @type {V_INVERTER_STATUS[]} */
     const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
@@ -52,7 +54,7 @@ router.get(
     /** @type {{inverter_seq: number, siteName: string}[]} */
     const inverterSiteNameList = [];
 
-    // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
+    // 인버터 현황 데이터 목록에 수평 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq, place_seq } = inverterStatus;
       // BU.CLI(foundPlaceData);
@@ -76,17 +78,17 @@ router.get(
         siteName,
       });
 
-      // 경사 일사량 구함
-      const foundIncludedInclinedSolarRow = _.chain(powerProfileRowsWithExtendedSolar)
+      // 수평 일사량 구함
+      const horizontalSolarRow = _.chain(powerProfileRowsWithExtendedSolar)
         .find({
           place_seq,
         })
         .get('INCLINED_SOLAR', null)
         .value();
 
-      // Inverter Status Row에 경사 일사량 확장
+      // Inverter Status Row에 수평 일사량 확장
       _.assign(inverterStatus, {
-        [INCLINED_SOLAR]: foundIncludedInclinedSolarRow,
+        [HORIZONTAL_SOLAR]: horizontalSolarRow,
         siteName,
       });
     });
@@ -106,31 +108,55 @@ router.get(
     // const searchRange = biModule.createSearchRange({
     //   searchType: 'days',
     //   // searchType: 'range',
-    //   searchInterval: 'min',
-    //   strStartDate: '2019-02-13',
+    //   searchInterval: 'min10',
+    //   strStartDate: '2019-05-21',
     //   // strEndDate: '',
     //   // strEndDate: '2019-02-14',
     // });
     const searchRange = biModule.createSearchRange();
+
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    // const strGroupDateList = sensorUtil.getGroupDateList(searchRange);
+    // BU.CLI(strGroupDateList);
+    // plotSeries 를 구하기 위한 객체
+    // const momentFormat = sensorUtil.getMomentFormat(searchRange);
+
+    // BU.CLI(momentFormat);
+
     const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
     // BU.CLI(inverterPowerList);
-    const chartOption = {
-      selectKey: 'avg_grid_kw',
-      dateKey: 'view_date',
-      groupKey: 'inverter_seq',
-      colorKey: 'chart_color',
-      sortKey: 'chart_sort_rank',
+
+    /** @type {lineChartConfig} */
+    const chartConfig = {
+      domId: 'chart_div',
+      title: '인버터 발전 현황',
+      yAxisList: [
+        {
+          dataUnit: 'kW',
+          yTitle: '전력(kW)',
+        },
+      ],
+      chartOption: {
+        selectKey: 'avg_grid_kw',
+        dateKey: 'group_date',
+        groupKey: 'inverter_seq',
+        colorKey: 'chart_color',
+        sortKey: 'chart_sort_rank',
+      },
     };
 
-    const inverterPowerChart = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
+    // 동적 라인 차트를 생성
+    const inverterLineChart = webUtil.makeDynamicLineChart(chartConfig, inverterPowerList);
 
-    inverterPowerChart.series.forEach(chartInfo => {
+    // BU.CLIN(inverterLineChart, 3);
+
+    inverterLineChart.series.forEach(chartInfo => {
       chartInfo.name = _.get(
         _.find(inverterSiteNameList, {
           inverter_seq: Number(chartInfo.name),
         }),
         'siteName',
-        '',
+        chartInfo.name,
       );
     });
 
@@ -142,7 +168,7 @@ router.get(
 
     _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 
-    req.locals.inverterPowerChart = inverterPowerChart;
+    req.locals.inverterLineChart = inverterLineChart;
     req.locals.measureInfo = {
       measureTime: `${moment().format('YYYY-MM-DD HH:mm')}:00`,
     };

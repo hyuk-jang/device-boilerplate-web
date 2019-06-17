@@ -371,7 +371,7 @@ class BiDevice extends BiModule {
     // BU.CLI(betweenDatePoint);
 
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    const sensorChart = webUtil.makeStaticChartData(sensorTrend, betweenDatePoint, chartOpt);
+    const sensorChart = webUtil.makeStaticLineChart(sensorTrend, betweenDatePoint, chartOpt);
 
     // BU.CLI(sensorChart);
     // return;

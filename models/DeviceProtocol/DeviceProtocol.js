@@ -75,10 +75,18 @@ class DeviceProtocol {
   }
 
   /**
-   * 트렌드 생성 정보
-   * @return {trendDomConfig[]}
+   * 트렌드 센서 생성 정보
+   * @return {trendSensorDomConfig[]}
    */
-  get trendViewList() {
+  get trendSensorViewList() {
+    return [];
+  }
+
+  /**
+   * 트렌드 센서 생성 정보
+   * @return {trendInverterDomConfig[]}
+   */
+  get trendInverterViewList() {
     return [];
   }
 

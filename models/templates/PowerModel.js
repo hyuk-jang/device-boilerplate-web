@@ -120,39 +120,73 @@ class PowerModel extends BiModule {
   }
 
   /**
+   * VIEW_INVERTER_PROFILE을 기준으로 인버터 명을 작성하여 반환
+   * @param {number[]} inverterSeqList
+   */
+  async makeInverterNameList(inverterSeqList) {
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+    /** @type {V_PW_INVERTER_PROFILE[]} */
+    const inverterProfileRows = await this.getTable('v_pw_inverter_profile', inverterWhere);
+
+    return inverterProfileRows.map(inverterProfile => {
+      // subName과 lastName을 구성하고 정의
+      const {
+        inverter_seq,
+        name: mainName = '',
+        target_name: subName,
+        director_name: company = '',
+        amount,
+      } = inverterProfile;
+
+      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
+        _.isString(company) && company.length ? company : ''
+      }`;
+
+      return {
+        inverter_seq,
+        siteName,
+      };
+    });
+  }
+
+  /**
    * 인버터 차트 반환
    * @param {searchRange} searchRange
+   * @param {trendInverterDomConfig[]} trendInverterDomConfigList
    * @param {number[]} inverterSeqList
-   * @param {{fullTxtPoint: [], shortTxtPoint: []}} betweenDatePoint
-   * @param {Object} plotSeries
-   * @param {number} plotSeries.pointStart 시작 UTC
-   * @param {number} plotSeries.pointInterval 시간 Interval
+   * @param {Object} rangeInfo
+   * @param {string[]} rangeInfo.strGroupDateList
+   * @param {plotSeries} rangeInfo.plotSeries
    * @return {{inverterPowerChartData: chartData, inverterTrend: Object[], viewInverterStatusList: V_INVERTER_STATUS[]}} chartData
    */
-  async getInverterLineChart(searchRange, inverterSeqList, betweenDatePoint, plotSeries = {}) {
+  async getInverterLineChart(searchRange, trendInverterDomConfigList, inverterSeqList, rangeInfo) {
     // BU.CLI(searchRange);
-    const refinedChart = {
-      domId: 'domPower',
-      title: '인버터 발전량 정보',
-      subtitle: '발전량',
-      yAxis: [{ yTitle: '전력', dataUnit: 'kWh' }],
-      plotSeries,
-      series: [],
-    };
 
-    // searchRange.searchType = 'hour';
+    const chartConfigList = trendInverterDomConfigList.map(domConfig => {
+      const { domId, dataKey, title, yAxisList = [], scale, toFixed } = domConfig;
+      /** @type {lineChartConfig} */
+      const chartConfig = {
+        domId,
+        title,
+        yAxisList,
+        chartOption: {
+          selectKey: dataKey,
+          dateKey: 'group_date',
+          groupKey: 'inverter_seq',
+          colorKey: 'chart_color',
+          sortKey: 'chart_sort_rank',
+        },
+      };
+      return chartConfig;
+    });
+
     // TODO: 인버터 모듈 이름을 가져오기 위한 테이블. 성능을 위해서라면 다른 쿼리문 작성 사용 필요
     /** @type {V_INVERTER_STATUS[]} */
-    const inverterStatusRows = await this.getTable(
-      'v_pw_inverter_status',
-      {
-        inverter_seq: inverterSeqList,
-      },
-      true,
-    );
-    BU.CLI(inverterStatusRows);
+    const inverterStatusRows = await this.getTable('v_pw_inverter_status', {
+      inverter_seq: inverterSeqList,
+    });
     // 인버터 차트 데이터 불러옴
-    // BU.CLI(searchRange);
     const inverterTrend = await this.getInverterTrend(searchRange, inverterSeqList);
     // BU.CLI(inverterTrend);
 
@@ -188,14 +222,17 @@ class PowerModel extends BiModule {
           minRequiredCountValue: 9,
         },
       };
+      // 트렌드 목록을 순회하면서 이전 값과 현재 값의 차를 구하고 그 값의 유효성을 검증
       webUtil.calcRangePower(inverterTrend, calcOption);
     }
+    // DB 긁어온 내용에 key 추가
     webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_id', 'inverter_seq');
     webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_name', 'inverter_seq');
     // 기간 발전량을 기준으로 실제 계통 출력량을 계산하여 추가함(grid_out_w)
     webUtil.calcRangeGridOutW(inverterTrend, searchRange, 'interval_power');
     // 검색 기간을 기준으로 data 비율을 조정함
     // BU.CLI(inverterTrend);
+    // 검색 조건에 맞게 데이터 단위를 변환함
     webUtil.calcScaleRowDataPacket(inverterTrend, searchRange, [
       'interval_power',
       'max_c_wh',
@@ -203,48 +240,155 @@ class PowerModel extends BiModule {
     ]);
     // BU.CLI(inverterTrend);
 
-    let chartOption = {
-      selectKey: 'interval_power',
-      maxKey: 'max_c_wh',
-      minKey: 'min_c_wh',
-      dateKey: 'group_date',
-      groupKey: 'target_id',
-      colorKey: 'chart_color',
-      sortKey: 'chart_sort_rank',
-    };
-    /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    const inverterPowerChartData = webUtil.makeStaticChartData(
-      inverterTrend,
-      betweenDatePoint,
-      chartOption,
-    );
-    BU.CLI(inverterPowerChartData);
-    // return;
+    // 인버터 차트 생성
+    const refinedLineChartList = chartConfigList.map(chartConfig => {
+      return webUtil.makeStaticLineChart(chartConfig, inverterTrend, rangeInfo);
+    });
 
-    chartOption = {
-      selectKey: 'avg_out_w',
-      maxKey: 'max_c_wh',
-      minKey: 'min_c_wh',
-      dateKey: 'group_date',
-      groupKey: 'target_id',
-      colorKey: 'chart_color',
-      sortKey: 'chart_sort_rank',
-    };
+    // BU.CLIN(refinedLineChartList);
 
-    /** Grouping Chart에 의미있는 이름을 부여함. */
-    webUtil.mappingChartDataName(
-      inverterPowerChartData,
-      inverterStatusRows,
-      'target_id',
-      'target_name',
-    );
+    // 인버터 이름 목록을 가져옴
+    const inverterNameList = await this.makeInverterNameList(inverterSeqList);
 
-    return {
-      inverterPowerChartData,
-      inverterTrend,
-      viewInverterStatusList: inverterStatusRows,
-    };
+    // 인버터 차트 목록의 series.name을 한글 이름 일괄 변경
+    _(refinedLineChartList)
+      .map('series')
+      .flatten()
+      .forEach(seriesInfo => {
+        seriesInfo.name = _.get(
+          _.find(inverterNameList, {
+            inverter_seq: Number(seriesInfo.name),
+          }),
+          'siteName',
+          seriesInfo.name,
+        );
+      });
+
+    return refinedLineChartList;
   }
+
+  // /**
+  //  * 인버터 차트 반환
+  //  * @param {searchRange} searchRange
+  //  * @param {number[]} inverterSeqList
+  //  * @param {{fullTxtPoint: [], shortTxtPoint: []}} betweenDatePoint
+  //  * @param {Object} plotSeries
+  //  * @param {number} plotSeries.pointStart 시작 UTC
+  //  * @param {number} plotSeries.pointInterval 시간 Interval
+  //  * @return {{inverterPowerChartData: chartData, inverterTrend: Object[], viewInverterStatusList: V_INVERTER_STATUS[]}} chartData
+  //  */
+  // async getInverterLineChart(searchRange, inverterSeqList, betweenDatePoint, plotSeries = {}) {
+  //   // BU.CLI(searchRange);
+  //   const refinedChart = {
+  //     domId: 'domPower',
+  //     title: '인버터 발전량 정보',
+  //     subtitle: '발전량',
+  //     yAxis: [{ yTitle: '전력', dataUnit: 'kWh' }],
+  //     plotSeries,
+  //     series: [],
+  //   };
+
+  //   // searchRange.searchType = 'hour';
+  //   // TODO: 인버터 모듈 이름을 가져오기 위한 테이블. 성능을 위해서라면 다른 쿼리문 작성 사용 필요
+  //   /** @type {V_INVERTER_STATUS[]} */
+  //   const inverterStatusRows = await this.getTable('v_pw_inverter_status', {
+  //     inverter_seq: inverterSeqList,
+  //   });
+  //   // BU.CLI(inverterStatusRows);
+  //   // 인버터 차트 데이터 불러옴
+  //   // BU.CLI(searchRange);
+  //   const inverterTrend = await this.getInverterTrend(searchRange, inverterSeqList);
+  //   // BU.CLI(inverterTrend);
+
+  //   // 하루 데이터(10분 구간)는 특별히 데이터를 정제함.
+  //   if (
+  //     searchRange.searchType === 'min' ||
+  //     searchRange.searchType === 'min10' ||
+  //     searchRange.searchType === 'hour'
+  //   ) {
+  //     let maxRequiredDateSecondValue = 0;
+  //     switch (searchRange.searchType) {
+  //       case 'min':
+  //         maxRequiredDateSecondValue = 120;
+  //         break;
+  //       case 'min10':
+  //         maxRequiredDateSecondValue = 1200;
+  //         break;
+  //       case 'hour':
+  //         maxRequiredDateSecondValue = 7200;
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //     const calcOption = {
+  //       calcMaxKey: 'max_c_wh',
+  //       calcMinKey: 'min_c_wh',
+  //       resultKey: 'interval_power',
+  //       groupKey: 'inverter_seq',
+  //       rangeOption: {
+  //         dateKey: 'group_date',
+  //         maxRequiredDateSecondValue,
+  //         minRequiredCountKey: 'total_count',
+  //         minRequiredCountValue: 9,
+  //       },
+  //     };
+  //     webUtil.calcRangePower(inverterTrend, calcOption);
+  //   }
+  //   webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_id', 'inverter_seq');
+  //   webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_name', 'inverter_seq');
+  //   // 기간 발전량을 기준으로 실제 계통 출력량을 계산하여 추가함(grid_out_w)
+  //   webUtil.calcRangeGridOutW(inverterTrend, searchRange, 'interval_power');
+  //   // 검색 기간을 기준으로 data 비율을 조정함
+  //   // BU.CLI(inverterTrend);
+  //   webUtil.calcScaleRowDataPacket(inverterTrend, searchRange, [
+  //     'interval_power',
+  //     'max_c_wh',
+  //     'min_c_wh',
+  //   ]);
+  //   BU.CLI(inverterTrend);
+
+  //   let chartOption = {
+  //     selectKey: 'interval_power',
+  //     maxKey: 'max_c_wh',
+  //     minKey: 'min_c_wh',
+  //     dateKey: 'group_date',
+  //     groupKey: 'target_id',
+  //     colorKey: 'chart_color',
+  //     sortKey: 'chart_sort_rank',
+  //   };
+  //   /** 정해진 column을 기준으로 모듈 데이터를 정리 */
+  //   const inverterPowerChartData = webUtil.makeStaticChartData(
+  //     inverterTrend,
+  //     betweenDatePoint,
+  //     chartOption,
+  //   );
+  //   BU.CLI(inverterPowerChartData);
+  //   // return;
+
+  //   chartOption = {
+  //     selectKey: 'avg_out_w',
+  //     maxKey: 'max_c_wh',
+  //     minKey: 'min_c_wh',
+  //     dateKey: 'group_date',
+  //     groupKey: 'target_id',
+  //     colorKey: 'chart_color',
+  //     sortKey: 'chart_sort_rank',
+  //   };
+
+  //   /** Grouping Chart에 의미있는 이름을 부여함. */
+  //   webUtil.mappingChartDataName(
+  //     inverterPowerChartData,
+  //     inverterStatusRows,
+  //     'target_id',
+  //     'target_name',
+  //   );
+
+  //   return {
+  //     inverterPowerChartData,
+  //     inverterTrend,
+  //     viewInverterStatusList: inverterStatusRows,
+  //   };
+  // }
 
   /**
    * 인버터 차트 반환
@@ -345,7 +489,7 @@ class PowerModel extends BiModule {
       sortKey: 'chart_sort_rank',
     };
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    inverterPowerChartData = webUtil.makeStaticChartData(
+    inverterPowerChartData = webUtil.makeStaticLineChart(
       inverterTrend,
       betweenDatePoint,
       chartOption,
@@ -442,7 +586,7 @@ class PowerModel extends BiModule {
     };
 
     weatherChartOptionList.forEach(chartOption => {
-      const staticChart = webUtil.makeStaticChartData(weatherTrend, betweenDatePoint, chartOption);
+      const staticChart = webUtil.makeStaticLineChart(weatherTrend, betweenDatePoint, chartOption);
       const chart = _.head(staticChart.series);
       chart.name = chartOption.name;
       chart.color = chartOption.color;
@@ -666,7 +810,7 @@ class PowerModel extends BiModule {
     };
 
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    chartData = webUtil.makeStaticChartData(connectorTrend, betweenDatePoint, chartOption);
+    chartData = webUtil.makeStaticLineChart(connectorTrend, betweenDatePoint, chartOption);
 
     // BU.CLI(chartData);
 

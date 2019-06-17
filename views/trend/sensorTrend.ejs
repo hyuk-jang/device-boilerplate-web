@@ -2,8 +2,11 @@
 <html>
   <head>
     <!-- Default Js -->
-    <%- include("../master/head.ejs") %> <%- include("../master/excel.ejs") %>
+    <%- include("../master/head.ejs") %>
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/contents/main/hichartMaker.js"></script>
     <link href="/css/spinner.css" rel="stylesheet" />
   </head>
 
@@ -20,12 +23,8 @@
             <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
           </div>
         </div>
-        <div class="container_row flex_jus_end default_search_area mt0">
+        <div class="container_row flex_jus_end default_search_area">
           <div class="search_area">
-            <div class="search_box search_category_box ml0">
-              <span class="search_title">생육환경</span>
-              <select id="subSelectBoxDom" class="form-control"> </select>
-            </div>
             <div class="search_box search_range_box">
               <span class="search_title">조회기간</span>
               <select id="searchType" class="form-control">
@@ -68,68 +67,41 @@
               </div>
             </div>
             <div class="submit_box">
-              <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">
+              <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">
                 검색
               </button>
-              <input
-                type="image"
-                id="downloadExcel"
-                class="icon"
-                src="/image/common/excel-icon.jpg"
-              />
             </div>
           </div>
         </div>
-        <div class="container_row flex_dir_col ">
-          <div class="table-responsive default_area">
-            <table class="table table-bordered number_table">
-              <thead id="sensorReportHeaderDom">
-                <tr>
-                  <th>번호</th>
-                  <th>일시</th>
-                  <th>모듈후면온도(℃)</th>
-                  <th>조도(lx)</th>
-                  <th>이산화탄소(ppm)</th>
-                  <th>토양EC(%)</th>
-                  <th>토양온도(℃)</th>
-                  <th>토양습도(%)</th>
-                  <th>외기온도(℃)</th>
-                  <th>외기습도(%)</th>
-                  <th>수평일사량(W/m2)</th>
-                  <!-- <th scope="col" style="width:7%">풍향</th> -->
-                  <th>풍속(km/h)</th>
-                  <th>강우량(mm/hr)</th>
-                  <!-- <th scope="col" style="width:6%">강우상황</th> -->
-                </tr>
-              </thead>
-              <tbody id="sensorReportBodyDom"></tbody>
-            </table>
-          </div>
-          <div id="paginationDom" class="table_pagenation"></div>
+        <div class="container_row flex_dir_col mt0">
+          <p class="table_desc_area">
+            생육환경 트렌드
+          </p>
+          <div id="sensorArea"></div>
         </div>
       </div>
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
-
     <script>
-      // 돔 설정
-      // $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
-      $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
-      $('#sensorReportHeaderDom').html(<%- JSON.stringify(dom.sensorReportHeaderDom) %>);
-      $('#sensorReportBodyDom').html(<%- JSON.stringify(dom.sensorReportBodyDom) %>);
-      $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      var sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
+      var madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+
       // 초기 시작시 라디오 체크버튼 클릭처리
       var searchRange = <%- JSON.stringify(searchRange) %>;
-      var reportInfo = <%- JSON.stringify(reportInfo) %>;
+      var trendInfo = <%- JSON.stringify(trendInfo) %>;
+      var siteId = _.get(trendInfo, 'siteId');
 
-      var siteId = _.get(reportInfo, 'siteId');
-      var subCategory = _.get(reportInfo, 'subCategory');
-      var subCategoryId = _.get(reportInfo, 'subCategoryId');
+      $('#sensorArea').html(sensorDivDomList)
+
+      madeSensorChartList.forEach(function (chartInfo) {
+        makeLineChart(chartInfo)
+      });
     </script>
 
     <script src="/js/contents/report/search.js"></script>
-
     <!-- 기본 데이터 세팅 -->
     <script>
       checkSelectBoxOption('searchInterval', searchRange.searchInterval);
@@ -138,6 +110,10 @@
 
       // 검색 타입에 따라 적용
       applySearchType(searchRange.searchType);
+    </script>
+
+    <script>
+      // 차트를 그리기 위한 데이터
     </script>
   </body>
 </html>

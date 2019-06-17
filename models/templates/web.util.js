@@ -51,16 +51,16 @@ exports.convertValueBySearchType = convertValueBySearchType;
 
 /**
  * 차트 데이터 레포트 통계치 계산
- * @param {Object[]} rowDataPacketList
+ * @param {Object[]} dataRows
  * @param {chartOption} chartOption
  * @return {chartDataOption}
  */
-function calcStatisticsReport(rowDataPacketList, chartOption) {
+function calcStatisticsReport(dataRows, chartOption) {
   /** @type {chartDataOption} */
   const returnValue = {};
   const { sortKey, maxKey, minKey, averKey } = chartOption;
 
-  const dataRow = _.head(rowDataPacketList);
+  const dataRow = _.head(dataRows);
 
   // 데이터가 없다면 빈 객체 반환
   if (_.isEmpty(dataRow)) {
@@ -73,17 +73,17 @@ function calcStatisticsReport(rowDataPacketList, chartOption) {
   }
   // 최대 값을 구한다면
   if (maxKey) {
-    const row = _.maxBy(rowDataPacketList, rowPacket => rowPacket[maxKey]);
+    const row = _.maxBy(dataRows, rowPacket => rowPacket[maxKey]);
     returnValue.max = row[maxKey];
   }
   // 최소 값을 구한다면
   if (minKey) {
-    const row = _.minBy(rowDataPacketList, rowPacket => rowPacket[minKey]);
+    const row = _.minBy(dataRows, rowPacket => rowPacket[minKey]);
     returnValue.min = row[minKey];
   }
   // TODO
   if (averKey) {
-    returnValue.aver = _(rowDataPacketList)
+    returnValue.aver = _(dataRows)
       .map(averKey)
       .mean();
   }
@@ -341,18 +341,15 @@ function calcRangeGridOutW(rowDataPacketList, searchRange, cumulativePowerKey) {
 exports.calcRangeGridOutW = calcRangeGridOutW;
 
 /**
- *
- * @param {Object[]} rowDataPacketList
+ * 검색 조건에 맞게 데이터 단위를 변환함
+ * @param {Object[]} dataRows
  * @param {searchRange} searchRange
  * @param {string[]} dataKeyList
  */
-function calcScaleRowDataPacket(rowDataPacketList, searchRange, dataKeyList) {
-  rowDataPacketList.forEach(rowDataPacket => {
+function calcScaleRowDataPacket(dataRows, searchRange, dataKeyList) {
+  dataRows.forEach(dataRow => {
     dataKeyList.forEach(dataKey => {
-      rowDataPacket[dataKey] = convertValueBySearchType(
-        rowDataPacket[dataKey],
-        searchRange.searchType,
-      );
+      dataRow[dataKey] = convertValueBySearchType(dataRow[dataKey], searchRange.searchType);
     });
   });
 }
@@ -480,162 +477,268 @@ exports.refineSelectedInverterStatus = refineSelectedInverterStatus;
 
 /**
  * Range에 맞는 차트 데이터 구성
- * @param {Object[]} tableRows
- * @param {chartOption} chartOption
- * @return {chartData}
+ * @param {lineChartConfig} lineChartConfig
+ * @param {Object[]} dataRows
+ * @return {lineChartInfo}
  */
-function makeDynamicChartData(tableRows, chartOption) {
+function makeDynamicLineChart(lineChartConfig, dataRows) {
   // BU.CLI(chartOption);
+
+  const { domId, subtitle, title, yAxisList, chartOption } = lineChartConfig;
+
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
-  // 데이터를 정리할 X 축 시간
-  const range = _.sortBy(_.unionWith(_.map(tableRows, dateKey), _.isEqual));
-
-  // 반환 데이터 유형
-  const returnValue = {
-    range,
+  /** @type {lineChartInfo} */
+  const refinedLineChart = {
+    domId,
+    title,
+    subtitle,
+    yAxis: yAxisList,
     series: [],
   };
+
+  // y축 표현 정보
+  const yAxisInfo = _.head(yAxisList);
 
   // BU.CLI(returnValue.range);
   // 같은 Key 끼리 그루핑
   if (groupKey) {
-    const groupedTableInfo = _.groupBy(tableRows, groupKey);
-    returnValue.series = [];
+    const groupedTableInfo = _.groupBy(dataRows, groupKey);
     _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
-      const addObj = {
+      /** @type {chartSeriesInfo} */
+      const chartSeries = {
         name: gKey,
         data: [],
+        type: hasArea && 'area',
+        color: colorKey && _.get(_.head(groupedTableRows), colorKey),
+        sortKey: sortKey && _.get(_.head(groupedTableRows), sortKey),
+        yAxis: 0,
+        tooltip: {
+          valueSuffix: yAxisInfo.yTitle,
+        },
       };
 
-      if (hasArea) {
-        addObj.type = 'area';
-      }
-
-      const groupedFirstRow = _.head(groupedTableRows);
-      if (colorKey) {
-        addObj.color = groupedFirstRow[chartOption.colorKey];
-      }
-      if (sortKey) {
-        addObj.sort = groupedFirstRow[chartOption.sortKey];
-      }
-
-      _.forEach(groupedTableRows, tableRow => {
-        const index = _.findIndex(range, d => _.isEqual(d, tableRow[dateKey]));
-
-        addObj.data[index] = tableRow[selectKey];
+      _.forEach(groupedTableRows, dataRow => {
+        // dateKey를 기준으로 UTC 날짜를 환산
+        const utcDate = moment(_.get(dataRow, dateKey))
+          .add(9, 'hours')
+          .valueOf();
+        // 데이터 형식은 [Date, Data]
+        chartSeries.data.push([utcDate, _.get(dataRow, selectKey)]);
       });
-      returnValue.series.push(addObj);
+      refinedLineChart.series.push(chartSeries);
     });
 
-    if (sortKey) {
-      returnValue.series = _.sortBy(returnValue.series, obj => obj.sort);
-    } else {
-      returnValue.series = _.sortBy(returnValue.series, obj => obj.name);
-    }
+    const orderByKey = sortKey ? 'sort' : 'name';
+    refinedLineChart.series = _.sortBy(refinedLineChart.series, [orderByKey]);
   } else {
-    const addObj = {
-      name: '',
+    /** @type {chartSeriesInfo} */
+    const chartSeries = {
+      name: title,
       data: [],
+      type: hasArea && 'area',
+      yAxis: 0,
+      tooltip: {
+        valueSuffix: yAxisInfo.yTitle,
+      },
     };
 
-    if (hasArea) {
-      addObj.type = 'area';
-    }
-
-    addObj.data = _(tableRows)
+    chartSeries.data = _(dataRows)
       .groupBy(dateKey)
-      .toPairs()
-      .sortBy()
-      .map(currentItem => _.nth(currentItem, 1))
-      .map(dataPacket => _.sum(_.map(dataPacket, selectKey)))
+      .toPairs() // [[date, [[data], [data], [data]]], ...]
+      .sortBy() // 날짜 오름 차순 정렬
+      .map(pairList => {
+        return [
+          moment(_.head(pairList))
+            .add(9, 'hours')
+            .valueOf(),
+          _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
+        ];
+      })
       .value();
-    returnValue.series.push(addObj);
+
+    refinedLineChart.series.push(chartSeries);
   }
-  return returnValue;
+  return refinedLineChart;
 }
-exports.makeDynamicChartData = makeDynamicChartData;
+exports.makeDynamicLineChart = makeDynamicLineChart;
 
 /**
  * 차트 데이터
- * @param {Object[]} tableRows
- * @param {{fullTxtPoint: [], shortTxtPoint: []}} baseRange 고정된 Column 객체
- * @param {chartOption} chartOption
- * @return {chartData}
+ * @param {lineChartConfig} lineChartConfig
+ * @param {Object[]} dataRows
+ * @param {Object} rangeInfo
+ * @param {string[]} rangeInfo.strGroupDateList
+ * @param {plotSeries} rangeInfo.plotSeries
  */
-function makeStaticChartData(tableRows, baseRange, chartOption) {
-  const { selectKey, dateKey, groupKey, colorKey, sortKey } = chartOption;
+function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
+  // BU.CLI(rangeInfo);
 
-  // 반환 데이터 유형
-  /** @type {chartData} */
-  const returnValue = {
-    range: baseRange.shortTxtPoint,
+  const { domId, subtitle, title, yAxisList, chartOption } = lineChartConfig;
+
+  const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
+
+  const { plotSeries, strGroupDateList } = rangeInfo;
+
+  // y축 표현 정보
+  const yAxisInfo = _.head(yAxisList);
+
+  /** @type {lineChartInfo} */
+  const refinedLineChart = {
+    domId,
+    title,
+    subtitle,
+    yAxis: yAxisList,
+    plotSeries,
     series: [],
   };
 
   // 색상키가 정해져있찌 않다면 색상 없이 반환
   // 같은 Key 끼리 그루핑
   if (groupKey) {
-    const groupedTableInfo = _.groupBy(tableRows, groupKey);
-    BU.CLI(groupedTableInfo);
-
-    returnValue.series = [];
-    _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
-      /** @type {chartSeries} */
-      const addObj = {
+    // BU.CLI(groupKey);
+    const groupedTableInfo = _.groupBy(dataRows, groupKey);
+    // BU.CLIN(groupedTableInfo, 1);
+    _.forEach(groupedTableInfo, (groupedDataRows, gKey) => {
+      /** @type {chartSeriesInfo} */
+      const chartSeries = {
         name: gKey,
         data: [],
-        option: {},
+        type: hasArea && 'area',
+        color: colorKey && _.get(_.head(groupedDataRows), colorKey),
+        sortKey: sortKey && _.get(_.head(groupedDataRows), sortKey),
+        yAxis: 0,
+        tooltip: {
+          valueSuffix: yAxisInfo.yTitle,
+        },
       };
 
-      const groupedFirstRow = _.head(groupedTableRows);
-      // 색상 키가 있다면 입력
-      if (colorKey) {
-        addObj.color = groupedFirstRow[colorKey];
-      }
+      chartSeries.option = calcStatisticsReport(groupedDataRows, chartOption);
 
-      addObj.option = calcStatisticsReport(groupedTableRows, chartOption);
-
-      baseRange.fullTxtPoint.forEach(fullTxtDate => {
-        const resultFind = _.find(groupedTableRows, {
-          [dateKey]: fullTxtDate,
+      // 지정된 날짜 목록을 순회하며 해당 그루핑 날짜와 같은 경우 유효 데이터 삽입.
+      strGroupDateList.forEach(strGroupDate => {
+        const resultFind = _.find(groupedDataRows, {
+          [dateKey]: strGroupDate,
         });
 
         // BU.CLI(findGridObj)
         const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
-        addObj.data.push(data);
+        chartSeries.data.push(data);
       });
-      returnValue.series.push(addObj);
+      refinedLineChart.series.push(chartSeries);
     });
 
-    if (sortKey) {
-      returnValue.series = _.sortBy(returnValue.series, obj => obj.option.sort);
-    } else {
-      returnValue.series = _.sortBy(returnValue.series, obj => obj.name);
-    }
+    const orderByKey = sortKey ? 'sort' : 'name';
+    refinedLineChart.series = _.sortBy(refinedLineChart.series, [orderByKey]);
   } else {
-    const addObj = {
-      name: '',
+    /** @type {chartSeriesInfo} */
+    const chartSeries = {
+      name: title,
       data: [],
-      option: calcStatisticsReport(tableRows, chartOption),
+      type: hasArea && 'area',
+      yAxis: 0,
+      tooltip: {
+        valueSuffix: yAxisInfo.yTitle,
+      },
+      option: calcStatisticsReport(dataRows, chartOption),
     };
 
-    baseRange.fullTxtPoint.forEach(fullTxtDate => {
-      const resultFind = _.find(tableRows, {
-        [dateKey]: fullTxtDate,
-      });
+    // baseRange.fullTxtPoint.forEach(fullTxtDate => {
+    //   const resultFind = _.find(dataRows, {
+    //     [dateKey]: fullTxtDate,
+    //   });
 
-      // BU.CLI(findGridObj)
-      const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
-      addObj.data.push(data);
-    });
+    //   // BU.CLI(findGridObj)
+    //   const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+    //   addObj.data.push(data);
+    // });
 
-    returnValue.series.push(addObj);
+    // returnValue.series.push(addObj);
   }
-  BU.CLI(returnValue);
-  return returnValue;
+  // BU.CLI(refinedLineChart);
+  return refinedLineChart;
 }
-exports.makeStaticChartData = makeStaticChartData;
+exports.makeStaticLineChart = makeStaticLineChart;
+// /**
+//  * 차트 데이터
+//  * @param {Object[]} tableRows
+//  * @param {{fullTxtPoint: [], shortTxtPoint: []}} baseRange 고정된 Column 객체
+//  * @param {chartOption} chartOption
+//  * @return {chartData}
+//  */
+// function makeStaticChartData(tableRows, baseRange, chartOption) {
+//   const { selectKey, dateKey, groupKey, colorKey, sortKey } = chartOption;
+
+//   // 반환 데이터 유형
+//   /** @type {chartData} */
+//   const returnValue = {
+//     range: baseRange.shortTxtPoint,
+//     series: [],
+//   };
+
+//   // 색상키가 정해져있찌 않다면 색상 없이 반환
+//   // 같은 Key 끼리 그루핑
+//   if (groupKey) {
+//     const groupedTableInfo = _.groupBy(tableRows, groupKey);
+//     BU.CLI(groupedTableInfo);
+
+//     returnValue.series = [];
+//     _.forEach(groupedTableInfo, (groupedTableRows, gKey) => {
+//       /** @type {chartSeries} */
+//       const addObj = {
+//         name: gKey,
+//         data: [],
+//         option: {},
+//       };
+
+//       const groupedFirstRow = _.head(groupedTableRows);
+//       // 색상 키가 있다면 입력
+//       if (colorKey) {
+//         addObj.color = groupedFirstRow[colorKey];
+//       }
+
+//       addObj.option = calcStatisticsReport(groupedTableRows, chartOption);
+
+//       baseRange.fullTxtPoint.forEach(fullTxtDate => {
+//         const resultFind = _.find(groupedTableRows, {
+//           [dateKey]: fullTxtDate,
+//         });
+
+//         // BU.CLI(findGridObj)
+//         const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+//         addObj.data.push(data);
+//       });
+//       returnValue.series.push(addObj);
+//     });
+
+//     if (sortKey) {
+//       returnValue.series = _.sortBy(returnValue.series, obj => obj.option.sort);
+//     } else {
+//       returnValue.series = _.sortBy(returnValue.series, obj => obj.name);
+//     }
+//   } else {
+//     const addObj = {
+//       name: '',
+//       data: [],
+//       option: calcStatisticsReport(tableRows, chartOption),
+//     };
+
+//     baseRange.fullTxtPoint.forEach(fullTxtDate => {
+//       const resultFind = _.find(tableRows, {
+//         [dateKey]: fullTxtDate,
+//       });
+
+//       // BU.CLI(findGridObj)
+//       const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+//       addObj.data.push(data);
+//     });
+
+//     returnValue.series.push(addObj);
+//   }
+//   BU.CLI(returnValue);
+//   return returnValue;
+// }
+// exports.makeStaticChartData = makeStaticChartData;
 
 /**
  * 차트 데이터 검색 조건에 따라서 데이터 비율 적용

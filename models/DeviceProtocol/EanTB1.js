@@ -83,9 +83,9 @@ class EanTB1 extends DeviceProtocol {
 
   /**
    * 트렌드 생성 정보
-   * @return {trendDomConfig[]}
+   * @return {trendSensorDomConfig[]}
    */
-  get trendViewList() {
+  get trendSensorViewList() {
     return [
       {
         domId: 'temperature',

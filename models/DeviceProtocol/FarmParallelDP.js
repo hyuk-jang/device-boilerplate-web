@@ -102,9 +102,9 @@ class FarmParallelDP extends DeviceProtocol {
 
   /**
    * 트렌드 생성 정보
-   * @return {trendDomConfig[]}
+   * @return {trendSensorDomConfig[]}
    */
-  get trendViewList() {
+  get trendSensorViewList() {
     return [
       {
         domId: 'solarChart',
@@ -216,6 +216,49 @@ class FarmParallelDP extends DeviceProtocol {
             // dataUnit: 'ㅇd',
           },
         ],
+      },
+    ];
+  }
+
+  /**
+   * 트렌드 인버터 생성 정보
+   * @return {trendInverterDomConfig[]}
+   */
+  get trendInverterViewList() {
+    return [
+      {
+        domId: 'interval_power_chart',
+        title: '기간 발전량',
+        yAxisList: [
+          {
+            dataUnit: 'kWh',
+            yTitle: '전력(kWh)',
+          },
+        ],
+        dataKey: 'interval_power',
+      },
+      {
+        domId: 'max_c_kwh_chart',
+        title: '누적 발전량',
+        yAxisList: [
+          {
+            dataUnit: 'MWh',
+            yTitle: '전력(MWh)',
+          },
+        ],
+        dataKey: 'max_c_kwh',
+        scale: 0.001,
+      },
+      {
+        domId: 'avg_pv_kw_chart',
+        title: 'DC 전압',
+        yAxisList: [
+          {
+            dataUnit: 'V',
+            yTitle: '전압(V)',
+          },
+        ],
+        dataKey: 'avg_pv_kw',
       },
     ];
   }
