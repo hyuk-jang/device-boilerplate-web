@@ -150,5 +150,5 @@ function searchTrend() {
   $('#loader').removeClass('hidden');
   $('#loader-ground').removeClass('hidden'); // 사이트 변경 시
 
-  location.href = "".concat(window.location.origin, "/").concat(naviId, "/").concat(siteId, "?").concat(queryString);
+  location.href = "".concat(window.location.origin, "/").concat(naviId, "/").concat(siteId, "/").concat(subCategory, "?").concat(queryString);
 }

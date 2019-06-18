@@ -123,11 +123,11 @@ router.get(
       hasArea: true,
     };
     // 데이터 현황에 따라 동적 차트 궝
-    const chartData = webUtil.makeDynamicChartData(inverterTrend, chartOption);
+    // const chartData = webUtil.makeDynamicLineChart(inverterTrend, chartOption);
 
     // 일별 차트로 구성
-    webUtil.applyScaleChart(chartData, 'day');
-    webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
+    // webUtil.applyScaleChart(chartData, 'day');
+    // webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
 
     // 인버터 현재 발전 현황
     /** @type {V_PW_INVERTER_STATUS[]} */
@@ -225,7 +225,7 @@ router.get(
       domMakerMain.makeInverterStatusDom(validInverterDataList),
     );
 
-    req.locals.dailyPowerChartData = chartData;
+    // req.locals.dailyPowerChartData = chartData;
     // req.locals.moduleStatusList = validModuleStatusList;
     req.locals.powerGenerationInfo = powerGenerationInfo;
     req.locals.growthEnv = sensorDataInfo;

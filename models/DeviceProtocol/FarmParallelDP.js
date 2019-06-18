@@ -102,9 +102,9 @@ class FarmParallelDP extends DeviceProtocol {
 
   /**
    * 트렌드 생성 정보
-   * @return {trendDomConfig[]}
+   * @return {trendSensorDomConfig[]}
    */
-  get trendViewList() {
+  get trendSensorViewList() {
     return [
       {
         domId: 'solarChart',
@@ -221,6 +221,72 @@ class FarmParallelDP extends DeviceProtocol {
   }
 
   /**
+   * 트렌드 인버터 생성 정보
+   * @return {trendInverterDomConfig[]}
+   */
+  get trendInverterViewList() {
+    return [
+      {
+        domId: 'avg_power_kw_chart',
+        title: '평균 AC 전력',
+        yAxisList: [
+          {
+            dataUnit: 'kW',
+            yTitle: '전력(kW)',
+          },
+        ],
+        dataKey: 'avg_power_kw',
+      },
+      {
+        domId: 'avg_pv_v_chart',
+        title: '평균 DC 전압',
+        yAxisList: [
+          {
+            dataUnit: 'V',
+            yTitle: '전압(V)',
+          },
+        ],
+        dataKey: 'avg_pv_v',
+      },
+      {
+        domId: 'avg_pv_a_chart',
+        title: '평균 DC 전류',
+        yAxisList: [
+          {
+            dataUnit: 'A',
+            yTitle: '전류(V)',
+          },
+        ],
+        dataKey: 'avg_pv_a',
+      },
+      {
+        domId: 'interval_power_chart',
+        title: '기간 발전량',
+        yAxisList: [
+          {
+            dataUnit: 'kWh',
+            yTitle: '전력(kWh)',
+          },
+        ],
+        dataKey: 'interval_power',
+      },
+      {
+        domId: 'max_c_kwh_chart',
+        title: '누적 발전량',
+        yAxisList: [
+          {
+            dataUnit: 'MWh',
+            yTitle: '전력(MWh)',
+          },
+        ],
+        dataKey: 'max_c_kwh',
+        scale: 0.001,
+        toFixed: 3,
+      },
+    ];
+  }
+
+  /**
    * @desc App
    * @return {string[]} 앱 Master로 쓸 센서  ND ID 목록
    */
@@ -243,7 +309,7 @@ class FarmParallelDP extends DeviceProtocol {
       {
         dataKey: 'avg_pv_a',
         dataName: 'DC 전류',
-        dataUnit: 'V',
+        dataUnit: 'A',
       },
       {
         dataKey: 'avg_pv_kw',

@@ -101,9 +101,9 @@ class Solar2WayDP extends DeviceProtocol {
 
   /**
    * 트렌드 생성 정보
-   * @return {trendDomConfig[]}
+   * @return {trendSensorDomConfig[]}
    */
-  get trendViewList() {
+  get trendSensorViewList() {
     return [
       {
         domId: 'solarChart',

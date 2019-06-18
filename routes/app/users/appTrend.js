@@ -152,7 +152,7 @@ router.get(
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
     // 생육 환경정보 차트 목록을 생성
-    const madeSensorLineChartList = deviceProtocol.trendViewList.map(chartConfig =>
+    const madeSensorLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
       sensorUtil.makeSimpleLineChart(chartConfig, nodeDefStorageList, momentFormat.plotSeries),
     );
     // console.timeEnd('madeSensorChartList');

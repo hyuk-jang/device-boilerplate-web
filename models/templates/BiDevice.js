@@ -175,29 +175,30 @@ class BiDevice extends BiModule {
 
   /**
    * 장소 시퀀스를 기준으로 관련된 현재 데이터를 모두 가져옴
-   * @param {{place_seq: number}[]} containedPlaceSeqRows
+   * @param {{place_seq: number}[]} powerProfileRows
    * @param {string} pickId nd_target_id 입력
    * @return {{place_seq: number, *: number=}[]} new containedPlaceSeqRows with Extend PickId Key
    */
-  async extendsPlaceDeviceData(containedPlaceSeqRows, pickId) {
-    const relationPlaceRows = await this.getPlaceRelation(containedPlaceSeqRows);
+  async extendsPlaceDeviceData(powerProfileRows, pickId) {
+    let relationPlaceRows = await this.getPlaceRelation(powerProfileRows);
     // BU.CLI(relationPlaceRows);
     // 장소 관계에 관련된 내용이 없다면 그냥 반환
     if (_.isEmpty(relationPlaceRows)) {
-      return containedPlaceSeqRows;
+      return powerProfileRows;
     }
+
     // 검색 조건에 맞는 데이터
-    const containedPickIdRelationPlaceRows = _.filter(relationPlaceRows, {
+    relationPlaceRows = _.filter(relationPlaceRows, {
       nd_target_id: pickId,
     });
 
     // 검색 조건에 맞는 데이터가 없다면 그냥 반환
-    if (_.isEmpty(containedPickIdRelationPlaceRows)) {
-      return containedPlaceSeqRows;
+    if (_.isEmpty(relationPlaceRows)) {
+      return powerProfileRows;
     }
 
     // 검색 조건에 맞는 Node Seq 목록을 만듬
-    const nodeSeqList = _.map(containedPickIdRelationPlaceRows, 'node_seq');
+    const nodeSeqList = _.map(relationPlaceRows, 'node_seq');
 
     // 장소 관계 리스트에서 nodeSeq 리스트를 추출하고 해당 장치의 최신 데이터를 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
@@ -211,14 +212,14 @@ class BiDevice extends BiModule {
     // BU.CLI('@@');
     // 검색된 노드가 없다면 그냥 반환
     if (_.isEmpty(dvSensorProfileRows)) {
-      return containedPlaceSeqRows;
+      return powerProfileRows;
     }
 
     const now = moment();
     // 검색 결과 노드를 순회
     _.forEach(dvSensorProfileRows, sensorProfile => {
       // 해당 장치가 속해있는 장소 목록 구성
-      const containedNodeSeqRelationPlaceRows = _.filter(containedPickIdRelationPlaceRows, {
+      const containedNodeSeqRelationPlaceRows = _.filter(relationPlaceRows, {
         node_seq: sensorProfile.node_seq,
       });
 
@@ -229,7 +230,7 @@ class BiDevice extends BiModule {
       const foundPlaceSeqList = _.map(containedNodeSeqRelationPlaceRows, 'place_seq');
 
       // 요청받은 containedPlaceSeqRows 중 실제 해당 장치가 사용중인 목록 필터링
-      const filterdPlaceSeqRows = _.filter(containedPlaceSeqRows, placeSeqRow =>
+      const filterdPlaceSeqRows = _.filter(powerProfileRows, placeSeqRow =>
         _.includes(foundPlaceSeqList, placeSeqRow.place_seq),
       );
 
@@ -252,7 +253,7 @@ class BiDevice extends BiModule {
     });
 
     // BU.CLI(receiveObjList);
-    return containedPlaceSeqRows;
+    return powerProfileRows;
   }
 
   /**
@@ -371,7 +372,7 @@ class BiDevice extends BiModule {
     // BU.CLI(betweenDatePoint);
 
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    const sensorChart = webUtil.makeStaticChartData(sensorTrend, betweenDatePoint, chartOpt);
+    const sensorChart = webUtil.makeStaticLineChart(sensorTrend, betweenDatePoint, chartOpt);
 
     // BU.CLI(sensorChart);
     // return;
