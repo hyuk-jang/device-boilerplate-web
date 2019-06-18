@@ -11,6 +11,8 @@
  * @property {string} domId
  * @property {string=} title
  * @property {string=} subtitle
+ * @property {number=} scale 배율. 원 데이터에 해당 수치 곱셈 처리
+ * @property {number=} toFixed 소수점 자리
  * @property {Object[]} yAxisList
  * @property {string} yAxisList.dataUnit
  * @property {string} yAxisList.yTitle

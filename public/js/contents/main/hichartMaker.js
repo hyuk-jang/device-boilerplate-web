@@ -540,7 +540,7 @@ function makeLineChart(chartInfo) {
             lineWidth: 1,
           },
         },
-        series: _.get(chartInfo, 'plotSeries', {}),
+        series: _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
       },
 
       series: chartInfo.series,

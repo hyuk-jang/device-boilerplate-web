@@ -163,5 +163,5 @@ function searchTrend() {
   $('#loader-ground').removeClass('hidden');
 
   // 사이트 변경 시
-  location.href = `${window.location.origin}/${naviId}/${siteId}?${queryString}`;
+  location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}?${queryString}`;
 }

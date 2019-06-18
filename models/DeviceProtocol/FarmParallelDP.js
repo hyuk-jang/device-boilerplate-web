@@ -227,6 +227,39 @@ class FarmParallelDP extends DeviceProtocol {
   get trendInverterViewList() {
     return [
       {
+        domId: 'avg_power_kw_chart',
+        title: '평균 AC 전력',
+        yAxisList: [
+          {
+            dataUnit: 'kW',
+            yTitle: '전력(kW)',
+          },
+        ],
+        dataKey: 'avg_power_kw',
+      },
+      {
+        domId: 'avg_pv_v_chart',
+        title: '평균 DC 전압',
+        yAxisList: [
+          {
+            dataUnit: 'V',
+            yTitle: '전압(V)',
+          },
+        ],
+        dataKey: 'avg_pv_v',
+      },
+      {
+        domId: 'avg_pv_a_chart',
+        title: '평균 DC 전류',
+        yAxisList: [
+          {
+            dataUnit: 'A',
+            yTitle: '전류(V)',
+          },
+        ],
+        dataKey: 'avg_pv_a',
+      },
+      {
         domId: 'interval_power_chart',
         title: '기간 발전량',
         yAxisList: [
@@ -248,17 +281,7 @@ class FarmParallelDP extends DeviceProtocol {
         ],
         dataKey: 'max_c_kwh',
         scale: 0.001,
-      },
-      {
-        domId: 'avg_pv_kw_chart',
-        title: 'DC 전압',
-        yAxisList: [
-          {
-            dataUnit: 'V',
-            yTitle: '전압(V)',
-          },
-        ],
-        dataKey: 'avg_pv_kw',
+        toFixed: 3,
       },
     ];
   }
@@ -286,7 +309,7 @@ class FarmParallelDP extends DeviceProtocol {
       {
         dataKey: 'avg_pv_a',
         dataName: 'DC 전류',
-        dataUnit: 'V',
+        dataUnit: 'A',
       },
       {
         dataKey: 'avg_pv_kw',

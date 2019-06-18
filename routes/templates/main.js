@@ -251,3 +251,22 @@ module.exports = app => {
 
   return router;
 };
+
+// // 인버터 현황 데이터 목록에 수평 일사량 데이터를 붙임.
+// inverterStatusRows.forEach(inverterStatus => {
+//   const { inverter_seq, place_seq } = inverterStatus;
+//   // BU.CLI(foundPlaceData);
+
+//   // 수평 일사량 구함
+//   const horizontalSolarRow = _.chain(powerProfileRowsWithExtendedSolar)
+//     .find({
+//       place_seq,
+//     })
+//     .get(HORIZONTAL_SOLAR, null)
+//     .value();
+
+//   // Inverter Status Row에 수평 일사량 확장
+//   _.assign(inverterStatus, {
+//     [HORIZONTAL_SOLAR]: horizontalSolarRow,
+//   });
+// });

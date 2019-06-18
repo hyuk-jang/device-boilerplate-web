@@ -18,8 +18,8 @@ const HORIZONTAL_SOLAR = 'horizontalSolar';
 router.get(
   ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
 
@@ -49,51 +49,39 @@ router.get(
     // BU.CLI(powerProfileRowsWithExtendedSolar);
 
     /** @type {V_INVERTER_STATUS[]} */
-    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
+    const inverterStatusRows = await powerModel.getTable('v_pw_inverter_status', inverterWhere);
 
     /** @type {{inverter_seq: number, siteName: string}[]} */
-    const inverterSiteNameList = [];
+    const inverterSiteNameList = await powerModel.makeInverterNameList(inverterSeqList);
+
+    _(inverterStatusRows).forEach(statusRow => {
+      statusRow.siteName = _.get(
+        _.find(inverterSiteNameList, {
+          inverter_seq: Number(statusRow.inverter_seq),
+        }),
+        'siteName',
+        '',
+      );
+    });
 
     // 인버터 현황 데이터 목록에 수평 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq, place_seq } = inverterStatus;
       // BU.CLI(foundPlaceData);
-      // 인버터 Sequence가 동일한 Power Profile을 가져옴
-      const foundProfile = _.find(powerProfileRows, {
-        inverter_seq,
-      });
-      // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
-      const {
-        m_name: mainName = '',
-        ivt_target_name: subName,
-        ivt_director_name: company = '',
-        ivt_amount: amount,
-      } = foundProfile;
-      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
-        _.isString(company) && company.length ? company : ''
-      }`;
-
-      inverterSiteNameList.push({
-        inverter_seq,
-        siteName,
-      });
 
       // 수평 일사량 구함
       const horizontalSolarRow = _.chain(powerProfileRowsWithExtendedSolar)
         .find({
           place_seq,
         })
-        .get('INCLINED_SOLAR', null)
+        .get(HORIZONTAL_SOLAR, null)
         .value();
 
       // Inverter Status Row에 수평 일사량 확장
       _.assign(inverterStatus, {
         [HORIZONTAL_SOLAR]: horizontalSolarRow,
-        siteName,
       });
     });
-
-    // BU.CLI(viewInverterStatusRows);
 
     // 데이터 검증
     const validInverterStatusList = webUtil.checkDataValidation(
@@ -113,7 +101,10 @@ router.get(
     //   // strEndDate: '',
     //   // strEndDate: '2019-02-14',
     // });
-    const searchRange = biModule.createSearchRange();
+    const searchRange = powerModel.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'min10',
+    });
 
     // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
     // const strGroupDateList = sensorUtil.getGroupDateList(searchRange);
@@ -123,7 +114,7 @@ router.get(
 
     // BU.CLI(momentFormat);
 
-    const inverterPowerList = await biModule.getInverterPower(searchRange, inverterSeqList);
+    const inverterPowerList = await powerModel.getInverterPower(searchRange, inverterSeqList);
     // BU.CLI(inverterPowerList);
 
     /** @type {lineChartConfig} */

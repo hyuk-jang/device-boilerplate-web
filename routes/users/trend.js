@@ -45,19 +45,19 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'hour',
-      strStartDate: '2019-05-21',
-      strEndDate: '',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'days',
+    //   searchInterval: 'hour',
+    //   strStartDate: '2019-05-21',
+    //   strEndDate: '',
+    // });
 
     // BU.CLI(searchRange);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
@@ -84,8 +84,6 @@ router.get(
 
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
-    /** @type {PowerModel} */
-    const powerModel = global.app.get('powerModel');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
@@ -165,106 +163,22 @@ router.get(
 
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
-    const madeSensorLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
+    const madeLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
       sensorUtil.makeSimpleLineChart(chartConfig, nodeDefStorageList, momentFormat.plotSeries),
     );
-
-    // BU.CLI(madeSensorChartList);
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const sensorDomTemplate = _.template(`
         <div class="lineChart_box default_area" id="<%= domId %>"></div>
     `);
-    const sensorDivDomList = madeSensorLineChartList.map(refinedChart =>
+    const divDomList = madeLineChartList.map(refinedChart =>
       sensorDomTemplate({
         domId: refinedChart.domId,
       }),
     );
 
-    /**
-     * 인버터 트렌드 시작
-     */
-
-    /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-
-    // 인버터 Seq 목록
-    const inverterSeqList = _(powerProfileRows)
-      .map('inverter_seq')
-      .value();
-
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-
-    /** @type {V_PW_PROFILE[]} */
-    const pwProfileRows = await powerModel.getTable('v_pw_profile', inverterWhere);
-
-    /** @type {{inverter_seq: number, siteName: string}[]} */
-    const inverterSiteNameList = _.map(pwProfileRows, profileRow => {
-      return {
-        inverter_seq: profileRow.inverter_seq,
-        siteName: `${profileRow.m_name} ${profileRow.ivt_target_name}`,
-      };
-    });
-
-    const inverterPowerList = await powerModel.getInverterPower(searchRangeInfo, inverterSeqList);
-
-    // BU.CLI(inverterPowerList);
-    const chartOption = {
-      selectKey: 'avg_grid_kw',
-      dateKey: 'view_date',
-      groupKey: 'inverter_seq',
-      colorKey: 'chart_color',
-      sortKey: 'chart_sort_rank',
-    };
-
-    // const betweenDatePoint = BU.getBetweenDatePoint(
-    //   searchRangeInfo.strBetweenEnd,
-    //   searchRangeInfo.strBetweenStart,
-    //   searchRangeInfo.searchInterval,
-    //   {
-    //     startHour: 0,
-    //     endHour: 24,
-    //   },
-    // );
-
-    // const inverterPowerChart = webUtil.makeDynamicChartData(inverterPowerList, chartOption);
-
-    // inverterPowerChart.series.forEach(chartInfo => {
-    //   chartInfo.name = _.get(
-    //     _.find(inverterSiteNameList, {
-    //       inverter_seq: Number(chartInfo.name),
-    //     }),
-    //     'siteName',
-    //     '',
-    //   );
-    // });
-
-    // // BU.CLI(inverterPowerChart);
-
-    // req.locals.inverterPowerChart = inverterPowerChart;
-
-    /** searchRange를 기준으로 검색 Column Date를 정함  */
-    // const betweenDatePoint = BU.getBetweenDatePoint(
-    //   searchRangeInfo.strBetweenEnd,
-    //   searchRangeInfo.strBetweenStart,
-    //   searchRangeInfo.searchInterval,
-    // );
-    // BU.CLI(betweenDatePoint);
-
-    // const inverterTrendRows = await powerModel.getInverterLineChart(
-    //   searchRangeInfo,
-    //   inverterSeqList,
-    //   betweenDatePoint,
-    //   momentFormat.plotSeries,
-    // );
-    // BU.CLI(inverterTrendRows.inverterPowerChartData);
-
-    // console.timeEnd('madeSensorChartList');
-
-    // BU.CLIN(madeSensorChartList, 4);
-
-    _.set(req, 'locals.dom.sensorDivDomList', sensorDivDomList);
-    _.set(req, 'locals.madeSensorChartList', madeSensorLineChartList);
+    _.set(req, 'locals.dom.divDomList', divDomList);
+    _.set(req, 'locals.madeLineChartList', madeLineChartList);
 
     // TODO: 1. 각종 Chart 작업
 
@@ -299,14 +213,7 @@ router.get(
 
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-
-    // const inverterTrendRows = await powerModel.getInverterTrend(searchRangeInfo, inverterSeqList);
-
-    // /** @type {V_INVERTER_STATUS[]} */
-    // const inverterStatusRows = await this.getTable('v_pw_inverter_status', inverterWhere);
-
-    // BU.CLI(inverterTrendRows);
+    // const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
 
     const deviceProtocol = new DeviceProtocol(siteId);
 

@@ -75,15 +75,9 @@
         </div>
         <div class="container_row flex_dir_col mt0">
           <p class="table_desc_area">
-            생육환경 트렌드
-          </p>
-          <div id="sensorArea"></div>
-        </div>
-        <div class="container_row flex_dir_col mt0">
-          <p class="table_desc_area">
             인버터 트렌드
           </p>
-          <div id="inverterArea"></div>
+          <div id="divDomArea"></div>
         </div>
       </div>
       <!--하단1-->
@@ -93,7 +87,7 @@
       var divDomList = <%- JSON.stringify(dom.divDomList) %>;
       var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
 
-      $('#sensorArea').html(divDomList)
+      $('#divDomArea').html(divDomList)
 
       madeLineChartList.forEach(function (chartInfo) {
         makeLineChart(chartInfo)
@@ -103,6 +97,7 @@
       var searchRange = <%- JSON.stringify(searchRange) %>;
       var trendInfo = <%- JSON.stringify(trendInfo) %>;
       var siteId = _.get(trendInfo, 'siteId');
+      var subCategory = _.get(trendInfo, 'subCategory');
     </script>
 
     <script src="/js/contents/report/search.js"></script>

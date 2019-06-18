@@ -123,7 +123,7 @@ class PowerModel extends BiModule {
    * VIEW_INVERTER_PROFILE을 기준으로 인버터 명을 작성하여 반환
    * @param {number[]} inverterSeqList
    */
-  async makeInverterNameList(inverterSeqList) {
+  async makeInverterNameList(inverterSeqList = []) {
     const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
 
     /** @type {V_PW_INVERTER_PROFILE[]} */
@@ -169,6 +169,8 @@ class PowerModel extends BiModule {
       const chartConfig = {
         domId,
         title,
+        scale,
+        toFixed,
         yAxisList,
         chartOption: {
           selectKey: dataKey,
@@ -264,6 +266,7 @@ class PowerModel extends BiModule {
         );
       });
 
+    // BU.CLIN(refinedLineChartList, 3);
     return refinedLineChartList;
   }
 

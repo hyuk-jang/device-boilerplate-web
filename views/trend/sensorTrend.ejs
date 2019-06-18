@@ -86,17 +86,18 @@
     <script>
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
 
-      var sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
-      var madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
 
       // 초기 시작시 라디오 체크버튼 클릭처리
       var searchRange = <%- JSON.stringify(searchRange) %>;
       var trendInfo = <%- JSON.stringify(trendInfo) %>;
       var siteId = _.get(trendInfo, 'siteId');
+      var subCategory = _.get(trendInfo, 'subCategory');
 
-      $('#sensorArea').html(sensorDivDomList)
+      $('#sensorArea').html(divDomList)
 
-      madeSensorChartList.forEach(function (chartInfo) {
+      madeLineChartList.forEach(function (chartInfo) {
         makeLineChart(chartInfo)
       });
     </script>

@@ -484,7 +484,15 @@ exports.refineSelectedInverterStatus = refineSelectedInverterStatus;
 function makeDynamicLineChart(lineChartConfig, dataRows) {
   // BU.CLI(chartOption);
 
-  const { domId, subtitle, title, yAxisList, chartOption } = lineChartConfig;
+  const {
+    domId,
+    subtitle,
+    title,
+    scale = 1,
+    toFixed = 1,
+    yAxisList,
+    chartOption,
+  } = lineChartConfig;
 
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
@@ -514,7 +522,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
         sortKey: sortKey && _.get(_.head(groupedTableRows), sortKey),
         yAxis: 0,
         tooltip: {
-          valueSuffix: yAxisInfo.yTitle,
+          valueSuffix: ` ${yAxisInfo.dataUnit}`,
         },
       };
 
@@ -524,7 +532,16 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
           .add(9, 'hours')
           .valueOf();
         // 데이터 형식은 [Date, Data]
-        chartSeries.data.push([utcDate, _.get(dataRow, selectKey)]);
+        let data = _.get(dataRow, selectKey);
+        // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
+        data = _.isNumber(data)
+          ? _.chain(data)
+              .multiply(scale)
+              .round(toFixed)
+              .value()
+          : data;
+
+        chartSeries.data.push([utcDate, data]);
       });
       refinedLineChart.series.push(chartSeries);
     });
@@ -539,7 +556,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       type: hasArea && 'area',
       yAxis: 0,
       tooltip: {
-        valueSuffix: yAxisInfo.yTitle,
+        valueSuffix: ` ${yAxisInfo.dataUnit}`,
       },
     };
 
@@ -552,13 +569,21 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
           moment(_.head(pairList))
             .add(9, 'hours')
             .valueOf(),
-          _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
+
+          _.chain(_.nth(pairList, 1))
+            .map(selectKey)
+            .sum()
+            .multiply(scale)
+            .round(toFixed)
+            .value(),
+          // _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
         ];
       })
       .value();
 
     refinedLineChart.series.push(chartSeries);
   }
+
   return refinedLineChart;
 }
 exports.makeDynamicLineChart = makeDynamicLineChart;
@@ -573,8 +598,7 @@ exports.makeDynamicLineChart = makeDynamicLineChart;
  */
 function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
   // BU.CLI(rangeInfo);
-
-  const { domId, subtitle, title, yAxisList, chartOption } = lineChartConfig;
+  const { domId, subtitle, title, scale, toFixed = 1, yAxisList, chartOption } = lineChartConfig;
 
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
@@ -609,7 +633,7 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
         sortKey: sortKey && _.get(_.head(groupedDataRows), sortKey),
         yAxis: 0,
         tooltip: {
-          valueSuffix: yAxisInfo.yTitle,
+          valueSuffix: ` ${yAxisInfo.dataUnit}`,
         },
       };
 
@@ -622,7 +646,16 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
         });
 
         // BU.CLI(findGridObj)
-        const data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+        let data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+        // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
+        data =
+          _.isNumber(data) && _.isNumber(scale)
+            ? _.chain(data)
+                .multiply(scale)
+                .round(toFixed)
+                .value()
+            : data;
+
         chartSeries.data.push(data);
       });
       refinedLineChart.series.push(chartSeries);
@@ -631,6 +664,7 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
     const orderByKey = sortKey ? 'sort' : 'name';
     refinedLineChart.series = _.sortBy(refinedLineChart.series, [orderByKey]);
   } else {
+    // FIXME: Dynamic Line CHart와 비슷하게 코딩 필요.
     /** @type {chartSeriesInfo} */
     const chartSeries = {
       name: title,
@@ -638,7 +672,7 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
       type: hasArea && 'area',
       yAxis: 0,
       tooltip: {
-        valueSuffix: yAxisInfo.yTitle,
+        valueSuffix: ` ${yAxisInfo.dataUnit}`,
       },
       option: calcStatisticsReport(dataRows, chartOption),
     };
