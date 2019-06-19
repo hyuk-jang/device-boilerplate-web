@@ -14,7 +14,7 @@ module.exports = {
     // place_seq를 기준으로 grouping 후 총 지점 개수를 구함
     const groupByMainSeqRelation = _.groupBy(viewPlaceRelationRows, 'main_seq');
 
-    const headerTemplate = _.template('<th><%= ndName %><%= dataUnit %></th>');
+    const headerTemplate = _.template('<th><%= nd_target_name %>(<%= data_unit %>)</th>');
 
     // Picked목록에 따라 동적 Header 생성
     const dynamicHeaderDom = _.concat(rowsNdIdList, rowspanNdIdList).map(key => {
@@ -29,12 +29,7 @@ module.exports = {
         return false;
       }
 
-      const { nd_target_name: ndName = '', data_unit: dataUnit = '' } = placeRelationRow;
-
-      return headerTemplate({
-        ndName,
-        dataUnit: _.isEmpty(dataUnit) ? '' : `(${dataUnit})`,
-      });
+      return headerTemplate(placeRelationRow);
     });
 
     // 만들어진 동적 Table Header Dom

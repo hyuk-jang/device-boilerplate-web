@@ -25,6 +25,7 @@
 /**
  * Block 단위로 만들 EWS
  * @typedef {Object} blockViewMakeOption 장소 단위로 만들 엑셀
+ * @property {string} mainTitle dataName을 묶는 이름. Table.TH 1행 이름. 동일 숫자만큼 셀 병합 처리
  * @property {string} dataKey 가져올 데이터 Key
  * @property {string} dataName 데이터 Key 이름
  * @property {string=} dataUnit 데이터 단위

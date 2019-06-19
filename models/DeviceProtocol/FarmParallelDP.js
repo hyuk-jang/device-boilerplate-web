@@ -305,52 +305,63 @@ class FarmParallelDP extends DeviceProtocol {
         dataKey: 'avg_pv_v',
         dataName: 'DC 전압',
         dataUnit: 'V',
+        mainTitle: '태양광',
       },
       {
         dataKey: 'avg_pv_a',
         dataName: 'DC 전류',
         dataUnit: 'A',
+        mainTitle: '태양광',
       },
       {
         dataKey: 'avg_pv_kw',
         dataName: 'DC 전력',
         dataUnit: 'kW',
+        mainTitle: '태양광',
       },
       {
         dataKey: 'avg_grid_rs_v',
         dataName: 'AC 전압',
         dataUnit: 'V',
+        mainTitle: '인버터',
       },
       {
         dataKey: 'avg_grid_r_a',
         dataName: 'AC 전류',
         dataUnit: 'A',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'avg_power_kw',
+        dataName: 'AC 전력',
+        dataUnit: 'kW',
+        mainTitle: '인버터',
       },
       {
         dataKey: 'avg_line_f',
         dataName: '주파수',
         dataUnit: 'Hz',
-      },
-      {
-        dataKey: 'avg_power_kw',
-        dataName: '평균 출력',
-        dataUnit: 'kW',
-      },
-      {
-        dataKey: 'interval_power',
-        dataName: '기간 발전량',
-        dataUnit: 'kWh',
+        mainTitle: '인버터',
       },
       {
         dataKey: 'avg_p_f',
         dataName: '효율',
         dataUnit: '%',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'interval_power',
+        dataName: '기간 발전량',
+        dataUnit: 'kWh',
+        mainTitle: '발전 현황',
       },
       {
         dataKey: 'max_c_kwh',
         dataName: '누적 발전량',
         dataUnit: 'MWh',
         scale: 0.001,
+        toFixed: 4,
+        mainTitle: '발전 현황',
       },
     ];
   }
