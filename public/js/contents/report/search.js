@@ -26,9 +26,9 @@ $('#downloadExcel').on('click', event => {
     }
   }
 
-  if (!_.includes(['min', 'min10', 'hour'], searchInterval)) {
-    return alert('엑셀 Download는 1분, 10분, 1시간 단위 생성만 지원합니다.');
-  }
+  // if (!_.includes(['min', 'min10', 'hour'], searchInterval)) {
+  //   return alert('엑셀 Download는 1분, 10분, 1시간 단위 생성만 지원합니다.');
+  // }
 
   const dataParam = {
     searchInterval,

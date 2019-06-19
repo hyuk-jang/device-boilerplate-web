@@ -978,8 +978,8 @@ class BiModule extends BM {
         ROUND(AVG(avg_line_f), 1) AS avg_line_f,
         ROUND(AVG(avg_p_f), 1) AS avg_p_f,
         ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
-        ROUND(SUM(interval_power), 2) AS total_s_kwh,
-        ROUND(SUM(max_c_kwh) / 1000, 3) AS total_c_mwh
+        ROUND(SUM(interval_power), 2) AS interval_power,
+        ROUND(SUM(max_c_kwh), 3) AS max_c_kwh
     FROM
       (SELECT
             inverter_seq,

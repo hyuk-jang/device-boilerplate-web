@@ -7,6 +7,7 @@ const router = express.Router();
 
 const { BU, DU } = require('base-util-jh');
 
+const defaultDom = require('../../models/domMaker/defaultDom');
 const reportDom = require('../../models/domMaker/reportDom');
 
 const sensorUtil = require('../../models/templates/sensor.util');
@@ -332,6 +333,8 @@ router.get(
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
       // BU.CLI('인버터 엑셀 출력 Next', searchRangeInfo);
@@ -371,9 +374,23 @@ router.get(
     const inverterSiteDom = reportDom.makeInverterSiteDom(powerProfileRows, subCategoryId);
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
+    const deviceProtocol = new DeviceProtocol();
     // 인버터 보고서 돔 추가
-    const inverterReportDom = reportDom.makeInverterReportDom(reportRows, paginationInfo);
-    _.set(req, 'locals.dom.reportDom', inverterReportDom);
+
+    const { tableHeaderDom, tableBodyDom } = reportDom.makeInverterReportDom(reportRows, {
+      blockViewList: deviceProtocol.reportInverterViewList,
+      page,
+      pageListCount: PAGE_LIST_COUNT,
+    });
+
+    // const inverterReportDom = reportDom.makeInverterReportDom(reportRows, {
+    //   blockViewList: deviceProtocol.reportInverterViewList,
+    //   page,
+    //   pageListCount: PAGE_LIST_COUNT,
+    // });
+
+    _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
+    _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
 
     res.render('./report/rInverter', req.locals);
   }),

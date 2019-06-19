@@ -2,6 +2,8 @@ const _ = require('lodash');
 
 const { BU } = require('base-util-jh');
 
+const defaultDom = require('./defaultDom');
+
 module.exports = {
   /**
    *
@@ -75,10 +77,10 @@ module.exports = {
   /**
    * @desc searchOption -> Combine(병합)
    * 생육 환경 보고서 돔 생성
-   * @param {sensorReportStorageByPickNdId[]} reportStorageListByPickedNdIdList
+   * @param {nodeDefStorage[]} nodeDefStorage
    * @param {{groupDateInfo: sensorGroupDateInfo, pickedNodeDefIdList: string[]}} reportOption
    */
-  makeSensorReportDomByCombine(reportStorageListByPickedNdIdList, reportOption) {
+  makeSensorReportDomByCombine(nodeDefStorage, reportOption) {
     // 기본 페이지 값 설정
     const { groupDateInfo, pickedNodeDefIdList } = reportOption;
     const { strGroupDateList = [], page = 1, pageListCount = 20 } = groupDateInfo;
@@ -86,18 +88,23 @@ module.exports = {
     const firstRowNum = (page - 1) * pageListCount;
 
     // 동적으로 Table Header를 구성하기 위한 템플릿 초안 정의
-    const headerTemplate = _.template('<th style="width:7%"><%= ndName %><%= dataUnit %></th>');
+    const headerTemplate = _.template('<th style="width:7%"><%= ndName %>(<%= dataUnit %>)</th>');
+
+    const pickNdIdList = _.filter(pickedNodeDefIdList, ndId => {
+      return _.chain(_.find(nodeDefStorage, { ndId }))
+        .get('ndName', '')
+        .value();
+    });
 
     // Picked목록에 따라 동적 Header 생성
-    const dynamicHeaderDom = pickedNodeDefIdList.map(key => {
-      const { ndName = '', dataUnit = '' } = _.find(reportStorageListByPickedNdIdList, {
-        ndId: key,
-      });
-      return headerTemplate({
-        ndName,
-        dataUnit: _.isEmpty(dataUnit) ? '' : `(${dataUnit})`,
-      });
-    });
+    const dynamicHeaderDom = _.chain(pickNdIdList)
+      .map(ndId =>
+        _.find(nodeDefStorage, {
+          ndId,
+        }),
+      )
+      .map(dom => headerTemplate(dom))
+      .value();
 
     // 만들어진 동적 Table Header Dom
     const sensorReportHeaderDom = `
@@ -109,7 +116,7 @@ module.exports = {
     `;
 
     // Picked 목록에 따라 동적으로 만들 Table Tr TD 템플릿 초안 정의
-    const dynamicTemplate = pickedNodeDefIdList.map(key => `<td><%= ${key} %></td>`);
+    const dynamicTemplate = pickNdIdList.map(key => `<td><%= ${key} %></td>`);
     // 기본으로 생성할 TR 열 틀에 해당 동적 템플릿을 삽입
     const sensorReportTemplate = _.template(`
         <tr>
@@ -129,7 +136,7 @@ module.exports = {
         group_date: row, // row당 보여질 일시
       };
       // ND_TARGET_ID에 따라 그루핑된 레포트 저장소를 순회하면서 해당 ndId를 Key로 한 데이터 확장
-      _.forEach(reportStorageListByPickedNdIdList, reportStorage => {
+      _.forEach(nodeDefStorage, reportStorage => {
         _.assign(sensorData, { [reportStorage.ndId]: reportStorage.mergedAvgList[index] });
       });
 
@@ -207,40 +214,59 @@ module.exports = {
   /**
    *
    * @param {PW_INVERTER_DATA[]} inverterReportRows
-   * @param {page: number, pageListCount: number} paginationInfo
+   * @param {Object} reportOption
+   * @param {blockViewMakeOption[]} reportOption.blockViewList
+   * @param {number} reportOption.page
+   * @param {number} reportOption.pageListCount
    */
-  makeInverterReportDom(inverterReportRows, paginationInfo) {
-    const firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
-    const inverterReportTemplate = _.template(`
-        <tr>
-        <td><%= num %></td>
-        <td><%= group_date %></td>
-        <td><%= avg_pv_a %></td>
-        <td><%= avg_pv_v %></td>
-        <td><%= avg_pv_kw %></td>
-        <td><%= avg_grid_r_a %></td>
-        <td><%= avg_grid_rs_v %></td>
-        <td><%= avg_line_f %></td>
-        <td><%= avg_power_kw %></td>
-        <td><%= powerFactor %></td>
-        <td><%= total_c_mwh %></td>
-      </tr>
-    `);
-    const inverterReportsDom = inverterReportRows.map((row, index) => {
-      const pvKw = _.get(row, 'avg_pv_kw', '');
-      const powerKw = _.get(row, 'avg_power_kw', '');
+  makeInverterReportDom(inverterReportRows, reportOption) {
+    const { blockViewList, page, pageListCount } = reportOption;
 
-      // 번호
-      _.set(row, 'num', firstRowNum + index + 1);
-      // 발전 효율
-      _.set(row, 'powerFactor', _.round(_.divide(powerKw, pvKw) * 100, 1));
+    const firstRowNum = (page - 1) * pageListCount;
 
-      BU.toLocaleString(row);
-
-      return inverterReportTemplate(row);
+    const tableHeaderDom = defaultDom.makeDynamicHeaderDom({
+      staticTitleList: ['번호', '일시'],
+      mainTitleList: _.map(blockViewList, 'mainTitle'),
+      subTitleOptionList: _.map(blockViewList, blockInfo => {
+        const { dataName, dataUnit } = blockInfo;
+        return {
+          title: dataName,
+          dataUnit,
+        };
+      }),
     });
 
-    return inverterReportsDom;
+    const bodyTemplate = _.template(`
+      <tr>
+        <td><%= num %></td>
+        <td><%= group_date %></td>
+        ${defaultDom.makeStaticBodyElements(_.map(blockViewList, 'dataKey'))}
+      </tr>
+    `);
+
+    const tableBodyDom = inverterReportRows.map((dataRow, index) => {
+      defaultDom.applyCalcDataRow({
+        dataRow,
+        bodyConfigList: blockViewList,
+      });
+
+      const pvKw = _.get(dataRow, 'avg_pv_kw', '');
+      const powerKw = _.get(dataRow, 'avg_power_kw', '');
+
+      // 번호
+      _.set(dataRow, 'num', firstRowNum + index + 1);
+      // 발전 효율 (계산하여 재정의 함)
+      _.set(dataRow, 'avg_p_f', _.round(_.divide(powerKw, pvKw) * 100, 1));
+
+      // BU.toLocaleString(dataRow);
+
+      return bodyTemplate(dataRow);
+    });
+
+    return {
+      tableHeaderDom,
+      tableBodyDom,
+    };
   },
 
   /**
