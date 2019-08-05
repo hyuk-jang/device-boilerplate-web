@@ -158,7 +158,7 @@ class Control {
    * @param {nodeInfo[]} renewalList 갱신된 노드. 차후에 속도에 문제가 된다면 갱신된 노드만 적용토록 해야함.
    */
   updateNodeList(msInfo, renewalList) {
-    this.socketIoManager.submitNodeListToIoClient(msInfo, renewalList);
+    this.socketIoManager.submitNodeList(msInfo);
   }
 
   /**
@@ -167,7 +167,7 @@ class Control {
    * @param {msInfo} msInfo
    */
   updateContractCmdList(msInfo) {
-    this.socketIoManager.submitOrderListToIoClient(msInfo);
+    this.socketIoManager.submitCommandList(msInfo);
   }
 }
 module.exports = Control;

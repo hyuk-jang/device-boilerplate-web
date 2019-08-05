@@ -44,13 +44,32 @@ class AbstSocketIOManager {
    * @param {net.Socket} socket
    * @return {msInfo}
    */
-  findMainStorageBySocketClient(socket) {}
+  findMainStorage(socket) {}
 
   /**
    * Data Logger 상태를 io Client로 보냄
    * @param {msInfo} msInfo
    */
   submitMsClientStatus(msInfo) {}
+
+  /**
+   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
+   * @param {msInfo} msInfo
+   */
+  submitNodeList(msInfo) {}
+
+  /**
+   * 현재 수행중인 명령 리스트를 io Client로 보냄
+   * @param {msInfo} msInfo
+   */
+  submitCommandList(msInfo) {}
+
+  /**
+   * 현재 수행중인 명령 리스트를 io Client로 보냄
+   * @param {msInfo} msInfo
+   * @param {defaultFormatToResponse} execCommandResultInfo
+   */
+  submitExecCommandResult(msInfo, execCommandResultInfo) {}
 
   /**
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
