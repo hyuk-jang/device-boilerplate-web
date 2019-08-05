@@ -26,6 +26,7 @@ const DEFAULT_CATEGORY = 'sensor';
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
+    // console.time('Trend Middleware');
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
@@ -72,6 +73,7 @@ router.get(
 
     _.set(req, 'locals.trendInfo', trendInfo);
     _.set(req, 'locals.searchRange', searchRange);
+    // console.timeEnd('Trend Middleware');
     next();
   }),
 );
@@ -90,7 +92,7 @@ router.get(
 
     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-
+    // console.time('init');
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
@@ -105,7 +107,7 @@ router.get(
 
     // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
-
+    // console.timeEnd('init');
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     // BU.CLI(searchRangeInfo);

@@ -15,6 +15,9 @@ const Ean = require('./Ean');
 
 let selectedRouter;
 switch (process.env.PJ_MAIN_ID) {
+  case 'UPSAS':
+    selectedRouter = users;
+    break;
   case 'FP':
     selectedRouter = users;
     break;

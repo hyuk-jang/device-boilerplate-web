@@ -17,6 +17,9 @@ switch (process.env.PJ_MAIN_ID) {
   case 'FP':
     selectedRouter = users;
     break;
+  case 'UPSAS':
+    selectedRouter = users;
+    break;
   default:
     selectedRouter = users;
     break;

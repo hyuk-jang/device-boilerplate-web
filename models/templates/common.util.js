@@ -10,6 +10,10 @@ function convertProjectSource(projectMainId) {
   let projectImg = '';
 
   switch (projectMainId) {
+    case 'UPSAS':
+      projectImg = 'upsas_logo.png';
+      projectName = '수중태양광 발전 시스템 모니터링';
+      break;
     case 'FP':
       projectImg = 'fp_logo.png';
       projectName = '농업병행 태양광발전 모니터링';
