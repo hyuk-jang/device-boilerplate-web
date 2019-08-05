@@ -9,8 +9,9 @@ const net = require('net');
 const AbstSocketIOManager = require('./AbstSocketIOManager');
 
 const {
-  reqWrapCmdType,
-  complexCmdStep,
+  reqWrapCmdFormat: reqWCF,
+  reqWrapCmdType: reqWCT,
+  commandStep: cmdStep,
 } = require('../../../../default-intelligence').dcmConfigModel;
 /** 무안 6kW TB */
 
@@ -41,12 +42,9 @@ class SocketIOManager extends AbstSocketIOManager {
         // 접속한 Socket 정보 정의
         msUser.socketClient = socket;
 
-        const { sessionUserInfo } = msUser;
-        const { main_seq: mainSeq } = sessionUserInfo;
-
         // Main 정보(거점)의 ID가 동일한 객체 탐색
         const foundMsInfo = _.find(this.mainStorageList, msInfo =>
-          _.isEqual(msInfo.msFieldInfo.main_seq, mainSeq),
+          _.isEqual(msInfo.msFieldInfo.main_seq, msUser.sessionUserInfo.main_seq),
         );
 
         // 거점을 찾을 경우 초기 값을 보내줌.
@@ -65,9 +63,9 @@ class SocketIOManager extends AbstSocketIOManager {
           // Site 접속 상태 코드 전송
           socket.emit('updateMsClientStatus', connectedStatus);
           // NodeList 에서 선택한 key 만을 정제해서 전송
-          socket.emit('updateNodeInfo', pickedNodeList);
+          socket.emit('updateNode', pickedNodeList);
           // OrderList에서 명령 타입을 한글로 변환 후 전송
-          socket.emit('updateOrderInfo', this.pickContractCmdList(contractCmdList));
+          socket.emit('updateCommand', this.pickContractCmdList(contractCmdList));
         }
       });
 
@@ -87,7 +85,7 @@ class SocketIOManager extends AbstSocketIOManager {
         // uuid 추가
         defaultFormatToRequestInfo.uuid = uuidv4();
         // Main Storage 찾음.
-        const msInfo = this.findMainStorageBySocketClient(socket);
+        const msInfo = this.findMainStorage(socket);
 
         // Data Logger와 연결이 되어야만 명령 요청 가능
         if (msInfo && msInfo.msClient instanceof net.Socket) {
@@ -105,11 +103,26 @@ class SocketIOManager extends AbstSocketIOManager {
   pickNodeList(dataInfo) {
     const pickList = ['node_id', 'nd_target_name', 'data'];
     const { nodeList, placeList } = dataInfo;
+
+    return _.chain(nodeList)
+      .map(nodeInfo => {
+        return _.chain(nodeInfo)
+          .pick(pickList)
+          .thru(pickNode => {
+            const placeNameList = _(placeList)
+              .filter({ node_real_id: nodeInfo.node_real_id })
+              .map('place_name');
+            return _.assign(pickNode, { place_name_list: placeNameList });
+          });
+      })
+      .sortBy('node_id')
+      .value();
+
     return _(nodeList)
       .map(nodeInfo => {
         const placeNameList = _(placeList)
           .filter(placeInfo => placeInfo.node_real_id === nodeInfo.node_real_id)
-          .map(pInfo => pInfo.place_name)
+          .map('place_name')
           .value();
         //  _.filter(placeList, placeInfo => {
         //   placeInfo.node_real_id === nodeInfo.node_real_id;
@@ -123,61 +136,65 @@ class SocketIOManager extends AbstSocketIOManager {
       .value();
   }
 
-  /**
-   * 노드 정보에서 UI에 보여줄 내용만을 반환
-   * @param {contractCmdInfo[]} contractCmdList
-   */
-  pickContractCmdList(contractCmdList) {
-    const pickList = ['reqWrapCmdType', 'complexCmdStep', 'commandId', 'commandName'];
-    const returnValue = _.map(contractCmdList, contractCmdInfo => {
-      const pickInfo = _.pick(contractCmdInfo, pickList);
+  // /**
+  //  * 노드 정보에서 UI에 보여줄 내용만을 반환
+  //  * @param {contractCmdInfo[]} contractCmdList
+  //  */
+  // pickContractCmdList(contractCmdList) {
+  //   const pickList = ['reqWrapCmdType', 'wrapCmdStep', 'commandId', 'commandName'];
+  //   const returnValue = _.map(contractCmdList, contractCmdInfo => {
+  //     const pickInfo = _.pick(contractCmdInfo, pickList);
 
-      // 명령 타입 한글로 변경
-      switch (contractCmdInfo.reqWrapCmdType) {
-        case reqWrapCmdType.CONTROL:
-          pickInfo.reqWrapCmdType = '명령 제어';
-          break;
-        case reqWrapCmdType.CANCEL:
-          pickInfo.reqWrapCmdType = '명령 취소';
-          break;
-        case reqWrapCmdType.MEASURE:
-          pickInfo.reqWrapCmdType = '계측';
-          break;
-        default:
-          pickInfo.reqWrapCmdType = '알수없음';
-          break;
-      }
+  //     // 명령 타입 한글로 변경
+  //     switch (contractCmdInfo.reqWrapCmdType) {
+  //       case reqWCT.CONTROL:
+  //         pickInfo.reqWrapCmdType = '명령 제어';
+  //         break;
+  //       case reqWCT.CANCEL:
+  //         pickInfo.reqWrapCmdType = '명령 취소';
+  //         break;
+  //       case reqWCT.MEASURE:
+  //         pickInfo.reqWrapCmdType = '계측';
+  //         break;
+  //       default:
+  //         pickInfo.reqWrapCmdType = '알수없음';
+  //         break;
+  //     }
 
-      // 명령 상태 한글로 변경
-      switch (contractCmdInfo.complexCmdStep) {
-        case complexCmdStep.WAIT:
-          pickInfo.complexCmdStep = '대기 중';
-          pickInfo.index = 0;
-          break;
-        case complexCmdStep.PROCEED:
-          pickInfo.complexCmdStep = '진행 중';
-          pickInfo.index = 1;
-          break;
-        case complexCmdStep.RUNNING:
-          pickInfo.complexCmdStep = '실행 중';
-          pickInfo.index = 2;
-          break;
-        default:
-          pickInfo.complexCmdStep = '알수없음';
-          pickInfo.index = 3;
-          break;
-      }
-      return pickInfo;
-    });
+  //     // 명령 상태 한글로 변경
+  //     switch (contractCmdInfo.wrapCmdStep) {
+  //       case cmdStep.WAIT:
+  //         pickInfo.wrapCmdStep = '대기 중';
+  //         pickInfo.index = 0;
+  //         break;
+  //       case cmdStep.PROCEED:
+  //         pickInfo.wrapCmdStep = '진행 중';
+  //         pickInfo.index = 1;
+  //         break;
+  //       case cmdStep.COMPLETE:
+  //         pickInfo.wrapCmdStep = '진행 중';
+  //         pickInfo.index = 1;
+  //         break;
+  //       case cmdStep.RUNNING:
+  //         pickInfo.wrapCmdStep = '실행 중';
+  //         pickInfo.index = 2;
+  //         break;
+  //       default:
+  //         pickInfo.wrapCmdStep = '알수없음';
+  //         pickInfo.index = 3;
+  //         break;
+  //     }
+  //     return pickInfo;
+  //   });
 
-    return _.sortBy(returnValue, 'index');
-  }
+  //   return _.sortBy(returnValue, 'index');
+  // }
 
   /**
    * 접속한 SocketIO 객체 정보가 등록된 Main Storage를 반환
    * @param {net.Socket} socket
    */
-  findMainStorageBySocketClient(socket) {
+  findMainStorage(socket) {
     return _.find(this.mainStorageList, msInfo =>
       _.find(msInfo.msUserList, { socketClient: socket }),
     );
@@ -202,11 +219,49 @@ class SocketIOManager extends AbstSocketIOManager {
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
    * @param {msInfo} msInfo
    */
+  submitNodeList(msInfo) {
+    const simpleNodeList = this.pickNodeList(msInfo.msDataInfo);
+    // 해당 Socket Client에게로 데이터 전송
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('updateNode', simpleNodeList);
+    });
+  }
+
+  /**
+   * 현재 수행중인 명령 리스트를 io Client로 보냄
+   * @param {msInfo} msInfo
+   */
+  submitCommandList(msInfo) {
+    // const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
+    // 해당 Socket Client에게로 데이터 전송
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('updateCommand', msInfo.msDataInfo.contractCmdList);
+    });
+  }
+
+  /**
+   * 현재 수행중인 명령 리스트를 io Client로 보냄
+   * @param {msInfo} msInfo
+   * @param {defaultFormatToResponse} execCommandResultInfo
+   */
+  submitExecCommandResult(msInfo, execCommandResultInfo) {
+    // const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
+
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('resultExecCommand', execCommandResultInfo.message);
+    });
+    // 해당 Socket Client에게로 데이터 전송
+  }
+
+  /**
+   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
+   * @param {msInfo} msInfo
+   */
   submitNodeListToIoClient(msInfo) {
     const simpleNodeList = this.pickNodeList(msInfo.msDataInfo);
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateNodeInfo', simpleNodeList);
+      clientInfo.socketClient.emit('updateNode', simpleNodeList);
     });
   }
 
@@ -218,7 +273,7 @@ class SocketIOManager extends AbstSocketIOManager {
     const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateOrderInfo', pickedOrderList);
+      clientInfo.socketClient.emit('updateCommand', pickedOrderList);
     });
   }
 }
