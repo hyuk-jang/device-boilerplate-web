@@ -126,7 +126,7 @@ class Control {
           dataLoggerList: filterdDataLoggerList,
           nodeList: filterdNodeList,
           placeList: filterdPlaceList,
-          simpleOrderList: [],
+          contractCmdList: [],
         },
         msUserList: [],
       };
@@ -166,7 +166,7 @@ class Control {
    * SocketServer로 수신받은 DataLogger Order 정보
    * @param {msInfo} msInfo
    */
-  updateSimpleOrderList(msInfo) {
+  updateContractCmdList(msInfo) {
     this.socketIoManager.submitOrderListToIoClient(msInfo);
   }
 }

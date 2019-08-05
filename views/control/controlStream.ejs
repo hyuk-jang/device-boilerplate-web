@@ -33,22 +33,34 @@
               <li class="list-group-item">
                 <h4>사진 캡처</h4>
                 <div>
-                  <button type="button" id="btn_snapshot" title="Snapshot" class="btn btn-success" onclick="clientsidesnapshot()">사진
-                    찍기</button>
+                  <button type="button" id="btn_snapshot" title="Snapshot" class="btn btn-success"
+                    onclick="clientsidesnapshot()">
+                    사진 찍기
+                  </button>
                 </div>
                 <br />
               </li>
               <li class="list-group-item">
                 <h4>CCTV 제어</h4>
-                <div id="control-area" style="padding-top: 0px;"><b class="niftycorners" style="margin-left: -10px; margin-right: -10px; background: rgb(255, 255, 255); margin-bottom: -10px;"><b
-                      class="rb1" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb2" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb3" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb4" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb5" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb6" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb7" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
-                      class="rb8" style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b></b>
+                <div id="control-area" style="padding-top: 0px;">
+                  <b class="niftycorners"
+                    style="margin-left: -10px; margin-right: -10px; background: rgb(255, 255, 255); margin-bottom: -10px;"><b
+                      class="rb1"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb2"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb3"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb4"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb5"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb6"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb7"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b><b
+                      class="rb8"
+                      style="background-color: rgb(196, 234, 255); border-color: rgb(225, 244, 255); border-left-width: 0px; margin-left: 0px;"></b></b>
                   <table class="CtrlArea">
                     <tbody>
                       <tr id="ptz_direction">
@@ -58,25 +70,30 @@
                               <tr>
                                 <td></td>
                                 <td>
-                                  <button id="btn_ptz_up" style="background-position: 0px 0px;" onclick="CamControl('move','up')">
-                                  </button></td>
+                                  <button id="btn_ptz_up" style="background-position: 0px 0px;"
+                                    onclick="CamControl('move','up')"></button>
+                                </td>
                                 <td></td>
                               </tr>
                               <tr>
                                 <td>
-                                  <button id="btn_ptz_left" style="background-position: -69px 0px;" onclick="CamControl('move','left')"></button>
+                                  <button id="btn_ptz_left" style="background-position: -69px 0px;"
+                                    onclick="CamControl('move','left')"></button>
                                 </td>
                                 <td>
-                                  <button id="btn_ptz_home" style="background-position: -46px 0px;" onclick="CamControl('move','home')"></button>
+                                  <button id="btn_ptz_home" style="background-position: -46px 0px;"
+                                    onclick="CamControl('move','home')"></button>
                                 </td>
                                 <td>
-                                  <button id="btn_ptz_right" style="background-position: -105px 0px;" onclick="CamControl('move','right')"></button>
+                                  <button id="btn_ptz_right" style="background-position: -105px 0px;"
+                                    onclick="CamControl('move','right')"></button>
                                 </td>
                               </tr>
                               <tr>
                                 <td></td>
                                 <td>
-                                  <button id="btn_ptz_down" style="background-position: -23px 0px;" onclick="CamControl('move','down')"></button>
+                                  <button id="btn_ptz_down" style="background-position: -23px 0px;"
+                                    onclick="CamControl('move','down')"></button>
                                 </td>
                                 <td></td>
                               </tr>
@@ -87,36 +104,66 @@
                       <tr id="ptz_zoom">
                         <td colspan="2">
                           <div class="CameraCtrlBlock2">
-                            <button id="btn_ptz_zoomWide" style="background-position: -169px 0px;" onclick="CamControl('zoom', 'wide')">&nbsp;</button>
-                            <button id="btn_ptz_zoom" style="background-Position: -267px 0px;" hidefocus="true" value="Zoom">Zoom</button>
-                            <button id="btn_ptz_zoomTele" style="background-position: -141px 0px;" onclick="CamControl('zoom', 'tele')">&nbsp;</button>
+                            <button id="btn_ptz_zoomWide" style="background-position: -169px 0px;"
+                              onclick="CamControl('zoom', 'wide')">
+                              &nbsp;
+                            </button>
+                            <button id="btn_ptz_zoom" style="background-Position: -267px 0px;" hidefocus="true"
+                              value="Zoom">
+                              Zoom
+                            </button>
+                            <button id="btn_ptz_zoomTele" style="background-position: -141px 0px;"
+                              onclick="CamControl('zoom', 'tele')">
+                              &nbsp;
+                            </button>
                           </div>
                         </td>
                       </tr>
                       <tr id="ptz_focus">
                         <td colspan="2">
                           <div class="CameraCtrlBlock2">
-                            <button id="btn_ptz_focusNear" style="background-position: -169px 0px;" onclick="CamControl('focus', 'near')">&nbsp;</button>
-                            <button id="btn_ptz_focusAuto" style="background-position: -267px 0px;" onclick="CamControl('focus', 'auto')">Focus</button>
-                            <button id="btn_ptz_focusFar" style="background-position: -141px 0px;" onclick="CamControl('focus', 'far')">&nbsp;</button>
+                            <button id="btn_ptz_focusNear" style="background-position: -169px 0px;"
+                              onclick="CamControl('focus', 'near')">
+                              &nbsp;
+                            </button>
+                            <button id="btn_ptz_focusAuto" style="background-position: -267px 0px;"
+                              onclick="CamControl('focus', 'auto')">
+                              Focus
+                            </button>
+                            <button id="btn_ptz_focusFar" style="background-position: -141px 0px;"
+                              onclick="CamControl('focus', 'far')">
+                              &nbsp;
+                            </button>
                           </div>
                         </td>
                       </tr>
                       <tr id="ptz_iris">
                         <td colspan="2">
                           <div class="CameraCtrlBlock2">
-                            <button id="btn_ptz_irisDec" style="background-position: -169px 0px;" onclick="CamControl('iris', 'close')">&nbsp;</button>
-                            <button id="btn_ptz_irisAuto" style="background-position: -267px 0px;" onclick="CamControl('iris', 'auto')">Iris</button>
-                            <button id="btn_ptz_irisInc" style="background-position: -141px 0px;" onclick="CamControl('iris', 'open')">&nbsp;</button>
+                            <button id="btn_ptz_irisDec" style="background-position: -169px 0px;"
+                              onclick="CamControl('iris', 'close')">
+                              &nbsp;
+                            </button>
+                            <button id="btn_ptz_irisAuto" style="background-position: -267px 0px;"
+                              onclick="CamControl('iris', 'auto')">
+                              Iris
+                            </button>
+                            <button id="btn_ptz_irisInc" style="background-position: -141px 0px;"
+                              onclick="CamControl('iris', 'open')">
+                              &nbsp;
+                            </button>
                           </div>
                         </td>
                       </tr>
                       <tr id="ptz_psp">
                         <td colspan="2">
                           <div class="CameraCtrlBlock2">
-                            <button id="btn_ptz_pan" style="background-position: -407px 0px;" onclick="CamControl('auto', 'pan');"></button>
-                            <button id="btn_ptz_stop" style="background-position: -449px 0px;" onclick="CamControl('auto', 'stop');"></button>
-                            <button id="btn_ptz_patrol" style="background-position: -491px 0px;" onclick="CamControl('auto', 'patrol');"></button>
+                            <button id="btn_ptz_pan" style="background-position: -407px 0px;"
+                              onclick="CamControl('auto', 'pan');"></button>
+                            <button id="btn_ptz_stop" style="background-position: -449px 0px;"
+                              onclick="CamControl('auto', 'stop');"></button>
+                            <button id="btn_ptz_patrol" style="background-position: -491px 0px;"
+                              onclick="CamControl('auto', 'patrol');"></button>
                           </div>
                         </td>
                       </tr>
@@ -209,7 +256,7 @@
           <section>
             <!-- <canvas id="canvas" height=500 width=500></canvas> -->
             <div class="title">
-              <p> 실시간 CCTV </p>
+              <p>실시간 CCTV</p>
             </div>
             <div>
               <canvas id="canvas" style="width:100%;height:100%"></canvas>
@@ -218,8 +265,8 @@
         </div>
       </div>
       <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
+      <div class="container-fluid bg-3 text-center"></div>
+      <br />
       <%- include("../master/footer.ejs") %>
     </div>
   </div>
@@ -268,13 +315,13 @@
         commandId: "SINGLE",
         contents: {
           /**
-           * 명령 제어 타입 (requestOrderCommandType) 
+           * 명령 제어 타입 (reqWrapCmdType)
            * @example
            * CONTROL: 장치 제어 요청
            * CANCEL: 명령 제어 취소 요청
            * MEASURE: 명령 계측 요청
            */
-          requestCommandType: "CONTROL", // 단일 동작 제어는 모두 명령 요청으로 처리
+          wrapCmdType: "CONTROL", // 단일 동작 제어는 모두 명령 요청으로 처리
           nodeId: deviceId,
           /**
            * 장치 제어 타입 (requestDeviceControlType)
@@ -284,7 +331,7 @@
            * 2: 장치 Measure
            * 3: 장치 값 설정
            */
-          controlValue: controlType,
+          singleControlType: controlType,
           rank: 2,
           /** 로그인 한 사용자 정보 전송 */
           user: <%- JSON.stringify(user) %>
@@ -294,8 +341,6 @@
       socket.emit("executeCommand", requestMsg);
     })
   </script>
-
-
 </body>
 
 </html>

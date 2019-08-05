@@ -9,9 +9,8 @@ const net = require('net');
 const AbstSocketIOManager = require('./AbstSocketIOManager');
 
 const {
-  requestOrderCommandType,
-  combinedOrderType,
-  simpleOrderStatus,
+  reqWrapCmdType,
+  complexCmdStep,
 } = require('../../../../default-intelligence').dcmConfigModel;
 /** 무안 6kW TB */
 
@@ -54,7 +53,7 @@ class SocketIOManager extends AbstSocketIOManager {
         if (foundMsInfo) {
           foundMsInfo.msUserList.push(msUser);
 
-          const { simpleOrderList } = foundMsInfo.msDataInfo;
+          const { contractCmdList } = foundMsInfo.msDataInfo;
 
           let connectedStatus = 'Disconnected';
           if (foundMsInfo.msClient instanceof net.Socket) {
@@ -68,7 +67,7 @@ class SocketIOManager extends AbstSocketIOManager {
           // NodeList 에서 선택한 key 만을 정제해서 전송
           socket.emit('updateNodeInfo', pickedNodeList);
           // OrderList에서 명령 타입을 한글로 변환 후 전송
-          socket.emit('updateOrderInfo', this.pickSimpleOrderList(simpleOrderList));
+          socket.emit('updateOrderInfo', this.pickContractCmdList(contractCmdList));
         }
       });
 
@@ -126,45 +125,45 @@ class SocketIOManager extends AbstSocketIOManager {
 
   /**
    * 노드 정보에서 UI에 보여줄 내용만을 반환
-   * @param {simpleOrderInfo[]} simpleOrderList
+   * @param {contractCmdInfo[]} contractCmdList
    */
-  pickSimpleOrderList(simpleOrderList) {
-    const pickList = ['orderCommandType', 'orderStatus', 'commandId', 'commandName'];
-    const returnValue = _.map(simpleOrderList, simpleOrderInfo => {
-      const pickInfo = _.pick(simpleOrderInfo, pickList);
+  pickContractCmdList(contractCmdList) {
+    const pickList = ['reqWrapCmdType', 'complexCmdStep', 'commandId', 'commandName'];
+    const returnValue = _.map(contractCmdList, contractCmdInfo => {
+      const pickInfo = _.pick(contractCmdInfo, pickList);
 
       // 명령 타입 한글로 변경
-      switch (simpleOrderInfo.orderCommandType) {
-        case requestOrderCommandType.CONTROL:
-          pickInfo.orderCommandType = '명령 제어';
+      switch (contractCmdInfo.reqWrapCmdType) {
+        case reqWrapCmdType.CONTROL:
+          pickInfo.reqWrapCmdType = '명령 제어';
           break;
-        case requestOrderCommandType.CANCEL:
-          pickInfo.orderCommandType = '명령 취소';
+        case reqWrapCmdType.CANCEL:
+          pickInfo.reqWrapCmdType = '명령 취소';
           break;
-        case requestOrderCommandType.MEASURE:
-          pickInfo.orderCommandType = '계측';
+        case reqWrapCmdType.MEASURE:
+          pickInfo.reqWrapCmdType = '계측';
           break;
         default:
-          pickInfo.orderCommandType = '알수없음';
+          pickInfo.reqWrapCmdType = '알수없음';
           break;
       }
 
       // 명령 상태 한글로 변경
-      switch (simpleOrderInfo.orderStatus) {
-        case simpleOrderStatus.NEW:
-          pickInfo.orderStatus = '대기 중';
+      switch (contractCmdInfo.complexCmdStep) {
+        case complexCmdStep.WAIT:
+          pickInfo.complexCmdStep = '대기 중';
           pickInfo.index = 0;
           break;
-        case simpleOrderStatus.PROCEED:
-          pickInfo.orderStatus = '진행 중';
+        case complexCmdStep.PROCEED:
+          pickInfo.complexCmdStep = '진행 중';
           pickInfo.index = 1;
           break;
-        case simpleOrderStatus.COMPLETE:
-          pickInfo.orderStatus = '완료';
+        case complexCmdStep.RUNNING:
+          pickInfo.complexCmdStep = '실행 중';
           pickInfo.index = 2;
           break;
         default:
-          pickInfo.orderStatus = '알수없음';
+          pickInfo.complexCmdStep = '알수없음';
           pickInfo.index = 3;
           break;
       }
@@ -216,7 +215,7 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {msInfo} msInfo
    */
   submitOrderListToIoClient(msInfo) {
-    const pickedOrderList = this.pickSimpleOrderList(msInfo.msDataInfo.simpleOrderList);
+    const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateOrderInfo', pickedOrderList);

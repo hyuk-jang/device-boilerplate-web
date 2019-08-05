@@ -62,9 +62,9 @@ class AbstApiServer {
    * FIXME: 명령은 전체 갱신 처리해버림.
    * @desc dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
-   * @param {simpleOrderInfo[]} updatedFieldSimpleOrderList
+   * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareSimpleOrderList(msInfo, updatedFieldSimpleOrderList) {}
+  compareContractCmdList(msInfo, updatedFieldContractCmdList) {}
 }
 module.exports = AbstApiServer;
 
