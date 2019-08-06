@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const net = require('net');
 
+const { BU } = require('base-util-jh');
+
 class AbstApiServer {
   /** @param {MainControl} controller */
   constructor(controller) {
@@ -8,6 +10,8 @@ class AbstApiServer {
     this.controller = controller;
     this.defaultConverter = controller.defaultConverter;
     this.mainStorageList = controller.mainStorageList;
+
+    this.observers = [];
 
     // this.init = _.once(this.init);
   }
@@ -18,6 +22,15 @@ class AbstApiServer {
    * @param {number} apiConfig.socketPort API Communicator 설정
    */
   init(apiConfig) {}
+
+  /**
+   *
+   * @param {Observer} observer
+   */
+  attach(observer) {
+    BU.CLI('어태취');
+    this.observers.push(observer);
+  }
 
   /**
    * Field Client 인증을 하고자 할 경우

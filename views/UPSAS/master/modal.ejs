@@ -1,0 +1,50 @@
+<!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<style>
+  .modal-backdrop {
+    background-color: aliceblue;
+  }
+</style>
+
+<div class="container">
+  <!-- Trigger the modal with a button -->
+  <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button> -->
+
+  <!-- Modal -->
+  <div class="modal fade " id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content modal-backdrop">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">
+            <b>서버 점검 연장 안내</b>
+          </h4>
+
+        </div>
+        <div class="modal-body">
+          <p>
+            <b> ◆ 점검 일시: 8월 8일(목) 10:00 ~ 8월 9일(금) 18:00 </b>
+          </p>
+          <p> ◆ 연장 내용: 경사 일사량 설치에 따른 수집 컨트롤러 적용 </p>
+          <p> ◆ 점검 내용: 모듈 온도, 수위, 염도 데이터 수집 및 저장 </p>
+          <p> ◆ 점검 영향: 인버터, 접속반을 비롯한 모든 장치 데이터 수집 불가 </p>
+          <p> 서비스 이용에 불편을 드려 죄송합니다. </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script>
+  $(window).load(function () {
+    $('#myModal').modal('show');
+  });
+</script>

@@ -48,26 +48,26 @@ server.on('listening', onListening);
 // 컨트롤러 구동 시작
 async function operationController() {
   try {
-    // // BU.CLI(process.env.DEV_MODE);
-    // const main = new Main();
-    // const srcController = main.createControl({
-    //   projectInfo,
-    //   dbInfo,
-    // });
+    // BU.CLI(process.env.DEV_MODE);
+    const main = new Main();
+    const srcController = main.createControl({
+      projectInfo,
+      dbInfo,
+    });
 
-    // // 전역 변수로 등록
-    // global.srcController = srcController;
+    // 전역 변수로 등록
+    global.srcController = srcController;
 
-    // await srcController.init();
-    // srcController.bindingFeature();
-    // srcController.runFeature({
-    //   apiConfig,
-    //   ioConfig: {
-    //     httpServer: server,
-    //   },
-    //   rtspConfig,
-    //   weathercastConfig,
-    // });
+    await srcController.init();
+    srcController.bindingFeature();
+    srcController.runFeature({
+      apiConfig,
+      ioConfig: {
+        httpServer: server,
+      },
+      rtspConfig,
+      weathercastConfig,
+    });
   } catch (error) {
     BU.CLI(error);
     BU.errorLog('init', 'mainError', error);

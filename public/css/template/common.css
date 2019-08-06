@@ -166,7 +166,7 @@ _:-ms-input-placeholder,
 }
 
 .header_home_area > img {
-  width: 30px;
+  /* width: 30px; */
   height: 30px;
   margin: 0px;
   margin-right: 5px;
@@ -656,6 +656,14 @@ article.sdv_w_side > p:last-child {
 
 .ml_2rem {
   margin-left: 2rem;
+}
+
+.mr_1rem {
+  margin-right: 1rem;
+}
+
+.mr_2rem {
+  margin-right: 2rem;
 }
 
 .mb_50rem {

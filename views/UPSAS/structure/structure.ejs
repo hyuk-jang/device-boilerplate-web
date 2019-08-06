@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
+
+    <!-- SVG Map 을 생성하기 위한 필수 Library -->
+    <!-- <script src="js/drawSvg/svg.js"></script>
+    <script src="js/drawSvg/svg.filter.js"></script>
+    <script src="js/drawSvg/jquery.panzoom.js"></script>
+    <script src="js/drawSvg/jquery.mousewheel.js"></script> -->
+
+    <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
+    <!-- <script src="js/drawSvg/drawSvg.js"></script> -->
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div class="report_category">
+            <button type="button" value="structure" class="btn btn-success btn1">구성도</button>
+            <button type="button" value="dataTable" class="btn btn-default btn2">
+              테이블
+            </button>
+          </div>
+        </div>
+        <div class="container_row default_search_area">
+          <p>
+            장치 연결 상태:
+            <span id="device_connected_stauts"></span>
+          </p>
+          <h2>
+            <span>명령 처리 결과:</span>
+            <span id="test_alert" style="color: red"></span>
+          </h2>
+        </div>
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 형식</span>
+              <select class="form-control">
+                <option value="single">단일 제어</option>
+                <option value="set">설정 제어</option>
+                <option value="flow">염수 이동</option>
+                <option value="scenario">시나리오</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장치 타입</span>
+              <select class="form-control" id="singleDeviceCate"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장치 목록</span>
+              <select class="form-control" id="singleDeviceList">
+                <option value=""></option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">제어 형식</span>
+              <select class="form-control">
+                <option value="1">Open / On</option>
+                <option value="0">Close / Off</option>
+              </select>
+            </div>
+            <div class="user_box report_category ml_2rem">
+              <button type="button" class="btn btn-success" onclick="" id="">
+                제어
+              </button>
+              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 설정 제어 명령 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 형식</span>
+              <select class="form-control">
+                <option value="single">단일 제어</option>
+                <option value="set">설정 제어</option>
+                <option value="flow">염수 이동</option>
+                <option value="scenario">시나리오</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 종류</span>
+              <select class="form-control">
+                <option value="closeAllDevice">모든 장치 폐쇄</option>
+                <option value="rainMode">우천 대피</option>
+              </select>
+            </div>
+            <div class="user_box report_category  ml_2rem">
+              <button type="button" class="btn btn-success" onclick="" id="">
+                제어
+              </button>
+              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 흐름 제어 명령 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 형식</span>
+              <select class="form-control">
+                <option value="single">단일 제어</option>
+                <option value="set">설정 제어</option>
+                <option value="flow">염수 이동</option>
+                <option value="scenario">시나리오</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">시작지</span>
+              <select class="form-control" id="flowCmdSrcPlace" > </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">도착지</span>
+              <select class="form-control" id="flowCmdDestPlace" > </select>
+            </div>
+            <div class="user_box report_category  ml_2rem">
+              <button type="button" class="btn btn-success" onclick="" id="">
+                제어
+              </button>
+              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 시나리오 명령 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 형식</span>
+              <select class="form-control">
+                <option value="single">단일 제어</option>
+                <option value="set">설정 제어</option>
+                <option value="flow">염수 이동</option>
+                <option value="scenario">시나리오</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">시나리오</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="user_box report_category  ml_2rem">
+              <button type="button" class="btn btn-success" onclick="" id="">
+                제어
+              </button>
+              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 명령 목표 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">제한 시간(초)</span>
+              <div class="search_body">
+                <input type="text" class="input_tre" placeholder="Infinity" />
+              </div>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장소 타입</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장소</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">센서 종류</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">달성 목표치</span>
+              <div class="search_body">
+                <input type="text" class="input_tre" placeholder="없음" />
+              </div>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">목표 범위</span>
+              <select class="form-control">
+                <option value="UPPER">이상</option>
+                <option value="EQUAL">동일</option>
+                <option value="LOWER">이하</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col mt0">
+          <!-- tableContent -->
+          <div id="tableMode">
+            <div style="display: flex; justify-content: center">
+              <div id="contents" class="row row_st_line min_h_780" style="padding: 30px">
+                <div class=" panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">명령 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="CMD_order_date"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="CMD_order_list" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="wrapCmdFormat">명령 형식</th>
+                        <th data-field="wrapCmdType">명령 타입</th>
+                        <th data-field="wrapCmdStep">명령 단계</th>
+                        <th data-field="wrapCmdId">명령 ID</th>
+                        <th data-field="wrapCmdName">명령 이름</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="contents" class="row row_st_line min_h_780" style="padding: 30px">
+                <div class="panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">장치 상태 정보 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="CMD_node_date"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="MS_node_list" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="nd_target_name">장치 명</th>
+                        <th data-field="node_id">장치 ID</th>
+                        <th data-field="place_name_list">관련 장소</th>
+                        <th data-field="data">데이터</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container_row mt0">
+          <div id="zoom" style="display: flex; justify-content: center;">
+            <button id="zoom-in" class="btn btn-default btn-sm" style="margin-right: 5px">
+              <span class="glyphicon glyphicon-zoom-in"></span>
+              Zoom-in
+            </button>
+            <button id="zoom-out" class="btn btn-default btn-sm" style="margin-right: 5px">
+              <span class="glyphicon glyphicon-zoom-out"></span>
+              Zoom-out
+            </button>
+            <button id="reset" class="btn btn-default btn-sm" style="margin-right: 5px">
+              <span class="glyphicon glyphicon-refresh"></span>
+              Reset
+            </button>
+            <div style="margin-right: 5px">
+              <input id="placeNodeChangeNameToogleBtn" type="checkbox" data-toggle="toggle" />
+            </div>
+            <select class="selectpicker" id="modeSelect">
+              <option value="view">뷰 모드</option>
+              <option value="control">제어 모드</option>
+              <!-- <option value="develop">개발 모드</option> -->
+            </select>
+          </div>
+          <!-- canvas -->
+          <div>
+            <div id="canvas"></div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+
+    <script>
+      var controlInfo = <%- JSON.stringify(controlInfo) %>;
+      var setCmdList = controlInfo.setCmdList;
+      var flowCmdList = controlInfo.flowCmdList;
+      var scenarioCmdList = controlInfo.scenarioCmdList;
+
+      var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
+
+      // Single 제어 장치 타입 선택시 이벤트
+      $('#singleDeviceCate').on('change', function(event){
+        return handleDeviceCategory(this.value);
+      })
+
+      // Flow 제어 시작지 선택시 이벤트
+      $('#flowCmdSrcPlace').on('change', function(event){
+        return handleFlowSrcPlace(this.value);
+      })
+
+      // Single Cmd: 제어 장치 타입 Dom 설정
+      function setDeviceCategory() {
+        // 돔 생성
+        $('#singleDeviceCate').html(_.map(deviceDomList, 'category'));
+
+        // handleDeviceCategory() 실행 시킴
+        $('#singleDeviceCate').trigger('change');
+      }
+
+      // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
+      function handleDeviceCategory(category) {
+        $('#singleDeviceList').html(_.find(deviceDomList, {type: category}).list)
+      }
+
+
+      // Flow Cmd: 시작 장소 세팅
+      function setFlowSrcPlace() {
+        const placeTemplate = _.template('<option value="${ srcPlaceId }"> ${ srcPlaceName }</option>');
+        
+        $('#flowCmdSrcPlace').html(_.map(flowCmdList, placeTemplate));
+
+        // handleFlowSrcPlace() 실행 시킴
+        $('#flowCmdSrcPlace').trigger('change');
+      }
+
+      // Flow Cmd: 시작 장소 선택 시 실행하는 함수
+      function handleFlowSrcPlace(placeId) {
+        console.log('handleFlowSrcPlace')
+        const placeTemplate = _.template('<option value="${ destPlaceId }"> ${ destPlaceName }</option>');
+
+
+        console.log('placeId', placeId)
+        console.log(_.find(flowCmdList, {srcPlaceId: placeId}).destList)
+
+        
+        $('#flowCmdDestPlace').html(_.find(flowCmdList, {srcPlaceId: placeId}).destList.map(placeTemplate));
+      }
+
+      setDeviceCategory();
+      setFlowSrcPlace();
+    </script>
+  </body>
+</html>
