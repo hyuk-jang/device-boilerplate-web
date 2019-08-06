@@ -34,7 +34,7 @@ class SocketIOManager extends AbstSocketIOManager {
     this.io = new SocketIO(httpServer);
 
     this.io.on('connection', socket => {
-      // BU.CLI('connection');
+      BU.CLI('connection');
       // 접속한 Socket 등록
       socket.on('certifySocket', target => {
         /** @type {msUserInfo} */

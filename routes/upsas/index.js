@@ -7,8 +7,9 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const main = require('./main');
+const structure = require('./structure');
+const connector = require('./connector');
 const inverter = require('./inverter');
-const sensor = require('./sensor');
 const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
@@ -109,12 +110,16 @@ router.get(
         name: '메인',
       },
       {
-        href: 'inverter',
-        name: '인버터',
+        href: 'structure',
+        name: '구성도',
       },
       {
-        href: 'sensor',
-        name: '생육환경',
+        href: 'connector',
+        name: '접속반',
+      },
+      {
+        href: 'inverter',
+        name: '인버터',
       },
       {
         href: 'trend',
@@ -158,8 +163,9 @@ router.get(
 
 // Router 추가
 router.use('/', main);
+router.use('/structure', structure);
+router.use('/connector', connector);
 router.use('/inverter', inverter);
-router.use('/sensor', sensor);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/control', control);
