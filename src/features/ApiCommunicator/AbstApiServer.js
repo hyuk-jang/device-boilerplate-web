@@ -28,7 +28,6 @@ class AbstApiServer {
    * @param {Observer} observer
    */
   attach(observer) {
-    BU.CLI('어태취');
     this.observers.push(observer);
   }
 

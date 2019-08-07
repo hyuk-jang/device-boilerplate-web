@@ -39,7 +39,7 @@ class ApiServer extends AbstApiServer {
           try {
             // Parser 가 EOT 까지 삭제하므로 끝에 붙임
             data += EOT;
-            BU.CLI(data);
+            // BU.CLI(data);
             // 수신받은 데이터의 CRC 계산 및 본 데이터 추출
             const strData = decodingMsg(data).toString();
             // BU.CLI(strData);
