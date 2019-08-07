@@ -52,10 +52,8 @@ router.get(
 
     // BU.CLI(flowCmdDom);
 
+    // 명령 정보만 따로 저장
     req.locals.controlInfo = map.controlInfo;
-
-    const { setCmdList, flowCmdList, scenarioCmdList } = map.controlInfo;
-
     delete map.controlInfo;
 
     //  로그인 한 사용자 세션 저장
