@@ -270,6 +270,100 @@ class PowerModel extends BiModule {
     return refinedLineChartList;
   }
 
+  /**
+   * 발전 현황을 나타내는 기본적인 정보 계산
+   * @param {number=} siteId
+   */
+  async getGeneralPowerInfo(siteId) {
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+
+    /** @type {V_PW_PROFILE[]} */
+    const viewPowerProfileRows = await this.getTable('v_pw_profile', mainWhere);
+
+    // 연결된 모든 인버터 Seq 목록 추출
+    const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
+
+    // 인버터 검색 Where 절
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+    // 인버터 월간 정보 추출
+    const monthSearchRange = this.createSearchRange({
+      searchType: 'months',
+      searchInterval: 'month',
+    });
+
+    const monthInverterStatusRows = await this.getInverterStatistics(
+      monthSearchRange,
+      inverterSeqList,
+    );
+
+    // console.timeEnd('getInverterStatistics');
+    // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
+    const monthPower = webUtil.reduceDataList(monthInverterStatusRows, 'interval_power');
+
+    /** @type {V_PW_INVERTER_STATUS[]} */
+    const inverterStatusRows = await this.getTable('v_pw_inverter_status', inverterWhere);
+
+    BU.CLI(inverterStatusRows)
+
+    // 인버터 발전 현황 데이터 검증
+    const validInverterDataList = webUtil.checkDataValidation(
+      inverterStatusRows,
+      new Date(),
+      'writedate',
+    );
+
+    // 설치 인버터 총 용량
+    const ivtAmount = _(viewPowerProfileRows)
+      .map('ivt_amount')
+      .sum();
+
+    // Curr PV 전력
+    const pvKw = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
+      1,
+      3,
+    );
+    // Curr Power 전력
+    const currKw = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
+      1,
+      2,
+    );
+
+    // 금일 발전량
+    const dailyPower = _(inverterStatusRows)
+      .map('daily_power_kwh')
+      .sum();
+
+    // Curr Power 전력
+    const cumulativePower = webUtil.calcValue(
+      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', true),
+      0.001,
+      3,
+    );
+
+    // 현재 발전 효율
+    const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
+
+    const powerGenerationInfo = {
+      currKw,
+      currPf: _.isNaN(currPf) ? '-' : currPf,
+      currKwYaxisMax: _.round(ivtAmount),
+      dailyPower,
+      monthPower,
+      cumulativePower,
+      // co2: _.round(cumulativePower * 0.424, 3),
+      isOperationInverter: _.chain(validInverterDataList)
+        .map('hasValidData')
+        .values()
+        .every(Boolean)
+        .value(),
+    };
+
+    return powerGenerationInfo;
+  }
+
   // /**
   //  * 인버터 차트 반환
   //  * @param {searchRange} searchRange

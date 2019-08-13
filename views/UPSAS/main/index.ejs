@@ -181,19 +181,13 @@
     </div>
 
     <script>
-      let powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
-      let growthEnv = <%- JSON.stringify(growthEnv) %>;
+        var powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
 
-      document.getElementById('inclinedSolar').setAttribute('value', powerGenerationInfo.inclinedSolar);
-
-      // 발전 현황 셋팅
+        // 발전 현황 셋팅
       setDomElementValueWithJson(document.getElementById('current_power_data'), powerGenerationInfo, 'innerHTML',
         'data-id')
       setDomElementValueWithJson(document.getElementById('daily_power_data'), powerGenerationInfo, 'innerHTML', 'data-id')
       setDomElementValueWithJson(document.getElementById('powerStatus'), powerGenerationInfo, 'innerHTML', 'id')
-
-      $('#growthEnv').html(<%- JSON.stringify(dom.sensorStatusListDom) %>)
-      $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
       // 금일 발전량 차트
       makeGaugeChart({
@@ -226,70 +220,6 @@
             valueSuffix: 'kW'
           }
         },
-      })
-
-      makeColumnChart({
-        domId: 'growthEnvChart',
-        xAxis: {
-          categories: ['토양', '외기']
-        },
-        yAxis: [{
-            labels: {
-              format: '{value} °C',
-              style: {
-                color: Highcharts.getOptions().colors[1]
-              }
-            },
-            title: {
-              text: '온도'
-            },
-            min: -10,
-            max: 40,
-            tickInterval: 10,
-            // tickAmount: 5,
-          },
-          {
-            labels: {
-              format: '{value} %',
-              style: {
-                color: Highcharts.getOptions().colors[1]
-              }
-            },
-            title: {
-              text: '습도'
-            },
-            min: 0,
-            max: 100,
-            tickInterval: 20,
-            // tickAmount: 5,
-            opposite: 1
-          },
-        ],
-        series: [{
-            name: '온도',
-            data: [growthEnv.soilTemperature, growthEnv.outsideAirTemperature],
-            color: 'red',
-            tooltip: {
-              valueSuffix: ' °C'
-            }
-          },
-          {
-            name: '습도',
-            data: [growthEnv.soilReh, growthEnv.outsideAirReh],
-            yAxis: 1,
-            tooltip: {
-              valueSuffix: ' %'
-            }
-          },
-          {
-            name: '토양 EC',
-            data: [growthEnv.soilWaterValue],
-            yAxis: 1,
-            tooltip: {
-              valueSuffix: ' %'
-            }
-          }
-        ]
       })
     </script>
   </body>
