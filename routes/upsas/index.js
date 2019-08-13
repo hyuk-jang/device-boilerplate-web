@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
@@ -35,6 +36,12 @@ const DEFAULT_SITE_ID = 'all';
 //   next();
 // });
 
+// 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_TYPE = 'days';
+// Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_INTERVAL = 'hour';
+const DEFAULT_SEARCH_OPTION = 'merge';
+
 // server middleware
 router.get(
   [
@@ -61,6 +68,34 @@ router.get(
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
+    // req.query 값 비구조화 할당
+    const {
+      searchType = DEFAULT_SEARCH_TYPE,
+      searchInterval = DEFAULT_SEARCH_INTERVAL,
+      searchOption = DEFAULT_SEARCH_OPTION,
+      strStartDateInputValue = moment().format('YYYY-MM-DD'),
+      strEndDateInputValue = '',
+    } = req.query;
+
+    // BU.CLI(req.query);
+
+    // SQL 질의를 위한 검색 정보 옵션 객체 생성
+    // const searchRange = biModule.createSearchRange({
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: strStartDateInputValue,
+    //   strEndDate: strEndDateInputValue,
+    // });
+    const searchRange = biModule.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'hour',
+      strStartDate: '2019-08-05',
+      strEndDate: '',
+    });
+
+    _.set(req, 'locals.searchRange', searchRange);
+
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
@@ -77,7 +112,7 @@ router.get(
         );
         totalSiteAmount += totalAmount;
         const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
+        const siteName = `${totalAmount}kW급 (${siteMainName})`;
         return { siteId: strMainSeq.toString(), name: siteName, m_name: siteMainName };
       })
       .value();
