@@ -594,10 +594,10 @@ exports.makeDynamicLineChart = makeDynamicLineChart;
  * @param {Object[]} dataRows
  * @param {Object} rangeInfo
  * @param {string[]} rangeInfo.strGroupDateList
- * @param {plotSeries} rangeInfo.plotSeries
+ * @param {plotSeriesInfo} rangeInfo.plotSeries
  */
 function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
-  // BU.CLI(rangeInfo);
+  // BU.CLI(dataRows);
   const { domId, subtitle, title, scale, toFixed = 1, yAxisList, chartOption } = lineChartConfig;
 
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
@@ -676,6 +676,56 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
       },
       option: calcStatisticsReport(dataRows, chartOption),
     };
+
+    strGroupDateList.forEach(strGroupDate => {
+      chartSeries.data.push(
+        _(dataRows)
+          .filter({ [dateKey]: strGroupDate })
+          .map(dataInfo => _.get(dataInfo, selectKey))
+          .sum(),
+      );
+    });
+
+    //   const resultFind = _.find(groupedDataRows, {
+    //     [dateKey]: strGroupDate,
+    //   });
+
+    //   // BU.CLI(findGridObj)
+    //   let data = _.isEmpty(resultFind) ? '' : resultFind[selectKey];
+    //   // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
+    //   data =
+    //     _.isNumber(data) && _.isNumber(scale)
+    //       ? _.chain(data)
+    //           .multiply(scale)
+    //           .round(toFixed)
+    //           .value()
+    //       : data;
+
+    //   chartSeries.data.push(data);
+    // });
+
+    // chartSeries.data = _(dataRows)
+    //   .groupBy(dateKey)
+    //   .toPairs() // [[date, [[data], [data], [data]]], ...]
+    //   .sortBy() // 날짜 오름 차순 정렬
+    //   .map(pairList => {
+    //     return [
+    //       moment(_.head(pairList))
+    //         .add(9, 'hours')
+    //         .valueOf(),
+
+    //       _.chain(_.nth(pairList, 1))
+    //         .map(selectKey)
+    //         .sum()
+    //         .multiply(scale)
+    //         .round(toFixed)
+    //         .value(),
+    //       // _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
+    //     ];
+    //   })
+    // .value();
+
+    refinedLineChart.series.push(chartSeries);
 
     // baseRange.fullTxtPoint.forEach(fullTxtDate => {
     //   const resultFind = _.find(dataRows, {

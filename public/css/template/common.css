@@ -228,7 +228,8 @@ _:-ms-input-placeholder,
 }
 
 .component_side_box {
-  width: 20%;
+  width: 200px;
+  min-width: 200px;
   height: 350px;
 }
 
@@ -283,9 +284,16 @@ _:-ms-input-placeholder,
 /***************************************/
 /********** Dash Board 영역 ************/
 /***************************************/
-.component_piece_box {
-  width: 39%;
+.component_pieceDouble_box {
+  width: 60%;
   height: 350px;
+}
+
+.component_piece_box {
+  width: 45%;
+  height: 350px;
+  display: flex;
+  justify-content: center;
 }
 
 .component_piece_area {
