@@ -458,9 +458,9 @@ Highcharts.setOptions({
  * @param {Object} chartInfo.series.tooltip
  * @param {string} chartInfo.series.tooltip.valueSuffix Data Unit
  */
-function makeLineChart(chartInfo) {
+function makeLineChart(chartInfo, isAreaChart = false) {
   if (chartInfo.series.length) {
-    Highcharts.chart(chartInfo.domId, {
+    const lineChartInfo = {
       chart: {
         type: 'spline',
         zoomType: 'xy',
@@ -540,14 +540,167 @@ function makeLineChart(chartInfo) {
             lineWidth: 1,
           },
         },
-        series: _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
+        // series: _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
       },
 
       series: chartInfo.series,
       credits: {
         enabled: false,
       },
-    });
+    };
+
+    if (_.isNumber(_.get(chartInfo, 'plotSeries.pointStart'))) {
+      console.log('살려줘');
+      _.assign(lineChartInfo.plotOptions.spline, _.get(chartInfo, 'plotSeries'));
+
+      console.log(lineChartInfo.plotOptions.spline);
+    }
+
+    Highcharts.chart(chartInfo.domId, lineChartInfo);
+  } else {
+    $(`#${chartInfo.domId}`).html(`<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`);
+  }
+}
+/**
+ * @param {Object} chartInfo
+ * @param {string} chartInfo.domId
+ * @param {string=} chartInfo.title
+ * @param {string=} chartInfo.subtitle
+ * @param {Object} chartInfo.xAxis
+ * @param {string=} chartInfo.xAxis.title
+ * @param {Object[]} chartInfo.yAxis
+ * @param {string=} chartInfo.yAxis.title
+ * @param {string=} chartInfo.yAxis.dataUnit
+ * @param {Object=} chartInfo.plotSeries
+ * @param {number} chartInfo.plotSeries.pointStart 시작 UTC
+ * @param {number} chartInfo.plotSeries.pointInterval 시간 Interval
+ * @param {Object[]} chartInfo.series
+ * @param {string} chartInfo.series.name
+ * @param {number[]} chartInfo.series.data
+ * @param {number} chartInfo.series.yAxis 0: left, 1: right
+ * @param {string=} chartInfo.series.color 카테고리 색상
+ * @param {Object} chartInfo.series.tooltip
+ * @param {string} chartInfo.series.tooltip.valueSuffix Data Unit
+ */
+function makeAreaChart(chartInfo) {
+  if (chartInfo.series.length) {
+    const areaChartInfo = {
+      chart: {
+        type: 'area',
+        zoomType: 'xy',
+      },
+      title: {
+        text: _.get(chartInfo, 'title', ''),
+      },
+      subtitle: {
+        text: _.get(chartInfo, 'subtitle', ''),
+      },
+      xAxis: {
+        title: {
+          // text: chartDecorator.xAxisTitle
+        },
+        type: 'datetime',
+        // tickWidth: 0,
+        // gridLineWidth: 1,
+        dateTimeLabelFormats: {
+          second: '%H:%M:%S',
+          minute: '%H:%M',
+          hour: '%H:%M',
+          day: '%m-%e',
+          week: '%m-%e',
+          month: '%y-%m',
+          year: '%Y',
+        },
+      },
+      yAxis: [
+        {
+          // left y axis
+          title: {
+            text: _.get(chartInfo, 'yAxis[0].yTitle', ''),
+          },
+          labels: {
+            align: 'left',
+            x: 3,
+            y: 16,
+            format: `{value:.,0f}${_.get(chartInfo, 'yAxis[0].dataUnit', '')}`,
+          },
+          showFirstLabel: false,
+        },
+        {
+          // right y axis
+          // linkedTo: 0,
+          // gridLineWidth: 0,
+          opposite: true,
+          title: {
+            text: _.get(chartInfo, 'yAxis[1].yTitle', ''),
+          },
+          labels: {
+            align: 'right',
+            x: -3,
+            y: 16,
+            format: `{value:.,0f}${_.get(chartInfo, 'yAxis[1].dataUnit', '')}`,
+          },
+          showFirstLabel: false,
+        },
+      ],
+
+      legend: {
+        align: 'left',
+        // verticalAlign: 'top',
+        borderWidth: 0,
+        enabled: false,
+      },
+
+      tooltip: {
+        valueDecimals: 2,
+        shared: true,
+        // crosshairs: true
+      },
+
+      plotOptions: {
+        area: {
+          fillColor: {
+            linearGradient: {
+              x1: 0,
+              y1: 0,
+              x2: 0,
+              y2: 1,
+            },
+            stops: [
+              [0, Highcharts.getOptions().colors[0]],
+              [
+                1,
+                Highcharts.Color(Highcharts.getOptions().colors[0])
+                  .setOpacity(0)
+                  .get('rgba'),
+              ],
+            ],
+          },
+          marker: {
+            enabled: false,
+            symbol: 'circle',
+            radius: 2,
+            states: {
+              hover: {
+                enabled: true,
+              },
+            },
+          },
+        },
+        // series: _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
+      },
+
+      series: chartInfo.series,
+      credits: {
+        enabled: false,
+      },
+    };
+
+    if (_.isNumber(_.get(chartInfo, 'plotSeries.pointStart'))) {
+      _.assign(areaChartInfo.plotOptions.area, _.get(chartInfo, 'plotSeries'));
+    }
+
+    Highcharts.chart(chartInfo.domId, areaChartInfo);
   } else {
     $(`#${chartInfo.domId}`).html(`<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`);
   }

@@ -67,6 +67,8 @@ router.get(
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
 
     // req.query 값 비구조화 할당
     const {
@@ -80,19 +82,19 @@ router.get(
     // BU.CLI(req.query);
 
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
     const searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'hour',
-      strStartDate: '2019-08-05',
-      strEndDate: '',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'days',
+    //   searchInterval: 'hour',
+    //   strStartDate: '2019-08-05',
+    //   strEndDate: '',
+    // });
 
     _.set(req, 'locals.searchRange', searchRange);
 
@@ -186,7 +188,7 @@ router.get(
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await biModule.getCurrWeatherCast(mainRow.weather_location_seq);
+    const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

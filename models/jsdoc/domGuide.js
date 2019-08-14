@@ -30,7 +30,7 @@
  * @property {Object[]} yAxis
  * @property {string=} yAxis.title
  * @property {string=} yAxis.dataUnit
- * @property {plotSeries=} plotSeries
+ * @property {plotOptions=} plotOptions
  * @property {chartSeriesInfo[]} series
  */
 
@@ -47,7 +47,19 @@
  */
 
 /**
- * @typedef {Object} plotSeries
+ * @typedef {Object} plotOptions
+ * @property {plotOptionSplineInfo} spline 시작 UTC
+ */
+
+/**
+ * @typedef {Object} plotOptionSplineInfo
+ * @property {Object} marker 시작 UTC
+ * @property {number} pointStart 시작 UTC
+ * @property {number} pointInterval 시간 Interval
+ */
+
+/**
+ * @typedef {Object} plotSeriesInfo
  * @property {number} pointStart 시작 UTC
  * @property {number} pointInterval 시간 Interval
  */

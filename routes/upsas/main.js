@@ -25,6 +25,8 @@ router.get(
     const biModule = global.app.get('biModule');
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
@@ -33,20 +35,50 @@ router.get(
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     // ********** Power 관련
-
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-    // BU.CLI(powerProfileRows);
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
-    BU.CLI(searchRangeInfo);
+    // BU.CLI(searchRangeInfo);
 
     // 발전 현황을 나타내는 기본적인 정보
-    const powerGenerationInfo = await powerModel.getGeneralPowerInfo(siteId);
+    const { powerGenerationInfo, validInverterDataList } = await refineModel.getGeneralPowerInfo(
+      siteId,
+    );
 
-    BU.CLI(powerGenerationInfo);
+    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+
+    // 인버터 평균 출력 현황 차트로 긁어옴
+    const inverterLineChart = await refineModel.getInverterChart(searchRangeInfo, inverterSeqList, {
+      domId: 'daily_kw_graph',
+      // title: '인버터 발전 현황',
+      yAxisList: [
+        {
+          dataUnit: 'kW',
+          yTitle: '전력(kW)',
+        },
+      ],
+      chartOption: {
+        selectKey: 'avg_grid_kw',
+        dateKey: 'group_date',
+        // groupKey: 'inverter_seq',
+        colorKey: 'chart_color',
+        sortKey: 'chart_sort_rank',
+      },
+    });
+
+    // BU.CLIN(inverterLineChart, 3);
+
+    // 인버터 현재 데이터 동적 생성 돔
+    _.set(
+      req,
+      'locals.dom.inverterStatusListDom',
+      domMakerMain.makeInverterStatusDom(validInverterDataList),
+    );
+
+    req.locals.inverterLineChart = inverterLineChart;
 
     req.locals.powerGenerationInfo = powerGenerationInfo;
 

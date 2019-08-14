@@ -37,6 +37,8 @@ const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
 const PowerModel = require('./models/templates/PowerModel');
+const WeatherModel = require('./models/templates/WeatherModel');
+const RefineModel = require('./models/templates/RefineModel');
 
 app.use(bodyParser.json());
 app.use(
@@ -75,6 +77,8 @@ app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
 app.set('powerModel', new PowerModel(dbInfo));
+app.set('weatherModel', new WeatherModel(dbInfo));
+app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(
   session({

@@ -492,9 +492,7 @@ exports.makeSensorChart = makeSensorChart;
  * @param {string} chartConfig.chartOptionList.yTitle
  * @param {string} chartConfig.chartOptionList.dataUnit
  * @param {nodeDefStorage[]} nodeDefStorageList
- * @param {Object} plotSeries
- * @param {number} plotSeries.pointStart 시작 UTC
- * @param {number} plotSeries.pointInterval 시간 Interval
+ * @param {plotSeriesInfo} plotSeries
  */
 function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
   // BU.CLI(plotSeries)
