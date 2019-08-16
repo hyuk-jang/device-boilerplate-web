@@ -27,7 +27,7 @@ class RefineModel extends BiModule {
    * 발전 현황을 나타내는 기본적인 정보 계산
    * @param {number=} siteId
    */
-  async getGeneralPowerInfo(siteId) {
+  async refineGeneralPowerInfo(siteId) {
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     /** @type {V_PW_PROFILE[]} */
@@ -141,15 +141,68 @@ class RefineModel extends BiModule {
 
   /**
    * 인버터 차트 뽑아옴
+   * @param {number[]=} inverterSeqList
+   */
+  async refineInverterStatus(inverterSeqList) {
+    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+    /** @type {V_INVERTER_STATUS[]} */
+    const inverterStatusRows = await this.powerModel.getTable(
+      'v_pw_inverter_status',
+      inverterWhere,
+    );
+
+    /** @type {{inverter_seq: number, siteName: string}[]} */
+    const inverterSiteNameList = await this.powerModel.makeInverterNameList(inverterSeqList);
+
+    _(inverterStatusRows).forEach(statusRow => {
+      statusRow.siteName = _.get(
+        _.find(inverterSiteNameList, {
+          inverter_seq: Number(statusRow.inverter_seq),
+        }),
+        'siteName',
+        '',
+      );
+    });
+
+    // 데이터 검증
+    const validInverterStatusList = webUtil.checkDataValidation(
+      inverterStatusRows,
+      new Date(),
+      'writedate',
+    );
+
+    /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
+    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
+
+    return refinedInverterStatusList;
+  }
+
+  /**
+   * 인버터 차트 뽑아옴
    * @param {searchRange} searchRange
    * @param {number[]=} inverterSeqList
    * @param {lineChartConfig} lineChartConfig
    */
-  async getInverterChart(searchRange, inverterSeqList, lineChartConfig) {
+  async refineInverterChart(searchRange, inverterSeqList, lineChartConfig) {
     const inverterPowerList = await this.powerModel.getInverterPower(searchRange, inverterSeqList);
 
+    const inverterSiteNameList = await this.powerModel.makeInverterNameList(inverterSeqList);
+
     // 동적 라인 차트를 생성
-    return webUtil.makeDynamicLineChart(lineChartConfig, inverterPowerList);
+    const inverterLineChart = webUtil.makeDynamicLineChart(lineChartConfig, inverterPowerList);
+
+    inverterLineChart.series.forEach(chartInfo => {
+      chartInfo.name = _.get(
+        _.find(inverterSiteNameList, {
+          inverter_seq: Number(chartInfo.name),
+        }),
+        'siteName',
+        chartInfo.name,
+      );
+    });
+
+    return inverterLineChart;
   }
 }
 module.exports = RefineModel;

@@ -65,6 +65,8 @@ router.get(
     // 선택한 SiteId와 인버터 Id를 정의
     const { naviMenu = 'main', siteId = userMainSeq } = req.params;
 
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
     /** @type {WeatherModel} */
@@ -101,7 +103,7 @@ router.get(
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
-    _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
+    _.set(req, 'locals.viewPowerProfileRows', _.filter(viewPowerProfileRows, mainWhere));
 
     let totalSiteAmount = 0;
     const siteList = _(viewPowerProfileRows)
@@ -127,6 +129,7 @@ router.get(
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
+    _.set(req, 'locals.mainInfo.mainWhere', mainWhere);
 
     // BU.CLI(req.locals.mainInfo);
 

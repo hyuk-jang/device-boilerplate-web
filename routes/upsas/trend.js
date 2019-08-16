@@ -88,10 +88,10 @@ router.get(
     const biDevice = global.app.get('biDevice');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
+    const { siteId, mainWhere } = req.locals.mainInfo;
 
     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    // const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     // console.time('init');
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
@@ -162,6 +162,8 @@ router.get(
     // FIXME: 구간 최대 값 차 차트 --> getSensorReport 밑에 저장해둠. 수정 필요.
 
     // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
+
+    // BU.CLIN(nodeDefStorageList);
 
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
