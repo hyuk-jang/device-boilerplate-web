@@ -1,8 +1,15 @@
 /**
+ * @typedef {Object} blockTableInfo DB Table 정보
+ * @property {string} tableName
+ * @property {blockDomConfig[]} blockChartList
+ */
+
+/**
  * @typedef {Object} blockDomConfig 센서 트렌드 페이지를 생성하기 위한 차트별 설정 정보
  * @property {string} domId Dom Element ID
  * @property {string} title 차트 메인 제목
  * @property {string} subtitle 차트 서브 제목
+ * @property {string} dataTable 데이터를 가져올 DB Table Name
  * @property {Object[]} chartOptionList 생성할 차트 내용 목록
  * @property {blockConfig[]} chartOptionList.blockConfigList ND ID List
  * @property {string} chartOptionList.yTitle Y축 제목
@@ -13,6 +20,7 @@
  * @typedef {Object} blockConfig 센서 트렌드 페이지를 생성하기 위한 차트별 설정 정보
  * @property {string} fromKey Node Def Id
  * @property {string=} toKey default: fromKey, Table Column. fromKey를 toKey로 변환해서 저장한 것.
+ * @property {boolean=} isDataAmount 데이터를 시간당 량으로 환산 여부. 기본값 false
  * @property {string=} mixColor 원 색에 조합할 색상
  */
 
