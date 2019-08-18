@@ -56,7 +56,7 @@ router.get(
     // const searchRange = biModule.createSearchRange({
     //   searchType: 'days',
     //   searchInterval: 'hour',
-    //   strStartDate: '2019-05-21',
+    //   strStartDate: '2019-08-16',
     //   strEndDate: '',
     // });
 
@@ -123,9 +123,9 @@ router.get(
     // BU.CLIN(sensorReportRows);
 
     // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    const strGroupDateList = commonUtil.getGroupDateList(searchRangeInfo);
     // plotSeries 를 구하기 위한 객체
-    const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    const momentFormat = commonUtil.getMomentFormat(searchRangeInfo);
 
     // 하루 단위로 검색할 경우에만 시간 제한을 둠
     // if (searchRangeInfo.searchType === 'days') {
@@ -133,11 +133,11 @@ router.get(
     //     startHour: 7,
     //     endHour: 20,
     //   };
-    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
-    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
+    //   strGroupDateList = commonUtil.getGroupDateList(searchRangeInfo, rangeInfo);
+    //   momentFormat = commonUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
     // } else {
-    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    //   strGroupDateList = commonUtil.getGroupDateList(searchRangeInfo);
+    //   momentFormat = commonUtil.getMomentFormat(searchRangeInfo);
     // }
 
     // console.time('extPlaRelSensorRep');
@@ -197,6 +197,10 @@ router.get(
 router.get(
   ['/:siteId', '/:siteId/inverter'],
   asyncHandler(async (req, res, next) => {
+    // TODO: Block으로 처리할  V_DV_NODE를 가져옴
+
+    // TODO: Block dataTable 에서 가져올 column (toKey) 배열을 생성 및 searchRange에 맞는 데이터를 가져옴
+
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
@@ -208,11 +212,9 @@ router.get(
     /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
 
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-
     /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+    // const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+    const powerProfileRows = req.locals.viewPowerProfileRows;
     // BU.CLI(powerProfileRows);
 
     // 인버터 Seq 목록
@@ -221,10 +223,10 @@ router.get(
 
     const deviceProtocol = new DeviceProtocol(siteId);
 
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    const strGroupDateList = commonUtil.getGroupDateList(searchRangeInfo);
 
     // plotSeries 를 구하기 위한 객체
-    const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    const momentFormat = commonUtil.getMomentFormat(searchRangeInfo);
 
     // BU.CLI(strGroupDateList);
 
