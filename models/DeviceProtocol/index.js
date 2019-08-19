@@ -1,4 +1,6 @@
-const AbstDeviceProtocol = require('./DeviceProtocol');
+const { BU } = require('base-util-jh');
+
+// const AbstDeviceProtocol = require('./DeviceProtocol');
 const UpsasDP = require('./UpsasDP');
 const FarmParallelDP = require('./FarmParallelDP');
 const Solar2WayDP = require('./Solar2WayDP');
@@ -11,8 +13,8 @@ function selectDeviceProtocol() {
   const projectMainId = process.env.PJ_MAIN_ID || 'FP';
   // const projectSubId = process.env.PJ_SUB_ID || 'RnD';
 
-  let DeviceProtocol = AbstDeviceProtocol;
-
+  let DeviceProtocol;
+  // let DeviceProtocol = AbstDeviceProtocol;
   switch (projectMainId) {
     case 'UPSAS':
       DeviceProtocol = UpsasDP;

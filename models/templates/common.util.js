@@ -137,3 +137,38 @@ function getGroupDateList(searchRange, controlHour = {}) {
   return groupDateList;
 }
 exports.getGroupDateList = getGroupDateList;
+
+/**
+ * 1. DB에서 검색한 데이터 결과를 완전한 날짜를 지닌 Rows로 변환
+ * 2. 해당 node_seq를 사용하는 PlaceRelation에 결합
+ * Extends Place Realtion Rows With Perfect Sensor Report Rows
+ * @param {V_DV_PLACE_RELATION[]} placeRelationRows
+ * @param {Object[]} dataRows
+ * @param {string[]} strGroupDateList
+ */
+function extPerfectRows(groupKey, dataRows, strGroupDateList) {
+  // Node Seq 별로 그룹
+  const dataRowsGroup = _.groupBy(dataRows, groupKey);
+
+  _.keys(dataRowsGroup).forEach(groupSeq => {
+    // 모든 날짜 목록을 순회하면서 빈 데이터 목록 생성
+    const emptyDataRows = _.map(strGroupDateList, strGroupDate => ({
+      [groupKey]: Number(groupSeq),
+      group_date: strGroupDate,
+    }));
+
+    // BU.CLIN(emptySensorReportRows);
+    // DB 데이터 상 데이터가 없는 곳은 emptyAvgSensorReport를 채워넣은 후 날짜 순으로 정렬
+    const unionSensorReportRows = _(dataRowsGroup[groupSeq])
+      .unionBy(emptyDataRows, 'group_date')
+      .sortBy('group_date')
+      .value();
+
+    // BU.CLIN(unionSensorReportRows);
+    //  union 처리 된 결과물을 재 정의
+    _.set(dataRowsGroup, groupSeq, unionSensorReportRows);
+  });
+
+  return dataRowsGroup;
+}
+exports.extPerfectRows = extPerfectRows;
