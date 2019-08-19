@@ -540,7 +540,10 @@ function makeLineChart(chartInfo, isAreaChart = false) {
             lineWidth: 1,
           },
         },
-        // series: _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
+        series: {
+          turboThreshold: 0,
+        },
+        // _.assign({ turboThreshold: 0 }, _.get(chartInfo, 'plotSeries', {})),
       },
 
       series: chartInfo.series,
@@ -550,10 +553,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
     };
 
     if (_.isNumber(_.get(chartInfo, 'plotSeries.pointStart'))) {
-      console.log('살려줘');
       _.assign(lineChartInfo.plotOptions.spline, _.get(chartInfo, 'plotSeries'));
-
-      console.log(lineChartInfo.plotOptions.spline);
     }
 
     Highcharts.chart(chartInfo.domId, lineChartInfo);

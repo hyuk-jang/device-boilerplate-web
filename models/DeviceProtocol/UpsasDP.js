@@ -616,6 +616,7 @@ class UpsasDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
+                  mixColor: '#e52352',
                 },
               ],
               dataUnit: 'A',
@@ -668,7 +669,7 @@ class UpsasDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'max_c_kwh_chart',
+          domId: 'max_c_mwh_chart',
           title: '누적 발전량',
           chartOptionList: [
             {
@@ -676,15 +677,15 @@ class UpsasDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerCpKwh,
                   toKey: 'power_cp_kwh',
-                  convertKey: 'max_power_cp_kwh',
+                  convertKey: 'max_power_cp_mwh',
                   convertName: '누적 발전량',
                   calcType: this.CALC_TYPE.MAX,
                   calculate: 0.001,
                   toFixed: 3,
                 },
               ],
-              dataUnit: 'kWh',
-              yTitle: '전력(kWh)',
+              dataUnit: 'MWh',
+              yTitle: '전력(MWh)',
             },
           ],
         },
