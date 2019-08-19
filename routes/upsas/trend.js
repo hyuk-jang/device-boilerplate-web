@@ -184,10 +184,6 @@ router.get(
     _.set(req, 'locals.dom.divDomList', divDomList);
     _.set(req, 'locals.madeLineChartList', madeLineChartList);
 
-    // TODO: 1. 각종 Chart 작업
-
-    // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
-
     // BU.CLIN(req.locals);
     res.render('./trend/sensorTrend', req.locals);
   }),
@@ -197,69 +193,31 @@ router.get(
 router.get(
   ['/:siteId', '/:siteId/inverter'],
   asyncHandler(async (req, res, next) => {
-    // TODO: Block으로 처리할  V_DV_NODE를 가져옴
-
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    // TODO: Block dataTable 에서 가져올 column (toKey) 배열을 생성 및 searchRange에 맞는 데이터를 가져옴
-
-    /** @type {PowerModel} */
-    const powerModel = global.app.get('powerModel');
-
-    /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
-
-    // commonUtil.applyHasNumbericReqToNumber(req);
-
     const { siteId } = req.locals.mainInfo;
 
-    await refineModel.refineBlockCharts(searchRangeInfo, 'inverter', siteId);
-
-    /** @type {V_PW_PROFILE[]} */
-    // const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-    const powerProfileRows = req.locals.viewPowerProfileRows;
-    // BU.CLI(powerProfileRows);
-
-    // 인버터 Seq 목록
-    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    // const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-
-    const deviceProtocol = new DeviceProtocol(siteId);
-
-    const strGroupDateList = commonUtil.getGroupDateList(searchRangeInfo);
-
-    // plotSeries 를 구하기 위한 객체
-    const momentFormat = commonUtil.getMomentFormat(searchRangeInfo);
-
-    // BU.CLI(strGroupDateList);
-
-    const madeLineChartList = await powerModel.getInverterLineChart(
-      searchRangeInfo,
-      deviceProtocol.trendInverterViewList,
-      inverterSeqList,
-      {
-        strGroupDateList,
-        plotSeries: momentFormat.plotSeries,
-      },
+    // console.time('refinedInverterCharts');
+    const refinedInverterCharts = await refineModel.refineBlockCharts(
+      _.get(req, 'locals.searchRange'),
+      'inverter',
+      siteId,
     );
-
-    // BU.CLIN(madeLineChartList, 3);
+    // console.timeEnd('refinedInverterCharts');
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const inverterDomTemplate = _.template(`
         <div class="lineChart_box default_area" id="<%= domId %>"></div>
     `);
-    const divDomList = madeLineChartList.map(refinedChart =>
+    const divDomList = refinedInverterCharts.map(refinedChart =>
       inverterDomTemplate({
         domId: refinedChart.domId,
       }),
     );
 
     _.set(req, 'locals.dom.divDomList', divDomList);
-    _.set(req, 'locals.madeLineChartList', madeLineChartList);
-
-    // BU.CLIN(inverterTrendRows);
+    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
 
     res.render('./trend/inverterTrend', req.locals);
   }),
