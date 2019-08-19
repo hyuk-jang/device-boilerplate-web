@@ -10,6 +10,13 @@ const WeatherModel = require('./WeatherModel');
 
 const webUtil = require('./web.util');
 const excelUtil = require('./excel.util');
+const commonUtil = require('./common.util');
+
+const DeviceProtocol = require('../DeviceProtocol');
+
+const VIEW_DV_PLACE = 'V_DV_PLACE';
+const VIEW_DV_NODE_DEF = 'V_DV_NODE_DEF';
+const VIEW_DV_PLACE_RELATION = 'V_DV_PLACE_RELATION';
 
 class RefineModel extends BiModule {
   /** @param {dbInfo} dbInfo */
@@ -203,6 +210,220 @@ class RefineModel extends BiModule {
     });
 
     return inverterLineChart;
+  }
+
+  /**
+   * 블록 차트 목록을 뽑아옴
+   * @param {searchRange} searchRange
+   * @param {string} blockId Block Id
+   * @param {number=} mainSeq
+   */
+  async refineBlockCharts(searchRange, blockId, mainSeq) {
+    const deviceProtocol = new DeviceProtocol();
+
+    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
+    const blockTrendViews = deviceProtocol.getBlockTrendViews(blockId);
+    const {
+      blockTableName,
+      baseTableInfo: { tableName, placeKey, fromToKeyTableList },
+      blockChartList,
+    } = blockTrendViews;
+
+    // TODO: mainWhere 추출
+    const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
+
+    // TODO: SiteId에 맞는 V_DV_PLACE 목록 가져옴
+    /** @type {V_DV_PLACE[]} */
+    const viewPlaceRows = await this.getTable(VIEW_DV_PLACE, mainWhere);
+    /** @type {V_DV_NODE_DEF[]} */
+    const viewNodeDefRows = await this.getTable(VIEW_DV_NODE_DEF);
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const viewPlaceRelationRows = await this.getTable(VIEW_DV_PLACE_RELATION);
+
+    const blockDataRows = await this.getDynamicBlockRows(searchRange, blockId, mainSeq);
+
+    // BU.CLIN(blockDataRows);
+
+    // plotSeries 를 구하기 위한 객체
+    const { plotSeries } = commonUtil.getMomentFormat(searchRange);
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    const strGroupDateList = commonUtil.getGroupDateList(searchRange);
+
+    // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
+    const blockDataRowsGroup = commonUtil.extPerfectRows(
+      _.head(fromToKeyTableList).toKey,
+      blockDataRows,
+      strGroupDateList,
+    );
+
+    // BU.CLI(blockDataRowsGroup);
+
+    const refinedDomChart = blockTrendViews.blockChartList.map(blockChartInfo => {
+      const { domId, title = '', subtitle = '', chartOptionList } = blockChartInfo;
+      /** @type {lineChartInfo} 정제된 차트 정보 */
+      const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
+
+      chartOptionList.forEach((chartOption, index) => {
+        // 보여줄 축 정보
+        const { dataUnit = '', yTitle, blockConfigList } = chartOption;
+        // Y축 표현 정보 삽입
+        refinedChart.yAxis.push({
+          yTitle,
+          dataUnit,
+        });
+
+        blockConfigList.forEach(blockConfig => {
+          const { fromKey, convertKey, mixColor } = blockConfig;
+          let { convertName = '' } = blockConfig;
+
+          const placeRelationInfo = _.find(viewPlaceRelationRows, { nd_target_id: fromKey });
+
+          // 존재하지 않을경우 throw
+          if (_.isEmpty(placeRelationInfo)) {
+            throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
+          }
+
+          const {
+            node_name: nodeName,
+            serial_number: serial,
+            chart_color: chartColor = '',
+          } = placeRelationInfo;
+
+          // 변환하고자 하는 이름이 존재할 경우
+          if (convertName.length) {
+            convertName = `${convertName} ${serial}`;
+          } else {
+            convertName = nodeName;
+          }
+
+          /** @type {chartSeriesInfo} */
+          const chartSeries = {
+            name: convertName,
+            color: chartColor.length ? chartColor : BU.blendColors(chartColor, mixColor, 0.5),
+            tooltip: {
+              valueSuffix: dataUnit,
+            },
+            yAxis: index,
+            data: [],
+          };
+
+          refinedChart.series.push(chartSeries);
+        });
+      });
+
+      return refinedChart;
+    });
+
+    // BU.CLIN(refinedDomChart, 3);
+
+    // TODO: Refine Chart Format
+
+    // TODO: Merge chart name
+  }
+
+  /**
+   * 블록 차트 목록을 뽑아옴
+   * @param {searchRange} searchRange
+   * @param {string} blockId Block Id
+   * @param {number=} mainSeq
+   */
+  async getDynamicBlockRows(searchRange, blockId, mainSeq) {
+    const deviceProtocol = new DeviceProtocol();
+    // mainWhere 추출
+    const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
+
+    /** @type {V_DV_PLACE[]} SiteId에 맞는 V_DV_PLACE 목록 가져옴 */
+    const viewPlaceRows = await this.getTable(VIEW_DV_PLACE, mainWhere);
+
+    const placeSeqList = _.map(viewPlaceRows, 'place_seq');
+
+    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
+    const blockTrendViews = deviceProtocol.getBlockTrendViews(blockId);
+    const {
+      blockTableName,
+      baseTableInfo: { tableName, placeKey, fromToKeyTableList },
+      blockChartList,
+    } = blockTrendViews;
+
+    let baseTableRows = viewPlaceRows;
+    // Base Table이 존재할 경우 해당 Base Table Rows를 가져옴
+    if (tableName !== VIEW_DV_PLACE) {
+      const baseWhere = placeSeqList.length ? { [placeKey]: placeSeqList } : null;
+      baseTableRows = await this.getTable(tableName, baseWhere);
+    }
+
+    let mainSelectQuery = '';
+    let sqlBlockWhere = '';
+
+    // 실제로 가져올 Block Chart Where 절 생성
+    _.forEach(fromToKeyTableList, (fromToKeyInfo, index) => {
+      const { fromKey, toKey } = fromToKeyInfo;
+      mainSelectQuery += fromToKeyTableList.length - 1 === index ? `${toKey}` : `${toKey},`;
+      sqlBlockWhere += ` AND ${toKey} IN (${_.map(baseTableRows, fromKey)})`;
+    });
+
+    const dynamicSelectQuery = _.chain(blockChartList)
+      .map('chartOptionList')
+      .flatten()
+      .map('blockConfigList')
+      .flatten()
+      .unionBy('toKey')
+      .map(calcInfo => {
+        const { toKey, convertKey = toKey, calcType, calculate, toFixed = 1 } = calcInfo;
+        const { AVG, INTERVAL_MAX, MAX, MIN } = deviceProtocol.CALC_TYPE;
+
+        let dynamicSql = '';
+        switch (calcType) {
+          case INTERVAL_MAX:
+            dynamicSql = `MAX(${toKey}) - MIN(${toKey})`;
+            break;
+          case MAX:
+            dynamicSql = `MAX(${toKey})`;
+            break;
+          case MIN:
+            dynamicSql = `MIN(${toKey})`;
+            break;
+          case AVG:
+          default:
+            dynamicSql = `AVG(${toKey})`;
+            break;
+        }
+
+        if (_.isNumber(calculate) && calculate !== 1) {
+          dynamicSql = ` ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
+        } else {
+          dynamicSql = ` ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
+        }
+        return dynamicSql;
+      })
+      .value();
+
+    // Make Dynamic Query
+    const {
+      selectGroupDate,
+      selectViewDate,
+      firstGroupByFormat,
+      groupByFormat,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
+
+    const mainSql = `
+        SELECT
+                ${mainSelectQuery},
+                ${selectViewDate},
+                ${selectGroupDate},
+                ${dynamicSelectQuery.toString()},
+                COUNT(*) AS row_count
+        FROM ${blockTableName}
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        ${sqlBlockWhere}
+        GROUP BY ${firstGroupByFormat}, ${mainSelectQuery}
+        ORDER BY ${mainSelectQuery}, writedate
+      `;
+
+    // Get Rows
+    const calcRows = await this.db.single(mainSql, '', true);
+
+    return calcRows;
   }
 }
 module.exports = RefineModel;

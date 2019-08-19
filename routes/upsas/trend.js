@@ -87,6 +87,9 @@ router.get(
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
 
+    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
+    const deviceProtocol = new DeviceProtocol();
+
     // Site Sequence.지점 Id를 불러옴
     const { siteId, mainWhere } = req.locals.mainInfo;
 
@@ -146,9 +149,6 @@ router.get(
     sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
     // console.timeEnd('extPlaRelSensorRep');
 
-    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const deviceProtocol = new DeviceProtocol(siteId);
-
     // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
     // console.time('makeNodeDefStorageList');
     const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
@@ -199,6 +199,9 @@ router.get(
   asyncHandler(async (req, res, next) => {
     // TODO: Block으로 처리할  V_DV_NODE를 가져옴
 
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
     // TODO: Block dataTable 에서 가져올 column (toKey) 배열을 생성 및 searchRange에 맞는 데이터를 가져옴
 
     /** @type {PowerModel} */
@@ -209,8 +212,9 @@ router.get(
 
     // commonUtil.applyHasNumbericReqToNumber(req);
 
-    /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
+
+    await refineModel.refineBlockCharts(searchRangeInfo, 'inverter', siteId);
 
     /** @type {V_PW_PROFILE[]} */
     // const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);

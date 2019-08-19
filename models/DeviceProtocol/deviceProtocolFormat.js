@@ -1,7 +1,23 @@
 /**
  * @typedef {Object} blockTableInfo DB Table 정보
- * @property {string} tableName
+ * @property {string} blockTableName 데이터를 가져올 DB Table Name
+ * @property {baseTableInfo} baseTableInfo
  * @property {blockDomConfig[]} blockChartList
+ */
+
+/**
+ * @typedef {Object} baseTableInfo DB Table 간 이전 Table 컬럼명을 반영할 Table 컬럼 명으로 변환
+ * @property {string} tableName 참조할 Table 명
+ * @property {string} idKey Table Row 당 ID로 사용할 컬럼 명
+ * @property {string} placeKey Table Row와 연결되어 있는 place seq 컬럼 명
+ * @property {string[]=} placeClassKeyList dv_class를 참조할 경우 filtering 할 place_class target_id List
+ * @property {fromToKeyTableInfo[]} fromToKeyTableList tableName에 지정한 table에서 추출할 Param 값 목록
+ */
+
+/**
+ * @typedef {Object} fromToKeyTableInfo DB Table 간 이전 Table 컬럼명을 반영할 Table 컬럼 명으로 변환
+ * @property {string} fromKey 이전 DB Column Key
+ * @property {string} toKey 이후 DB Column Key
  */
 
 /**
@@ -9,19 +25,26 @@
  * @property {string} domId Dom Element ID
  * @property {string} title 차트 메인 제목
  * @property {string} subtitle 차트 서브 제목
- * @property {string} dataTable 데이터를 가져올 DB Table Name
- * @property {Object[]} chartOptionList 생성할 차트 내용 목록
- * @property {blockConfig[]} chartOptionList.blockConfigList ND ID List
+ * @property {Object[]} chartOptionList 생성할 차트 내용 목록 index 0: 왼쪽, index 1: 오른쪽
+ * @property {blockConfig[]} chartOptionList.blockConfigList
  * @property {string} chartOptionList.yTitle Y축 제목
  * @property {string} chartOptionList.dataUnit 마우스 오버시 나타날 단위
  */
 
 /**
- * @typedef {Object} blockConfig 센서 트렌드 페이지를 생성하기 위한 차트별 설정 정보
- * @property {string} fromKey Node Def Id
- * @property {string=} toKey default: fromKey, Table Column. fromKey를 toKey로 변환해서 저장한 것.
- * @property {boolean=} isDataAmount 데이터를 시간당 량으로 환산 여부. 기본값 false
+ * @typedef {Object} blockConfig 라인 차트 정보
+ * @property {string} fromKey Node Def Id. Node의 원천 정보를 알기 위함
+ * @property {string} toKey table Column
+ * @property {string=} convertKey default: toKey
+ * @property {string=} convertName default: Place Relation Node Def Name
+ * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
+ * @property {string=} calcType 데이터 가공 값, 기본 AVG
  * @property {string=} mixColor 원 색에 조합할 색상
+ * @example
+ * calcType AVG 평균 = 합산 평균 default
+ * calcType SUB 평균 = 구간 Max - Min
+ * calcType AMO 시간당 단위 량 = 해당 구간에 얻은 량(시간 대비 환산)
  */
 
 /**
