@@ -9,6 +9,7 @@ const { BU } = require('base-util-jh');
 
 const main = require('./main');
 const structure = require('./structure');
+const status = require('./status');
 const connector = require('./connector');
 const inverter = require('./inverter');
 const trend = require('./trend');
@@ -154,6 +155,10 @@ router.get(
         name: '구성도',
       },
       {
+        href: 'status',
+        name: '계측현황',
+      },
+      {
         href: 'connector',
         name: '접속반',
       },
@@ -204,6 +209,7 @@ router.get(
 // Router 추가
 router.use('/', main);
 router.use('/structure', structure);
+router.use('/status', status);
 router.use('/connector', connector);
 router.use('/inverter', inverter);
 router.use('/trend', trend);

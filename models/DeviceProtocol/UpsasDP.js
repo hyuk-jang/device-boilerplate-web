@@ -5,6 +5,7 @@ const { BASE_KEY: UPSAS_KEY } = BaseModel.UPSAS;
 const {
   Inverter: { BASE_KEY: BASE_INV_KEY },
   UPSAS: { BASE_KEY: BASE_UPSAS_KEY },
+  Sensor: { BASE_KEY: BASE_SENSOR_KEY },
 } = BaseModel;
 
 const DeviceProtocol = require('./DeviceProtocol');
@@ -226,72 +227,6 @@ class UpsasDP extends DeviceProtocol {
   }
 
   /**
-   * 트렌드 인버터 생성 정보
-   * @return {trendInverterDomConfig[]}
-   */
-  get trendInverterViewList() {
-    return [
-      {
-        domId: 'avg_power_kw_chart',
-        title: '평균 AC 전력',
-        yAxisList: [
-          {
-            dataUnit: 'kW',
-            yTitle: '전력(kW)',
-          },
-        ],
-        dataKey: 'avg_power_kw',
-      },
-      {
-        domId: 'avg_pv_v_chart',
-        title: '평균 DC 전압',
-        yAxisList: [
-          {
-            dataUnit: 'V',
-            yTitle: '전압(V)',
-          },
-        ],
-        dataKey: 'avg_pv_v',
-      },
-      {
-        domId: 'avg_pv_a_chart',
-        title: '평균 DC 전류',
-        yAxisList: [
-          {
-            dataUnit: 'A',
-            yTitle: '전류(V)',
-          },
-        ],
-        dataKey: 'avg_pv_a',
-      },
-      {
-        domId: 'interval_power_chart',
-        title: '기간 발전량',
-        yAxisList: [
-          {
-            dataUnit: 'kWh',
-            yTitle: '전력(kWh)',
-          },
-        ],
-        dataKey: 'interval_power',
-      },
-      {
-        domId: 'max_c_kwh_chart',
-        title: '누적 발전량',
-        yAxisList: [
-          {
-            dataUnit: 'MWh',
-            yTitle: '전력(MWh)',
-          },
-        ],
-        dataKey: 'max_c_kwh',
-        scale: 0.001,
-        toFixed: 3,
-      },
-    ];
-  }
-
-  /**
    * @desc App
    * @return {string[]} 앱 Master로 쓸 센서  ND ID 목록
    */
@@ -382,9 +317,83 @@ class UpsasDP extends DeviceProtocol {
         return this.blockFarmSensor;
       case 'inverter':
         return this.blockInverter;
+      case 'connector':
+        return this.blockConnector;
       default:
         break;
     }
+  }
+
+  /**
+   * 인버터 레포트 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get connectorStatusTable() {
+    /** @type {blockViewMakeOption} */
+    return [
+      {
+        dataKey: 'avg_pv_v',
+        dataName: 'DC 전압',
+        dataUnit: 'V',
+        mainTitle: '태양광',
+      },
+      {
+        dataKey: 'avg_pv_a',
+        dataName: 'DC 전류',
+        dataUnit: 'A',
+        mainTitle: '태양광',
+      },
+      {
+        dataKey: 'avg_pv_kw',
+        dataName: 'DC 전력',
+        dataUnit: 'kW',
+        mainTitle: '태양광',
+      },
+      {
+        dataKey: 'avg_grid_rs_v',
+        dataName: 'AC 전압',
+        dataUnit: 'V',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'avg_grid_r_a',
+        dataName: 'AC 전류',
+        dataUnit: 'A',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'avg_power_kw',
+        dataName: 'AC 전력',
+        dataUnit: 'kW',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'avg_line_f',
+        dataName: '주파수',
+        dataUnit: 'Hz',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'avg_p_f',
+        dataName: '효율',
+        dataUnit: '%',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'interval_power',
+        dataName: '기간 발전량',
+        dataUnit: 'kWh',
+        mainTitle: '발전 현황',
+      },
+      {
+        dataKey: 'max_c_kwh',
+        dataName: '누적 발전량',
+        dataUnit: 'MWh',
+        scale: 0.001,
+        toFixed: 4,
+        mainTitle: '발전 현황',
+      },
+    ];
   }
 
   /**
@@ -598,8 +607,8 @@ class UpsasDP extends DeviceProtocol {
       },
       blockChartList: [
         {
-          domId: 'avg_power_kw_chart',
-          title: '평균 AC 전력',
+          domId: 'inverter_power_chart',
+          title: '출력',
           chartOptionList: [
             {
               blockConfigList: [
@@ -611,12 +620,27 @@ class UpsasDP extends DeviceProtocol {
               dataUnit: 'kW',
               yTitle: '전력(kW)',
             },
+          ],
+        },
+        {
+          domId: 'inverter_pv_chart',
+          title: 'DC 현황',
+          chartOptionList: [
             {
               blockConfigList: [
                 {
-                  fromKey: BASE_INV_KEY.gridRAmp,
-                  toKey: 'grid_r_a',
-                  mixColor: '#e52352',
+                  fromKey: BASE_INV_KEY.pvVol,
+                  toKey: 'pv_v',
+                },
+              ],
+              dataUnit: 'V',
+              yTitle: '전압(V)',
+            },
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_INV_KEY.pvAmp,
+                  toKey: 'pv_a',
                 },
               ],
               dataUnit: 'A',
@@ -625,14 +649,24 @@ class UpsasDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'avg_pv_v_chart',
-          title: 'DC 현황',
+          domId: 'inverter_grid_chart',
+          title: 'AC 현황',
           chartOptionList: [
             {
               blockConfigList: [
                 {
                   fromKey: BASE_INV_KEY.gridTrVol,
                   toKey: 'grid_tr_v',
+                },
+                {
+                  fromKey: BASE_INV_KEY.gridRsVol,
+                  toKey: 'grid_rs_v',
+                  mixColor: '#eeeeee',
+                },
+                {
+                  fromKey: BASE_INV_KEY.gridStVol,
+                  toKey: 'grid_st_v',
+                  mixColor: '#dddddd',
                 },
               ],
               dataUnit: 'V',
@@ -643,6 +677,14 @@ class UpsasDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
+                },
+                {
+                  fromKey: BASE_INV_KEY.gridSAmp,
+                  toKey: 'grid_s_a',
+                },
+                {
+                  fromKey: BASE_INV_KEY.gridTAmp,
+                  toKey: 'grid_t_a',
                 },
               ],
               dataUnit: 'A',
@@ -686,6 +728,106 @@ class UpsasDP extends DeviceProtocol {
               ],
               dataUnit: 'MWh',
               yTitle: '전력(MWh)',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  /**
+   * 접속반 생성 정보
+   * @return {blockTableInfo}
+   */
+  get blockConnector() {
+    return {
+      blockTableName: 'pw_connector_data',
+      baseTableInfo: {
+        tableName: 'pw_connector',
+        idKey: 'target_id',
+        placeKey: 'place_seq',
+        fromToKeyTableList: [
+          {
+            fromKey: 'connector_seq',
+            toKey: 'connector_seq',
+          },
+        ],
+      },
+      blockChartList: [
+        {
+          domId: 'connector_vol_chart',
+          title: '전압',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh1,
+                  toKey: 'v_ch_1',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh2,
+                  toKey: 'v_ch_2',
+                  mixColor: '#087f5b',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh3,
+                  toKey: 'v_ch_3',
+                  mixColor: '#e67700',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh4,
+                  toKey: 'v_ch_4',
+                  mixColor: '#212529',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh5,
+                  toKey: 'v_ch_5',
+                  mixColor: '#862e9c',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh6,
+                  toKey: 'v_ch_6',
+                  mixColor: '#1864ab',
+                },
+              ],
+              dataUnit: 'V',
+              yTitle: '전력 (V)',
+            },
+          ],
+        },
+        {
+          domId: 'connector_amp_chart',
+          title: '전류',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh1,
+                  toKey: 'a_ch_1',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh2,
+                  toKey: 'a_ch_2',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh3,
+                  toKey: 'a_ch_3',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh4,
+                  toKey: 'a_ch_4',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh5,
+                  toKey: 'a_ch_5',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh6,
+                  toKey: 'a_ch_6',
+                },
+              ],
+              dataUnit: 'A',
+              yTitle: '전류 (A)',
             },
           ],
         },

@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/contents/inverter/setInverter.js"></script>
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
+    <script src="/js/contents/main/hichartMaker.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            인버터 모니터링 측정시간 &nbsp;
+            <span id="inverterMeasureTime"> 2018-10-17 10:27:00</span>
+          </p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <!-- <colgroup>
+                <col width="12%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="6%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="5%" />
+              </colgroup> -->
+              <thead class="text-center">
+                <tr>
+                  <th rowspan="2"></th>
+                  <th colspan="8">실증부지 100kW</th>
+                  <th colspan="2">테스트베드 6kW</th>
+                </tr>
+                <tr>
+                  <!-- <th rowspan="1"></th> -->
+                  <th>수중 태양광 1</th>
+                  <th>수중 태양광 2</th>
+                  <th>수중 태양광 3</th>
+                  <th>수중 태양광 4</th>
+                  <th>수중 태양광 5</th>
+                  <th>수중 태양광 6</th>
+                  <th>수중 태양광 7</th>
+                  <th>수중 태양광 8</th>
+                  <th>일반 증발지 1</th>
+                  <th>일반 증발지 2</th>
+                </tr>
+              </thead>
+              <tbody id="inverterStatus">
+                <tr>
+                  <td>제조사</td>
+                  <td>SK쏠라</td>
+                  <td>SK쏠라</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>쏠라테크</td>
+                  <td>에스에너지</td>
+                </tr>
+                <tr>
+                  <td>모듈타입</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>G2G</td>
+                  <td>일반</td>
+                </tr>
+                <!-- TODO: 용량, DC(V, A), AC 출력, 금일 발전량, 모듈 온도, 수위, 염도, 장치상태  -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            계측 현황
+          </p>
+          <!-- TODO: 용량 대비 달성률, 금일 발전량  -->
+          <div id="divDomArea"></div>
+        </div>
+      </div>
+      <!--하단1-->
+
+      <%- include("../master/footer.ejs") %>
+    </div>
+    <script>
+      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+
+      $('#divDomArea').html(divDomList)
+
+      madeLineChartList.forEach(function (chartInfo) {
+        makeLineChart(chartInfo)
+      });
+    </script>
+  </body>
+</html>
