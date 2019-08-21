@@ -48,7 +48,7 @@ router.get(
     _.set(req, 'locals.dom.divDomList', divDomList);
     _.set(req, 'locals.madeLineChartList', refinedCharts);
 
-    res.render('./UPSAS/connector/connector', req.locals);
+    res.render('./UPSAS/status/measureStatus', req.locals);
   }),
 );
 

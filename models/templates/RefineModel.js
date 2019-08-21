@@ -254,6 +254,8 @@ class RefineModel extends BiModule {
     // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
     const blockDataRowsGroup = commonUtil.extPerfectRows(baseToKey, dataRows, strGroupDateList);
 
+    // BU.CLIN(blockDataRowsGroup);
+
     // block 목록만큼의 동적 차트 생성
     const refinedDomChart = blockChartList.map(blockChartInfo => {
       // Chart Dom을 생성하기 위한 옵션 선언
@@ -303,26 +305,36 @@ class RefineModel extends BiModule {
             const {
               chart_color: chartColor,
               node_name: nName,
-              p_target_code: pCode,
+              nd_target_name: ndName,
+              place_name: pName,
+              p_target_name: pTargetName,
+              p_target_code: pTargetCode,
+              chart_sort_rank: chartSortRank,
             } = placeRelationInfo;
+
+            // BU.CLI(chartSortRank);
 
             /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
             const chartSeries = {
-              name: convertName.length ? `${convertName} ${pCode}` : nName,
-              color: mixColor.length ? chartColor : BU.blendColors(chartColor, mixColor, 0.5),
+              name: convertName.length
+                ? `${pTargetName} ${convertName}`
+                : `${pTargetName} ${ndName}`,
+              color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
               tooltip: {
                 valueSuffix: dataUnit,
               },
               yAxis: index,
               // 데이터가 없을 경우 빈공간으로 대체
               data: _.map(blockDataRows, blockDataRow => _.get(blockDataRow, convertKey, '')),
+              chartSortRank,
             };
             // Chart Line 추가
             refinedChart.series.push(chartSeries);
           });
         });
       });
-
+      // 차트 정렬 순서대로 재정렬
+      refinedChart.series = _.sortBy(refinedChart.series, 'chartSortRank');
       // 정제한 Chart Dom 반환
       return refinedChart;
     });
