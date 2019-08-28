@@ -147,8 +147,12 @@ const defaultDom = {
       let calcData = _.get(dataRow, [dataKey]);
       // 데이터 변형 목록에 있는지 확인
       if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
-        calcData = scale !== 1 ? _.multiply(calcData, scale) : calcData;
-        calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
+        if (!_.isNumber(calcData)) {
+          calcData = '';
+        } else {
+          calcData = scale !== 1 ? _.multiply(calcData, scale) : calcData;
+          calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
+        }
       }
       // 천단위 기호 추가 후 본 객체에 적용
       _.set(dataRow, [dataKey], this.addComma(calcData));

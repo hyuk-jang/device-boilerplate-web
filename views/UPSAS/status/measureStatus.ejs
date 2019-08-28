@@ -37,7 +37,7 @@
                 <col width="8%" />
                 <col width="5%" />
               </colgroup> -->
-              <thead class="text-center">
+              <thead id="headerDom" class="text-center">
                 <tr>
                   <th rowspan="2"></th>
                   <th colspan="8">실증부지 100kW</th>
@@ -57,7 +57,7 @@
                   <th>일반 증발지 2</th>
                 </tr>
               </thead>
-              <tbody id="inverterStatus">
+              <tbody id="bodyDom">
                 <tr>
                   <td>제조사</td>
                   <td>SK쏠라</td>
@@ -94,7 +94,7 @@
             계측 현황
           </p>
           <!-- TODO: 용량 대비 달성률, 금일 발전량  -->
-          <div id="divDomArea"></div>
+          <div id="measureColumnChart"></div>
         </div>
       </div>
       <!--하단1-->
@@ -102,13 +102,78 @@
       <%- include("../master/footer.ejs") %>
     </div>
     <script>
-      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
-      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+      $('#headerDom').html(<%- JSON.stringify(dom.headerDom) %>);
+      $('#bodyDom').html(<%- JSON.stringify(dom.bodyDom) %>);
 
-      $('#divDomArea').html(divDomList)
+      var sebRelationRows = <%- JSON.stringify(sebRelationRows) %>;
+    </script>
 
-      madeLineChartList.forEach(function (chartInfo) {
-        makeLineChart(chartInfo)
+    <script>
+      console.log(sebRelationRows);
+      makeColumnChart({
+        domId: 'measureColumnChart',
+        xAxis: {
+          categories: _.map(sebRelationRows, 'seb_name'),
+        },
+        yAxis: [
+          {
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '출력',
+            },
+            min: 0,
+            // max: 40,
+            // tickInterval: 10,
+            // tickAmount: 5,
+          },
+          {
+            labels: {
+              format: '{value} ',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '수위/온도',
+            },
+            min: 0,
+            max: 50,
+            tickInterval: 5,
+            // tickAmount: 5,
+            opposite: 1,
+          },
+        ],
+        series: [
+          {
+            name: 'DC 출력',
+            data: _.map(sebRelationRows, 'pvKw'),
+            color: 'blue',
+            tooltip: {
+              valueSuffix: ' kW',
+            },
+          },
+          {
+            name: '수위',
+            data: _.map(sebRelationRows, 'water_level'),
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' cm',
+            },
+          },
+          {
+            name: '모듈후면온도',
+            data: _.map(sebRelationRows, 'module_rear_temp'),
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' ℃',
+            },
+          },
+        ],
       });
     </script>
   </body>

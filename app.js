@@ -38,6 +38,7 @@ const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
 const PowerModel = require('./models/templates/PowerModel');
 const WeatherModel = require('./models/templates/WeatherModel');
+const BlockModel = require('./models/templates/BlockModel');
 const RefineModel = require('./models/templates/RefineModel');
 
 app.use(bodyParser.json());
@@ -78,6 +79,7 @@ app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
 app.set('powerModel', new PowerModel(dbInfo));
 app.set('weatherModel', new WeatherModel(dbInfo));
+app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(
