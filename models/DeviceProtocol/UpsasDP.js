@@ -307,6 +307,83 @@ class UpsasDP extends DeviceProtocol {
   }
 
   /**
+   * 계측 현황 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get reportMeasureViewList() {
+    /** @type {blockViewMakeOption} */
+    return [
+      {
+        dataKey: 'manufacturer',
+        dataName: '제조사',
+        mainTitle: '모듈',
+      },
+      {
+        dataKey: 'power_amount',
+        dataName: '용량',
+        dataUnit: 'kW',
+        mainTitle: '모듈',
+      },
+      {
+        dataKey: 'pvAmp',
+        dataName: 'DC 전류',
+        dataUnit: 'A',
+        mainTitle: '모듈',
+      },
+      {
+        dataKey: 'pvVol',
+        dataName: 'DC 전압',
+        dataUnit: 'V',
+        mainTitle: '모듈',
+      },
+      {
+        dataKey: 'pvKw',
+        dataName: 'DC 출력',
+        dataUnit: 'kW',
+        mainTitle: '모듈',
+      },
+      {
+        dataKey: 'gridKw',
+        dataName: 'AC 출력',
+        dataUnit: 'kW',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'gridPf',
+        dataName: '변환효율',
+        dataUnit: '%',
+        mainTitle: '인버터',
+      },
+      {
+        dataKey: 'powerCpKwh',
+        dataName: '누적발전량',
+        dataUnit: 'MWh',
+        mainTitle: '인버터',
+        scale: 0.001,
+        toFixed: 3,
+      },
+      {
+        dataKey: 'water_level',
+        dataName: '수위',
+        dataUnit: 'cm',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'salinity',
+        dataName: '염도',
+        dataUnit: '%',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'module_rear_temp',
+        dataName: '모듈온도',
+        dataUnit: '℃',
+        mainTitle: '염전 상태 계측',
+      },
+    ];
+  }
+
+  /**
    * 트렌드 생성 정보
    * @property {string} blockId
    * @return {blockTableInfo}
@@ -394,7 +471,6 @@ class UpsasDP extends DeviceProtocol {
     ];
   }
 
- 
   /**
    * 인버터 생성 정보
    * @return {blockTableInfo}

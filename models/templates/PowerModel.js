@@ -172,7 +172,6 @@ class PowerModel extends BiModule {
     return refinedLineChartList;
   }
 
-  
   /**
    * 인버터 차트 반환
    * @param {{device_type: string, device_list_type: string, device_type_list: [], device_seq: string, search_type: string}} searchOption
@@ -455,6 +454,35 @@ class PowerModel extends BiModule {
         currentItem.data[index] = data === '' ? '' : Number((data * foundIt.scale).scale(1, 1));
       });
     });
+  }
+
+  /**
+   * 접속반 데이터 상태를 불러옴
+   * @param {number[]} connectorSeq
+   */
+  getConnectorStatus(connectorSeqList) {
+    const sql = `
+      SELECT
+        cnt.*,
+        cnt_data.*
+      FROM pw_connector cnt
+      LEFT OUTER JOIN 
+      (
+        SELECT 
+          cd.*
+        FROM pw_connector_data cd
+        INNER JOIN
+        (
+          SELECT MAX(connector_data_seq) AS connector_data_seq
+          FROM pw_connector_data
+          GROUP BY connector_seq
+        ) temp
+        ON cd.connector_data_seq = temp.connector_data_seq
+      ) cnt_data
+      ON cnt.connector_seq = cnt_data.connector_seq
+      WHERE cnt.connector_seq IN (${connectorSeqList})
+    `;
+    return this.db.single(sql);
   }
 
   /**

@@ -5,7 +5,6 @@ const { BaseModel } = require('../../../device-protocol-converter-jh');
 
 // 가져올려는 Report Key로 필터링
 const { BASE_KEY } = BaseModel.FarmParallel;
-const EAN_BASE_KEY = BaseModel.Sensor.BASE_KEY;
 
 require('./deviceProtocolFormat');
 
@@ -99,6 +98,14 @@ class DeviceProtocol {
    * @return {blockViewMakeOption[]}
    */
   get reportInverterViewList() {
+    return [];
+  }
+
+  /**
+   * 계측 현황 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get reportMeasureViewList() {
     return [];
   }
 

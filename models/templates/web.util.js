@@ -96,6 +96,7 @@ function calcStatisticsReport(dataRows, chartOption) {
  * @param {Array|Object} targetData 점검하고자 하는 데이터
  * @param {Date} baseDate 기준 날짜
  * @param {string} dateKey 검색 날짜와 매칭되는 키
+ * @return {{hasValidData: boolean, data: Object}[]}
  */
 //  * @return {Array.<{hasValidData: boolean, data: Object}>} 의미 있는 데이터 체크
 function checkDataValidation(targetData, baseDate, dateKey) {
