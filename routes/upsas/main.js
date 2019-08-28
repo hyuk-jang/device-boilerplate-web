@@ -12,6 +12,7 @@ const domMakerMain = require('../../models/domMaker/mainDom');
 
 const commonUtil = require('../../models/templates/common.util');
 const sensorUtil = require('../../models/templates/sensor.util');
+const weatherModel = require('../../models/templates/WeatherModel');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
@@ -33,6 +34,9 @@ router.get(
     // ********** Power 관련
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
+
+    /** @type {WC_KMA_DATA} */
+    const weatherCastInfo = _.get(req, 'locals.weatherCastInfo');
 
     // BU.CLI(searchRangeInfo);
 
@@ -75,9 +79,10 @@ router.get(
       domMakerMain.makeInverterStatusDom(validInverterDataList),
     );
 
+    // TODO:
     req.locals.inverterLineChart = inverterLineChart;
-
     req.locals.powerGenerationInfo = powerGenerationInfo;
+    req.locals.weatherCastInfo = weatherCastInfo;
 
     // BU.CLI(req.locals);
     res.render('./UPSAS/main/index', req.locals);

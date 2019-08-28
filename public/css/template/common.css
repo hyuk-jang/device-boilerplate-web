@@ -622,6 +622,14 @@ article.sdv_w_side > p:last-child {
   color: #93d30a;
 }
 
+.color_red {
+  color: #e62f2f;
+}
+
+.color_blue {
+  color: #2c3aff;
+}
+
 .w_10per {
   width: 10%;
 }
@@ -676,6 +684,24 @@ article.sdv_w_side > p:last-child {
 
 .mb_50rem {
   margin-bottom: 0.5rem;
+}
+
+/* TODO: */
+.growthEnv_table > tbody > tr.time > td > p {
+  border: 1px solid #d2d2d2;
+  background: white;
+  color: black;
+  position: relative;
+  left: -17px;
+  top: 0px;
+  width: 17px;
+  line-height: 17px;
+  height: 17px;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  font-family: gulim;
 }
 
 @media all and (max-width: 942px) {

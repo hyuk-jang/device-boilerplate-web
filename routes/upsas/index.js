@@ -197,11 +197,15 @@ router.get(
 
     // Site 기상청 날씨 정보 구성
     const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
-
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
+
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
-    // BU.CLI(req.locals.siteId);
+    // TODO: 현재 시간 기준 오늘, 내일, 모레 날씨 정보
+    const weatherCastInfo = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
+
+    _.set(req, 'locals.weatherCastInfo', weatherCastInfo);
+
     next();
   }),
 );
