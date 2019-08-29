@@ -102,19 +102,18 @@ class DeviceProtocol {
   }
 
   /**
-   * 계측 현황 생성 정보
+   * 현황 생성 정보
+   * @property {string} blockId
    * @return {blockViewMakeOption[]}
    */
-  get reportMeasureViewList() {
-    return [];
-  }
+  getBlockStatusTable(blockId) {}
 
   /**
    * 트렌드 생성 정보
    * @property {string} blockId
    * @return {blockTableInfo}
    */
-  getBlockTrendViews(blockId) {
+  getBlockChart(blockId) {
     console.trace('getBlockTrendViews');
   }
 }

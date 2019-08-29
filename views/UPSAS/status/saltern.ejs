@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category">
+            <button type="button" value="outline" class="btn btn-default btn1">종합</button>
+            <button type="button" value="connector" class="btn btn-default btn2">접속반</button>
+            <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
+            <button type="button" value="saltern" class="btn btn-success btn2">염전</button>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            모니터링 측정시간 &nbsp;
+            <span id="measureTime"> 2018-10-17 10:27:00</span>
+          </p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <colgroup>
+                <col width="40%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="15%" />
+              </colgroup>
+              <thead id="tableHeaderDom"></thead>
+              <tbody id="tableBodyDom"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            염전 상태 계측 현황
+          </p>
+          <article id="divDomArea"></article>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+    <script src="/js/contents/report/search.js"></script>
+
+    <script>
+      $('#tableHeaderDom').html(<%- JSON.stringify(dom.tableHeaderDom) %>);
+      $('#tableBodyDom').html(<%- JSON.stringify(dom.tableBodyDom) %>);
+
+      var measureInfo = <%- JSON.stringify(measureInfo) %>;
+      // 측정 시간 입력
+      document.getElementById('measureTime').innerHTML = measureInfo.measureTime;
+      var siteId = _.get(measureInfo, 'siteId');
+      var subCategory = _.get(measureInfo, 'subCategory');
+    </script>
+
+    <script>
+      // 자동 Div Dom 생성을 위함
+      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+      // 차트를 그리기 위한 데이터
+      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+    </script>
+
+    <script>
+      $('#divDomArea').html(divDomList);
+
+      madeLineChartList.forEach(function(chartInfo) {
+        makeLineChart(chartInfo);
+      });
+    </script>
+  </body>
+</html>

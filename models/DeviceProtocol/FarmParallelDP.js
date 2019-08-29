@@ -373,7 +373,7 @@ class FarmParallelDP extends DeviceProtocol {
    * @property {string} blockId
    * @return {blockTableInfo}
    */
-  getBlockTrendViews(blockId) {
+  getBlockChart(blockId) {
     switch (blockId) {
       case 'farmSensor':
         return this.blockFarmSensor;

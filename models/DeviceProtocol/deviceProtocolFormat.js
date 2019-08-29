@@ -80,6 +80,7 @@
  * @property {string=} dataUnit 데이터 단위
  * @property {number=} scale 배율
  * @property {number=} toFixed 소수점 자리수
+ * @property {number=} cssWidthPer 테이블 구성할 경우 col width %
  */
 
 module;

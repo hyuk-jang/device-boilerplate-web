@@ -7,7 +7,10 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
+const defaultDom = require('../../models/domMaker/defaultDom');
+const domMakerInverter = require('../../models/domMaker/inverterDom');
 const salternDom = require('../../models/domMaker/salternDom');
+const blockDom = require('../../models/domMaker/blockDom');
 
 const sensorUtil = require('../../models/templates/sensor.util');
 const excelUtil = require('../../models/templates/excel.util');
@@ -17,9 +20,31 @@ const webUtil = require('../../models/templates/web.util');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
-/* GET users listing. */
+const DEFAULT_CATEGORY = 'outline';
+
+// trend middleware
 router.get(
-  ['/', '/:siteId'],
+  ['/', '/:siteId', '/:siteId/:subCategory'],
+  asyncHandler(async (req, res, next) => {
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { subCategory = DEFAULT_CATEGORY } = req.params;
+
+    const measureInfo = {
+      siteId,
+      subCategory,
+      measureTime: `${moment().format('YYYY-MM-DD HH:mm')}:00`,
+    };
+
+    _.set(req, 'locals.measureInfo', measureInfo);
+
+    next();
+  }),
+);
+
+/* 종합. */
+router.get(
+  ['/', '/:siteId', '/:siteId/outline'],
   asyncHandler(async (req, res) => {
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
@@ -27,9 +52,9 @@ router.get(
     const blockModel = global.app.get('blockModel');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { mainWhere } = req.locals.mainInfo;
 
-    // TODO: Step1: SEB_RELATION에서 main_seq를 충족하는 rows 추출
+    // Step1: SEB_RELATION에서 main_seq를 충족하는 rows 추출
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationRows = await powerModel.getTable('V_DV_PLACE_RELATION', mainWhere);
 
@@ -83,11 +108,12 @@ router.get(
 
       /** @type {SEB_RELATION} */
       const emptyStatus = {
-        pvAmp: null,
-        pvVol: null,
+        modulePvAmp: null,
+        modulePvVol: null,
+        modulePvKw: null,
         pvKw: null,
-        gridPf: null,
         gridKw: null,
+        gridPf: null,
         powerCpKwh: null,
         water_level: null,
         salinity: null,
@@ -132,9 +158,9 @@ router.get(
           .round(1)
           .value();
 
-        sebRelRow.pvAmp = pvAmp;
-        sebRelRow.pvVol = pvVol;
-        sebRelRow.pvKw = _.chain(pvAmp)
+        sebRelRow.modulePvAmp = pvAmp;
+        sebRelRow.modulePvVol = pvVol;
+        sebRelRow.modulePvKw = _.chain(pvAmp)
           .multiply(pvVol)
           .divide(1000)
           .round(2)
@@ -150,14 +176,21 @@ router.get(
 
         // 의미없는 데이터일 경우 무시
         if (moment().diff(moment(inverterStatusRow.writedate), 'minutes') >= 10) {
+          const pvAmp = _.get(inverterStatusRow, 'pv_a', null);
+          const pvVol = _.get(inverterStatusRow, 'pv_v', null);
+          const pvKw =
+            _.isNumber(pvAmp) && _.isNumber(pvAmp)
+              ? _.chain(pvAmp)
+                  .multiply(pvVol)
+                  .divide(1000)
+                  .round(2)
+                  .value()
+              : null;
+          sebRelRow.pvKw = pvKw;
           sebRelRow.gridKw = _.get(inverterStatusRow, 'power_kw', null);
           sebRelRow.powerCpKwh = _.get(inverterStatusRow, 'power_cp_kwh', null);
         }
       }
-
-      _.set(req, 'locals.sebRelationRows', _.cloneDeep(sebRelationRows));
-
-      BU.CLI(sebRelationRows);
 
       // BU.CLI(inverterStatusRow);
 
@@ -171,19 +204,264 @@ router.get(
       }
     });
 
-    // BU.CLI(sebRelationRows);
+    _.set(req, 'locals.sebRelationRows', _.cloneDeep(sebRelationRows));
 
     const deviceProtocol = new DeviceProtocol();
 
     const { tableHeaderDom, tableBodyDom } = salternDom.makeMeasureStatusDom(
       sebRelationRows,
-      deviceProtocol.reportMeasureViewList,
+      deviceProtocol.getBlockStatusTable('outline'),
     );
 
     _.set(req, 'locals.dom.headerDom', tableHeaderDom);
     _.set(req, 'locals.dom.bodyDom', tableBodyDom);
 
-    res.render('./UPSAS/status/measureStatus', req.locals);
+    res.render('./UPSAS/status/outline', req.locals);
+  }),
+);
+
+// 접속반
+router.get(
+  ['/:siteId/connector'],
+  asyncHandler(async (req, res) => {
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    const { subCategory } = req.locals.measureInfo;
+
+    const { siteId, mainWhere } = req.locals.mainInfo;
+
+    const deviceProtocol = new DeviceProtocol();
+    // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴
+    const blockStatusTable = deviceProtocol.getBlockStatusTable(subCategory);
+
+    /** @type {PW_RELATION_POWER[]} */
+    const relationPowerRows = await refineModel.getTable('PW_RELATION_POWER', mainWhere);
+
+    const connectorSeqList = _(relationPowerRows)
+      .map('connector_seq')
+      .union()
+      .value();
+
+    /** @type {CONNECTOR[]} */
+    const connectorRows = await powerModel.getTable('PW_CONNECTOR', {
+      connector_seq: connectorSeqList,
+    });
+
+    // 접속반 현재 상태
+    const statusRows = await powerModel.getConnectorStatus(_.map(connectorRows, 'connector_seq'));
+
+    // 접속반에 데이터를 붙임
+    _.forEach(connectorRows, cntRow => {
+      const statusRow = _.find(statusRows, { place_seq: cntRow.place_seq });
+
+      BU.CLI(statusRow);
+
+      // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
+      if (statusRow && moment().diff(moment(statusRow.writedate), 'minutes') >= 10) {
+        // 접속반 총합 전류 산출
+        const sumAmp = _(statusRow)
+          .map((value, key) => {
+            return _.includes(key, 'a_ch') && _.isNumber(value) ? value : null;
+          })
+          .sum();
+
+        // 접속반 평균 전압 산출
+        const avgVol = _.chain(statusRow)
+          .map((value, key) => {
+            return _.includes(key, 'v_ch') && _.isNumber(value) ? value : null;
+          })
+          .mean()
+          .round(1);
+
+        // 접속반 채널별 데이터 및 전류 총합, 평균 전류를 포함한 객체 확장
+        _.assign(cntRow, _.pick(statusRow, _.map(blockStatusTable, 'dataKey')), { sumAmp, avgVol });
+      }
+    });
+
+    // BU.CLI(connectorRows);
+
+    // BU.CLI(blockStatusTable)
+    // Status Table Dom 생성
+    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDefaultTable(
+      connectorRows,
+      blockStatusTable,
+    );
+
+    _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
+    _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
+
+    const searchRange = refineModel.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'min10',
+    });
+
+    // console.time('refinedCharts');
+    const refinedCharts = await refineModel.refineBlockCharts(searchRange, subCategory, siteId);
+    // console.timeEnd('refinedCharts');
+
+    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+    const domTemplate = _.template(`
+       <div class="lineChart_box default_area" id="<%= domId %>"></div>
+   `);
+    const divDomList = refinedCharts.map(refinedChart =>
+      domTemplate({
+        domId: refinedChart.domId,
+      }),
+    );
+
+    _.set(req, 'locals.dom.divDomList', divDomList);
+    _.set(req, 'locals.madeLineChartList', refinedCharts);
+
+    res.render('./UPSAS/status/connector', req.locals);
+  }),
+);
+
+// 인버터
+router.get(
+  ['/:siteId/inverter'],
+  asyncHandler(async (req, res) => {
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    /** @type {V_PW_PROFILE[]} powerProfileRows */
+    const powerProfileRows = req.locals.viewPowerProfileRows;
+
+    // 인버터 Seq 목록
+    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+
+    const refinedInverterStatusList = await refineModel.refineInverterStatus(inverterSeqList);
+
+    /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
+    // 인버터 현재 상태 데이터 동적 생성 돔
+    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(
+      refinedInverterStatusList,
+    );
+
+    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
+
+    const searchRange = refineModel.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'min10',
+    });
+
+    // BU.CLI(momentFormat);
+    /** @type {lineChartConfig} */
+    const chartConfig = {
+      domId: 'chart_div',
+      title: '인버터 발전 현황',
+      yAxisList: [
+        {
+          dataUnit: 'kW',
+          yTitle: '전력(kW)',
+        },
+      ],
+      chartOption: {
+        selectKey: 'avg_grid_kw',
+        dateKey: 'group_date',
+        groupKey: 'inverter_seq',
+        colorKey: 'chart_color',
+        sortKey: 'chart_sort_rank',
+      },
+    };
+
+    // 동적 라인 차트를 생성
+    const inverterLineChart = await refineModel.refineInverterChart(
+      searchRange,
+      inverterSeqList,
+      chartConfig,
+    );
+
+    req.locals.inverterLineChart = inverterLineChart;
+    // BU.CLIN(req.locals);
+    res.render('./UPSAS/status/inverter', req.locals);
+  }),
+);
+
+// 염전 상태 계측
+router.get(
+  ['/:siteId/saltern'],
+  asyncHandler(async (req, res) => {
+    /** @type {BlockModel} */
+    const blockModel = global.app.get('blockModel');
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    const { subCategory } = req.locals.measureInfo;
+
+    const { siteId, mainWhere } = req.locals.mainInfo;
+
+    const deviceProtocol = new DeviceProtocol();
+    // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴
+    const blockStatusTable = deviceProtocol.getBlockStatusTable(subCategory);
+
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await refineModel.getTable('V_DV_PLACE', mainWhere);
+
+    // 목록으로 표출할 장소 카테고리
+    const salternPlaceClassId = ['salternBlock', 'brineWarehouse', 'reservoir'];
+
+    // 실제적으로 출력할 염전 장소 Rows
+    const salternPlaceRows = _.filter(placeRows, plaRelRow => {
+      return _.includes(salternPlaceClassId, plaRelRow.pc_target_id);
+    });
+
+    // 염전 상태 계측 센서 상태
+    const salternStatusRows = await blockModel.getBlockStatus({
+      tableName: 'saltern_sensor_data',
+      uniqueColumn: 'saltern_sensor_data_seq',
+      groupColumn: 'place_seq',
+      whereColumn: 'place_seq',
+      whereColumnValueList: _(salternPlaceRows)
+        .map('place_seq')
+        .union()
+        .value(),
+    });
+
+    // 염전 장소 Rows를 순회하면서 장소에 해당하는 Sensor Data를 Assign 처리
+    _.forEach(salternPlaceRows, salternPlaRow => {
+      const salternStatusRow = _.find(salternStatusRows, { place_seq: salternPlaRow.place_seq });
+
+      // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
+      if (salternStatusRow && moment().diff(moment(salternStatusRow.writedate), 'minutes') >= 10) {
+        _.assign(salternPlaRow, _.pick(salternStatusRow, _.map(blockStatusTable, 'dataKey')));
+      }
+    });
+
+    // Status Table Dom 생성
+    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDefaultTable(
+      salternPlaceRows,
+      blockStatusTable,
+    );
+
+    _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
+    _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
+
+    // console.time('refinedCharts');
+    const searchRange = refineModel.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'min10',
+    });
+
+    const refinedCharts = await refineModel.refineBlockCharts(searchRange, subCategory, siteId);
+    // console.timeEnd('refinedCharts');
+
+    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+    const domTemplate = _.template(`
+       <div class="lineChart_box default_area" id="<%= domId %>"></div>
+   `);
+    const divDomList = refinedCharts.map(refinedChart =>
+      domTemplate({
+        domId: refinedChart.domId,
+      }),
+    );
+
+    _.set(req, 'locals.dom.divDomList', divDomList);
+    _.set(req, 'locals.madeLineChartList', refinedCharts);
+
+    res.render('./UPSAS/status/saltern', req.locals);
   }),
 );
 
@@ -198,11 +476,12 @@ module.exports = router;
  * @property {string} seb_name
  * @property {string} manufacturer
  * @property {number} power_amount
- * @property {number} pvAmp
- * @property {number} pvVol
+ * @property {number} modulePvAmp
+ * @property {number} modulePvVol
+ * @property {number} modulePvKw
  * @property {number} pvKw
- * @property {number} gridPf
  * @property {number} gridKw
+ * @property {number} gridPf
  * @property {number} powerCpKwh
  * @property {number} water_level
  * @property {number} salinity

@@ -222,7 +222,7 @@ class RefineModel extends BiModule {
     const deviceProtocol = new DeviceProtocol();
 
     // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
-    const blockTrendViews = deviceProtocol.getBlockTrendViews(blockId);
+    const blockTrendViews = deviceProtocol.getBlockChart(blockId);
     const {
       baseTableInfo: { fromToKeyTableList, placeKey },
       blockChartList,
@@ -362,7 +362,7 @@ class RefineModel extends BiModule {
     const placeSeqList = _.map(viewPlaceRows, 'place_seq');
 
     // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
-    const blockTrendViews = deviceProtocol.getBlockTrendViews(blockId);
+    const blockTrendViews = deviceProtocol.getBlockChart(blockId);
     const {
       blockTableName,
       baseTableInfo: { tableName, placeKey, fromToKeyTableList },
