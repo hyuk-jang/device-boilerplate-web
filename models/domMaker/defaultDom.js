@@ -3,6 +3,45 @@ const { BU } = require('base-util-jh');
 
 const defaultDom = {
   /**
+   * @description makeDynamicHeaderDom
+   * blockStatusTableOptions 내용을 makeDynamicHeaderDom.subTitleOptionList 에 맞는 형식으로 변경하여 반환
+   * @param {blockViewMakeOption[]} blockStatusTableOptions
+   */
+  convertBlockStatusToSubTitleOption(blockStatusTableOptions) {
+    return _.map(blockStatusTableOptions, blockInfo => {
+      const { dataName, dataUnit, cssWidthPer } = blockInfo;
+      return {
+        title: dataName,
+        dataUnit,
+        cssWidthPer,
+      };
+    });
+  },
+
+  /**
+   * DataRows와 BlcokStatusViewOptions를 활용하여 Table 생성 반환
+   * @param {Object[]} dataRows
+   * @param {blockViewMakeOption[]} blockViewOptions
+   */
+  makeDefaultTable(dataRows, blockViewOptions) {
+    const tableHeaderDom = this.makeDynamicHeaderDom({
+      staticTitleList: [],
+      mainTitleList: _.map(blockViewOptions, 'mainTitle'),
+      subTitleOptionList: this.convertBlockStatusToSubTitleOption(blockViewOptions),
+    });
+
+    const tableBodyDom = this.makeStaticBody({
+      dataRows,
+      bodyConfigList: blockViewOptions,
+    });
+
+    return {
+      tableHeaderDom,
+      tableBodyDom,
+    };
+  },
+
+  /**
    *
    * @param {Object} dynamicHeaderInfo
    * @param {string[]} dynamicHeaderInfo.staticTitleList 기본으로 포함시킬 코드
@@ -10,14 +49,20 @@ const defaultDom = {
    * @param {Object[]} dynamicHeaderInfo.subTitleOptionList
    * @param {string} dynamicHeaderInfo.subTitleOptionList.title 제목
    * @param {string=} dynamicHeaderInfo.subTitleOptionList.dataUnit 표기 단위
+   * @param {string=} dynamicHeaderInfo.subTitleOptionList.cssWidthPer 테이블 구성할 경우 col width %
    */
   makeDynamicHeaderDom(dynamicHeaderInfo) {
-    const { staticTitleList, mainTitleList = [], subTitleOptionList } = dynamicHeaderInfo;
+    const { staticTitleList = [], mainTitleList = [], subTitleOptionList } = dynamicHeaderInfo;
     let staticTitleTemplate = _.template('<th><%= title %></th>');
     let subTitleTemplate = _.template('<th><%= title %><%= dataUnit %></th>');
 
+    // 실제적으로 사용될 MainTitle 길이
+    const realMainTitle = _(mainTitleList)
+      .reject(_.isEmpty)
+      .value();
+
     // 대분류 제목이 없다면 일반적인 1줄 반환
-    if (!mainTitleList.length) {
+    if (!realMainTitle.length) {
       const staticDom = staticTitleList.map(title => staticTitleTemplate({ title }));
       // 중분류 Header Dom 생성
       const subTitleDom = _.map(subTitleOptionList, titleInfo => {
@@ -78,14 +123,6 @@ const defaultDom = {
 
   /**
    *
-   * @param {string[]} dataKeyList json 객체에서 가져올 key 목록
-   */
-  makeStaticBodyElements(dataKeyList) {
-    return _.map(dataKeyList, dataKey => `<td><%= ${dataKey} %></td>`).toString();
-  },
-
-  /**
-   *
    * @param {Object} staticInfo
    * @param {Object[]} staticInfo.dataRows DB Data Rows
    * @param {Object[]} staticInfo.bodyConfigList json 객체에서 가져올 key 목록
@@ -123,6 +160,14 @@ const defaultDom = {
 
       return bodyTemplate(dataRow);
     });
+  },
+
+  /**
+   * dataKeyList에 해당하는 TD Html 생성하여 반환
+   * @param {string[]} dataKeyList json 객체에서 가져올 key 목록
+   */
+  makeStaticBodyElements(dataKeyList) {
+    return _.map(dataKeyList, dataKey => `<td><%= ${dataKey} %></td>`).toString();
   },
 
   /**

@@ -307,11 +307,28 @@ class UpsasDP extends DeviceProtocol {
   }
 
   /**
-   * 계측 현황 생성 정보
+   * 현황 생성 정보
+   * @property {string} blockId
    * @return {blockViewMakeOption[]}
    */
-  get reportMeasureViewList() {
-    /** @type {blockViewMakeOption} */
+  getBlockStatusTable(blockId) {
+    switch (blockId) {
+      case 'outline':
+        return this.statusOutlineTable;
+      case 'connector':
+        return this.statusConnectorTable;
+      case 'saltern':
+        return this.statusSalternTable;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * 종합 계측 현황
+   * @return {blockViewMakeOption[]}
+   */
+  get statusOutlineTable() {
     return [
       {
         dataKey: 'manufacturer',
@@ -325,22 +342,28 @@ class UpsasDP extends DeviceProtocol {
         mainTitle: '모듈',
       },
       {
-        dataKey: 'pvAmp',
+        dataKey: 'modulePvAmp',
         dataName: 'DC 전류',
         dataUnit: 'A',
         mainTitle: '모듈',
       },
       {
-        dataKey: 'pvVol',
+        dataKey: 'modulePvVol',
         dataName: 'DC 전압',
         dataUnit: 'V',
         mainTitle: '모듈',
       },
       {
-        dataKey: 'pvKw',
+        dataKey: 'modulePvKw',
         dataName: 'DC 출력',
         dataUnit: 'kW',
         mainTitle: '모듈',
+      },
+      {
+        dataKey: 'pvKw',
+        dataName: 'DC 입력',
+        dataUnit: 'kW',
+        mainTitle: '인버터',
       },
       {
         dataKey: 'gridKw',
@@ -350,7 +373,7 @@ class UpsasDP extends DeviceProtocol {
       },
       {
         dataKey: 'gridPf',
-        dataName: '변환효율',
+        dataName: '효율',
         dataUnit: '%',
         mainTitle: '인버터',
       },
@@ -384,98 +407,164 @@ class UpsasDP extends DeviceProtocol {
   }
 
   /**
-   * 트렌드 생성 정보
+   * 접속반 현황 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get statusConnectorTable() {
+    return [
+      {
+        dataKey: 'target_name',
+        dataName: '접속반',
+        cssWidthPer: 15,
+      },
+      {
+        dataKey: 'install_place',
+        dataName: '관련 모듈',
+        cssWidthPer: 20,
+      },
+      {
+        dataKey: 'a_ch_1',
+        dataName: 'CH 1',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_1',
+        dataName: 'CH 1',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_2',
+        dataName: 'CH 2',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_2',
+        dataName: 'CH 2',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_3',
+        dataName: 'CH 3',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_3',
+        dataName: 'CH 3',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_4',
+        dataName: 'CH 4',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_4',
+        dataName: 'CH 4',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_5',
+        dataName: 'CH 5',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_5',
+        dataName: 'CH 5',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_6',
+        dataName: 'CH 6',
+        dataUnit: 'A',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'a_ch_6',
+        dataName: 'CH 6',
+        dataUnit: 'V',
+        mainTitle: '접속반 채널',
+      },
+      {
+        dataKey: 'sumAmp',
+        dataName: '전류 총합',
+        dataUnit: 'A',
+        mainTitle: '종합',
+      },
+      {
+        dataKey: 'avgVol',
+        dataName: '전압 평균',
+        dataUnit: 'V',
+        mainTitle: '종합',
+      },
+    ];
+  }
+
+  /**
+   * 계측 현황 생성 정보
+   * @return {blockViewMakeOption[]}
+   */
+  get statusSalternTable() {
+    return [
+      {
+        dataKey: 'place_name',
+        dataName: '장소',
+      },
+      {
+        dataKey: 'water_level',
+        dataName: '수위',
+        dataUnit: 'cm',
+      },
+      {
+        dataKey: 'salinity',
+        dataName: '염도',
+        dataUnit: '%',
+      },
+      {
+        dataKey: 'module_rear_temp',
+        dataName: '모듈 후면 온도',
+        dataUnit: '℃',
+      },
+      {
+        dataKey: 'brine_temp',
+        dataName: '모듈 수온',
+        dataUnit: '℃',
+      },
+    ];
+  }
+
+  /**
+   * 차트 생성 정보
    * @property {string} blockId
    * @return {blockTableInfo}
    */
-  getBlockTrendViews(blockId) {
+  getBlockChart(blockId) {
     switch (blockId) {
       case 'inverter':
-        return this.blockInverter;
+        return this.blockInverterChart;
       case 'connector':
-        return this.blockConnector;
+        return this.blockConnectorChart;
+      case 'saltern':
+        return this.blockSalternChart;
       default:
         break;
     }
   }
 
   /**
-   * 인버터 레포트 생성 정보
-   * @return {blockViewMakeOption[]}
-   */
-  get connectorStatusTable() {
-    /** @type {blockViewMakeOption} */
-    return [
-      {
-        dataKey: 'avg_pv_v',
-        dataName: 'DC 전압',
-        dataUnit: 'V',
-        mainTitle: '태양광',
-      },
-      {
-        dataKey: 'avg_pv_a',
-        dataName: 'DC 전류',
-        dataUnit: 'A',
-        mainTitle: '태양광',
-      },
-      {
-        dataKey: 'avg_pv_kw',
-        dataName: 'DC 전력',
-        dataUnit: 'kW',
-        mainTitle: '태양광',
-      },
-      {
-        dataKey: 'avg_grid_rs_v',
-        dataName: 'AC 전압',
-        dataUnit: 'V',
-        mainTitle: '인버터',
-      },
-      {
-        dataKey: 'avg_grid_r_a',
-        dataName: 'AC 전류',
-        dataUnit: 'A',
-        mainTitle: '인버터',
-      },
-      {
-        dataKey: 'avg_power_kw',
-        dataName: 'AC 전력',
-        dataUnit: 'kW',
-        mainTitle: '인버터',
-      },
-      {
-        dataKey: 'avg_line_f',
-        dataName: '주파수',
-        dataUnit: 'Hz',
-        mainTitle: '인버터',
-      },
-      {
-        dataKey: 'avg_p_f',
-        dataName: '효율',
-        dataUnit: '%',
-        mainTitle: '인버터',
-      },
-      {
-        dataKey: 'interval_power',
-        dataName: '기간 발전량',
-        dataUnit: 'kWh',
-        mainTitle: '발전 현황',
-      },
-      {
-        dataKey: 'max_c_kwh',
-        dataName: '누적 발전량',
-        dataUnit: 'MWh',
-        scale: 0.001,
-        toFixed: 4,
-        mainTitle: '발전 현황',
-      },
-    ];
-  }
-
-  /**
    * 인버터 생성 정보
    * @return {blockTableInfo}
    */
-  get blockInverter() {
+  get blockInverterChart() {
     return {
       blockTableName: 'pw_inverter_data',
       baseTableInfo: {
@@ -623,7 +712,7 @@ class UpsasDP extends DeviceProtocol {
    * 접속반 생성 정보
    * @return {blockTableInfo}
    */
-  get blockConnector() {
+  get blockConnectorChart() {
     return {
       blockTableName: 'pw_connector_data',
       baseTableInfo: {
@@ -712,6 +801,81 @@ class UpsasDP extends DeviceProtocol {
               ],
               dataUnit: 'A',
               yTitle: '전류 (A)',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  /**
+   * 염전 생성 정보
+   * @return {blockTableInfo}
+   */
+  get blockSalternChart() {
+    return {
+      blockTableName: 'saltern_sensor_data',
+      baseTableInfo: {
+        tableName: 'v_dv_place',
+        idKey: 'place_real_id',
+        placeKey: 'place_seq',
+        fromToKeyTableList: [
+          {
+            fromKey: 'place_seq',
+            toKey: 'place_seq',
+          },
+        ],
+      },
+      blockChartList: [
+        {
+          domId: 'water_level_chart',
+          title: '수위',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_UPSAS_KEY.waterLevel,
+                  toKey: 'water_level',
+                },
+              ],
+              dataUnit: 'cm',
+              yTitle: '수위(cm)',
+            },
+          ],
+        },
+        {
+          domId: 'salinity_chart',
+          title: '염도 현황',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_UPSAS_KEY.salinity,
+                  toKey: 'salinity',
+                },
+              ],
+              dataUnit: '%',
+              yTitle: '염도(V)',
+            },
+          ],
+        },
+        {
+          domId: 'module_rear_temp_chart',
+          title: '온도',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_UPSAS_KEY.moduleRearTemperature,
+                  toKey: 'module_rear_temp',
+                },
+                {
+                  fromKey: BASE_UPSAS_KEY.brineTemperature,
+                  toKey: 'brine_temp',
+                },
+              ],
+              dataUnit: '℃',
+              yTitle: '온도(℃)',
             },
           ],
         },

@@ -10,13 +10,10 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const structure = require('./structure');
 const status = require('./status');
-const connector = require('./connector');
-const inverter = require('./inverter');
 const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
 
-const webUtil = require('../../models/templates/web.util');
 const commonUtil = require('../../models/templates/common.util');
 
 const domMakerMaster = require('../../models/domMaker/masterDom');
@@ -158,14 +155,14 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      {
-        href: 'connector',
-        name: '접속반',
-      },
-      {
-        href: 'inverter',
-        name: '인버터',
-      },
+      // {
+      //   href: 'connector',
+      //   name: '접속반',
+      // },
+      // {
+      //   href: 'inverter',
+      //   name: '인버터',
+      // },
       {
         href: 'trend',
         name: '트렌드',
@@ -173,6 +170,10 @@ router.get(
       {
         href: 'report',
         name: '보고서',
+      },
+      {
+        href: 'cctv',
+        name: 'CCTV',
       },
     ];
 
@@ -214,11 +215,12 @@ router.get(
 router.use('/', main);
 router.use('/structure', structure);
 router.use('/status', status);
-router.use('/connector', connector);
-router.use('/inverter', inverter);
+// router.use('/connector', connector);
+// router.use('/inverter', inverter);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/control', control);
+router.use('/cctv', control);
 
 // router.use('/users', users);
 
