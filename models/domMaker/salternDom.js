@@ -11,21 +11,13 @@ module.exports = {
    * @param {blockViewMakeOption[]} blockViewList
    */
   makeMeasureStatusDom(measureStatusList, blockViewList) {
-    const tableHeaderDom = defaultDom.makeDynamicHeaderDom({
-      staticTitleList: [''],
-      mainTitleList: _.map(blockViewList, 'mainTitle'),
-      subTitleOptionList: _.map(blockViewList, blockInfo => {
-        const { dataName, dataUnit } = blockInfo;
-        return {
-          title: dataName,
-          dataUnit,
-        };
-      }),
+    const tableHeaderDom = defaultDom.makeDynamicBlockTableHeader({
+      blockTableOptions: blockViewList,
     });
 
     const inverterRegeditList = [];
 
-    const tableBodyDom = measureStatusList.map((dataRow, index) => {
+    const tableBodyDom = measureStatusList.map(dataRow => {
       let contentsTemplate = '';
       // 최초 인버터 인지 확인
       const isMergeInverter = _.includes(inverterRegeditList, dataRow.inverter_seq);
@@ -61,12 +53,7 @@ module.exports = {
       }
 
       // 온전한 바디 템플릿 돔 생성
-      const bodyTemplate = _.template(`
-        <tr>
-          <td><%= seb_name %></td>
-          ${contentsTemplate}
-          </tr>
-          `);
+      const bodyTemplate = _.template(`<tr>${contentsTemplate}</tr>`);
 
       const pvKw = _.get(dataRow, 'pvKw', '');
       const powerKw = _.get(dataRow, 'gridKw', '');

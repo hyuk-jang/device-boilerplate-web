@@ -239,7 +239,6 @@ class UpsasDP extends DeviceProtocol {
    * @return {blockViewMakeOption[]}
    */
   get reportInverterViewList() {
-    /** @type {blockViewMakeOption} */
     return [
       {
         dataKey: 'avg_pv_v',
@@ -331,6 +330,11 @@ class UpsasDP extends DeviceProtocol {
   get statusOutlineTable() {
     return [
       {
+        dataKey: 'seb_name',
+        mainTitle: '',
+        cssWidthPer: 13,
+      },
+      {
         dataKey: 'manufacturer',
         dataName: '제조사',
         mainTitle: '모듈',
@@ -414,83 +418,85 @@ class UpsasDP extends DeviceProtocol {
     return [
       {
         dataKey: 'target_name',
-        dataName: '접속반',
-        cssWidthPer: 15,
+        // dataName: '접속반',
+        cssWidthPer: 10,
+        mainTitle: '접속반',
       },
       {
         dataKey: 'install_place',
-        dataName: '관련 모듈',
-        cssWidthPer: 20,
+        // dataName: '관련 모듈',
+        cssWidthPer: 15,
+        mainTitle: '관련 모듈',
       },
       {
         dataKey: 'a_ch_1',
-        dataName: 'CH 1',
+        dataName: '1 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_1',
-        dataName: 'CH 1',
+        dataKey: 'v_ch_1',
+        dataName: '1 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
       {
         dataKey: 'a_ch_2',
-        dataName: 'CH 2',
+        dataName: '2 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_2',
-        dataName: 'CH 2',
+        dataKey: 'v_ch_2',
+        dataName: '2 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
       {
         dataKey: 'a_ch_3',
-        dataName: 'CH 3',
+        dataName: '3 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_3',
-        dataName: 'CH 3',
+        dataKey: 'v_ch_3',
+        dataName: '3 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
       {
         dataKey: 'a_ch_4',
-        dataName: 'CH 4',
+        dataName: '4 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_4',
-        dataName: 'CH 4',
+        dataKey: 'v_ch_4',
+        dataName: '4 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
       {
         dataKey: 'a_ch_5',
-        dataName: 'CH 5',
+        dataName: '5 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_5',
-        dataName: 'CH 5',
+        dataKey: 'v_ch_5',
+        dataName: '5 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
       {
         dataKey: 'a_ch_6',
-        dataName: 'CH 6',
+        dataName: '6 CH',
         dataUnit: 'A',
         mainTitle: '접속반 채널',
       },
       {
-        dataKey: 'a_ch_6',
-        dataName: 'CH 6',
+        dataKey: 'v_ch_6',
+        dataName: '6 CH',
         dataUnit: 'V',
         mainTitle: '접속반 채널',
       },
@@ -517,27 +523,27 @@ class UpsasDP extends DeviceProtocol {
     return [
       {
         dataKey: 'place_name',
-        dataName: '장소',
+        mainTitle: '장소',
       },
       {
         dataKey: 'water_level',
-        dataName: '수위',
         dataUnit: 'cm',
+        mainTitle: '수위',
       },
       {
         dataKey: 'salinity',
-        dataName: '염도',
         dataUnit: '%',
+        mainTitle: '염도',
       },
       {
         dataKey: 'module_rear_temp',
-        dataName: '모듈 후면 온도',
         dataUnit: '℃',
+        mainTitle: '모듈 후면 온도',
       },
       {
         dataKey: 'brine_temp',
-        dataName: '모듈 수온',
         dataUnit: '℃',
+        mainTitle: '모듈 수온',
       },
     ];
   }
@@ -549,15 +555,115 @@ class UpsasDP extends DeviceProtocol {
    */
   getBlockChart(blockId) {
     switch (blockId) {
-      case 'inverter':
-        return this.blockInverterChart;
       case 'connector':
         return this.blockConnectorChart;
+      case 'inverter':
+        return this.blockInverterChart;
       case 'saltern':
         return this.blockSalternChart;
       default:
         break;
     }
+  }
+
+  /**
+   * 접속반 생성 정보
+   * @return {blockTableInfo}
+   */
+  get blockConnectorChart() {
+    return {
+      blockTableName: 'pw_connector_data',
+      baseTableInfo: {
+        tableName: 'pw_connector',
+        idKey: 'target_id',
+        placeKey: 'place_seq',
+        fromToKeyTableList: [
+          {
+            fromKey: 'connector_seq',
+            toKey: 'connector_seq',
+          },
+        ],
+      },
+      blockChartList: [
+        {
+          domId: 'connector_vol_chart',
+          title: '전압',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh1,
+                  toKey: 'v_ch_1',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh2,
+                  toKey: 'v_ch_2',
+                  mixColor: '#087f5b',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh3,
+                  toKey: 'v_ch_3',
+                  mixColor: '#e67700',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh4,
+                  toKey: 'v_ch_4',
+                  mixColor: '#212529',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh5,
+                  toKey: 'v_ch_5',
+                  mixColor: '#862e9c',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh6,
+                  toKey: 'v_ch_6',
+                  mixColor: '#1864ab',
+                },
+              ],
+              dataUnit: 'V',
+              yTitle: '전력 (V)',
+            },
+          ],
+        },
+        {
+          domId: 'connector_amp_chart',
+          title: '전류',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh1,
+                  toKey: 'a_ch_1',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh2,
+                  toKey: 'a_ch_2',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh3,
+                  toKey: 'a_ch_3',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh4,
+                  toKey: 'a_ch_4',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh5,
+                  toKey: 'a_ch_5',
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.ampCh6,
+                  toKey: 'a_ch_6',
+                },
+              ],
+              dataUnit: 'A',
+              yTitle: '전류 (A)',
+            },
+          ],
+        },
+      ],
+    };
   }
 
   /**
@@ -701,106 +807,6 @@ class UpsasDP extends DeviceProtocol {
               ],
               dataUnit: 'MWh',
               yTitle: '전력(MWh)',
-            },
-          ],
-        },
-      ],
-    };
-  }
-
-  /**
-   * 접속반 생성 정보
-   * @return {blockTableInfo}
-   */
-  get blockConnectorChart() {
-    return {
-      blockTableName: 'pw_connector_data',
-      baseTableInfo: {
-        tableName: 'pw_connector',
-        idKey: 'target_id',
-        placeKey: 'place_seq',
-        fromToKeyTableList: [
-          {
-            fromKey: 'connector_seq',
-            toKey: 'connector_seq',
-          },
-        ],
-      },
-      blockChartList: [
-        {
-          domId: 'connector_vol_chart',
-          title: '전압',
-          chartOptionList: [
-            {
-              blockConfigList: [
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh1,
-                  toKey: 'v_ch_1',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh2,
-                  toKey: 'v_ch_2',
-                  mixColor: '#087f5b',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh3,
-                  toKey: 'v_ch_3',
-                  mixColor: '#e67700',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh4,
-                  toKey: 'v_ch_4',
-                  mixColor: '#212529',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh5,
-                  toKey: 'v_ch_5',
-                  mixColor: '#862e9c',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.volCh6,
-                  toKey: 'v_ch_6',
-                  mixColor: '#1864ab',
-                },
-              ],
-              dataUnit: 'V',
-              yTitle: '전력 (V)',
-            },
-          ],
-        },
-        {
-          domId: 'connector_amp_chart',
-          title: '전류',
-          chartOptionList: [
-            {
-              blockConfigList: [
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh1,
-                  toKey: 'a_ch_1',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh2,
-                  toKey: 'a_ch_2',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh3,
-                  toKey: 'a_ch_3',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh4,
-                  toKey: 'a_ch_4',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh5,
-                  toKey: 'a_ch_5',
-                },
-                {
-                  fromKey: BASE_SENSOR_KEY.ampCh6,
-                  toKey: 'a_ch_6',
-                },
-              ],
-              dataUnit: 'A',
-              yTitle: '전류 (A)',
             },
           ],
         },

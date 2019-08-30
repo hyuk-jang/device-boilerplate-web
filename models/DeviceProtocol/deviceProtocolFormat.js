@@ -74,13 +74,13 @@
 /**
  * Block 단위로 만들 EWS
  * @typedef {Object} blockViewMakeOption 장소 단위로 만들 엑셀
- * @property {string} mainTitle dataName을 묶는 이름. Table.TH 1행 이름. 동일 숫자만큼 셀 병합 처리
- * @property {string} dataKey 가져올 데이터 Key
- * @property {string} dataName 데이터 Key 이름
- * @property {string=} dataUnit 데이터 단위
- * @property {number=} scale 배율
- * @property {number=} toFixed 소수점 자리수
- * @property {number=} cssWidthPer 테이블 구성할 경우 col width %
+ * @property {string} mainTitle Table.TH 컬럼 이름(1행, 대분류). dataName이 있을 경우 묶는 이름. Table.TH 1행. 동일 숫자만큼 셀 병합 처리
+ * @property {string=} dataName Table.TH 컬럼 이름(2행). mainTitle 아래로 붙고자 할 경우.
+ * @property {string=} dataUnit 데이터 단위. (%, kW, kWh, ppm, lx, ...etc)
+ * @property {string=} dataKey 가져올 데이터 Key. dataRow 객체 안에 있는 key 중 하나
+ * @property {number=} scale 배율. 원 데이터에 곱할 수치
+ * @property {number=} toFixed 최종 계산 결과 값에 소수점 절삭 처리할 자리수
+ * @property {number=} cssWidthPer Table 셀 가로 길이(%) TH.style='width: ${cssWidthPer} %'
  */
 
 module;

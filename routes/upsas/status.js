@@ -22,12 +22,12 @@ const DeviceProtocol = require('../../models/DeviceProtocol');
 
 const DEFAULT_CATEGORY = 'outline';
 
-// trend middleware
+// middleware
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
     // Site Sequence.지점 Id를 불러옴
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
 
     const measureInfo = {
@@ -257,8 +257,6 @@ router.get(
     _.forEach(connectorRows, cntRow => {
       const statusRow = _.find(statusRows, { place_seq: cntRow.place_seq });
 
-      BU.CLI(statusRow);
-
       // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
       if (statusRow && moment().diff(moment(statusRow.writedate), 'minutes') >= 10) {
         // 접속반 총합 전류 산출
@@ -281,14 +279,11 @@ router.get(
       }
     });
 
-    // BU.CLI(connectorRows);
-
-    // BU.CLI(blockStatusTable)
     // Status Table Dom 생성
-    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDefaultTable(
-      connectorRows,
-      blockStatusTable,
-    );
+    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDynamicBlockTable({
+      dataRows: connectorRows,
+      blockTableOptions: blockStatusTable,
+    });
 
     _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
     _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
@@ -431,10 +426,10 @@ router.get(
     });
 
     // Status Table Dom 생성
-    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDefaultTable(
-      salternPlaceRows,
-      blockStatusTable,
-    );
+    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDynamicBlockTable({
+      dataRows: salternPlaceRows,
+      blockTableOptions: blockStatusTable,
+    });
 
     _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
     _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
