@@ -200,7 +200,7 @@ class WeatherModel extends BiModule {
   }
 
   /**
-   * 기상청 현재시간 기준 내일 모레 날씨를 가져옴 TODO:
+   * 기상청 현재시간 기준 오늘, 내일, 모레 날씨를 가져옴 TODO:
    * @param {number} weatherLocationSeq 기상청 동네 예보 위치 seq
    * @return {WC_KMA_DATA} 날씨 정보
    */
@@ -209,12 +209,12 @@ class WeatherModel extends BiModule {
       SELECT *
       FROM wc_kma_data 
       WHERE weather_location_seq = ${weatherLocationSeq}
-      AND applydate = DATE_FORMAT(NOW(), '%Y-%m-%d %H')
+      AND applydate > DATE_FORMAT(NOW(), '%Y-%m-%d %H')
     `;
     /** @type {KMA_DATA[]} */
     const weatherCastList = await this.db.single(sql, '', false);
     if (weatherCastList.length) {
-      return _.head(weatherCastList);
+      return weatherCastList;
     }
     return {};
   }

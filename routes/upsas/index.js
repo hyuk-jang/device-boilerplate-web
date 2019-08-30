@@ -203,9 +203,8 @@ router.get(
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
     // TODO: 현재 시간 기준 오늘, 내일, 모레 날씨 정보
-    const weatherCastInfo = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
-
-    _.set(req, 'locals.weatherCastInfo', weatherCastInfo);
+    const weatherCastList = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
+    _.set(req, 'locals.weatherCastList', weatherCastList);
 
     next();
   }),

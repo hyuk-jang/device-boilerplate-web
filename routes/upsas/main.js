@@ -36,8 +36,7 @@ router.get(
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
     /** @type {WC_KMA_DATA} */
-    const weatherCastInfo = _.get(req, 'locals.weatherCastInfo');
-
+    const weatherCastList = _.get(req, 'locals.weatherCastList');
     // BU.CLI(searchRangeInfo);
 
     // 발전 현황을 나타내는 기본적인 정보
@@ -79,10 +78,16 @@ router.get(
       domMakerMain.makeInverterStatusDom(validInverterDataList),
     );
 
-    // TODO:
+    // TODO: 기상 환경 정보 동적 생성 돔
+    _.set(
+      req,
+      'locals.dom.weatherCastTableDom',
+      domMakerMain.makeweatherCastTableDom(weatherCastList),
+    );
+
     req.locals.inverterLineChart = inverterLineChart;
     req.locals.powerGenerationInfo = powerGenerationInfo;
-    req.locals.weatherCastInfo = weatherCastInfo;
+    req.locals.weatherCastList = weatherCastList;
 
     // BU.CLI(req.locals);
     res.render('./UPSAS/main/index', req.locals);
