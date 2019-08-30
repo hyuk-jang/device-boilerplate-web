@@ -290,6 +290,8 @@ class RefineModel extends BiModule {
               placeSeq = _.get(baseRow, placeKey);
             }
 
+            // BU.CLIS(placeSeq, fromKey);
+
             // 장소 관계 Row 검색
             const placeRelationInfo = _.find(viewPlaceRelationRows, {
               place_seq: placeSeq,

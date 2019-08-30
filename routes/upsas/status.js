@@ -10,17 +10,30 @@ const { BU } = require('base-util-jh');
 const defaultDom = require('../../models/domMaker/defaultDom');
 const domMakerInverter = require('../../models/domMaker/inverterDom');
 const salternDom = require('../../models/domMaker/salternDom');
-const blockDom = require('../../models/domMaker/blockDom');
-
-const sensorUtil = require('../../models/templates/sensor.util');
-const excelUtil = require('../../models/templates/excel.util');
-const commonUtil = require('../../models/templates/common.util');
-
-const webUtil = require('../../models/templates/web.util');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
 const DEFAULT_CATEGORY = 'outline';
+
+/** @type {setCategoryInfo[]} */
+const subCategoryList = [
+  {
+    subCategory: 'outline',
+    btnName: '종합',
+  },
+  {
+    subCategory: 'connector',
+    btnName: '접속반',
+  },
+  {
+    subCategory: 'inverter',
+    btnName: '인버터',
+  },
+  {
+    subCategory: 'saltern',
+    btnName: '염전',
+  },
+];
 
 // middleware
 router.get(
@@ -29,6 +42,10 @@ router.get(
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
+
+    // 선택된 subCategoryDom 정의
+    const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
+    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
     const measureInfo = {
       siteId,
@@ -213,8 +230,8 @@ router.get(
       deviceProtocol.getBlockStatusTable('outline'),
     );
 
-    _.set(req, 'locals.dom.headerDom', tableHeaderDom);
-    _.set(req, 'locals.dom.bodyDom', tableBodyDom);
+    _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
+    _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
 
     res.render('./UPSAS/status/outline', req.locals);
   }),

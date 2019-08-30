@@ -524,6 +524,7 @@ class UpsasDP extends DeviceProtocol {
       {
         dataKey: 'place_name',
         mainTitle: '장소',
+        cssWidthPer: 25,
       },
       {
         dataKey: 'water_level',

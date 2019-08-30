@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
+    <script src="/js/contents/main/hichartMaker.js"></script>
+    <link href="/css/spinner.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <%- include("../master/spinner.ejs") %>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <%- include("../master/search.ejs") %>
+        <div class="container_row flex_dir_col mt0">
+          <p class="table_desc_area">
+            트렌드
+          </p>
+          <div id="divDomArea"></div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+
+      var searchRange = <%- JSON.stringify(searchRange) %>;
+      var trendInfo = <%- JSON.stringify(trendInfo) %>;
+    </script>
+
+    <script src="/js/contents/report/search.js"></script>
+    <!-- 기본 데이터 세팅 -->
+    <script>
+      $('#divDomArea').html(divDomList);
+
+      madeLineChartList.forEach(function(chartInfo) {
+        makeLineChart(chartInfo);
+      });
+
+      // 초기 시작시 라디오 체크버튼 클릭처리
+      var siteId = _.get(trendInfo, 'siteId');
+      var subCategory = _.get(trendInfo, 'subCategory');
+
+      checkSelectBoxOption('searchInterval', searchRange.searchInterval);
+      checkSelectBoxOption('searchType', searchRange.searchType);
+      checkSelectBoxOption('searchOption', searchRange.searchOption);
+
+      // 검색 타입에 따라 적용
+      applySearchType(searchRange.searchType);
+    </script>
+  </body>
+</html>
