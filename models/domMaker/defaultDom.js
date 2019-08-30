@@ -303,6 +303,25 @@ const defaultDom = {
   },
 
   /**
+   *
+   * @param {string} selectedSubCategory
+   * @param {setCategoryInfo[]} setSubCategoryList
+   */
+  makeSubCategoryDom(selectedSubCategory, setSubCategoryList) {
+    const subCategoryBtnTemplate = _.template(
+      '<button type="button" value="<%= subCategory %>" class="btn <%= btnClass %> <%= btnType %>"><%= btnName %></button> ',
+    );
+
+    return _.map(setSubCategoryList, (categoryInfo, index) => {
+      const { subCategory } = categoryInfo;
+      const btnType = index === 0 ? 'btn1' : 'btn2';
+      const btnClass = selectedSubCategory === subCategory ? 'btn-success' : 'btn-default';
+
+      return subCategoryBtnTemplate(_.assign(categoryInfo, { btnType, btnClass }));
+    });
+  },
+
+  /**
    * 원 데이터에 계산하고자하는 값들에 배율을 반영하고 천단위 기호 추가
    * @param {Object} calcDataRowInfo
    * @param {Object} calcDataRowInfo.dataRow

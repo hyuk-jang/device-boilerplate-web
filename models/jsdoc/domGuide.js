@@ -1,4 +1,11 @@
 /**
+ * Sub Category 정보
+ * @typedef {Object} setCategoryInfo
+ * @property {string} subCategory
+ * @property {string} btnName
+ */
+
+/**
  * @typedef {Object} domMainSensor
  * @property {string} ndId Node Def Id
  * @property {string} ndName 데이터 명
