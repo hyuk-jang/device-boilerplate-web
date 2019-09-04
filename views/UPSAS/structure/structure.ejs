@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
+<!-- css -->
+<link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"
+    />
+<link
+      href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Default Js -->
 
     <%- include("../master/head.ejs") %>
     <script src="/js/contents/master/mainUtil.js"></script>
+    <script src='/js/lodash'></script>
     <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
 
+    <!-- toggle library -->
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
-    <!-- <script src="js/drawSvg/svg.js"></script>
-    <script src="js/drawSvg/svg.filter.js"></script>
-    <script src="js/drawSvg/jquery.panzoom.js"></script>
-    <script src="js/drawSvg/jquery.mousewheel.js"></script> -->
+    <script src="js/svg/svg.js"></script>
+    <script src="js/svg/svg.filter.js"></script>
+    <script src="js/jquery.panzoom.js"></script>
+    <script src="js/jquery.mousewheel.js"></script>
 
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
-    <!-- <script src="js/drawSvg/drawSvg.js"></script> -->
+    <script src="/map/muan100kW.js"></script>
+    <script src="js/drawSvg/drawSvg.js"></script>
+
   </head>
 
   <body>
@@ -22,11 +39,23 @@
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="container_body">
+      <div class="container_body ">
         <div class="container_row mb_50rem">
           <div class="report_category">
-            <button type="button" value="structure" class="btn btn-success btn1">구성도</button>
-            <button type="button" value="dataTable" class="btn btn-default btn2">
+            <button
+              type="button"
+              name="selectMode"
+              data-value="structureMode"
+              class="btn btn-success btn1"
+            >
+              구성도
+            </button>
+            <button
+              type="button"
+              name="selectMode"
+              data-value="tableMode"
+              class="btn btn-default btn2"
+            >
               테이블
             </button>
           </div>
@@ -41,131 +70,133 @@
             <span id="test_alert" style="color: red"></span>
           </h2>
         </div>
-        <div class="container_row flex_jus_end default_search_area">
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">장치 타입</span>
-              <select class="form-control" id="singleDeviceCate"> </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">장치 목록</span>
-              <select class="form-control" id="singleDeviceList">
-                <option value=""></option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">제어 형식</span>
-              <select class="form-control">
-                <option value="1">Open / On</option>
-                <option value="0">Close / Off</option>
-              </select>
-            </div>
-            <div class="user_box report_category ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- 설정 제어 명령 -->
-        <div class="container_row flex_jus_end default_search_area">
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 종류</span>
-              <select class="form-control">
-                <option value="closeAllDevice">모든 장치 폐쇄</option>
-                <option value="rainMode">우천 대피</option>
-              </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
+        <div id='controlArea'>
+          <!-- 단일 제어 명령 -->
+          <div class="container_row flex_jus_end default_search_area" name="controlArea" data-area="single" >
+            <div class="search_area">
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 형식</span>
+                <select class="form-control" name="cmdFormatSelector" >
+                  <option value="single">단일 제어</option>
+                  <option value="set">설정 제어</option>
+                  <option value="flow">염수 이동</option>
+                  <option value="scenario">시나리오</option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 타입</span>
+                <select class="form-control" id="singleDeviceCate"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 목록</span>
+                <select class="form-control" id="singleDeviceList">
+                  <option value=""></option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">제어 형식</span>
+                <select class="form-control">
+                  <option value="1">Open / On</option>
+                  <option value="0">Close / Off</option>
+                </select>
+              </div>
+              <div class="user_box report_category ml_2rem">
+                <button type="button" class="btn btn-success" onclick="" id="">
+                  제어
+                </button>
+                <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                  취소
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <!-- 흐름 제어 명령 -->
-        <div class="container_row flex_jus_end default_search_area">
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">시작지</span>
-              <select class="form-control" id="flowCmdSrcPlace" > </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">도착지</span>
-              <select class="form-control" id="flowCmdDestPlace" > </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- 시나리오 명령 -->
-        <div class="container_row flex_jus_end default_search_area">
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">시나리오</span>
-              <select class="form-control"> </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
+          <!-- 설정 제어 명령 -->
+          <div class="container_row flex_jus_end default_search_area" name="controlArea" data-area="set" style="display: none">
+            <div class="search_area">
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 형식</span>
+                <select class="form-control" name="cmdFormatSelector" >
+                  <option value="single">단일 제어</option>
+                  <option value="set">설정 제어</option>
+                  <option value="flow">염수 이동</option>
+                  <option value="scenario">시나리오</option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 종류</span>
+                <select class="form-control">
+                  <option value="closeAllDevice">모든 장치 폐쇄</option>
+                  <option value="rainMode">우천 대피</option>
+                </select>
+              </div>
+              <div class="user_box report_category  ml_2rem">
+                <button type="button" class="btn btn-success mr_1rem" onclick="" id="">
+                  제어
+                </button>
+                <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                  취소
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <!-- 명령 목표 -->
-        <div class="container_row flex_jus_end default_search_area">
+          <!-- 흐름 제어 명령 -->
+          <div class="container_row flex_jus_end default_search_area" name="controlArea" data-area="flow" >
+            <div class="search_area">
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 형식</span>
+                <select class="form-control" name="cmdFormatSelector" >
+                  <option value="single">단일 제어</option>
+                  <option value="set">설정 제어</option>
+                  <option value="flow">염수 이동</option>
+                  <option value="scenario">시나리오</option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">시작지</span>
+                <select class="form-control" id="flowCmdSrcPlace"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">도착지</span>
+                <select class="form-control" id="flowCmdDestPlace"> </select>
+              </div>
+              <div class="user_box report_category  ml_2rem">
+                <button type="button" class="btn btn-success" onclick="" id="">
+                  제어
+                </button>
+                <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- 시나리오 명령 -->
+          <div class="container_row flex_jus_end default_search_area" name="controlArea" data-area="scenario">
+            <div class="search_area">
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 형식</span>
+                <select class="form-control" name="cmdFormatSelector">
+                  <option value="single">단일 제어</option>
+                  <option value="set">설정 제어</option>
+                  <option value="flow">염수 이동</option>
+                  <option value="scenario">시나리오</option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">시나리오</span>
+                <select class="form-control"> </select>
+              </div>
+              <div class="user_box report_category  ml_2rem">
+                <button type="button" class="btn btn-success" onclick="" id="">
+                  제어
+                </button>
+                <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- 명령 목표 -->
+          <div class="container_row flex_jus_end default_search_area" >
           <div class="search_area">
             <div class="search_box search_range_box">
               <span class="search_title">제한 시간(초)</span>
@@ -201,9 +232,10 @@
             </div>
           </div>
         </div>
+      </div>
         <div class="container_row flex_dir_col mt0">
           <!-- tableContent -->
-          <div id="tableMode">
+          <div id="tableMode" hidden>
             <div style="display: flex; justify-content: center">
               <div id="contents" class="row row_st_line min_h_780" style="padding: 30px">
                 <div class=" panel panel-default">
@@ -252,51 +284,51 @@
               </div>
             </div>
           </div>
+          <!-- structure Content FIXME: style 수정 -->
+            <div id="structureMode" class="jumbotron text-center jumbotron_line" style="margin-top: 10px">
+                <div class="">
+                  <div id="zoom" style="display: flex; justify-content: center;">
+                    <button id="zoom-in" class="btn btn-default btn-sm" style="margin-right: 5px">
+                      <span class="glyphicon glyphicon-zoom-in"></span> Zoom-in
+                    </button>
+                    <button id="zoom-out" class="btn btn-default btn-sm" style="margin-right: 5px">
+                      <span class="glyphicon glyphicon-zoom-out"></span> Zoom-out
+                    </button>
+                    <button id="reset" class="btn btn-default btn-sm " style="margin-right: 5px">
+                      <span class="glyphicon glyphicon-refresh"></span> Reset
+                    </button>
+                    <div style="margin-right: 5px">
+                      <input id="placeNodeChangeNameToogleBtn" type="checkbox" data-toggle="toggle" />
+                    </div>
+                    <select class="form-control" id='controlMode' style="width: auto">
+                      <option value="view" selected>뷰 모드</option>
+                      <option value="control">제어 모드</option>
+                      <option value="develop">개발 모드</option>
+                    </select>
+                  </div>
+                  <!-- FIXME:canvas -->
+                  <div style="height:1800px;" >
+                    <div id="canvas" style="display: flex; justify-content: center; margin: 5px;"></div>
+                  </div>
+                </div>
+              </div>
         </div>
-
-        <div class="container_row mt0">
-          <div id="zoom" style="display: flex; justify-content: center;">
-            <button id="zoom-in" class="btn btn-default btn-sm" style="margin-right: 5px">
-              <span class="glyphicon glyphicon-zoom-in"></span>
-              Zoom-in
-            </button>
-            <button id="zoom-out" class="btn btn-default btn-sm" style="margin-right: 5px">
-              <span class="glyphicon glyphicon-zoom-out"></span>
-              Zoom-out
-            </button>
-            <button id="reset" class="btn btn-default btn-sm" style="margin-right: 5px">
-              <span class="glyphicon glyphicon-refresh"></span>
-              Reset
-            </button>
-            <div style="margin-right: 5px">
-              <input id="placeNodeChangeNameToogleBtn" type="checkbox" data-toggle="toggle" />
-            </div>
-            <select class="selectpicker" id="modeSelect">
-              <option value="view">뷰 모드</option>
-              <option value="control">제어 모드</option>
-              <!-- <option value="develop">개발 모드</option> -->
-            </select>
-          </div>
-          <!-- canvas -->
-          <div>
-            <div id="canvas"></div>
-          </div>
-        </div>
+        <!-- FIXME: structureContent -->
+       
       </div>
       <!--하단1-->
 
       <%- include("../master/footer.ejs") %>
-    </div>
-
+    </!--하단1-->
 
     <script>
       var controlInfo = <%- JSON.stringify(controlInfo) %>;
       var setCmdList = controlInfo.setCmdList;
       var flowCmdList = controlInfo.flowCmdList;
       var scenarioCmdList = controlInfo.scenarioCmdList;
-
       var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
 
+      
       // Single 제어 장치 타입 선택시 이벤트
       $('#singleDeviceCate').on('change', function(event){
         return handleDeviceCategory(this.value);
@@ -325,7 +357,7 @@
       // Flow Cmd: 시작 장소 세팅
       function setFlowSrcPlace() {
         const placeTemplate = _.template('<option value="${ srcPlaceId }"> ${ srcPlaceName }</option>');
-        
+
         $('#flowCmdSrcPlace').html(_.map(flowCmdList, placeTemplate));
 
         // handleFlowSrcPlace() 실행 시킴
@@ -334,19 +366,129 @@
 
       // Flow Cmd: 시작 장소 선택 시 실행하는 함수
       function handleFlowSrcPlace(placeId) {
-        console.log('handleFlowSrcPlace')
-        const placeTemplate = _.template('<option value="${ destPlaceId }"> ${ destPlaceName }</option>');
+        // console.log('handleFlowSrcPlace')
+        // const placeTemplate = _.template('<option value="${ destPlaceId }"> ${ destPlaceName }</option>');
 
 
-        console.log('placeId', placeId)
-        console.log(_.find(flowCmdList, {srcPlaceId: placeId}).destList)
+        // console.log('placeId', placeId)
+        // console.log(_.find(flowCmdList, {srcPlaceId: placeId}).destList)
 
-        
-        $('#flowCmdDestPlace').html(_.find(flowCmdList, {srcPlaceId: placeId}).destList.map(placeTemplate));
+
+        // $('#flowCmdDestPlace').html(_.find(flowCmdList, {srcPlaceId: placeId}).destList.map(placeTemplate));
       }
+
 
       setDeviceCategory();
       setFlowSrcPlace();
+
     </script>
+
+    <!-- TODO: 구성도 페이지 형식 선택 -->
+    <script>
+      var $selectDomList = $('button[name=selectMode]');
+
+      $('button[name=selectMode]').on('click', function(event) {
+        var selectValue = $(this).data('value');
+
+        $selectDomList.each(function(index, ele) {
+          var $ele = $(ele);
+          var eleValue = $ele.data('value');
+
+          if (eleValue === selectValue) {
+            $ele.removeClass('btn-default');
+            $ele.addClass('btn-success');
+            $('#' + eleValue).removeAttr('hidden');
+          } else {
+            $ele.removeClass('btn-success');
+            $ele.addClass('btn-default');
+            $('#' + eleValue).attr('hidden', 'hidden');
+          }
+        });
+      });
+    </script>
+
+    <!-- TODO: structure Content 세팅 -->
+    <script>
+        drawSvgBasePlace('canvas'); // 멥 그리기
+        setPanzoom(); // 줌 기능 세팅
+  
+        //모드 선택 설렉트 박스 and 한/영 토글 버튼
+        $('#controlMode, #placeNodeChangeNameToogleBtn').change(function() {
+          var selectedMode = this.value
+          var isChecked = $('#placeNodeChangeNameToogleBtn').prop('checked'); // 체크 상태 false: off, true: on
+  
+          $(`#canvas`).empty(); // svg가 그려진 공간 초기화
+          drawSvgBasePlace('canvas', isChecked); // 초기화 후 다시 그리기 (체크 상태 포함)
+  
+          bindingClickNodeEvent('', selectedMode); // 장치, 센서 클릭 이벤트 다시 바인딩
+          // 새롭게 그려진 svg map 다시 데이터 뿌리기 (체크 상태 포함)
+        });
+  
+        // panzoom 옵션 세팅
+        function setPanzoom() {
+          var svgMap = SVG.get('svgCanvas'); //id가 svgCanvas인 svg 요소 선택
+          var $canvas = $('#canvas');
+          var { width, height } = map.drawInfo.frame.mapInfo;
+          var matrix = `matrix(1, 0, 0, 1, 0, 0)`; // panzoom 그린
+          var filter = 'win16|win32|win64|mac';
+  
+          //모바일, pc 접속 분별하여 zoom in/out 활셩 여부 설정
+            if (0 > filter.indexOf(navigator.platform.toLowerCase())) {
+              // mobile panzoom option  
+              $canvas.panzoom({
+                disablePan: true,
+                disableZoom: true,
+                startTransform: matrix,
+              });
+              // zoom(in,out), reset 버튼 숨김
+              $('#zoom-out', '#zoom-in', '#reset').hide();
+            } else {
+              // pc panzoom
+              $canvas.panzoom({
+                $reset: $('#reset'),
+                cursor: 'context-menu',
+                startTransform: matrix,
+              });
+  
+              // mousewheel option
+              $canvas.panzoom().on('mousewheel.focal', function(e) {
+                const delta = e.delta || e.originalEvent.wheelDelta;
+                const zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+                
+                e.preventDefault();
+                $canvas.panzoom('zoom', zoomOut, {
+                  animate: false,
+                  focal: e,
+                });
+              });
+
+            // zoom in, out 기능 적용
+            $('#zoom-in').click(function(e) {
+              $canvas.panzoom('zoom', {});
+            });
+            $('#zoom-out').click(function(e) {
+              $canvas.panzoom('zoom', 'zoomOut', {});
+            });
+            }
+          }
+      </script>
+
+      <!-- TODO: 명령 형식 선택 이벤트 -->
+      <script>
+        // FIXME: 중복 소스인데 어떻게 해결 안되나?
+          $('div[name=controlArea').each(function(index, value){
+            $(value).data('area') !== 'single' && $(value).hide()
+          })
+
+          $('select[name="cmdFormatSelector"]').on('change', function() {
+            var selectedForm = this.value // 선택된 명령 형식
+            var $controlArea = $('div[name=controlArea')
+           
+            $('select[name="cmdFormatSelector"]').val(selectedForm).attr('selected','selected')
+            $controlArea.each(function(index, searchArea){
+              $(searchArea).data('area') === selectedForm ?$(searchArea).fadeIn() : $(searchArea).hide()
+            })
+          })
+      </script>
   </body>
 </html>
