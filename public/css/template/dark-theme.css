@@ -142,6 +142,17 @@ footer {
   border-bottom: 1px solid #232a33;
 }
 
+.component_piece_area .p_column_rem {
+  padding: 2rem 0 0;
+  overflow: hidden;
+}
+/* FIXME: */
+.component_piece_area .p_column_rem_2 {
+  padding: 1rem 0 0;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
 /* Body 단위 색상 녹색 */
 .sensor_data_view > p:nth-child(2) {
   color: #93d30a;

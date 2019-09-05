@@ -111,6 +111,12 @@ header {
   padding: 2rem 0 0;
   overflow: hidden;
 }
+/* FIXME: */
+.component_piece_area .p_column_rem_2 {
+  padding: 1rem 0 0;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
 
 /* Body 단위 색상 검은색 */
 .sensor_data_view > p:nth-child(2) {

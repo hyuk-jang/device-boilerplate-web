@@ -79,10 +79,14 @@ router.get(
     );
 
     // TODO: 기상 환경 정보 동적 생성 돔
+    const deviceProtocol = new DeviceProtocol();
     _.set(
       req,
       'locals.dom.weatherCastTableDom',
-      domMakerMain.makeweatherCastTableDom(weatherCastList),
+      domMakerMain.makeWeatherCastTableDom(
+        weatherCastList,
+        deviceProtocol.getBlockStatusTable('weatherCast'),
+      ),
     );
 
     req.locals.inverterLineChart = inverterLineChart;

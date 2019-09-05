@@ -318,6 +318,8 @@ class UpsasDP extends DeviceProtocol {
         return this.statusConnectorTable;
       case 'saltern':
         return this.statusSalternTable;
+      case 'weatherCast':
+        return this.statusWeatherCastTable;
       default:
         break;
     }
@@ -545,6 +547,47 @@ class UpsasDP extends DeviceProtocol {
         dataKey: 'brine_temp',
         dataUnit: '℃',
         mainTitle: '모듈 수온',
+      },
+    ];
+  }
+
+  /**
+   *  TODO: 기상 환경 정보 테이블
+   * @return {blockViewMakeOption[]}
+   */
+  get statusWeatherCastTable() {
+    return [
+      {
+        dataKey: 'applydate',
+        mainTitle: '시각',
+      },
+      {
+        dataKey: 'wf',
+        mainTitle: '날씨',
+      },
+      {
+        dataKey: 'pop',
+        dataUnit: '%',
+        mainTitle: '강수율',
+      },
+      {
+        dataKey: 'temp',
+        dataUnit: '℃',
+        mainTitle: '기온',
+      },
+      {
+        dataKey: 'wd',
+        mainTitle: '풍향',
+      },
+      {
+        dataKey: 'ws',
+        dataUnit: 'm/s',
+        mainTitle: '풍속',
+      },
+      {
+        dataKey: 'reh',
+        dataUnit: '%',
+        mainTitle: '습도',
       },
     ];
   }

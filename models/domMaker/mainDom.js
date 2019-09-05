@@ -45,131 +45,133 @@ module.exports = {
         _.set(validRow.data, 'grid_rs_v', '-');
         _.set(validRow.data, 'grid_r_a', '-');
       }
+
       return inverterStatusTemplate(validRow.data);
     });
 
     return madeDom;
   },
 
-  // FIXME: 함수 이름 고민..
   /**
    *
-   * @param {Array} weatherCastList
+   * @param {Array} weatherCastRows
+   * @param {Array} blockStatusList
    */
-  makeweatherCastTableDom(weatherCastList) {
-    const todayWeatherCast = [];
-    const futureWeaterCast = [];
+  makeWeatherCastTableDom(weatherCastRows, blockStatusList) {
+    // 데이터를 원하는 모양으로 가공
+    // FIXME:
+    /** @type {WC_KMA_DATA} 날씨 정보 */
+    const weatherChastInfo = _.reduce(
+      weatherCastRows,
+      (r, v) => _.mergeWith(r, v, (x, y) => (x || []).concat(y)),
+      {},
+    );
 
-    _.forEach(weatherCastList, weaterCastInfo => {
-      const day = moment(weaterCastInfo.applydate).date();
-      day === moment().date() && todayWeatherCast.push(weaterCastInfo);
-    });
+    // TODO::
+    let count = 1; // 날짜가 바뀌는 부분을 체크하는 카운트
+    const dynamicHeader = ` <tr>
+      <th scope="row" class="date">날짜</th>
+      ${_.map(weatherChastInfo.applydate, (date, index, dates) => {
+        let madeHeader; //
+        let day = moment(date).day();
 
-    const dynamicRowsBodyTemplate = weatherCastList.map();
+        //
+        switch (day) {
+          case 0:
+            day = '일';
+            break;
+          case 1:
+            day = '월';
+            break;
+          case 2:
+            day = '화';
+            break;
+          case 3:
+            day = '수';
+            break;
+          case 4:
+            day = '목';
+            break;
+          case 5:
+            day = '금';
+            break;
+          case 6:
+            day = '토';
+            break;
+          default:
+            break;
+        }
 
-    // TODO: 시각 row
-    const hourRowTemplate = _.template(`<tr class="time" >
-    <th scope="row">시각</th>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-    <td><p>0</p></td>
-  </tr>`);
-    // TODO: 날씨 row
-    const weatherRowTemplate = _.template(` <tr class="weather">
-    <th scope="row">날씨</th>
-    <td><img src="" width="20"></td>
-  </tr>`);
-    // TODO: 강수율 row
-    const popRowTemplate = _.template(` <tr>
-    <th scope="row">강수율</th>
-    <td>0</td>
-  </tr>`);
-    // TODO: 기온 row
-    const tempRowTemplate = _.template(` <tr class="degree">
-    <th scope="row">기온(℃)</th>  
-    <td><p>0</p></td>
-  </tr> `);
-    // TODO: 풍향/풍속 row
-    const wsRowTemplate = _.template(`<tr class="wind"> 
-    <th scope="row" style="letter-spacing: -1px">풍향/<br>풍속(km/h)</th>
-    <td><p><img src=""></p><p><span>0</span></p></td>
-  </tr>`);
-    // TODO: 습도 row
-    const rehRowTemplate = _.template(`<tr class="humidity">   
-    <th scope="row">습도(%)</th>
-    <td><p>0</p></td>                 
-  </tr>`);
+        //
+        if (moment(dates[index]).format('D') === moment(dates[index + 1]).format('D')) {
+          count += 1;
+        } else {
+          madeHeader = `<th colspan="${count}">${moment(date).format('D')}일 (${day})</th>`;
+          count = 1;
+        }
+        return madeHeader;
+      }).toString()}
+    </tr>`;
+
+    // TODO::
+    const dynamicBody = _.map(blockStatusList, blockStatusInfo => {
+      const { dataKey = '', dataUnit = '', mainTitle = '' } = blockStatusInfo;
+      const dataList = _.result(weatherChastInfo, dataKey);
+      let result; // FIXME: 변수명 수정 필요...
+
+      //
+      switch (dataKey) {
+        case 'applydate':
+          result = _.map(
+            dataList,
+            data => `<p class ="color_black">${moment(data).format('H')}</p>`,
+          );
+          break;
+        case 'wf':
+          result = _.map(dataList, data => `<img src="/image/wf/weather_${data}.png" width="17"/>`);
+          break;
+        case 'temp':
+          result = _.map(dataList, data => `<p class="color_red">${data}</p>`);
+          break;
+        case 'reh':
+          result = _.map(dataList, data => `<p class="color_green">${data}</p>`);
+          break;
+        case 'ws':
+          result = _.map(dataList, data => `<p class="color_blue">${data}</p>`);
+          break;
+        case 'wd':
+          result = _.map(dataList, data => `<img src="/image/wd/wd_${data}.gif" />`);
+          break;
+        default:
+          result = dataList;
+      }
+
+      return `
+        <tr>
+        <th>${mainTitle} ${dataUnit}</th>
+        ${_.map(result, data => `<td>${data} </td>`)}
+        </tr>
+      `;
+    }).toString();
+
+    // TODO::
+    const dynamicColgroup = _.map(weatherCastRows, () => '<col style="width:33px">');
 
     // TODO: result
-    const weatherCastTableTemplate = _.template(`
-    <table class="table table-bordered number_table growthEnv_table">
+    const madeDom = `
+    <table class="table table-bordered number_table growth_env_table">
     <colgroup>
-      <col style="width:70px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:30px">
-      <col style="width:0px">
+      <col style="width:70px"> 
+      ${dynamicColgroup}
     </colgroup>
     <thead>
-      <tr>
-        <th scope="row" class="date">날짜</th>
-        <th colspan="${
-          todayWeatherCast.length
-        }" scope="colgroup" class="today">오늘(${moment().format('D')}일)</th>
-        <th colspan="8" scope="colgroup" class="tommorow">내일(${moment()
-          .add(1, 'days')
-          .format('D')}일)</th>
-        <th colspan="8" scope="colgroup" class="twoday">모레(${moment()
-          .add(2, 'days')
-          .format('D')}일)</th>
-        <th scope="col" class="last"></th>
-      </tr>
-    </thead>
+      ${dynamicHeader}
+     </thead
     <tbody>
-    ${hourRowTemplate()}
-    ${weatherRowTemplate()}
-    ${popRowTemplate()}
-    ${tempRowTemplate()}
-    ${wsRowTemplate()}
-    ${rehRowTemplate()}
+      ${dynamicBody}
     </tbody>
-    </table>`);
-
-    return weatherCastTableTemplate();
+    </table>
+`;
+    return madeDom.replace(/,/gi, '');
   },
 };

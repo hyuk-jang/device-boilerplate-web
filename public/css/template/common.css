@@ -619,7 +619,7 @@ article.sdv_w_side > p:last-child {
 /**************** Color ****************/
 /***************************************/
 .color_green {
-  color: #93d30a;
+  color: #38be55;
 }
 
 .color_red {
@@ -869,19 +869,24 @@ article.sdv_w_side > p:last-child {
 }
 
 /* TODO: 기상 환경 정보 테이블  */
-.growthEnv_table > tbody > tr > td > p {
+.growth_env_table > tbody > tr > td > p {
   border: 1px solid #d2d2d2;
   background: white;
-  color: black;
   position: relative;
-  left: -17px;
+  left: -18px;
   top: 0px;
-  width: 17px;
-  line-height: 17px;
-  height: 17px;
+  width: 22px;
+  line-height: 19px;
+  height: 19px;
   margin-bottom: 3px;
   border-radius: 4px;
   font-weight: bold;
   font-size: 12px;
-  font-family: gulim;
+}
+
+.growth_env_table {
+  table-layout: fixed;
+  width: 97%;
+  font-size: 12px;
+  margin: auto;
 }
