@@ -1,5 +1,9 @@
 <div class="container_row flex_jus_end default_search_area mt0">
   <div class="search_area">
+    <div class="search_box search_category_box ml0">
+      <span id="subCategoryName" class="search_title"></span>
+      <select id="subSelectBoxDom" class="form-control"> </select>
+    </div>
     <div class="search_box search_range_box">
       <span class="search_title">조회기간</span>
       <select id="searchType" class="form-control">
@@ -29,9 +33,10 @@
       </div>
     </div>
     <div class="submit_box">
-      <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">
+      <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">
         검색
       </button>
+      <input type="image" id="downloadExcel" class="icon" src="/image/common/excel-icon.jpg" />
     </div>
   </div>
 </div>

@@ -300,6 +300,7 @@ class RefineModel extends BiModule {
 
             // 존재하지 않을경우 throw
             if (_.isEmpty(placeRelationInfo)) {
+              return false;
               throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
             }
 

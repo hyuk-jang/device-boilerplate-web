@@ -22,12 +22,12 @@ const subCategoryList = [
     btnName: '종합',
   },
   {
-    subCategory: 'connector',
-    btnName: '접속반',
-  },
-  {
     subCategory: 'inverter',
     btnName: '인버터',
+  },
+  {
+    subCategory: 'connector',
+    btnName: '접속반',
   },
   {
     subCategory: 'saltern',

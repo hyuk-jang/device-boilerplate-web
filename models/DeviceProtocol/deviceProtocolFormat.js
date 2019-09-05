@@ -1,4 +1,53 @@
 /**
+ * @description REPORT
+ * @typedef {Object} reportTableInfo 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {dynamicQueryConfig} dbTableInfo DB에서 데이터를 가져오고 변환시킬 정보
+ * @property {blockViewMakeOption[]} domTableColConfigs
+ */
+
+/**
+ * @description REPORT
+ * @typedef {Object} dynamicQueryConfig 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {string} blockTableName DB에서 데이터를 가져오고 변환시킬 정보
+ * @property {baseTableInfo} baseTableInfo
+ * @property {dbTableDynamicSqlConfig} dbTableDynamicSqlConfig 동적으로 가져올 DB Table Rows Columns 정보
+ */
+
+/**
+ * @description REPORT
+ * @typedef {Object} dbTableDynamicSqlConfig 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {string[]=} avgColumnList 구간 평균 값. 계산결과 접두어 avg_ 붙음
+ * @property {string[]=} maxColumnList 구간 최대 값. 계산결과 접두어 max_ 붙음
+ * @property {string[]=} minColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
+ * @property {string[]=} amountColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
+ * @property {string[]=} intervalColumnList 구간 최대 -최소, 계산결과 접두어 interval_ 붙음
+ * @property {evalExpressionInfo[]} evalExpressionList 계산식 적용 리스트
+ */
+
+/**
+ * @description REPORT
+ * @typedef {Object} evalExpressionInfo 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {string} evalExpression eval 계산식
+ * @property {string} columnId eval 계산 결과 컬럼 명
+ * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
+ */
+
+/**
+ * @description REPORT
+ * @typedef {Object} dbTableDynamicSqlConfig 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {string} fromColumnId Table 컬럼 ID
+ * @property {string=} toColumnId default: fromColumnId, 변환 후 Table 컬럼 ID.
+ * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
+ * @property {string=} calcType 데이터 가공 값, 기본 AVG
+ * @example
+ * calcType AVG 평균 = 합산 평균 default
+ * calcType SUB 평균 = 구간 Max - Min
+ * calcType AMO 시간당 단위 량 = 해당 구간에 얻은 량(시간 대비 환산)
+ */
+
+/**
  * @typedef {Object} blockTableInfo DB Table 정보
  * @property {string} blockTableName 데이터를 가져올 DB Table Name
  * @property {baseTableInfo} baseTableInfo
