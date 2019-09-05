@@ -307,7 +307,7 @@ class UpsasDP extends DeviceProtocol {
 
   /**
    * 현황 생성 정보
-   * @property {string} blockId
+   * @param {string} blockId
    * @return {blockViewMakeOption[]}
    */
   getBlockStatusTable(blockId) {
@@ -594,7 +594,7 @@ class UpsasDP extends DeviceProtocol {
 
   /**
    * 차트 생성 정보
-   * @property {string} blockId
+   * @param {string} blockId
    * @return {blockTableInfo}
    */
   getBlockChart(blockId) {
@@ -928,6 +928,123 @@ class UpsasDP extends DeviceProtocol {
               yTitle: '온도(℃)',
             },
           ],
+        },
+      ],
+    };
+  }
+
+  /**
+   * 레포트 생성 정보
+   * @param {string} blockId
+   * @return {blockTableInfo}
+   */
+  getBlockReport(blockId) {
+    switch (blockId) {
+      case 'inverter':
+        return this.blockInverterReport;
+      case 'connector':
+        return this.blockConnectorChart;
+      case 'saltern':
+        return this.blockSalternChart;
+      default:
+        break;
+    }
+  }
+
+  /**
+   *
+   * @return {reportTableInfo}
+   */
+  get blockInverterReport() {
+    return {
+      dbTableInfo: {
+        blockTableName: 'pw_inverter_data',
+        baseTableInfo: {
+          tableName: 'pw_inverter',
+          idKey: 'target_id',
+          placeKey: 'place_seq',
+          fromToKeyTableList: [
+            {
+              fromKey: 'inverter_seq',
+              toKey: 'inverter_seq',
+            },
+          ],
+        },
+        dbTableDynamicSqlConfig: {
+          avgColumnList: ['pv_v', 'pv_a', 'pv_kw', 'grid_rs_v', 'grid_r_a', 'line_f', 'power_kw'],
+          intervalColumnList: ['power_cp_kwh'],
+          evalExpressionList: [
+            {
+              columnId: 'power_f',
+              evalExpression: 'power_kw/pv_kw',
+              calculate: 100,
+              toFixed: 1,
+            },
+          ],
+        },
+      },
+      domTableColConfigs: [
+        {
+          dataKey: 'avg_pv_v',
+          dataName: 'DC 전압',
+          dataUnit: 'V',
+          mainTitle: '태양광',
+        },
+        {
+          dataKey: 'avg_pv_a',
+          dataName: 'DC 전류',
+          dataUnit: 'A',
+          mainTitle: '태양광',
+        },
+        {
+          dataKey: 'avg_pv_kw',
+          dataName: 'DC 전력',
+          dataUnit: 'kW',
+          mainTitle: '태양광',
+        },
+        {
+          dataKey: 'avg_grid_rs_v',
+          dataName: 'AC 전압',
+          dataUnit: 'V',
+          mainTitle: '인버터',
+        },
+        {
+          dataKey: 'avg_grid_r_a',
+          dataName: 'AC 전류',
+          dataUnit: 'A',
+          mainTitle: '인버터',
+        },
+        {
+          dataKey: 'avg_power_kw',
+          dataName: 'AC 전력',
+          dataUnit: 'kW',
+          mainTitle: '인버터',
+        },
+        {
+          dataKey: 'avg_line_f',
+          dataName: '주파수',
+          dataUnit: 'Hz',
+          mainTitle: '인버터',
+        },
+        {
+          dataKey: 'avg_power_f',
+          dataName: '효율',
+          dataUnit: '%',
+          mainTitle: '인버터',
+        },
+        {
+          dataKey: 'interval_power_cp_kwh',
+          dataName: '기간 발전량',
+          dataUnit: 'kWh',
+          mainTitle: '발전 현황',
+        },
+        {
+          dataKey: 'max_power_cp_kwh',
+          dataName: '누적 발전량',
+          dataUnit: 'MWh',
+          scale: 0.001,
+          toFixed: 4,
+          mainTitle: '발전 현황',
         },
       ],
     };

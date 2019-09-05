@@ -5,7 +5,6 @@
     <%- include("../master/head.ejs") %>
     <script src="/js/hichart/exporting.js"></script>
     <script src="/js/hichart/export-data.js"></script>
-    <script src="/js/contents/main/hichartMaker.js"></script>
     <link href="/css/spinner.css" rel="stylesheet" />
   </head>
 
@@ -19,11 +18,9 @@
         <div class="container_row mb_50rem">
           <div id="subCategoryDom" class="report_category"></div>
         </div>
-        <%- include("../master/search.ejs") %>
+        <%- include("../../master/search.ejs") %>
         <div class="container_row flex_dir_col mt0">
-          <p class="table_desc_area">
-            트렌드
-          </p>
+          <p class="table_desc_area"><span id="categoryName"></span> &nbsp; <span>트렌드</span></p>
           <div id="divDomArea"></div>
         </div>
       </div>
@@ -32,13 +29,14 @@
     </div>
 
     <script>
-      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
-
       var divDomList = <%- JSON.stringify(dom.divDomList) %>;
       var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
 
       var searchRange = <%- JSON.stringify(searchRange) %>;
       var trendInfo = <%- JSON.stringify(trendInfo) %>;
+
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+      $('#categoryName').html(<%- JSON.stringify(trendInfo.subCategoryName) %>);
     </script>
 
     <script src="/js/contents/report/search.js"></script>

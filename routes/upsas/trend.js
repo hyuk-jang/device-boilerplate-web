@@ -9,14 +9,6 @@ const { BU } = require('base-util-jh');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
 
-const sensorUtil = require('../../models/templates/sensor.util');
-const excelUtil = require('../../models/templates/excel.util');
-const commonUtil = require('../../models/templates/common.util');
-
-const webUtil = require('../../models/templates/web.util');
-
-const DeviceProtocol = require('../../models/DeviceProtocol');
-
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'days';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
@@ -87,6 +79,7 @@ router.get(
     const trendInfo = {
       siteId,
       subCategory,
+      subCategoryName: _.find(subCategoryList, { subCategory }).btnName,
       strStartDateInputValue: searchRange.strStartDateInputValue,
       strEndDateInputValue: searchRange.strEndDateInputValue,
       searchType,
@@ -131,7 +124,7 @@ router.get(
     _.set(req, 'locals.dom.divDomList', divDomList);
     _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
 
-    res.render('./trend/trendTemplate', req.locals);
+    res.render('./UPSAS/trend/trend', req.locals);
   }),
 );
 

@@ -50,5 +50,72 @@ class BlockModel extends BiModule {
 
     return this.db.single(sql, null, false);
   }
+
+  /**
+   * DB Table 동적 Query 생성 및 결과 반환
+   * @param {dynamicQueryGuideInfo} dynamicQueryGuideInfo
+   */
+  async getDynamicBlockRows(dynamicQueryGuideInfo) {
+    const { searchRange, pageInfo, dynamicQueryConfig, whereColumnInfo } = dynamicQueryGuideInfo;
+    const {
+      baseTableInfo,
+      blockTableName,
+      dbTableDynamicSqlConfig,
+      dbTableDynamicSqlConfig: {
+        amountColumnList = [],
+        avgColumnList = [],
+        evalExpressionList,
+        intervalColumnList = [],
+        maxColumnList = [],
+        minColumnList = [],
+      },
+    } = dynamicQueryConfig;
+
+    const selectDynamicSqlList = [];
+
+    _.forEach(dbTableDynamicSqlConfig, (columnList, key) => {
+      let dynamicSqlTemplate = '';
+
+      switch (key) {
+        case 'avgColumnList':
+          dynamicSqlTemplate = _.template('AVG(<%= value %>) AS avg_<%= value %>');
+          break;
+        case 'maxColumnList':
+          dynamicSqlTemplate = _.template('MAX(<%= value %>) AS max_<%= value %>');
+          break;
+        case 'minColumnList':
+          dynamicSqlTemplate = _.template('MIN(<%= value %>) AS min_<%= value %>');
+          break;
+        case 'intervalColumnList':
+          dynamicSqlTemplate = _.template(
+            'MAX(<%= value %>) - MIN(<%= value %>) AS interval_<%= value %>',
+          );
+          break;
+        case 'evalExpressionList':
+          break;
+        default:
+          break;
+      }
+
+      // 계산식이 아닐 경우
+      if (key !== 'evalExpressionList') {
+        _.forEach(columnList, columnId => {
+          selectDynamicSqlList.push(dynamicSqlTemplate({ value: columnId }));
+        });
+      }
+    });
+
+    // BU.CLI(selectDynamicSqlList);
+
+    // return this.db.single(sql, null, false);
+  }
 }
 module.exports = BlockModel;
+
+/**
+ * @typedef {Object} dynamicQueryGuideInfo
+ * @property {searchRange} searchRange 검색 조건
+ * @property {{page: number, pageListCount: number}} pageInfo 가져올 페이지
+ * @property {{column: string, seqList: number[]}=} whereColumnInfo 가져올 특정 장소
+ * @property {dynamicQueryConfig} dynamicQueryConfig 동적 SQL 생성 Query 생성 정보
+ */
