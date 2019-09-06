@@ -116,5 +116,12 @@ class DeviceProtocol {
   getBlockChart(blockId) {
     console.trace('getBlockTrendViews');
   }
+
+  /**
+   * 레포트 생성 정보
+   * @param {string} blockId
+   * @return {reportTableInfo}
+   */
+  getBlockReport(blockId) {}
 }
 module.exports = DeviceProtocol;

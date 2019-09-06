@@ -118,12 +118,14 @@ router.get(
   asyncHandler(async (req, res, next) => {
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
+    /** @type {BlockModel} */
+    const blockModel = global.app.get('blockModel');
 
     commonUtil.applyHasNumbericReqToNumber(req);
 
     /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
-    const { subCategory } = req.locals.reportInfo;
+    const { subCategory, subCategoryId } = req.locals.reportInfo;
 
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
@@ -143,6 +145,18 @@ router.get(
 
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
+
+    const deviceProtocol = new DeviceProtocol();
+
+    await blockModel.getDynamicBlockReportRows({
+      searchRange: searchRangeInfo,
+      pageInfo: { page, pageListCount: PAGE_LIST_COUNT },
+      dynamicQueryConfig: deviceProtocol.getBlockReport('inverter').dbTableInfo,
+      whereColumnInfo: {
+        column: 'inverter_seq',
+        seqList: inverterSeqList,
+      },
+    });
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
@@ -183,9 +197,7 @@ router.get(
     const inverterSiteDom = reportDom.makeInverterSiteDom(powerProfileRows, subCategoryId);
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
-    const deviceProtocol = new DeviceProtocol();
     // 인버터 보고서 돔 추가
-
     const { tableHeaderDom, tableBodyDom } = reportDom.makeInverterReportDom(reportRows, {
       blockViewList: deviceProtocol.reportInverterViewList,
       page,
