@@ -936,7 +936,7 @@ class UpsasDP extends DeviceProtocol {
   /**
    * 레포트 생성 정보
    * @param {string} blockId
-   * @return {blockTableInfo}
+   * @return {reportTableInfo}
    */
   getBlockReport(blockId) {
     switch (blockId) {
@@ -963,6 +963,7 @@ class UpsasDP extends DeviceProtocol {
           tableName: 'pw_inverter',
           idKey: 'target_id',
           placeKey: 'place_seq',
+          writeDateKey: 'writedate',
           fromToKeyTableList: [
             {
               fromKey: 'inverter_seq',
@@ -973,11 +974,13 @@ class UpsasDP extends DeviceProtocol {
         dbTableDynamicSqlConfig: {
           avgColumnList: ['pv_v', 'pv_a', 'pv_kw', 'grid_rs_v', 'grid_r_a', 'line_f', 'power_kw'],
           intervalColumnList: ['power_cp_kwh'],
-          evalExpressionList: [
+          amountColumnList: ['power_kw'],
+          expressionList: [
             {
               columnId: 'power_f',
-              evalExpression: 'power_kw/pv_kw',
-              calculate: 100,
+              firstExpression: 'AVG(power_kw) / AVG(pv_kw)',
+              secondExpression: 'AVG(power_f)',
+              scale: 100,
               toFixed: 1,
             },
           ],
@@ -985,49 +988,49 @@ class UpsasDP extends DeviceProtocol {
       },
       domTableColConfigs: [
         {
-          dataKey: 'avg_pv_v',
+          dataKey: 'pv_v',
           dataName: 'DC 전압',
           dataUnit: 'V',
           mainTitle: '태양광',
         },
         {
-          dataKey: 'avg_pv_a',
+          dataKey: 'pv_a',
           dataName: 'DC 전류',
           dataUnit: 'A',
           mainTitle: '태양광',
         },
         {
-          dataKey: 'avg_pv_kw',
+          dataKey: 'pv_kw',
           dataName: 'DC 전력',
           dataUnit: 'kW',
           mainTitle: '태양광',
         },
         {
-          dataKey: 'avg_grid_rs_v',
+          dataKey: 'grid_rs_v',
           dataName: 'AC 전압',
           dataUnit: 'V',
           mainTitle: '인버터',
         },
         {
-          dataKey: 'avg_grid_r_a',
+          dataKey: 'grid_r_a',
           dataName: 'AC 전류',
           dataUnit: 'A',
           mainTitle: '인버터',
         },
         {
-          dataKey: 'avg_power_kw',
+          dataKey: 'power_kw',
           dataName: 'AC 전력',
           dataUnit: 'kW',
           mainTitle: '인버터',
         },
         {
-          dataKey: 'avg_line_f',
+          dataKey: 'line_f',
           dataName: '주파수',
           dataUnit: 'Hz',
           mainTitle: '인버터',
         },
         {
-          dataKey: 'avg_power_f',
+          dataKey: 'power_f',
           dataName: '효율',
           dataUnit: '%',
           mainTitle: '인버터',
@@ -1039,7 +1042,7 @@ class UpsasDP extends DeviceProtocol {
           mainTitle: '발전 현황',
         },
         {
-          dataKey: 'max_power_cp_kwh',
+          dataKey: 'power_cp_kwh',
           dataName: '누적 발전량',
           dataUnit: 'MWh',
           scale: 0.001,

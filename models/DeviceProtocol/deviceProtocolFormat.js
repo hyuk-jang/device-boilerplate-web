@@ -1,3 +1,10 @@
+// /**
+//  * @description REPORT
+//  * @typedef {Object} reportTableConfig 레포트 메뉴 설정
+//  * @property {dynamicQueryConfig} dbTableInfo DB에서 데이터를 가져오고 변환시킬 정보
+//  * @property {blockViewMakeOption[]} domTableColConfigs
+//  */
+
 /**
  * @description REPORT
  * @typedef {Object} reportTableInfo 레포트 메뉴를 구성하기 위한 가이드라인
@@ -21,15 +28,16 @@
  * @property {string[]=} minColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
  * @property {string[]=} amountColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
  * @property {string[]=} intervalColumnList 구간 최대 -최소, 계산결과 접두어 interval_ 붙음
- * @property {evalExpressionInfo[]} evalExpressionList 계산식 적용 리스트
+ * @property {expressionInfo[]} expressionList 계산식 적용 리스트
  */
 
 /**
  * @description REPORT
- * @typedef {Object} evalExpressionInfo 레포트 메뉴를 구성하기 위한 가이드라인
- * @property {string} evalExpression eval 계산식
- * @property {string} columnId eval 계산 결과 컬럼 명
- * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @typedef {Object} expressionInfo 레포트 메뉴를 구성하기 위한 가이드라인
+ * @property {string} firstExpression 계산식
+ * @property {string} secondExpression 계산식
+ * @property {string} columnId 계산 결과 컬럼 명
+ * @property {number=} scale 데이터 곱셈 배율. default: 1
  * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
  */
 
@@ -59,6 +67,7 @@
  * @property {string} tableName 참조할 Table 명
  * @property {string} idKey Table Row 당 ID로 사용할 컬럼 명
  * @property {string} placeKey Table Row와 연결되어 있는 place seq 컬럼 명
+ * @property {string} writeDateKey Rows 업데이트 날짜 columnId
  * @property {string[]=} placeClassKeyList dv_class를 참조할 경우 filtering 할 place_class target_id List
  * @property {fromToKeyTableInfo[]} fromToKeyTableList tableName에 지정한 table에서 추출할 Param 값 목록
  */
