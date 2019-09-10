@@ -148,7 +148,7 @@ router.get(
 
     const deviceProtocol = new DeviceProtocol();
 
-    await blockModel.getDynamicBlockReportRows({
+    const dynamicDataRows = await blockModel.getDynamicBlockReportRows({
       searchRange: searchRangeInfo,
       pageInfo: { page, pageListCount: PAGE_LIST_COUNT },
       dynamicQueryConfig: deviceProtocol.getBlockReport('inverter').dbTableInfo,
@@ -157,6 +157,8 @@ router.get(
         seqList: inverterSeqList,
       },
     });
+
+    // BU.CLIN(dynamicDataRows);
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {

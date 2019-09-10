@@ -24,6 +24,7 @@
  * @description REPORT
  * @typedef {Object} dbTableDynamicSqlConfig 레포트 메뉴를 구성하기 위한 가이드라인
  * @property {string[]=} avgColumnList 구간 평균 값. 계산결과 접두어 avg_ 붙음
+ * @property {string[]=} avgSumColumnList 구간 평균의 그룹 합 값. 계산결과 접두어 avg_sum_ 붙음
  * @property {string[]=} maxColumnList 구간 최대 값. 계산결과 접두어 max_ 붙음
  * @property {string[]=} minColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
  * @property {string[]=} amountColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
