@@ -189,23 +189,28 @@ class BlockModel extends BiModule {
 
       switch (key) {
         case 'avgColumnList':
-          firstQueryTemplate = 'AVG(<%= value %>) AS avg_<%= value %>';
-          secondQueryTemplate = firstQueryTemplate;
+          firstQueryTemplate = 'AVG(<%= columnId %>) AS avg_<%= columnId %>';
+          secondQueryTemplate = 'AVG(avg_<%= columnId %>) AS avg_<%= columnId %>';
+          break;
+        case 'avgSumColumnList':
+          firstQueryTemplate = 'AVG(<%= columnId %>) AS avg_<%= columnId %>';
+          secondQueryTemplate = 'SUM(avg_<%= columnId %>) AS avg_sum_<%= columnId %>';
           break;
         case 'maxColumnList':
-          firstQueryTemplate = 'MAX(<%= value %>) AS max_<%= value %>';
-          secondQueryTemplate = firstQueryTemplate;
+          firstQueryTemplate = 'MAX(<%= columnId %>) AS max_<%= columnId %>';
+          secondQueryTemplate = 'MAX(max_<%= columnId %>) AS max_<%= columnId %>';
           break;
         case 'minColumnList':
-          firstQueryTemplate = 'MIN(<%= value %>) AS min_<%= value %>';
-          secondQueryTemplate = firstQueryTemplate;
+          firstQueryTemplate = 'MIN(<%= columnId %>) AS min_<%= columnId %>';
+          secondQueryTemplate = 'MIN(min_<%= columnId %>) AS min_<%= columnId %>';
           break;
         case 'intervalColumnList':
-          firstQueryTemplate = 'MAX(<%= value %>) - MIN(<%= value %>) AS interval_<%= value %>';
-          secondQueryTemplate = 'SUM(interval_<%= value %>) AS interval_<%= value %>';
+          firstQueryTemplate =
+            'MAX(<%= columnId %>) - MIN(<%= columnId %>) AS interval_<%= columnId %>';
+          secondQueryTemplate = 'SUM(interval_<%= columnId %>) AS interval_<%= columnId %>';
           break;
         case 'amountColumnList':
-          firstQueryTemplate = `AVG(<%= value %>) / ${divideTimeNumber} AS amount_<%= columnId %>`;
+          firstQueryTemplate = `AVG(<%= columnId %>) / ${divideTimeNumber} AS amount_<%= columnId %>`;
           secondQueryTemplate = 'SUM(amount_<%= columnId %>) AS amount_<%= columnId %>';
           break;
         case 'expressionList':
@@ -249,8 +254,8 @@ class BlockModel extends BiModule {
         });
       } else {
         _.forEach(columnList, columnId => {
-          firstDynamicQueryList.push(firstQueryTemplate({ value: columnId }));
-          secondDynamicQueryList.push(secondQueryTemplate({ value: columnId }));
+          firstDynamicQueryList.push(firstQueryTemplate({ columnId }));
+          secondDynamicQueryList.push(secondQueryTemplate({ columnId }));
         });
       }
     });
@@ -262,6 +267,7 @@ class BlockModel extends BiModule {
               ${selectGroupDate},
               ${_.join(secondDynamicQueryList, ',\n')},
               COUNT(*) AS row_count
+        FROM 
         (
           SELECT
                   ${staticSelectQueryList.toString()},
@@ -274,11 +280,11 @@ class BlockModel extends BiModule {
           GROUP BY ${firstGroupByFormat}, ${staticSelectQueryList.toString()}
           ORDER BY ${staticSelectQueryList.toString()}, ${writeDateKey}
         ) AS main_rows
-        GROUP BY ${staticSelectQueryList.toString()}, ${groupByFormat}) AS report
+        GROUP BY ${staticSelectQueryList.toString()}, ${groupByFormat}
       `;
 
-    BU.CLI(mainSql);
-    return this.db.single(mainSql, null, false);
+    // BU.CLI(mainSql);
+    return this.db.single(mainSql, null, true);
   }
 }
 module.exports = BlockModel;
