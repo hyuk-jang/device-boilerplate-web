@@ -12,7 +12,7 @@ const commonUtil = require('../../models/templates/common.util');
 
 /* GET users listing. */
 router.get(
-  '/',
+  ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
     // res.send('respond with a resource');
 

@@ -38,6 +38,9 @@ _:-ms-input-placeholder,
   min-height: unset;
 }
 
+select {
+  cursor: pointer;
+}
 /***************************************/
 /************ Footer Master ************/
 /***************************************/
@@ -160,7 +163,7 @@ _:-ms-input-placeholder,
   padding: 15px 15px 15px;
   color: #333 !important;
   font-weight: bold;
-  font-size: 17px;
+  /* font-size: 17px; */
   display: flex;
   align-items: center;
 }
@@ -573,6 +576,11 @@ article.sdv_w_side > p:last-child {
   min-height: 500px;
 }
 
+.zoom_box {
+  display: flex;
+  justify-content: center;
+}
+
 /***************************************/
 /************ Common *************/
 /***************************************/
@@ -634,12 +642,20 @@ article.sdv_w_side > p:last-child {
   color: black;
 }
 
+.w_auto {
+  width: auto;
+}
+
 .w_10per {
   width: 10%;
 }
 
 .w_20per {
   width: 20%;
+}
+
+.w_30per {
+  width: 30%;
 }
 
 .w_40per {
@@ -688,6 +704,14 @@ article.sdv_w_side > p:last-child {
 
 .mb_50rem {
   margin-bottom: 0.5rem;
+}
+
+.pt_1rem {
+  padding-top: 1rem;
+}
+
+.pt_1rem {
+  padding-top: 2rem;
 }
 
 @media all and (max-width: 942px) {
@@ -885,7 +909,7 @@ article.sdv_w_side > p:last-child {
 }
 
 .growth_env_table {
-  table-layout: fixed;
+  table-layout: auto;
   width: 97%;
   font-size: 12px;
   margin: auto;

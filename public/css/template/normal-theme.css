@@ -3,7 +3,8 @@
 /***************************************/
 body {
   color: #333;
-  background: #f2f4f7;
+  background: #cccaca;
+  font-family: 'Arial Black', Gadget, sans-serif;
 }
 
 body a {
@@ -11,6 +12,7 @@ body a {
 }
 
 header {
+  background: #122330;
   border-bottom: #091219 solid 1px;
 }
 
@@ -44,9 +46,14 @@ header {
 }
 
 .default_search_area {
-  background: linear-gradient(to bottom right, #8da7d6, #a1bae8);
+  background: linear-gradient(rgb(34, 80, 150), rgb(22, 58, 110));
   box-shadow: 5px 2px 10px #b7b7b7;
-  border: 1px solid #9fb1cc;
+  border-top: 1px solid rgb(34, 80, 150);
+  border-bottom: 1px solid rgb(22, 58, 110);
+  padding-right: 10px;
+  padding-left: 10px;
+  color: white;
+  box-shadow: 2px 2px 10px #a1a1a1;
 }
 
 .container_row {
@@ -66,19 +73,19 @@ header {
 /***************************************/
 /* 발전 현황 정보 */
 .side_section_power {
-  background: #92b912;
-  box-shadow: 5px 2px 10px #b7b7b7;
+  background: linear-gradient(#3baf69, #349059);
+  box-shadow: 3px 3px 10px #a1a1a1;
 }
 
 /* 발전 현황 정보 데이터 색상 */
 .side_section_power .sensor_data_view > p:nth-child(2) {
-  color: #0400ff;
+  color: #0652dd;
 }
 
 /* 생육 환경 정보 */
 .side_section_growth {
-  background: #3f8eb9;
-  box-shadow: 5px 2px 10px #b7b7b7;
+  background: linear-gradient(#337497, #235975);
+  box-shadow: 3px 3px 10px #a1a1a1;
 }
 
 /* 생육 환경 정보 데이터 색상 */
@@ -97,13 +104,15 @@ header {
 /* 박스 In Chart */
 .component_piece_area {
   background: #fff;
-  box-shadow: 5px 2px 10px #b7b7b7;
+  /* border: 1px solid #d1d1d1; */
+  box-shadow: 1px 1px 10px #a1a1a1;
 }
 
 .component_piece_area > header {
-  background: linear-gradient(#408cff, #2b68c5);
-  border-top: 1px solid #3977d4;
-  border-bottom: 1px solid #5181ca;
+  background: linear-gradient(rgb(34, 80, 150), rgb(22, 58, 110));
+  border: 1px solid #d1d1d1;
+  border-top: 1px solid rgb(34, 80, 150);
+  border-bottom: 1px solid rgb(22, 58, 110);
   color: #fff;
 }
 
@@ -120,7 +129,8 @@ header {
 
 /* Body 단위 색상 검은색 */
 .sensor_data_view > p:nth-child(2) {
-  color: rgb(28, 45, 202);
+  color: #097ad1;
+  font-weight: bold;
 }
 
 .component_ele_status {
@@ -130,7 +140,7 @@ header {
 
 .component_ele_status > header {
   color: #fff;
-  background: linear-gradient(#497b18, #5d9a22);
+  /* background: linear-gradient(#130c72, #5d9a22); FIXME: */
   margin: 0;
   width: 100%;
   font-weight: bold;
@@ -156,7 +166,7 @@ header {
 }
 
 .search_box > .search_title {
-  color: #002973;
+  color: #fff;
 }
 
 .submit_box > button {
@@ -166,6 +176,15 @@ header {
 
 .submit_box > button:hover {
   background: linear-gradient(#359b5d, #2c774a);
+}
+
+.submit_box > button.btn-danger {
+  border: 1px solid #aa3224;
+  background: linear-gradient(#e74c3c, #aa3224);
+}
+
+.submit_box > button.btn-danger:hover {
+  background: linear-gradient(#862217, #aa3224);
 }
 
 .rtsp_container {

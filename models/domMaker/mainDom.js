@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const moment = require('moment');
+const { BU } = require('base-util-jh');
 
 module.exports = {
   /**
@@ -53,115 +54,98 @@ module.exports = {
   },
 
   /**
-   *
+   * 기상 환경 정보 테이블
    * @param {Array} weatherCastRows
    * @param {Array} blockStatusList
    */
   makeWeatherCastTableDom(weatherCastRows, blockStatusList) {
-    // 데이터를 원하는 모양으로 가공
-    // FIXME:
-    /** @type {WC_KMA_DATA} 날씨 정보 */
+    moment.locale('ko'); // moment.js 한글 확장팩 적용
+
+    /**
+     * collection을 키값을 기준으로 데이터를 배열화
+     * @type {WC_KMA_DATA} 날씨 정보
+     * */
     const weatherChastInfo = _.reduce(
       weatherCastRows,
-      (r, v) => _.mergeWith(r, v, (x, y) => (x || []).concat(y)),
+      (result, weatherCastRow) =>
+        _.mergeWith(result, weatherCastRow, (resultVal, weatherCastRowVal) =>
+          (resultVal || []).concat(weatherCastRowVal),
+        ),
       {},
     );
 
-    // TODO::
-    let count = 1; // 날짜가 바뀌는 부분을 체크하는 카운트
+    // table header 생성 (날짜 정보)
+    let checkNextDayCount = 1; // 날짜가 바뀌는 부분을 체크하는 카운트
     const dynamicHeader = ` <tr>
       <th scope="row" class="date">날짜</th>
       ${_.map(weatherChastInfo.applydate, (date, index, dates) => {
         let madeHeader; //
-        let day = moment(date).day();
+        const day = moment.weekdaysShort(moment(date).day()); // 요일
 
-        //
-        switch (day) {
-          case 0:
-            day = '일';
-            break;
-          case 1:
-            day = '월';
-            break;
-          case 2:
-            day = '화';
-            break;
-          case 3:
-            day = '수';
-            break;
-          case 4:
-            day = '목';
-            break;
-          case 5:
-            day = '금';
-            break;
-          case 6:
-            day = '토';
-            break;
-          default:
-            break;
-        }
-
-        //
+        // 날짜가 바뀌는 시점 레이아웃 나누기
         if (moment(dates[index]).format('D') === moment(dates[index + 1]).format('D')) {
-          count += 1;
+          checkNextDayCount += 1;
         } else {
-          madeHeader = `<th colspan="${count}">${moment(date).format('D')}일 (${day})</th>`;
-          count = 1;
+          madeHeader = `<th colspan="${checkNextDayCount}">${moment(date).format(
+            'D',
+          )}일 (${day})</th>`;
+          checkNextDayCount = 1;
         }
         return madeHeader;
       }).toString()}
     </tr>`;
 
-    // TODO::
+    // table body 생성
     const dynamicBody = _.map(blockStatusList, blockStatusInfo => {
       const { dataKey = '', dataUnit = '', mainTitle = '' } = blockStatusInfo;
       const dataList = _.result(weatherChastInfo, dataKey);
-      let result; // FIXME: 변수명 수정 필요...
+      let madeBody;
 
-      //
+      // 기상 정보에 따른 태그 변화
       switch (dataKey) {
         case 'applydate':
-          result = _.map(
+          madeBody = _.map(
             dataList,
             data => `<p class ="color_black">${moment(data).format('H')}</p>`,
           );
           break;
         case 'wf':
-          result = _.map(dataList, data => `<img src="/image/wf/weather_${data}.png" width="17"/>`);
+          madeBody = _.map(
+            dataList,
+            data => `<img src="/image/wf/weather_${data}.png" width="17"/>`,
+          );
           break;
         case 'temp':
-          result = _.map(dataList, data => `<p class="color_red">${data}</p>`);
+          madeBody = _.map(dataList, data => `<p class="color_red">${data}</p>`);
           break;
         case 'reh':
-          result = _.map(dataList, data => `<p class="color_green">${data}</p>`);
+          madeBody = _.map(dataList, data => `<p class="color_green">${data}</p>`);
           break;
         case 'ws':
-          result = _.map(dataList, data => `<p class="color_blue">${data}</p>`);
+          madeBody = _.map(dataList, data => `<p class="color_blue">${data}</p>`);
           break;
         case 'wd':
-          result = _.map(dataList, data => `<img src="/image/wd/wd_${data}.gif" />`);
+          madeBody = _.map(dataList, data => `<img src="/image/wd/wd_${data}.gif" />`);
           break;
         default:
-          result = dataList;
+          madeBody = dataList;
       }
 
       return `
         <tr>
         <th>${mainTitle} ${dataUnit}</th>
-        ${_.map(result, data => `<td>${data} </td>`)}
+        ${_.map(madeBody, data => `<td>${data} </td>`)}
         </tr>
       `;
     }).toString();
 
-    // TODO::
-    const dynamicColgroup = _.map(weatherCastRows, () => '<col style="width:33px">');
+    const dynamicColgroup = _.map(weatherCastRows, () => '<col class="w_10per">');
 
-    // TODO: result
+    // result
     const madeDom = `
     <table class="table table-bordered number_table growth_env_table">
     <colgroup>
-      <col style="width:70px"> 
+      <col class="w_40per" > 
       ${dynamicColgroup}
     </colgroup>
     <thead>
