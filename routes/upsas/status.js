@@ -158,13 +158,15 @@ router.get(
 
       const cntStatusRow = _.find(connectorStatusRows, { connector_seq: cntSeq });
       // PV 전류 시간이 10분을 초과하였다면 처리하지 않음
-      if (moment().diff(moment(cntStatusRow.writedate), 'minutes') >= 10) {
+      if (moment().diff(moment(cntStatusRow.writedate), 'minutes') <= 10) {
         // 합산 전류
-        const pvAmp = _(ampList)
+        const pvAmp = _.chain(ampList)
           .map(ampCol => {
             return _.get(cntStatusRow, ampCol, null);
           })
-          .sum();
+          .sum()
+          .round(1)
+          .value();
 
         // 평균 전압
         const pvVol = _.chain(volList)
@@ -192,7 +194,7 @@ router.get(
         _.pullAt(inverterStatusRows, [foundInverterStatusIndex]);
 
         // 의미없는 데이터일 경우 무시
-        if (moment().diff(moment(inverterStatusRow.writedate), 'minutes') >= 10) {
+        if (moment().diff(moment(inverterStatusRow.writedate), 'minutes') <= 10) {
           const pvAmp = _.get(inverterStatusRow, 'pv_a', null);
           const pvVol = _.get(inverterStatusRow, 'pv_v', null);
           const pvKw =
@@ -213,7 +215,7 @@ router.get(
 
       const salternStatusRow = _.find(salternStatusRows, { place_seq: placeSeq });
       // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
-      if (moment().diff(moment(salternStatusRow.writedate), 'minutes') >= 10) {
+      if (moment().diff(moment(_.get(salternStatusRow, 'writedate')), 'minutes') <= 10) {
         _.assign(
           sebRelRow,
           _.pick(salternStatusRow, ['water_level', 'salinity', 'module_rear_temp']),
@@ -275,19 +277,21 @@ router.get(
       const statusRow = _.find(statusRows, { place_seq: cntRow.place_seq });
 
       // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
-      if (statusRow && moment().diff(moment(statusRow.writedate), 'minutes') >= 10) {
+      if (statusRow && moment().diff(moment(statusRow.writedate), 'minutes') <= 10) {
         // 접속반 총합 전류 산출
-        const sumAmp = _(statusRow)
+        const sumAmp = _.chain(statusRow)
           .map((value, key) => {
             return _.includes(key, 'a_ch') && _.isNumber(value) ? value : null;
           })
-          .sum();
+          .sum()
+          .round(1);
 
         // 접속반 평균 전압 산출
         const avgVol = _.chain(statusRow)
-          .map((value, key) => {
-            return _.includes(key, 'v_ch') && _.isNumber(value) ? value : null;
-          })
+          .reduce((result, value, key) => {
+            _.includes(key, 'v_ch') && result.push(value);
+            return result;
+          }, [])
           .mean()
           .round(1);
 
@@ -437,7 +441,7 @@ router.get(
       const salternStatusRow = _.find(salternStatusRows, { place_seq: salternPlaRow.place_seq });
 
       // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
-      if (salternStatusRow && moment().diff(moment(salternStatusRow.writedate), 'minutes') >= 10) {
+      if (salternStatusRow && moment().diff(moment(salternStatusRow.writedate), 'minutes') <= 10) {
         _.assign(salternPlaRow, _.pick(salternStatusRow, _.map(blockStatusTable, 'dataKey')));
       }
     });
