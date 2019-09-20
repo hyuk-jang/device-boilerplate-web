@@ -36,6 +36,9 @@ header {
   background: linear-gradient(#444, #333);
 }
 
+.navbar-inverse .navbar-toggle {
+  background-color: #333;
+}
 /***************************************/
 /************** Container **************/
 /***************************************/

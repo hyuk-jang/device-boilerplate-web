@@ -401,6 +401,16 @@ _:-ms-input-placeholder,
 }
 
 /***************************************/
+/************** structure 영역 *********/
+/***************************************/
+
+/* FIXME: */
+.command_status_view {
+  width: 48%;
+  margin: 10px;
+}
+
+/***************************************/
 /************** Table 영역 *************/
 /***************************************/
 
@@ -642,6 +652,9 @@ article.sdv_w_side > p:last-child {
   color: black;
 }
 
+/***************************************/
+/**************** interval ****************/
+/***************************************/
 .w_auto {
   width: auto;
 }
@@ -660,6 +673,10 @@ article.sdv_w_side > p:last-child {
 
 .w_40per {
   width: 40%;
+}
+
+.w_50per {
+  width: 50%;
 }
 
 .w_90per {
@@ -710,8 +727,24 @@ article.sdv_w_side > p:last-child {
   margin-top: 2rem;
 }
 
+.mr_1rem {
+  margin-right: 1rem;
+}
+
 .mr_2rem {
   margin-right: 2rem;
+}
+
+.mr_3rem {
+  margin-right: 3rem;
+}
+
+.mr_4rem {
+  margin-right: 4rem;
+}
+
+.mr_5rem {
+  margin-right: 5rem;
 }
 
 .ml_1rem {
@@ -720,14 +753,6 @@ article.sdv_w_side > p:last-child {
 
 .ml_2rem {
   margin-left: 2rem;
-}
-
-.mr_1rem {
-  margin-right: 1rem;
-}
-
-.mr_2rem {
-  margin-right: 2rem;
 }
 
 .mb_50rem {
@@ -866,6 +891,16 @@ article.sdv_w_side > p:last-child {
 
   .submit_box > .icon {
     margin-left: 1rem;
+  }
+
+  .rtsp_container {
+    flex-direction: column;
+    align-content: center;
+  }
+
+  .command_status_view {
+    width: 100%;
+    margin: 0;
   }
 }
 
