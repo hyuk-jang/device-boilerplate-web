@@ -133,19 +133,19 @@ module.exports = {
 
       return `
         <tr>
-        <th>${mainTitle} ${dataUnit}</th>
+        <th nowrap>${mainTitle} ${dataUnit}</th>
         ${_.map(madeBody, data => `<td>${data} </td>`)}
         </tr>
       `;
     }).toString();
 
-    const dynamicColgroup = _.map(weatherCastRows, () => '<col class="w_10per">');
+    const dynamicColgroup = _.map(weatherCastRows, () => '<col class="w_2rem">');
 
     // result
     const madeDom = `
-    <table class="table table-bordered number_table growth_env_table">
+    <table class="table table-bordered number_table growth_env_table" cellspacing='0'>
     <colgroup>
-      <col class="w_40per" > 
+      <col class="w_7rem" > 
       ${dynamicColgroup}
     </colgroup>
     <thead>

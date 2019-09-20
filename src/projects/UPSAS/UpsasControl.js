@@ -40,7 +40,7 @@ class UpsasControl extends Control {
   runFeature(featureConfig) {
     BU.CLI('runFeature');
     const { ioConfig, apiConfig, rtspConfig } = featureConfig;
-    // this.weathercast.init(this.dbInfo);
+    this.weathercast.init(this.dbInfo);
     this.socketIoManager.init(ioConfig);
 
     this.apiServer.init(apiConfig);

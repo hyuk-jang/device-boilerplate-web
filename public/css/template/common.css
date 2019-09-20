@@ -670,6 +670,34 @@ article.sdv_w_side > p:last-child {
   width: 100%;
 }
 
+.w_1rem {
+  width: 1rem;
+}
+
+.w_2rem {
+  width: 2rem;
+}
+
+.w_3rem {
+  width: 3rem;
+}
+
+.w_4rem {
+  width: 4rem;
+}
+
+.w_5rem {
+  width: 5rem;
+}
+
+.w_6rem {
+  width: 6rem;
+}
+
+.w_7rem {
+  width: 7rem;
+}
+
 .ml0 {
   margin-left: 0;
 }
@@ -892,7 +920,7 @@ article.sdv_w_side > p:last-child {
   }
 }
 
-/* TODO: 기상 환경 정보 테이블  */
+/* 기상 환경 정보 테이블  */
 .growth_env_table > tbody > tr > td > p {
   border: 1px solid #d2d2d2;
   background: white;
@@ -905,12 +933,12 @@ article.sdv_w_side > p:last-child {
   margin-bottom: 3px;
   border-radius: 4px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 1rem;
 }
 
 .growth_env_table {
   table-layout: auto;
   width: 97%;
-  font-size: 12px;
+  font-size: 1.2rem;
   margin: auto;
 }

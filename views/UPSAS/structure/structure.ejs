@@ -2,31 +2,12 @@
 <html>
   <head>
 <!-- css -->
-<link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"
-    />
-<link
-      href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css"
-      rel="stylesheet"
-    />
 
     <!-- Default Js -->
 
     <%- include("../master/head.ejs") %>
     <script src="/js/contents/master/mainUtil.js"></script>
-    <script src='/js/lodash'></script>
     <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
-
-    <!-- toggle library -->
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
-    <!-- SVG Map 을 생성하기 위한 필수 Library -->
-    <script src="js/svg/svg.js"></script>
-    <script src="js/svg/svg.filter.js"></script>
-    <script src="js/jquery.panzoom.js"></script>
-    <script src="js/jquery.mousewheel.js"></script>
 
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/map/muan100kW.js"></script>
@@ -237,7 +218,7 @@
           <!-- tableContent -->
           <div id="tableMode" hidden>
             <div class= "flex_jus_center rtsp_container" >
-              <div id="contents" class="row row_st_line min_h_780" style="padding: 30%" >
+              <div id="contents" class="row row_st_line min_h_780 mr_2rem">
                 <div class=" panel panel-default">
                   <!-- Default panel contents -->
                   <div class="panel-heading">명령 목록</div>
@@ -260,7 +241,7 @@
                   </table>
                 </div>
               </div> 
-              <div id="contents" class="row row_st_line min_h_780" style="padding: 30%" >
+              <div id="contents" class="row row_st_line min_h_780 mr_2rem">
                 <div class="panel panel-default">
                   <!-- Default panel contents -->
                   <div class="panel-heading">장치 상태 정보 목록</div>
