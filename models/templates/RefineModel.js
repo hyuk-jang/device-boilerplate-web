@@ -277,7 +277,7 @@ class RefineModel extends BiModule {
         blockConfigList.forEach(blockConfig => {
           // convertKey가 없을 경우 toKey로 대체
           const { fromKey, toKey, convertKey = toKey, mixColor = '' } = blockConfig;
-          const { convertName = '' } = blockConfig;
+          const { convertName } = blockConfig;
 
           // 현재 Dom 정보에서 표현해줄 chart line 갯수를 뽑아내기 위하여 group 처리된 목록을 순회
           _.forEach(blockDataRowsGroup, (blockDataRows, groupSeq) => {
@@ -319,7 +319,7 @@ class RefineModel extends BiModule {
 
             /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
             const chartSeries = {
-              name: convertName.length
+              name: _.isString(convertName)
                 ? `${pTargetName} ${convertName}`
                 : `${pTargetName} ${ndName}`,
               color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
