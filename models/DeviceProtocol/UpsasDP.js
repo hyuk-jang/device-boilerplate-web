@@ -731,13 +731,14 @@ class UpsasDP extends DeviceProtocol {
       blockChartList: [
         {
           domId: 'inverter_power_chart',
-          title: '출력',
+          title: 'AC 출력',
           chartOptionList: [
             {
               blockConfigList: [
                 {
                   fromKey: BASE_INV_KEY.powerGridKw,
                   toKey: 'power_kw',
+                  convertName: '',
                 },
               ],
               dataUnit: 'kW',
@@ -748,12 +749,14 @@ class UpsasDP extends DeviceProtocol {
         {
           domId: 'inverter_pv_chart',
           title: 'DC 현황',
+          subtitle: '전압, 전류',
           chartOptionList: [
             {
               blockConfigList: [
                 {
                   fromKey: BASE_INV_KEY.pvVol,
                   toKey: 'pv_v',
+                  convertName: '전압',
                 },
               ],
               dataUnit: 'V',
@@ -764,6 +767,7 @@ class UpsasDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.pvAmp,
                   toKey: 'pv_a',
+                  convertName: '전류',
                 },
               ],
               dataUnit: 'A',
@@ -773,22 +777,26 @@ class UpsasDP extends DeviceProtocol {
         },
         {
           domId: 'inverter_grid_chart',
-          title: 'AC 현황',
+          title: 'AC Grid 현황',
+          subtitle: '전압, 전류',
           chartOptionList: [
             {
               blockConfigList: [
                 {
-                  fromKey: BASE_INV_KEY.gridTrVol,
-                  toKey: 'grid_tr_v',
-                },
-                {
                   fromKey: BASE_INV_KEY.gridRsVol,
                   toKey: 'grid_rs_v',
-                  mixColor: '#eeeeee',
+                  convertName: 'RS 전압',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridStVol,
                   toKey: 'grid_st_v',
+                  convertName: 'ST 전압',
+                  mixColor: '#eeeeee',
+                },
+                {
+                  fromKey: BASE_INV_KEY.gridTrVol,
+                  toKey: 'grid_tr_v',
+                  convertName: 'TR 전압',
                   mixColor: '#dddddd',
                 },
               ],
@@ -800,14 +808,17 @@ class UpsasDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
+                  convertName: 'R 전류',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridSAmp,
                   toKey: 'grid_s_a',
+                  convertName: 'S 전류',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTAmp,
                   toKey: 'grid_t_a',
+                  convertName: 'T 전류',
                 },
               ],
               dataUnit: 'A',
@@ -817,7 +828,7 @@ class UpsasDP extends DeviceProtocol {
         },
         {
           domId: 'interval_power_chart',
-          title: '발전량',
+          title: '기간 발전량',
           chartOptionList: [
             {
               blockConfigList: [
@@ -825,6 +836,7 @@ class UpsasDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.powerCpKwh,
                   toKey: 'power_cp_kwh',
                   convertKey: 'interval_power_cp_kwh',
+                  convertName: '',
                   calcType: this.CALC_TYPE.INTERVAL_MAX,
                 },
               ],
@@ -843,7 +855,7 @@ class UpsasDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.powerCpKwh,
                   toKey: 'power_cp_kwh',
                   convertKey: 'max_power_cp_mwh',
-                  convertName: '누적 발전량',
+                  convertName: '',
                   calcType: this.CALC_TYPE.MAX,
                   calculate: 0.001,
                   toFixed: 3,
