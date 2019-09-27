@@ -5,7 +5,6 @@ const { BaseModel } = require('../../../device-protocol-converter-jh');
 
 // 가져올려는 Report Key로 필터링
 const { BASE_KEY } = BaseModel.FarmParallel;
-const EAN_BASE_KEY = BaseModel.Sensor.BASE_KEY;
 
 require('./deviceProtocolFormat');
 
@@ -16,6 +15,10 @@ const CALC_TYPE = {
   AMOUNT: 'AMOUNT',
   // 두 날짜 간격 사이의 데이터 중 큰 값의 차
   INTERVAL_MAX: 'INTERVAL_MAX',
+  // 구간 최소값
+  MIN: 'MIN',
+  // 구간 최대값
+  MAX: 'MAX',
 };
 
 class DeviceProtocol {
@@ -97,5 +100,28 @@ class DeviceProtocol {
   get reportInverterViewList() {
     return [];
   }
+
+  /**
+   * 현황 생성 정보
+   * @property {string} blockId
+   * @return {blockViewMakeOption[]}
+   */
+  getBlockStatusTable(blockId) {}
+
+  /**
+   * 트렌드 생성 정보
+   * @property {string} blockId
+   * @return {blockTableInfo}
+   */
+  getBlockChart(blockId) {
+    console.trace('getBlockTrendViews');
+  }
+
+  /**
+   * 레포트 생성 정보
+   * @param {string} blockId
+   * @return {reportTableInfo}
+   */
+  getBlockReport(blockId) {}
 }
 module.exports = DeviceProtocol;

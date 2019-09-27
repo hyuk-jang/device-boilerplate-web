@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <!-- <script src="/js/contents/master/mainUtil.js"></script> -->
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">측정시간 &nbsp; <span id="measureTime"> </span></p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <thead id="tableHeaderDom"></thead>
+              <tbody id="tableBodyDom"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            수중 태양광 증발지 발전 현황
+          </p>
+          <div id="divDomArea"></div>
+        </div>
+      </div>
+      <!--하단1-->
+
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      $('#tableHeaderDom').html(<%- JSON.stringify(dom.tableHeaderDom) %>);
+      $('#tableBodyDom').html(<%- JSON.stringify(dom.tableBodyDom) %>);
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      var measureInfo = <%- JSON.stringify(measureInfo) %>;
+      document.getElementById('measureTime').innerHTML = measureInfo.measureTime;
+      var siteId = _.get(measureInfo, 'siteId');
+      var subCategory = _.get(measureInfo, 'subCategory');
+
+      // 컬럼 차트를 표현하기 위함
+      var sebRelationRows = <%- JSON.stringify(sebRelationRows) %>;
+    </script>
+
+    <!-- subCategoryDom 자동 이벤트 부여  -->
+    <script src="/js/contents/report/search.js"></script>
+
+    <script>
+      makeColumnChart({
+        domId: 'divDomArea',
+        xAxis: {
+          categories: _.map(sebRelationRows, 'seb_name'),
+        },
+        yAxis: [
+          {
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '출력',
+            },
+            min: 0,
+            // max: 40,
+            // tickInterval: 10,
+            // tickAmount: 5,
+          },
+          {
+            labels: {
+              format: '{value} ',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '온도/수위/염도',
+            },
+            min: 0,
+            max: 50,
+            tickInterval: 5,
+            // tickAmount: 5,
+            opposite: 1,
+          },
+        ],
+        series: [
+          {
+            name: 'DC 출력',
+            data: _.map(sebRelationRows, 'modulePvKw'),
+            color: 'black',
+            tooltip: {
+              valueSuffix: ' kW',
+            },
+          },
+          {
+            name: '모듈후면온도',
+            data: _.map(sebRelationRows, 'module_rear_temp'),
+            yAxis: 1,
+            color: 'red',
+            tooltip: {
+              valueSuffix: ' ℃',
+            },
+          },
+          {
+            name: '수위',
+            data: _.map(sebRelationRows, 'water_level'),
+            color: 'blue',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' cm',
+            },
+          },
+          {
+            name: '염도',
+            data: _.map(sebRelationRows, 'salinity'),
+            color: 'brown',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+        ],
+      });
+    </script>
+  </body>
+</html>

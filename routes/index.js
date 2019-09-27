@@ -11,10 +11,14 @@ const admin = require('./admin/users');
 // const owner = require('./owner/users');
 // const guest = require('./guest/users');
 const users = require('./users');
+const upsas = require('./upsas');
 const Ean = require('./Ean');
 
 let selectedRouter;
 switch (process.env.PJ_MAIN_ID) {
+  case 'UPSAS':
+    selectedRouter = upsas;
+    break;
   case 'FP':
     selectedRouter = users;
     break;

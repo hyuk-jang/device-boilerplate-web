@@ -38,9 +38,10 @@ router.get(
 
     /** @type {V_DV_NODE_DEF[]} */
     const viewNodeDefRows = await biModule.getTable('v_dv_node_def');
-
+    // console.time('getSensorProfile');
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
+    // console.timeEnd('getSensorProfile');
 
     const deviceProtocol = new DeviceProtocol(siteId);
 
@@ -82,10 +83,12 @@ router.get(
     });
     // BU.CLI(searchRange);
     // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
+    // console.time('getInverterStatistics');
     const inverterStatisticsRows = await biModule.getInverterStatistics(
       searchRange,
       inverterSeqList,
     );
+    // console.timeEnd('getInverterStatistics');
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
     const monthPower = webUtil.reduceDataList(inverterStatisticsRows, 'interval_power');
 
@@ -101,7 +104,9 @@ router.get(
     // });
     // BU.CLI(searchRange);
     // 인버터 트렌드 구함
+    // console.time('getInverterTrend');
     const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
+    // console.timeEnd('getInverterTrend');
     // BU.CLI(inverterTrend);
 
     // 구한 인버터 Trend는 grouping 구간의 최대 최소 값이므로 오차가 발생. 따라서 이전 grouping 최대 값끼리 비교 연산 필요.
@@ -130,9 +135,10 @@ router.get(
     // webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
 
     // 인버터 현재 발전 현황
+    // console.time('v_pw_inverter_status');
     /** @type {V_PW_INVERTER_STATUS[]} */
     const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
-
+    // console.timeEnd('v_pw_inverter_status');
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq: inverterSeq } = inverterStatus;

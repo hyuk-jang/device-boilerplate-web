@@ -26,6 +26,7 @@ const DEFAULT_CATEGORY = 'sensor';
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
+    // console.time('Trend Middleware');
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
@@ -72,6 +73,7 @@ router.get(
 
     _.set(req, 'locals.trendInfo', trendInfo);
     _.set(req, 'locals.searchRange', searchRange);
+    // console.timeEnd('Trend Middleware');
     next();
   }),
 );
@@ -90,7 +92,7 @@ router.get(
 
     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-
+    // console.time('init');
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
@@ -105,7 +107,7 @@ router.get(
 
     // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
-
+    // console.timeEnd('init');
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     // BU.CLI(searchRangeInfo);
@@ -193,66 +195,102 @@ router.get(
 router.get(
   ['/:siteId', '/:siteId/inverter'],
   asyncHandler(async (req, res, next) => {
-    /** @type {PowerModel} */
-    const powerModel = global.app.get('powerModel');
-
-    /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
-
-    // commonUtil.applyHasNumbericReqToNumber(req);
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
 
     /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
 
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-
-    /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-    // BU.CLI(powerProfileRows);
-
-    // 인버터 Seq 목록
-    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    // const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-
-    const deviceProtocol = new DeviceProtocol(siteId);
-
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-
-    // plotSeries 를 구하기 위한 객체
-    const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
-
-    // BU.CLI(strGroupDateList);
-
-    const madeLineChartList = await powerModel.getInverterLineChart(
-      searchRangeInfo,
-      deviceProtocol.trendInverterViewList,
-      inverterSeqList,
-      {
-        strGroupDateList,
-        plotSeries: momentFormat.plotSeries,
-      },
+    const refinedInverterCharts = await refineModel.refineBlockCharts(
+      _.get(req, 'locals.searchRange'),
+      'inverter',
+      siteId,
     );
-
-    // BU.CLIN(madeLineChartList, 3);
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const inverterDomTemplate = _.template(`
         <div class="lineChart_box default_area" id="<%= domId %>"></div>
     `);
-    const divDomList = madeLineChartList.map(refinedChart =>
+    const divDomList = refinedInverterCharts.map(refinedChart =>
       inverterDomTemplate({
         domId: refinedChart.domId,
       }),
     );
 
     _.set(req, 'locals.dom.divDomList', divDomList);
-    _.set(req, 'locals.madeLineChartList', madeLineChartList);
+    // _.set(req, 'locals.madeLineChartList', madeLineChartList);
+    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
 
     // BU.CLIN(inverterTrendRows);
 
     res.render('./trend/inverterTrend', req.locals);
   }),
 );
+
+/** FIXME: 구 버젼 인버터 트렌드 */
+// router.get(
+//   ['/:siteId', '/:siteId/inverter'],
+//   asyncHandler(async (req, res, next) => {
+//     /** @type {PowerModel} */
+//     const powerModel = global.app.get('powerModel');
+
+//     /** @type {searchRange} */
+//     const searchRangeInfo = _.get(req, 'locals.searchRange');
+
+//     // commonUtil.applyHasNumbericReqToNumber(req);
+
+//     /** @type {MEMBER} */
+//     const { siteId } = req.locals.mainInfo;
+
+//     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
+//     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+
+//     /** @type {V_PW_PROFILE[]} */
+//     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+//     // BU.CLI(powerProfileRows);
+
+//     // 인버터 Seq 목록
+//     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+//     // const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+//     const deviceProtocol = new DeviceProtocol(siteId);
+
+//     const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+
+//     // plotSeries 를 구하기 위한 객체
+//     const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+
+//     // BU.CLI(strGroupDateList);
+
+//     const madeLineChartList = await powerModel.getInverterLineChart(
+//       searchRangeInfo,
+//       deviceProtocol.trendInverterViewList,
+//       inverterSeqList,
+//       {
+//         strGroupDateList,
+//         plotSeries: momentFormat.plotSeries,
+//       },
+//     );
+
+//     // BU.CLIN(madeLineChartList, 3);
+
+//     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+//     const inverterDomTemplate = _.template(`
+//         <div class="lineChart_box default_area" id="<%= domId %>"></div>
+//     `);
+//     const divDomList = madeLineChartList.map(refinedChart =>
+//       inverterDomTemplate({
+//         domId: refinedChart.domId,
+//       }),
+//     );
+
+//     _.set(req, 'locals.dom.divDomList', divDomList);
+//     _.set(req, 'locals.madeLineChartList', madeLineChartList);
+
+//     // BU.CLIN(inverterTrendRows);
+
+//     res.render('./trend/inverterTrend', req.locals);
+//   }),
+// );
 
 module.exports = router;

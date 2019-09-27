@@ -17,7 +17,7 @@ function makeDatePicker(dom, viewMode) {
   }
 
   $(dom).datepicker('remove');
-  console.log('dateFormat', dateFormat, viewMode);
+
   $(dom).datepicker({
     format: dateFormat,
     language: 'kr',

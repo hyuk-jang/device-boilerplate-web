@@ -166,7 +166,7 @@ _:-ms-input-placeholder,
 }
 
 .header_home_area > img {
-  width: 30px;
+  /* width: 30px; */
   height: 30px;
   margin: 0px;
   margin-right: 5px;
@@ -228,7 +228,8 @@ _:-ms-input-placeholder,
 }
 
 .component_side_box {
-  width: 20%;
+  width: 200px;
+  min-width: 200px;
   height: 350px;
 }
 
@@ -283,9 +284,16 @@ _:-ms-input-placeholder,
 /***************************************/
 /********** Dash Board 영역 ************/
 /***************************************/
-.component_piece_box {
-  width: 39%;
+.component_pieceDouble_box {
+  width: 60%;
   height: 350px;
+}
+
+.component_piece_box {
+  width: 45%;
+  height: 350px;
+  display: flex;
+  justify-content: center;
 }
 
 .component_piece_area {
@@ -657,6 +665,14 @@ article.sdv_w_side > p:last-child {
 
 .ml_2rem {
   margin-left: 2rem;
+}
+
+.mr_1rem {
+  margin-right: 1rem;
+}
+
+.mr_2rem {
+  margin-right: 2rem;
 }
 
 .mb_50rem {

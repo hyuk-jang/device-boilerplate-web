@@ -1,0 +1,42 @@
+<div class="container_row flex_jus_end default_search_area mt0">
+  <div class="search_area">
+    <div class="search_box search_category_box ml0">
+      <span id="subCategoryName" class="search_title"></span>
+      <select id="subSelectBoxDom" class="form-control"> </select>
+    </div>
+    <div class="search_box search_range_box">
+      <span class="search_title">조회기간</span>
+      <select id="searchType" class="form-control">
+        <option value="days">일일</option>
+        <option value="months">월간</option>
+        <option value="years">년간</option>
+        <option value="range">기간선택</option>
+      </select>
+    </div>
+    <div class="search_box search_interval_box">
+      <span class="search_title">조회간격</span>
+      <select id="searchInterval" class="form-control">
+        <option value="min">1분</option>
+        <option value="min10">10분</option>
+        <option value="hour">1시간</option>
+        <option value="day">1일</option>
+        <option value="month">1달</option>
+        <option value="year">1년</option>
+      </select>
+    </div>
+    <div class="search_box">
+      <span class="search_title">날짜</span>
+      <div class="search_body">
+        <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly />
+        <span id="between-start-end" hidden>~</span>
+        <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly hidden />
+      </div>
+    </div>
+    <div class="submit_box">
+      <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">
+        검색
+      </button>
+      <input type="image" id="downloadExcel" class="icon" src="/image/common/excel-icon.jpg" />
+    </div>
+  </div>
+</div>

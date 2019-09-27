@@ -60,7 +60,7 @@ class ApiServer extends AbstApiServer {
             // isError Key가 존재하고 Number 형태라면 요청에 대한 응답이라고 판단하고 이벤트 발생
             if (_.isNumber(_.get(fieldMessage, 'isError'))) {
               const msInfo = this.findMainStorage(socket);
-              return this.observerList.forEach(observer => {
+              return this.observers.forEach(observer => {
                 if (_.get(observer, 'responseFieldMessage')) {
                   observer.responseFieldMessage(msInfo, fieldMessage);
                 }
@@ -84,7 +84,7 @@ class ApiServer extends AbstApiServer {
         });
 
         // client가 접속 해제 될 경우에는 clientList에서 제거
-        // TODO: Socket 접속이 해제 되었을 경우 Node, Order 정보를 초기화 시키고 SocketIO로 전송 로직 필요
+        // TODO: Socket 접속이 해제 되었을 경우 Node, Command 정보를 초기화 시키고 SocketIO로 전송 로직 필요
         socket.on('close', () => {
           // 저장소 목록을 돌면서 해당 client를 초기화
           this.mainStorageList.forEach(msInfo => {
@@ -92,7 +92,7 @@ class ApiServer extends AbstApiServer {
               // msClient 초기화
               msInfo.msClient = null;
               // Data Logger와의 접속이 끊어졌다고 알림
-              this.observerList.forEach(observer => {
+              this.observers.forEach(observer => {
                 if (_.get(observer, 'updateMsFieldClient')) {
                   observer.updateMsFieldClient(msInfo);
                 }
@@ -149,14 +149,16 @@ class ApiServer extends AbstApiServer {
       responseFieldMessage.isError = 0;
 
       // Data Logger와의 접속이 연결되었다고 알림
-      this.observerList.forEach(observer => {
+      this.observers.forEach(observer => {
         if (_.get(observer, 'updateMsFieldClient')) {
           observer.updateMsFieldClient(foundMainStorage);
         }
       });
     } else {
-      responseFieldMessage.errorStack = '등록되지 않은 거점입니다.';
+      responseFieldMessage.message = '등록되지 않은 거점입니다.';
     }
+
+    BU.CLIN(responseFieldMessage);
     return responseFieldMessage;
   }
 
@@ -188,7 +190,7 @@ class ApiServer extends AbstApiServer {
       const responseDataByServer = {
         commandId,
         isError: 0,
-        errorStack: '',
+        message: '',
       };
 
       const msInfo = this.findMainStorage(fieldClient);
@@ -198,7 +200,7 @@ class ApiServer extends AbstApiServer {
             this.compareNodeList(msInfo, contents);
             break;
           case COMMAND: // 명령 정보가 업데이트 되었을 경우
-            this.compareSimpleOrderList(msInfo, contents);
+            this.compareContractCmdList(msInfo, contents);
             break;
           // case STAUTS: //
           //   this.transmitDataToClient(msInfo.msClient, msInfo.msDataInfo.statusBoard);
@@ -209,12 +211,12 @@ class ApiServer extends AbstApiServer {
             break;
           default:
             responseDataByServer.isError = 1;
-            responseDataByServer.errorStack = `${commandId}은 등록되지 않은 명령입니다.`;
+            responseDataByServer.message = `${commandId}은 등록되지 않은 명령입니다.`;
         }
         return responseDataByServer;
       }
       responseDataByServer.isError = 1;
-      responseDataByServer.errorStack = '사용자 인증이 필요합니다.';
+      responseDataByServer.message = '사용자 인증이 필요합니다.';
       return responseDataByServer;
     } catch (error) {
       throw error;
@@ -282,7 +284,7 @@ class ApiServer extends AbstApiServer {
       // 업데이트 내역이 있다면 전송
       if (renewalList.length) {
         // Observer가 해당 메소드를 가지고 있다면 전송
-        this.observerList.forEach(observer => {
+        this.observers.forEach(observer => {
           if (_.get(observer, 'updateNodeList')) {
             observer.updateNodeList(msInfo, renewalList);
           }
@@ -299,38 +301,38 @@ class ApiServer extends AbstApiServer {
    * FIXME: 명령은 전체 갱신 처리해버림.
    * @desc dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
-   * @param {simpleOrderInfo[]} updatedFieldSimpleOrderList
+   * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareSimpleOrderList(msInfo, updatedFieldSimpleOrderList) {
-    // BU.CLI(receiveSimpleOrderList);
+  compareContractCmdList(msInfo, updatedFieldContractCmdList) {
+    // BU.CLI(receiveContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
-      msInfo.msDataInfo.simpleOrderList = updatedFieldSimpleOrderList;
+      msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;
 
       // // 수신 받은 노드 리스트를 순회
-      // _.forEach(receiveSimpleOrderList, simpleOrderInfo => {
-      //   const foundIndex = _.findIndex(msInfo.msDataInfo.simpleOrderList, {
-      //     uuid: simpleOrderInfo.uuid,
+      // _.forEach(receiveContractCmdList, contractCmdInfo => {
+      //   const foundIndex = _.findIndex(msInfo.msDataInfo.contractCmdList, {
+      //     uuid: contractCmdInfo.uuid,
       //   });
 
       //   // 데이터가 존재한다면 해당 명령의 변화가 생긴 것
       //   if (foundIndex !== -1) {
       //     // BU.CLI('변화가 생겼네요')
-      //     _.pullAt(msInfo.msDataInfo.simpleOrderList, foundIndex);
+      //     _.pullAt(msInfo.msDataInfo.contractCmdList, foundIndex);
       //   }
       //   // 신규 데이터는 삽입
-      //   msInfo.msDataInfo.simpleOrderList.push(simpleOrderInfo);
+      //   msInfo.msDataInfo.contractCmdList.push(contractCmdInfo);
       // });
-      // BU.CLI(msInfo.msDataInfo.simpleOrderList);
+      // BU.CLI(msInfo.msDataInfo.contractCmdList);
 
       // Observer가 해당 메소드를 가지고 있다면 전송
-      this.observerList.forEach(observer => {
-        if (_.get(observer, 'updateSimpleOrderList')) {
-          observer.updateSimpleOrderList(msInfo);
+      this.observers.forEach(observer => {
+        if (_.get(observer, 'updateContractCmdList')) {
+          observer.updateContractCmdList(msInfo);
         }
       });
 
-      return msInfo.msDataInfo.simpleOrderList;
+      return msInfo.msDataInfo.contractCmdList;
     } catch (error) {
       throw error;
     }

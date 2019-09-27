@@ -415,7 +415,7 @@ Highcharts.setOptions({
 
 function makeLineChart(chartInfo) {
   if (chartInfo.series.length) {
-    Highcharts.chart(chartInfo.domId, {
+    const lineChartInfo = {
       chart: {
         type: 'spline',
         zoomType: 'xy'
