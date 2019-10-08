@@ -18,7 +18,7 @@
           <div class="component_side_box">
             <article class="component_side_area side_section_power">
               <div class="data_title_section">
-                <h4>발전현황</h4>
+                <h4>발전 현황</h4>
                 <h5>Power Status</h5>
               </div>
               <section id="powerStatus" class="data_view_section fs_150rem">
@@ -119,49 +119,39 @@
           <div class="component_side_box">
             <div class="component_side_area side_section_growth">
               <div class="data_title_section">
-                <h4>염전 환경 정보</h4>
+                <h4>염전 환경</h4>
                 <h5>Saltern Environment</h5>
               </div>
               <section id="salternEnv" class="data_view_section fs_150rem">
                 <article class="sensor_data_view sdv_w_side">
                   <p>일사량</p>
-                  <p id="inclinedSolar">-</p>
+                  <p id="solar">-</p>
                   <p>W/m²</p>
                 </article>
                 <article class="sensor_data_view sdv_w_side">
-                  <p>조도</p>
-                  <p id="lux">-</p>
-                  <p>lx</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>CO2</p>
-                  <p id="co2">-</p>
-                  <p>ppm</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>외기온도</p>
-                  <p id="outsideAirTemperature">-</p>
+                  <p>온도</p>
+                  <p id="temp">-</p>
                   <p>℃</p>
                 </article>
                 <article class="sensor_data_view sdv_w_side">
-                  <p>외기습도</p>
-                  <p id="outsideAirReh">-</p>
+                  <p>습도</p>
+                  <p id="reh">-</p>
                   <p>%</p>
                 </article>
                 <article class="sensor_data_view sdv_w_side">
-                  <p>토양온도</p>
-                  <p id="soilTemperature">-</p>
-                  <p>℃</p>
+                  <p>풍속</p>
+                  <p id="ws">-</p>
+                  <p>m/s</p>
                 </article>
                 <article class="sensor_data_view sdv_w_side">
-                  <p>토양습도</p>
-                  <p id="soilReh">-</p>
-                  <p>%</p>
+                  <p>1시간 강수량</p>
+                  <p id="rain_h">-</p>
+                  <p>mm</p>
                 </article>
                 <article class="sensor_data_view sdv_w_side">
-                  <p>토양EC</p>
-                  <p id="soilWaterValue">-</p>
-                  <p>%</p>
+                  <p>금일 강수량</p>
+                  <p id="rain_d">-</p>
+                  <p>mm</p>
                 </article>
               </section>
             </div>
@@ -174,7 +164,7 @@
           </div>
           <div class="component_piece_box">
             <article class="component_piece_area">
-              <header>기상 환경 정보</header>
+              <header>기상청 동네 예보</header>
               <div id="weatherCastTable" class="component_piece_body p_column_rem_2"></div>
             </article>
           </div>
@@ -185,7 +175,10 @@
     </div>
 
     <script>
+      // 발전 현황 정보를 표현하기 위한 객체
       var powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
+      // 염전 환경 정보를 표현하기 위한 객체
+      var salternEnvInfo = <%- JSON.stringify(salternEnvInfo) %>;
       // 차트를 그리기 위한 데이터
       var inverterLineChart = <%- JSON.stringify(inverterLineChart) %>;
 
@@ -197,25 +190,34 @@
     </script>
 
     <script>
-      // 발전 현황
+      // 금일 발전 현황
       makeAreaChart(inverterLineChart, true);
 
-      // 발전 현황 셋팅
+      // 현재 발전 현황
       setDomElementValueWithJson(
         document.getElementById('current_power_data'),
         powerGenerationInfo,
         'innerHTML',
         'data-id',
       );
+      // 금일 발전량
       setDomElementValueWithJson(
         document.getElementById('daily_power_data'),
         powerGenerationInfo,
         'innerHTML',
         'data-id',
       );
+      // 발전 현황 정보
       setDomElementValueWithJson(
         document.getElementById('powerStatus'),
         powerGenerationInfo,
+        'innerHTML',
+        'id',
+      );
+      // 염전 환경 정보
+      setDomElementValueWithJson(
+        document.getElementById('salternEnv'),
+        salternEnvInfo,
         'innerHTML',
         'id',
       );

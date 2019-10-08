@@ -291,9 +291,13 @@ class WeatherModel extends BiModule {
   /**
    * 기상 관측 장비의 최신 데이터 1row를 가져옴.
    */
-  getWeather() {
+  async getWeatherDeviceRow() {
     const sql = 'SELECT * FROM weather_device_data ORDER BY writedate DESC LIMIT 1';
-    return this.db.single(sql, '', false);
+    const rows = await this.db.single(sql, '', false);
+    if (rows.length) {
+      return _.head(rows);
+    }
+    return {};
   }
 
   /**

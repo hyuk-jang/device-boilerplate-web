@@ -231,8 +231,8 @@ _:-ms-input-placeholder,
 }
 
 .component_side_box {
-  width: 200px;
-  min-width: 200px;
+  width: 230px;
+  min-width: 230px;
   height: 370px;
 }
 
@@ -969,6 +969,7 @@ article.sdv_w_side > p:last-child {
   border-radius: 4px;
   font-weight: bold;
   font-size: 1rem;
+  text-align: center;
 }
 
 .growth_env_table {

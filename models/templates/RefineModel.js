@@ -120,7 +120,7 @@ class RefineModel extends BiModule {
 
     // Curr Power 전력
     const cumulativePower = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', true),
+      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', false),
       0.001,
       3,
     );

@@ -112,7 +112,7 @@ module.exports = {
         case 'wf':
           madeBody = _.map(
             dataList,
-            data => `<img src="/image/wf/weather_${data}.png" width="17"/>`,
+            data => `<img src="/image/weather/weather_${data}.png" width="17"/>`,
           );
           break;
         case 'temp':
@@ -125,7 +125,7 @@ module.exports = {
           madeBody = _.map(dataList, data => `<p class="color_blue">${data}</p>`);
           break;
         case 'wd':
-          madeBody = _.map(dataList, data => `<img src="/image/wd/wd_${data}.gif" />`);
+          madeBody = _.map(dataList, data => `<img src="/image/weather/wd_${data}.gif" />`);
           break;
         default:
           madeBody = dataList;

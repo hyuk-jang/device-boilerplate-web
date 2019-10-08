@@ -27,6 +27,8 @@ router.get(
 
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', mainWhere);
+    /** @type {MAIN_MAP} */
+    const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
     /** @type {V_DV_NODE[]} */
     const nodeList = await biModule.getTable('v_dv_node', mainWhere);
@@ -59,7 +61,8 @@ router.get(
     //  로그인 한 사용자 세션 저장
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;
-    //  Map 저장
+    //  Map 경로 재설정
+    _.set(map, 'drawInfo.frame.mapInfo.backgroundInfo.backgroundData', `/map/${mainMapRow.path}`);
     req.locals.map = map;
 
     req.locals.deviceDomList = deviceDomList;
@@ -83,10 +86,10 @@ function initCommand(deviceMap, placeList) {
   } = deviceMap;
 
   // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력
-  flowCmdList.forEach(flowCmdInfo => {
-    const { srcPlaceId } = flowCmdInfo;
+  flowCmdList.forEach((flowSrcInfo, srcIndex) => {
+    const { srcPlaceId, destList } = flowSrcInfo;
     // 출발지 한글 이름
-    let { srcPlaceName } = flowCmdInfo;
+    let { srcPlaceName } = flowSrcInfo;
 
     if (_.isNil(srcPlaceName)) {
       srcPlaceName = _.chain(placeList)
@@ -96,11 +99,11 @@ function initCommand(deviceMap, placeList) {
     }
     // 출발지 한글이름 추가
     // simpleCommandInfo.srcPlaceName ||
-    _.set(flowCmdInfo, 'srcPlaceName', srcPlaceName);
+    _.set(flowSrcInfo, 'srcPlaceName', srcPlaceName);
     // 목적지 목록을 순회하면서 상세 명령 정보 정의
-    flowCmdInfo.destList.forEach(scDesInfo => {
-      const { destPlaceId } = scDesInfo;
-      let { destPlaceName } = scDesInfo;
+    destList.forEach((flowDesInfo, desIndex) => {
+      const { destPlaceId } = flowDesInfo;
+      let { destPlaceName } = flowDesInfo;
       // 목적지 한글 이름
       if (_.isNil(destPlaceName)) {
         destPlaceName = _.chain(placeList)
@@ -109,11 +112,44 @@ function initCommand(deviceMap, placeList) {
           .value();
       }
 
+      flowSrcInfo.destList[desIndex] = {
+        cmdId: `${srcPlaceId}_TO_${destPlaceId}`,
+        cmdName: destPlaceName,
+      };
+
       // 목적지 한글이름 추가 및 명령 정보 정의
-      _.set(scDesInfo, 'destPlaceName', destPlaceName);
-      _.set(scDesInfo, 'cmdId', `${srcPlaceId}_TO_${destPlaceId}`);
-      _.set(scDesInfo, 'cmdName', `${srcPlaceName} → ${destPlaceName}`);
+      // _.set(scDesInfo, 'destPlaceName', destPlaceName);
+      // _.set(scDesInfo, 'cmdId', `${srcPlaceId}_TO_${destPlaceId}`);
+      // _.set(scDesInfo, 'cmdName', `${srcPlaceName} → ${destPlaceName}`);
     });
+
+    flowCmdList[srcIndex] = {
+      cmdId: srcPlaceId,
+      cmdName: srcPlaceName,
+      destList,
+    };
+  });
+
+  // 설정 명령 세팅
+  setCmdList.forEach((cmdInfo, index) => {
+    const { cmdId, cmdName = '' } = cmdInfo;
+
+    setCmdList[index] = {
+      cmdId,
+      cmdName: cmdName.length ? cmdName : cmdId,
+    };
+    // setCmdInfo.scenarioName = cmdName.length ? cmdName : cmdId;
+  });
+
+  // 시나리오 명령 세팅
+  scenarioCmdList.forEach((cmdInfo, index) => {
+    const { scenarioId: cmdId, scenarioName: cmdName = '' } = cmdInfo;
+
+    scenarioCmdList[index] = {
+      cmdId,
+      cmdName: cmdName.length ? cmdName : cmdId,
+    };
+    // scenarioCmdInfo.scenarioName = scenarioName.length ? scenarioName : scenarioId;
   });
 
   const mapCmdInfo = {

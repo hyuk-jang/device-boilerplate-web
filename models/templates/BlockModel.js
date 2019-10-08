@@ -284,7 +284,7 @@ class BlockModel extends BiModule {
       `;
 
     // BU.CLI(mainSql);
-    return this.db.single(mainSql, null, true);
+    return this.db.single(mainSql, null, false);
   }
 }
 module.exports = BlockModel;

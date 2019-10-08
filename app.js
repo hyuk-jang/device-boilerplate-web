@@ -116,10 +116,18 @@ app.use(express.json());
 // app.use(express.urlencoded({extended: `fa`lse}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// cctv 카메라 스냅샷 저장 경로
 app.use(
   '/snapshot',
   express.static(path.join(__dirname, 'snapshot'), {
     extensions: ['jpg'],
+  }),
+);
+// 맵 이미지 저장 경로
+app.use(
+  '/map',
+  express.static(path.join(__dirname, 'map'), {
+    extensions: ['jpg', 'png', 'gif'],
   }),
 );
 

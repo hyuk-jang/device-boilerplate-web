@@ -1,18 +1,15 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const webUtil = require('../../models/templates/web.util');
-
 const domMakerMain = require('../../models/domMaker/mainDom');
 
 const commonUtil = require('../../models/templates/common.util');
-const sensorUtil = require('../../models/templates/sensor.util');
-const weatherModel = require('../../models/templates/WeatherModel');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
@@ -24,6 +21,17 @@ router.get(
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
+
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
+
+    /** @type {WEATHER_DEVICE_DATA} */
+    const weatherDeviceStatus = await weatherModel.getWeatherDeviceRow();
+
+    // 기상 계측 장치의 데이터가 유효할경우 저장
+    moment().diff(moment(weatherDeviceStatus.writedate), 'minutes') >= 10
+      ? _.set(req, 'locals.salternEnvInfo', {})
+      : _.set(req, 'locals.salternEnvInfo', weatherDeviceStatus);
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;

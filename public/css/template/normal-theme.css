@@ -4,7 +4,6 @@
 body {
   color: #333;
   background: #cccaca;
-  font-family: 'Arial Black', Gadget, sans-serif;
 }
 
 body a {
@@ -133,7 +132,6 @@ header {
 /* Body 단위 색상 검은색 */
 .sensor_data_view > p:nth-child(2) {
   color: #097ad1;
-  font-weight: bold;
 }
 
 .component_ele_status {
@@ -166,6 +164,7 @@ header {
 
 .search_box input[type='text'] {
   border: 1px solid #eee;
+  color: #555;
 }
 
 .search_box > .search_title {
