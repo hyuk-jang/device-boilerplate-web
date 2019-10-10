@@ -40,9 +40,6 @@ router.get(
     const powerProfileRows = req.locals.viewPowerProfileRows;
 
     // ********** Power 관련
-    /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
-
     /** @type {WC_KMA_DATA} */
     const weatherCastList = _.get(req, 'locals.weatherCastList');
     // BU.CLI(searchRangeInfo);
@@ -52,32 +49,33 @@ router.get(
       siteId,
     );
 
+    const searchRange = refineModel.createSearchRange({ searchInterval: 'min10' });
+
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
 
     // 인버터 평균 출력 현황 차트로 긁어옴
-    const inverterLineChart = await refineModel.refineInverterChart(
-      searchRangeInfo,
-      inverterSeqList,
-      {
-        domId: 'daily_kw_graph',
-        // title: '인버터 발전 현황',
-        yAxisList: [
-          {
-            dataUnit: 'kW',
-            yTitle: '전력(kW)',
-          },
-        ],
-        chartOption: {
-          selectKey: 'avg_grid_kw',
-          dateKey: 'group_date',
-          // groupKey: 'inverter_seq',
-          colorKey: 'chart_color',
-          sortKey: 'chart_sort_rank',
+    const inverterLineChart = await refineModel.refineInverterChart(searchRange, inverterSeqList, {
+      domId: 'daily_kw_graph',
+      // title: '인버터 발전 현황',
+      yAxisList: [
+        {
+          dataUnit: 'kW',
+          yTitle: '전력(kW)',
         },
+      ],
+      chartOption: {
+        selectKey: 'avg_grid_kw',
+        dateKey: 'group_date',
+        // groupKey: 'inverter_seq',
+        colorKey: 'chart_color',
+        sortKey: 'chart_sort_rank',
       },
-    );
+    });
 
-    // BU.CLIN(inverterLineChart, 3);
+    // const weatherDeviceRows = await weatherModel.getWeatherDeviceAverage(searchRange);
+
+    // BU.CLIN(inverterLineChart, 4);
+    // BU.CLIN(weatherDeviceRows);
 
     // 인버터 현재 데이터 동적 생성 돔
     _.set(

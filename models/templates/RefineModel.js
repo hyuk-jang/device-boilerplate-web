@@ -200,13 +200,15 @@ class RefineModel extends BiModule {
     const inverterLineChart = webUtil.makeDynamicLineChart(lineChartConfig, inverterPowerList);
 
     inverterLineChart.series.forEach(chartInfo => {
-      chartInfo.name = _.get(
-        _.find(inverterSiteNameList, {
-          inverter_seq: Number(chartInfo.name),
-        }),
-        'siteName',
-        chartInfo.name,
-      );
+      const foundInverterInfo = _.find(inverterSiteNameList, {
+        inverter_seq: Number(chartInfo.name),
+      });
+
+      if (_.isEmpty(foundInverterInfo)) {
+        chartInfo.name = '인버터 총합';
+      } else {
+        chartInfo.name = _.get(foundInverterInfo, 'siteName', chartInfo.name);
+      }
     });
 
     return inverterLineChart;

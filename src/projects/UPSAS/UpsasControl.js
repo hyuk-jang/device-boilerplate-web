@@ -14,7 +14,7 @@ const DBA = require('../../../../device-boilerplate-abbreviation');
 
 class UpsasControl extends Control {
   bindingFeature() {
-    BU.CLI('bindingFeature');
+    // BU.CLI('bindingFeature');
     this.weathercast = new Weathercast();
     /** @type {SocketIOManager} */
     this.socketIoManager = new SocketIOManager(this);
@@ -38,7 +38,7 @@ class UpsasControl extends Control {
    * @param {number} featureConfig.rtspConfig.webPort Local Web Server Port
    */
   runFeature(featureConfig) {
-    BU.CLI('runFeature');
+    // BU.CLI('runFeature');
     const { ioConfig, apiConfig, rtspConfig } = featureConfig;
     // this.weathercast.init(this.dbInfo);
     this.socketIoManager.init(ioConfig);
