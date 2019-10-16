@@ -956,7 +956,7 @@ article.sdv_w_side > p:last-child {
 }
 
 /* 기상 환경 정보 테이블  */
-.growth_env_table > tbody > tr > td > p {
+.weather_forecast_table > tbody > tr > td > p {
   border: 1px solid #d2d2d2;
   background: white;
   position: relative;
@@ -972,9 +972,8 @@ article.sdv_w_side > p:last-child {
   text-align: center;
 }
 
-.growth_env_table {
+.weather_forecast_table {
   table-layout: auto;
-  width: 97%;
+  width: 100%;
   font-size: 1.2rem;
-  margin: auto;
 }

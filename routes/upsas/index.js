@@ -69,6 +69,8 @@ router.get(
     const biModule = global.app.get('biModule');
     /** @type {WeatherModel} */
     const weatherModel = global.app.get('weatherModel');
+    /** @type {PowerModel} */
+    const powerModel = global.app.get('powerModel');
 
     // req.query 값 비구조화 할당
     const {
@@ -202,9 +204,19 @@ router.get(
 
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
-    // TODO: 현재 시간 기준 오늘, 내일, 모레 날씨 정보
+    // 현재 시간 기준 오늘, 내일, 모레 날씨 정보 FIXME: Row? Info?
     const weatherCastRows = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
     _.set(req, 'locals.weatherCastList', weatherCastRows);
+
+    // 해당 지역 위치값 정보 TODO:
+    const powerPredictionInfo = await powerModel.getPowerPrediction(
+      moment()
+        .add(2, 'days')
+        .format('YYYY-MM-DD'),
+      mainRow.weather_location_seq,
+    );
+    // BU.CLI(powerPredictionInfo);
+    _.set(req, 'locals.powerPredictionInfo', powerPredictionInfo);
 
     next();
   }),

@@ -17,6 +17,9 @@ header {
 
 .table thead {
   background: linear-gradient(#cccccc, #a9a9a9);
+  background: linear-gradient(rgb(34, 80, 150), rgb(22, 58, 110));
+  background: linear-gradient(rgb(42, 140, 85), rgb(52, 115, 61));
+  color: white;
 }
 
 /***************************************/
@@ -75,13 +78,13 @@ header {
 /***************************************/
 /* 발전 현황 정보 */
 .side_section_power {
-  background: linear-gradient(#3baf69, #349059);
+  background: linear-gradient(rgb(42, 140, 85), rgb(52, 115, 61));
   box-shadow: 3px 3px 10px #a1a1a1;
 }
 
 /* 발전 현황 정보 데이터 색상 */
 .side_section_power .sensor_data_view > p:nth-child(2) {
-  color: #0652dd;
+  color: #ffee00e8;
 }
 
 /* 생육 환경 정보 */
@@ -124,7 +127,7 @@ header {
 }
 /* FIXME: */
 .component_piece_area .p_column_rem_2 {
-  padding: 1rem 0 0;
+  padding: 1rem;
   overflow-y: hidden;
   overflow-x: auto;
 }

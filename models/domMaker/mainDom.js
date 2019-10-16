@@ -143,7 +143,7 @@ module.exports = {
 
     // result
     const madeDom = `
-    <table class="table table-bordered number_table growth_env_table" cellspacing='0'>
+    <table class="table table-bordered number_table weather_forecast_table" cellspacing='0'>
     <colgroup>
       <col class="w_7rem" > 
       ${dynamicColgroup}

@@ -50,15 +50,13 @@
                 <!-- TODO: -->
                 <article class="sensor_data_view sdv_w_side">
                   <p>명일발전량</p>
-                  <div class>
-                    <select class="form-control">
+                  <!-- <select class="form-control">
                       <option>1</option>
                       <option>2</option>
                       <option>3</option>
-                    </select>
-                    <p id="forecastPower">-</p>
-                    <p>kWh</p>
-                  </div>
+                    </select> -->
+                  <p id="tomorrowPower">-</p>
+                  <p>kWh</p>
                 </article>
               </section>
             </article>
@@ -194,11 +192,13 @@
       var salternEnvInfo = <%- JSON.stringify(salternEnvInfo) %>;
       // 차트를 그리기 위한 데이터
       var inverterLineChart = <%- JSON.stringify(inverterLineChart) %>;
+      //  TODO: 발전량 예측일 위한 데이터
+      var powerPredictionInfo =<%- JSON.stringify(powerPredictionInfo) %>
 
       // console.log(inverterLineChart)
       $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
-      // TODO: 기상 환경 정보 테이블 세팅
+      // 기상 환경 정보 테이블 세팅
       $('#weatherCastTable').html(<%- JSON.stringify(dom.weatherCastTableDom) %>)
     </script>
 
@@ -267,6 +267,8 @@
           },
         },
       });
+      // predictPower(document.getElementById('tomorrowPower'), {});
+      predictPower('tomorrowPower', powerPredictionInfo);
     </script>
   </body>
 </html>

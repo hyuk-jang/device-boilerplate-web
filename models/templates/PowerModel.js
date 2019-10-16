@@ -559,5 +559,23 @@ class PowerModel extends BiModule {
 
     return chartData;
   }
+
+  async getPowerPrediction(date, weatherLocationSeq) {
+    const sql = `
+      SELECT wwl.weather_location_seq, wkd.*, wwl.latitude, SUM(wi.amount) AS moduleCapacity
+      FROM wc_weather_location AS wwl
+      JOIN wc_kma_data AS wkd
+      ON wwl.weather_location_seq=wkd.weather_location_seq
+      JOIN pw_inverter AS wi
+      WHERE wkd.applydate="${date}" AND wwl.weather_location_seq=${weatherLocationSeq}
+    `;
+
+    const powerPredictionInfo = await this.db.single(sql, '', false);
+    // powerPredictionInfo.moduleWide = 1000; // FIXME: 임시
+    if (powerPredictionInfo.length) {
+      return _.head(powerPredictionInfo);
+    }
+    return {};
+  }
 }
 module.exports = PowerModel;

@@ -28,6 +28,9 @@ router.get(
     /** @type {WEATHER_DEVICE_DATA} */
     const weatherDeviceStatus = await weatherModel.getWeatherDeviceRow();
 
+    /** @type {WC_KMA_DATA} */
+    const weatherCastList = _.get(req, 'locals.weatherCastList');
+
     // 기상 계측 장치의 데이터가 유효할경우 저장
     moment().diff(moment(weatherDeviceStatus.writedate), 'minutes') >= 10
       ? _.set(req, 'locals.salternEnvInfo', {})
@@ -35,15 +38,11 @@ router.get(
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
-
     /** @type {V_PW_PROFILE[]} powerProfileRows */
     const powerProfileRows = req.locals.viewPowerProfileRows;
-
-    // ********** Power 관련
-    /** @type {WC_KMA_DATA} */
-    const weatherCastList = _.get(req, 'locals.weatherCastList');
     // BU.CLI(searchRangeInfo);
 
+    // ********** Power 관련
     // 발전 현황을 나타내는 기본적인 정보
     const { powerGenerationInfo, validInverterDataList } = await refineModel.refineGeneralPowerInfo(
       siteId,
@@ -52,7 +51,6 @@ router.get(
     const searchRange = refineModel.createSearchRange({ searchInterval: 'min10' });
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-
     // 인버터 평균 출력 현황 차트로 긁어옴
     const inverterLineChart = await refineModel.refineInverterChart(searchRange, inverterSeqList, {
       domId: 'daily_kw_graph',
@@ -84,7 +82,6 @@ router.get(
       domMakerMain.makeInverterStatusDom(validInverterDataList),
     );
 
-    // TODO: 기상 환경 정보 동적 생성 돔
     const deviceProtocol = new DeviceProtocol();
     _.set(
       req,
