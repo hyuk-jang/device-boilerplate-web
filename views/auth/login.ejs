@@ -1,103 +1,195 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title><%- projectName %> : 로그인</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Jquery 3 CDN -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-<head>
-  <title><%- projectName %> : 로그인</title>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!--Jquery 3 CDN -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!--Bootsrap 4 CDN-->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
 
-  <!--Bootsrap 4 CDN-->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
-  </script>
+    <!--Fontawesome CDN-->
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+      integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+      crossorigin="anonymous"
+    />
 
-  <!--Fontawesome CDN-->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <!--Custom styles-->
+    <link rel="stylesheet" type="text/css" href="/css/template/login.css" />
+  </head>
 
-  <!--Custom styles-->
-  <link rel="stylesheet" type="text/css" href="/css/template/login.css">
-
-</head>
-
-<body>
-  <div class="container">
-    <div class="d-flex justify-content-center h-100">
-      <div class="card">
-        <div class="card-header">
-          <h3><%- projectName %></h3>
+  <body>
+    <div class="container">
+      <div class="d-flex justify-content-center h-100">
+        <div class="card">
+          <div class="card-header">
+            <h3><%- projectName %></h3>
+          </div>
+          <div class="card-body">
+            <form action="/auth/login" method="post">
+              <div class="input-group form-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fas fa-user"></i></span>
+                </div>
+                <input type="text" class="form-control" placeholder="아이디" name="userid" />
+              </div>
+              <div class="input-group form-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fas fa-key"></i></span>
+                </div>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="비밀번호"
+                  name="password"
+                  onkeypress="loginPress(event)"
+                />
+              </div>
+              <div class="d-flex justify-content-center links">
+                <span id="textErrorMessage">&nbsp;</span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="button"
+                  value="로그인"
+                  class="btn float-right login_btn"
+                  onclick="login()"
+                />
+                <input
+                  type="button"
+                  value="회원가입"
+                  class="btn float-right login_btn "
+                  onclick=""
+                />
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="card-body">
-          <form action="/auth/login" method="post">
-            <div class="input-group form-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-user"></i></span>
+        <!-- TODO: FIXME: 회원가입 form -->
+        <div class="card">
+          <div class="card-header">
+            <h3>회원 가입</h3>
+          </div>
+          <div class="card-body">
+            <form action="/auth/temp-join" method="post" id='testSignUp'>
+              <div class="input-group form-group">
+                <input type="text" class="form-control" placeholder="아이디" name="userid" />
               </div>
-              <input type="text" class="form-control" placeholder="아이디" name="userid">
-
-            </div>
-            <div class="input-group form-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-key"></i></span>
+              <div class="input-group form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="이름"
+                  name="name"
+                  onkeypress=""
+                />
               </div>
-              <input type="password" class="form-control" placeholder="비밀번호" name="password"
-                onkeypress="loginPress(event)">
-            </div>
-            <div class="d-flex justify-content-center links">
-              <span id="textErrorMessage">&nbsp;</span>
-            </div>
-            <div class="form-group">
-              <input type="button" value="로그인" class="btn float-right login_btn" onclick="login()">
-            </div>
-          </form>
+              <div class="input-group form-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="비밀번호"
+                  name="password"
+                  onkeypress=""
+                />
+              </div>
+              <div class="input-group form-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="비밀번호 확인"
+                  name="passwordCheck"
+                  onkeypress=""
+                />
+              </div>
+              <div class="d-flex justify-content-center links">
+              <div class="d-flex justify-content-center links">
+                <span id="textErrorMessage">&nbsp;</span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="button"
+                  value="가입"
+                  class="btn float-right login_btn"
+                  onclick="signUp()"
+                />
+                <input
+                  type="button"
+                  value="취소"
+                  class="btn float-right login_btn"
+                  onclick=""
+                />
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</body>
-
+  </body>
 </html>
 
-
 <script>
-  var message = "<%- message %>";
-  var projectName = "<%- projectName %>";
+  var message = '<%- message %>';
+  var projectName = '<%- projectName %>';
 
   if (message.length) {
-    $("#textErrorMessage").html(message);
+    $('#textErrorMessage').html(message);
   }
 
   function loginPress(event) {
     if (event.keyCode == 13) {
-      login()
+      login();
     }
   }
 
   function login() {
-    var form1 = document.querySelector("form");
+    var form1 = document.querySelector('form');
     var id = form1.userid.value;
     var password = form1.password.value;
 
-    console.log(id, password)
+    console.log(id, password);
 
-    if (id == "") {
-      $("#textErrorMessage").html(
-        "아이디를 입력하세요.");
+    if (id == '') {
+      $('#textErrorMessage').html('아이디를 입력하세요.');
       return;
     }
 
-
-    if (password == "") {
-      $("#textErrorMessage").html(
-        "비밀번호를 입력하세요");
+    if (password == '') {
+      $('#textErrorMessage').html('비밀번호를 입력하세요');
       return;
     }
 
     form1.submit();
   }
+
+  // TODO: id 정규식
+  // TODO: pw  Caps Lock
+  // TODO: 회원가입 func 팝업? 이동? 애니메이션?
+  function signUp() {
+    var form = document.querySelector('#testSignUp')
+    var userid  = form.userid.value
+    var password  = form.password.value
+    var name = ''
+
+    // var signUpInfo = {userid, password}
+
+    form.submit();
+  }
+  // TODO: 비밀번화 확인 func
+  // TODO: 회원가입 취소 func
 </script>

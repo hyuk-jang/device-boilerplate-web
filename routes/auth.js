@@ -70,7 +70,12 @@ router.post(
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
-    const { password = '', userid = '' } = _.pick(req.body, ['userid', 'password', 'nickname']);
+    const { password = '', userid = '', name = '' } = _.pick(req.body, [
+      'userid',
+      'password',
+      'name',
+      'nickname',
+    ]);
 
     // 입력된 id와 pw 가 string이 아닐 경우
     if (userid.length === 0 || password.length === 0) {
@@ -85,8 +90,8 @@ router.post(
 
     // 동일한 회원이 존재하는지 체크
     const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
-    // BU.CLI(memberInfo);
-    if (!_.isEmpty(memberInfo)) {
+    BU.CLI(memberInfo);
+    if (_.isEmpty(memberInfo)) {
       return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/login'));
     }
 
@@ -100,7 +105,8 @@ router.post(
     }
 
     /** @type {MEMBER} */
-    const newMemberInfo = { user_id: userid };
+    // FIXME: main_seq 수정
+    const newMemberInfo = { user_id: userid, name, main_seq: 1 };
 
     await biAuth.setMember(password, newMemberInfo);
 
