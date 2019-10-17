@@ -31,12 +31,13 @@
 
     <!--Custom styles-->
     <link rel="stylesheet" type="text/css" href="/css/template/login.css" />
+    <link rel="stylesheet" type="text/css" href="/css/template/common.css" />
   </head>
 
   <body>
     <div class="container">
       <div class="d-flex justify-content-center h-100">
-        <div class="card">
+        <div class="card"  id ="loginArea">
           <div class="card-header">
             <h3><%- projectName %></h3>
           </div>
@@ -67,21 +68,21 @@
                 <input
                   type="button"
                   value="로그인"
-                  class="btn float-right login_btn"
+                  class="btn float-right login_btn ml_1rem"
                   onclick="login()"
                 />
                 <input
                   type="button"
                   value="회원가입"
                   class="btn float-right login_btn "
-                  onclick=""
+                  onClick="location.href='/join'"
                 />
               </div>
             </form>
           </div>
         </div>
-        <!-- TODO: FIXME: 회원가입 form -->
-        <div class="card">
+        <!-- TODO: FIXME: style 수정필요,  회원가입 form -->
+        <div class="card " id="signUpArea" style="display:none;" >
           <div class="card-header">
             <h3>회원 가입</h3>
           </div>
@@ -90,6 +91,7 @@
               <div class="input-group form-group">
                 <input type="text" class="form-control" placeholder="아이디" name="userid" />
               </div>
+              <div id='idStatus'></div>
               <div class="input-group form-group">
                 <input
                   type="text"
@@ -108,6 +110,7 @@
                   onkeypress=""
                 />
               </div>
+              <div id='pwStatus'></div>
               <div class="input-group form-group">
                 <input
                   type="password"
@@ -117,6 +120,7 @@
                   onkeypress=""
                 />
               </div>
+              <div id='pwCheckStatus'></div>
               <div class="d-flex justify-content-center links">
               <div class="d-flex justify-content-center links">
                 <span id="textErrorMessage">&nbsp;</span>
@@ -125,14 +129,14 @@
                 <input
                   type="button"
                   value="가입"
-                  class="btn float-right login_btn"
+                  class="btn float-right login_btn ml_1rem"
                   onclick="signUp()"
                 />
                 <input
                   type="button"
                   value="취소"
                   class="btn float-right login_btn"
-                  onclick=""
+                  onclick="cancelSignUp()"
                 />
               </div>
             </form>
@@ -144,6 +148,7 @@
 </html>
 
 <script>
+ 
   var message = '<%- message %>';
   var projectName = '<%- projectName %>';
 
@@ -151,6 +156,10 @@
     $('#textErrorMessage').html(message);
   }
 
+  $(document).ready(function(){
+    $('#signUpArea').hide()
+  })
+  
   function loginPress(event) {
     if (event.keyCode == 13) {
       login();
@@ -161,8 +170,6 @@
     var form1 = document.querySelector('form');
     var id = form1.userid.value;
     var password = form1.password.value;
-
-    console.log(id, password);
 
     if (id == '') {
       $('#textErrorMessage').html('아이디를 입력하세요.');
@@ -177,19 +184,69 @@
     form1.submit();
   }
 
-  // TODO: id 정규식
-  // TODO: pw  Caps Lock
-  // TODO: 회원가입 func 팝업? 이동? 애니메이션?
+  function showSignUpArea(){
+    $('#loginArea').hide()
+    $('#signUpArea').fadeIn()
+  }
+
+  function cancelSignUp(){
+    $('#signUpArea').hide()
+    $('#loginArea').fadeIn()
+  }
+
   function signUp() {
     var form = document.querySelector('#testSignUp')
     var userid  = form.userid.value
     var password  = form.password.value
     var name = ''
-
-    // var signUpInfo = {userid, password}
-
+    
     form.submit();
   }
-  // TODO: 비밀번화 확인 func
-  // TODO: 회원가입 취소 func
+
+  document.querySelector('#signUpArea').addEventListener('input',function(e) {
+    switch (e.target.name) {
+      case 'userid':
+       $.ajax({
+         type:'POST',
+         url: "/auth/temp-join/id-check",
+         data:{ userid :e.target.value }, 
+         success: function(result){
+           document.getElementById('idStatus').innerHTML=result
+         }
+       });
+      break;
+
+      case 'password':
+        var pwReg = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
+        //pw 체크
+        if(!pwReg.test(e.target.value)) {
+          document.getElementById('pwStatus').innerHTML='<p class="color_red">8~15자 특수문자, 영문자, 숫자를 사용하십시오. </p>'
+        }
+        if(pwReg.test(e.target.value)){
+          document.getElementById('pwStatus').innerHTML='<p class="color_green">사용 가능한 비밀번호입니다. </p>'
+        }
+        if(e.target.value==''){
+          document.getElementById('pwStatus').innerHTML='<p class="color_red"> 필수 정보입니다. </p>'
+        }
+      break;
+     
+      case 'passwordCheck':
+       var pw = $('#signUpArea > input#password').val()
+       console.log(pw)
+
+       if(pw!==e.target.value){
+         document.getElementById('pwCheckStatus').innerHTML='<p class="color_red">비밀번호가 일치하지 않습니다.</p>'
+       }
+
+       if(pw==e.target.value){
+         document.getElementById('pwCheckStatus').innerHTML='<p class="color_green">일치</p>'
+       }
+
+      break;
+     
+      default:
+        break;
+    }
+  })
+  
 </script>
