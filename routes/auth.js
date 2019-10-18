@@ -14,6 +14,25 @@ router.get('/', (req, res) => {
   res.send('default main');
 });
 
+router.get(
+  '/join',
+  asyncHandler(async (req, res) => {
+    /** @type {BiAuth} */
+    const biAuth = global.app.get('biAuth');
+
+    /** @type {MAIN} */
+    const whereInfo = {
+      is_deleted: 0,
+    };
+
+    /** @type {MAIN} */
+    const mainInfo = await biAuth.getTable('MAMBER', whereInfo);
+    BU.CLI(mainInfo.address);
+
+    // res.render(`./${SITE_HEADER}join.ejs`);
+  }),
+);
+
 router.get('/login', (req, res) => {
   const { projectName } = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
   if (process.env.DEV_AUTO_AUTH === '1') {
@@ -63,19 +82,63 @@ router.get('/logout', (req, res) => {
   });
 });
 
+// TODO:
+router.post(
+  '/join',
+  asyncHandler(async (req, res) => {
+    // BU.CLIS('tempJoin', req.body, req.query, req.params);
+    /** @type {BiAuth} */
+    const biAuth = global.app.get('biAuth');
+
+    const { password = '', userid = '', name = '', tel = '', place = '' } = _.pick(req.body, [
+      'userid',
+      'password',
+      'nickname',
+      'name',
+      'tel',
+      'place',
+    ]);
+
+    /** @type {MEMBER} */
+    const whereInfo = {
+      user_id: userid,
+      is_deleted: 0,
+    };
+
+    // 동일한 회원이 존재하는지 체크
+    const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
+
+    if (!_.isEmpty(memberInfo)) {
+      // return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/join'));
+      return res.send(DU.locationAlertGo('이미 사용중인 아이디입니다..', '/auth/join'));
+    }
+
+    const salt = BU.genCryptoRandomByte(16);
+
+    // const encryptPbkdf2 = Promise.promisify(BU.encryptPbkdf2);
+    const hashPw = await EU.encryptPbkdf2(password, salt);
+
+    if (hashPw instanceof Error) {
+      throw new Error('Password hash failed.');
+    }
+
+    /** @type {MEMBER} */
+    const newMemberInfo = { user_id: userid, name, tel, is_deleted: 0 };
+
+    await biAuth.setMember(password, newMemberInfo);
+
+    return res.send(DU.locationAlertGo('가입이 완료되었습니다.', '/login'));
+  }),
+);
+
 router.post(
   '/temp-join',
   asyncHandler(async (req, res) => {
     // BU.CLIS('tempJoin', req.body, req.query, req.params);
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
-    // BU.CLI(req.body);
-    const { password = '', userid = '', name = '' } = _.pick(req.body, [
-      'userid',
-      'password',
-      'name',
-      'nickname',
-    ]);
+
+    const { password = '', userid = '' } = _.pick(req.body, ['userid', 'password', 'nickname']);
 
     // 입력된 id와 pw 가 string이 아닐 경우
     if (userid.length === 0 || password.length === 0) {
@@ -105,45 +168,11 @@ router.post(
     }
 
     /** @type {MEMBER} */
-    // FIXME: main_seq 수정, grade 고정
-    const newMemberInfo = { user_id: userid, name, main_seq: 1, grade: 'guest', is_deleted: 0 };
+    const newMemberInfo = { user_id: userid };
 
     await biAuth.setMember(password, newMemberInfo);
 
-    return res.send(DU.locationAlertGo('가입이 완료되었습니다.', `/${SITE_HEADER}login`));
-    // return res.redirect(`/${SITE_HEADER}login`);
-  }),
-);
-
-// TODO: 아이디 체크
-router.post(
-  '/temp-join/id-check',
-  asyncHandler(async (req, res) => {
-    /** @type {BiAuth} */
-    const biAuth = global.app.get('biAuth');
-    const { userid } = req.body;
-
-    /** @type {MEMBER} */
-    const whereInfo = {
-      user_id: userid,
-      is_deleted: 0,
-    };
-
-    if (_.isEmpty(userid)) {
-      return res.send('<p class="color_red">필수 정보입니다.</p>');
-    }
-
-    // 동일한 회원이 존재하는지 체크
-    const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
-    if (!_.isEmpty(memberInfo))
-      return res.send('<p class="color_red">이미 사용중인 아이디입니다.</p>');
-
-    // id 정규식
-    const idReg = /^[A-Za-z0-9]{4,12}$/;
-    if (!idReg.test(userid))
-      return res.send('<p class="color_red">4~12자의 영문, 숫자로만 사용 가능합니다.</p>');
-
-    return res.send('<p class="color_green">사용 가능한 아이디 입니다.</p>');
+    return res.redirect(`/${SITE_HEADER}login`);
   }),
 );
 
