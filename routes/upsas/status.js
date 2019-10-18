@@ -33,6 +33,10 @@ const subCategoryList = [
     subCategory: 'saltern',
     btnName: '염전',
   },
+  {
+    subCategory: 'damage',
+    btnName: '손실 및 저하요인 분석',
+  },
 ];
 
 // middleware
@@ -347,7 +351,7 @@ router.get(
 
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-
+    BU.CLI('hi');
     const refinedInverterStatusList = await refineModel.refineInverterStatus(inverterSeqList);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
@@ -478,6 +482,55 @@ router.get(
     _.set(req, 'locals.madeLineChartList', refinedCharts);
 
     res.render('./UPSAS/status/saltern', req.locals);
+  }),
+);
+
+// TODO: 손실 저하 요인
+router.get(
+  ['/:siteId/damage'],
+  asyncHandler(async (req, res) => {
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    /** @type {V_PW_PROFILE[]} powerProfileRows */
+    const powerProfileRows = req.locals.viewPowerProfileRows;
+
+    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+
+    const searchRange = refineModel.createSearchRange({
+      searchType: 'days',
+      searchInterval: 'min10',
+    });
+
+    /** @type {lineChartConfig} */
+    const chartConfig = {
+      domId: 'chart_div',
+      title: '',
+      yAxisList: [
+        {
+          dataUnit: 'kW',
+          yTitle: '전력(kW)',
+        },
+      ],
+      chartOption: {
+        selectKey: 'avg_grid_kw',
+        dateKey: 'group_date',
+        groupKey: 'inverter_seq',
+        colorKey: 'chart_color',
+        sortKey: 'chart_sort_rank',
+      },
+    };
+
+    // 동적 라인 차트를 생성
+    const inverterLineChart = await refineModel.refineInverterChart(
+      searchRange,
+      inverterSeqList,
+      chartConfig,
+    );
+
+    req.locals.inverterLineChart = inverterLineChart;
+    // BU.CLIN(req.locals);
+    res.render('./UPSAS/status/damage', req.locals);
   }),
 );
 
