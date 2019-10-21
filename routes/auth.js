@@ -26,10 +26,15 @@ router.get(
     };
 
     /** @type {MAIN} */
-    const mainInfo = await biAuth.getTable('MAMBER', whereInfo);
-    BU.CLI(mainInfo.address);
+    const mainList = await biAuth.getTable('MAIN', whereInfo);
+    const placeList = _.map(mainList, mainInfo => {
+      return { name: mainInfo.name, mainSeq: mainInfo.main_seq };
+    });
+    // BU.CLI(placeList);
 
-    // res.render(`./${SITE_HEADER}join.ejs`);
+    _.set(req, 'locals.placeList', placeList);
+
+    res.render(`./${SITE_HEADER}join.ejs`, req.locals);
   }),
 );
 
@@ -123,7 +128,7 @@ router.post(
     }
 
     /** @type {MEMBER} */
-    const newMemberInfo = { user_id: userid, name, tel, is_deleted: 0 };
+    const newMemberInfo = { user_id: userid, name, tel, main_seq: place, is_deleted: 0 };
 
     await biAuth.setMember(password, newMemberInfo);
 

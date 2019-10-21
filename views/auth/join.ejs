@@ -84,7 +84,7 @@
           </div>
           <div class="form-group">
             <label for="selectPlace">장소</label>
-            <select class="form-control" id="selectPlace" name="place"/>
+            <select class="form-control" id="selectPlace" name='place'></select>
           </div>
           <div class="form-group text-center">
             <button type="submit" id="join-submit" class="btn btn-primary">
@@ -101,6 +101,13 @@
 </html>
 <script>
   $(function() {
+
+    var placeList =<%- JSON.stringify(placeList) %>;
+
+    placeList.forEach(function(place){
+      $('#selectPlace').append(`<option value=${place.mainSeq}>${place.name}</option>`)
+    })
+
     // 회원 가입 처리
     $('#join-submit').click(function(e) {
       e.preventDefault();
