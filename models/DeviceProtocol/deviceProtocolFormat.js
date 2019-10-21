@@ -26,6 +26,7 @@
  * @property {string[]=} avgColumnList 구간 평균 값. 계산결과 접두어 avg_ 붙음
  * @property {string[]=} avgSumColumnList 구간 평균의 그룹 합 값. 계산결과 접두어 avg_sum_ 붙음
  * @property {string[]=} maxColumnList 구간 최대 값. 계산결과 접두어 max_ 붙음
+ * @property {string[]=} maxSumColumnList 구간 최대값의 그룹 합 값. 계산결과 접두어 max_sum_ 붙음
  * @property {string[]=} minColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
  * @property {string[]=} amountColumnList 구간 최소 값. 계산결과 접두어 min_ 붙음
  * @property {string[]=} intervalColumnList 구간 최대 -최소, 계산결과 접두어 interval_ 붙음

@@ -154,8 +154,9 @@ class BlockModel extends BiModule {
   /**
    * DB Table 동적 Query 생성 및 결과 반환
    * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo
+   * @param {boolean=} isMergeByDate staticSelectQueryList를 무시하고 writeDate으로 GroupBy 처리 여부
    */
-  getDynamicBlockReportRows(dynamicQueryGuideInfo) {
+  getDynamicBlockReportRows(dynamicQueryGuideInfo, isMergeByDate = false) {
     const { searchRange, dynamicQueryConfig, whereColumnInfo } = dynamicQueryGuideInfo;
 
     const { strStartDate, strEndDate } = searchRange;
@@ -199,6 +200,10 @@ class BlockModel extends BiModule {
         case 'maxColumnList':
           firstQueryTemplate = 'MAX(<%= columnId %>) AS max_<%= columnId %>';
           secondQueryTemplate = 'MAX(max_<%= columnId %>) AS max_<%= columnId %>';
+          break;
+        case 'maxSumColumnList':
+          firstQueryTemplate = 'MAX(<%= columnId %>) AS max_<%= columnId %>';
+          secondQueryTemplate = 'SUM(max_<%= columnId %>) AS max_sum_<%= columnId %>';
           break;
         case 'minColumnList':
           firstQueryTemplate = 'MIN(<%= columnId %>) AS min_<%= columnId %>';
@@ -262,7 +267,7 @@ class BlockModel extends BiModule {
 
     const mainSql = `
         SELECT
-              ${staticSelectQueryList.toString()},
+              ${isMergeByDate ? '' : `${staticSelectQueryList.toString()}, `}
               ${selectViewDate},
               ${selectGroupDate},
               ${_.join(secondDynamicQueryList, ',\n')},
@@ -280,11 +285,37 @@ class BlockModel extends BiModule {
           GROUP BY ${firstGroupByFormat}, ${staticSelectQueryList.toString()}
           ORDER BY ${staticSelectQueryList.toString()}, ${writeDateKey}
         ) AS main_rows
-        GROUP BY ${staticSelectQueryList.toString()}, ${groupByFormat}
+        GROUP BY ${isMergeByDate ? '' : `${staticSelectQueryList.toString()}, `} ${groupByFormat}
       `;
 
     // BU.CLI(mainSql);
-    return this.db.single(mainSql, null, false);
+    return mainSql;
+    // return this.db.single(mainSql, null, true);
+  }
+
+  /**
+   * Report
+   * @param {searchRange} searchRange createSearchRange() Return 객체
+   * @param {{page: number, pageListCount: number}} pageInfo
+   * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
+   */
+  async getDynamicReports(dynamicQueryGuideInfo, pageInfo) {
+    const sql = this.getDynamicBlockReportRows(dynamicQueryGuideInfo, true);
+
+    const { page = 1, pageListCount = 10 } = pageInfo;
+    // 총 갯수 구하는 Query 생성
+    const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
+
+    const mainQuery = `${sql}\n LIMIT ${(page - 1) * pageListCount}, ${pageListCount}`;
+
+    const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
+    const totalCount = _.head(resTotalCountQuery).total_count;
+    const reportRows = await this.db.single(mainQuery, '', false);
+
+    return {
+      totalCount,
+      reportRows,
+    };
   }
 }
 module.exports = BlockModel;

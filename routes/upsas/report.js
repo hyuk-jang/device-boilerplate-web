@@ -31,10 +31,10 @@ const subCategoryList = [
     subCategory: 'inverter',
     btnName: '인버터',
   },
-  {
-    subCategory: 'connector',
-    btnName: '접속반',
-  },
+  // {
+  //   subCategory: 'connector',
+  //   btnName: '접속반',
+  // },
   {
     subCategory: 'saltern',
     btnName: '염전',
@@ -72,7 +72,6 @@ router.get(
     } = req.query;
 
     // BU.CLI(req.query);
-
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
     const searchRange = biModule.createSearchRange({
       searchType,
@@ -100,7 +99,6 @@ router.get(
       searchType,
       searchInterval,
     };
-
     _.set(req, 'locals.reportInfo', reportInfo);
     _.set(req, 'locals.searchRange', searchRange);
     next();
@@ -110,6 +108,7 @@ router.get(
 /** 인버터 레포트 */
 router.get(
   [
+    '/',
     '/:siteId',
     '/:siteId/:subCategory',
     '/:siteId/:subCategory/:subCategoryId',
@@ -133,7 +132,6 @@ router.get(
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const inverterWhere = _.isNumber(subCategory) ? { inverter_seq: subCategory } : null;
-
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
 
@@ -142,23 +140,32 @@ router.get(
       .filter(inverterWhere)
       .map('inverter_seq')
       .value();
-
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
     const deviceProtocol = new DeviceProtocol();
 
-    const dynamicDataRows = await blockModel.getDynamicBlockReportRows({
-      searchRange: searchRangeInfo,
-      pageInfo: { page, pageListCount: PAGE_LIST_COUNT },
-      dynamicQueryConfig: deviceProtocol.getBlockReport('inverter').dbTableInfo,
-      whereColumnInfo: {
-        column: 'inverter_seq',
-        seqList: inverterSeqList,
-      },
-    });
+    const { dbTableInfo, domTableColConfigs } = deviceProtocol.getBlockReport(subCategory);
 
-    // BU.CLIN(dynamicDataRows);
+    const { reportRows, totalCount } = await blockModel.getDynamicReports(
+      {
+        searchRange: searchRangeInfo,
+        pageInfo: { page, pageListCount: PAGE_LIST_COUNT },
+        dynamicQueryConfig: dbTableInfo,
+        whereColumnInfo: {
+          column: 'inverter_seq',
+          seqList: inverterSeqList,
+        },
+      },
+      { page, pageListCount: PAGE_LIST_COUNT },
+    );
+
+    BU.CLI(reportRows);
+
+    const { tableHeaderDom, tableBodyDom } = defaultDom.makeDynamicBlockTable({
+      dataRows: reportRows,
+      blockTableOptions: domTableColConfigs,
+    });
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
@@ -171,11 +178,11 @@ router.get(
     // SQL 질의를 위한 검색 정보 옵션 객체 생성
     // BU.CLI(req.query);
     // 레포트 추출 --> 총 개수, TableRows 반환
-    const { reportRows, totalCount } = await powerModel.getInverterReport(
-      searchRangeInfo,
-      { page, pageListCount: PAGE_LIST_COUNT },
-      inverterSeqList,
-    );
+    // const { reportRows, totalCount } = await powerModel.getInverterReport(
+    //   searchRangeInfo,
+    //   { page, pageListCount: PAGE_LIST_COUNT },
+    //   inverterSeqList,
+    // );
 
     // BU.CLI(reportRows);
 
@@ -183,7 +190,7 @@ router.get(
     let paginationInfo = DU.makeBsPagination(
       page,
       totalCount,
-      `/report/${siteId}/inverter/${subCategoryId}`,
+      `/report/${siteId}/${subCategory}/${subCategoryId}`,
       _.get(req, 'locals.reportInfo'),
       PAGE_LIST_COUNT,
     );
@@ -200,11 +207,11 @@ router.get(
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
     // 인버터 보고서 돔 추가
-    const { tableHeaderDom, tableBodyDom } = reportDom.makeInverterReportDom(reportRows, {
-      blockViewList: deviceProtocol.reportInverterViewList,
-      page,
-      pageListCount: PAGE_LIST_COUNT,
-    });
+    // const { tableHeaderDom, tableBodyDom } = reportDom.makeInverterReportDom(reportRows, {
+    //   blockViewList: deviceProtocol.reportInverterViewList,
+    //   page,
+    //   pageListCount: PAGE_LIST_COUNT,
+    // });
 
     // const inverterReportDom = reportDom.makeInverterReportDom(reportRows, {
     //   blockViewList: deviceProtocol.reportInverterViewList,
