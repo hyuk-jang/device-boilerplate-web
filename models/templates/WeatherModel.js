@@ -142,42 +142,6 @@ class WeatherModel extends BiModule {
   }
 
   /**
-   * 날씨 평균을 구해옴
-   * @param {searchRange} searchRange  검색 옵션
-   * @return {weatherRowDataPacketList}
-   */
-  getWeatherCastAverage(searchRange, weatherLocationSeq) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'applydate');
-    // BU.CLI(dateFormat);
-    // BU.CLI(searchRange);
-
-    const sql = `
-    SELECT main.*,
-    ${dateFormat.selectViewDate},
-    ${dateFormat.selectGroupDate},
-    ROUND(AVG(main.scale_sky), 1) AS avg_sky
-     FROM
-    (
-    SELECT *,
-        CASE
-        WHEN sky = 1 THEN 1
-        WHEN sky = 2 THEN 4
-        WHEN sky = 3 THEN 7
-        WHEN sky = 4 THEN 9.5
-        END AS scale_sky
-    FROM kma_data	
-    WHERE weather_location_seq = ${weatherLocationSeq}
-      AND applydate>= "${searchRange.strBetweenStart}" and applydate<"${searchRange.strBetweenEnd}"
-      AND DATE_FORMAT(applydate, '%H') >= '05' AND DATE_FORMAT(applydate, '%H') < '20'
-    ) main
-    GROUP BY ${dateFormat.groupByFormat}
-    ORDER BY applydate
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
    * 기상청 날씨를 가져옴
    * @param {number} weatherLocationSeq 기상청 동네 예보 위치 seq
    * @return {WC_KMA_DATA} 날씨 정보
@@ -224,42 +188,55 @@ class WeatherModel extends BiModule {
    * @param {searchRange} searchRange  검색 옵션
    * @return {{view_date: string, group_date: string, avg_sm_infrared: number, avg_temp: number, avg_reh: number, avg_solar: number, total_interval_solar: number, avg_inclined_solar: number, total_interval_inclined_solar: number, avg_wd: number, avg_ws: number, avg_uv: number}[]}
    */
-  getWeatherTrend(searchRange, main_seq) {
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+  getWeatherTrend(searchRange, mainSeq) {
+    // const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+
+    // BU.CLI(searchRange);
+    const {
+      firstGroupByFormat,
+      selectGroupDate,
+      selectViewDate,
+      groupByFormat,
+      divideTimeNumber,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
+
     const sql = `
       SELECT
-        ${dateFormat.selectViewDate},
-        ${dateFormat.selectGroupDate},
-          ROUND(AVG(avg_sm_infrared), 1) AS avg_sm_infrared,
-          ROUND(AVG(avg_temp), 1) AS avg_temp,
-          ROUND(AVG(avg_reh), 1) AS avg_reh,
-          ROUND(AVG(avg_solar), 0) AS avg_solar,
-          ROUND(SUM(interval_solar), 1) AS total_interval_solar,
-          ROUND(AVG(avg_inclined_solar), 0) AS avg_inclined_solar,
-          ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
-          ROUND(AVG(avg_wd), 0) AS avg_wd,	
-          ROUND(AVG(avg_ws), 1) AS avg_ws,	
-          ROUND(AVG(avg_uv), 0) AS avg_uv
+            main_seq,
+            ${selectViewDate},
+            ${selectGroupDate},
+            ROUND(AVG(avg_sm_infrared), 1) AS avg_sm_infrared,
+            ROUND(AVG(avg_temp), 1) AS avg_temp,
+            ROUND(AVG(avg_reh), 1) AS avg_reh,
+            ROUND(AVG(avg_solar), 0) AS avg_solar,
+            ROUND(SUM(interval_solar), 1) AS total_interval_solar,
+            ROUND(AVG(avg_inclined_solar), 0) AS avg_inclined_solar,
+            ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
+            ROUND(AVG(avg_wd), 0) AS avg_wd,	
+            ROUND(AVG(avg_ws), 1) AS avg_ws,	
+            ROUND(AVG(avg_uv), 0) AS avg_uv
       FROM
         (SELECT 
-          writedate,
-          AVG(sm_infrared) AS avg_sm_infrared,
-          AVG(temp) AS avg_temp,
-          AVG(reh) AS avg_reh,
-          AVG(solar) AS avg_solar,
-          AVG(solar) / ${dateFormat.divideTimeNumber} AS interval_solar,
-          AVG(inclined_solar) AS avg_inclined_solar,
-          AVG(inclined_solar) / ${dateFormat.divideTimeNumber} AS interval_inclined_solar,
-          AVG(wd) AS avg_wd,	
-          AVG(ws) AS avg_ws,	
-          AVG(uv) AS avg_uv,
-          COUNT(*) AS first_count
+                main_seq,
+                writedate,
+                AVG(sm_infrared) AS avg_sm_infrared,
+                AVG(temp) AS avg_temp,
+                AVG(reh) AS avg_reh,
+                AVG(solar) AS avg_solar,
+                AVG(solar) / ${divideTimeNumber} AS interval_solar,
+                AVG(inclined_solar) AS avg_inclined_solar,
+                AVG(inclined_solar) / ${divideTimeNumber} AS interval_inclined_solar,
+                AVG(wd) AS avg_wd,	
+                AVG(ws) AS avg_ws,	
+                AVG(uv) AS avg_uv,
+                COUNT(*) AS first_count
         FROM weather_device_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-        AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-        AND main_seq = ${main_seq}
-        GROUP BY ${dateFormat.firstGroupByFormat}) AS result_wdd
-     GROUP BY ${dateFormat.groupByFormat}
+         AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
+         ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
+        GROUP BY ${firstGroupByFormat}
+        ) AS result_wdd
+     GROUP BY ${groupByFormat}
     `;
     return this.db.single(sql, '', false);
   }
@@ -303,30 +280,63 @@ class WeatherModel extends BiModule {
   /**
    * 기상 계측 장치 평균을 구해옴
    * @param {searchRange} searchRange  검색 옵션
+   * @param {number} mainSeq
    * @return {weatherRowDataPacketList}
    */
-  getWeatherDeviceAverage(searchRange) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+  getWeatherDeviceAverage(searchRange, mainSeq) {
+    const { strBetweenStart, strBetweenEnd, strStartDate, strEndDate } = searchRange;
+    const {
+      // selectGroupDate,
+      // selectViewDate,
+      // firstGroupByFormat,
+      // groupByFormat,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
+
+    BU.CLI(searchRange);
+
+    const {
+      firstGroupByFormat,
+      selectGroupDate,
+      selectViewDate,
+      groupByFormat,
+      divideTimeNumber,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
     const sql = `
-      SELECT
-          writedate,
-          ${dateFormat.selectViewDate},
-          ${dateFormat.selectGroupDate},
-          AVG(temp) AS avg_temp,
-          AVG(reh) AS avg_reh,
-          AVG(ws) AS avg_ws,
-          AVG(solar) AS avg_solar,
-          AVG(solar) AS avg_inclined_solar,
-          ROUND(AVG(solar) / 6, 1) AS interval_solar,
-          COUNT(*) AS first_count
+
+    SELECT
+          main_group.main_seq,
+          ${selectViewDate},
+          ${selectGroupDate},
+          ROUND(AVG(avg_temp), 1) AS avg_temp,
+          ROUND(AVG(avg_reh), 1) AS avg_reh,
+          ROUND(AVG(avg_ws), 1) AS avg_ws,
+          ROUND(AVG(avg_solar), 1) AS avg_solar,
+          ROUND(SUM(interval_solar), 1) AS total_interval_solar,
+          ROUND(AVG(avg_inclined_solar), 1) AS avg_inclined_solar,
+          ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
+          ROUND(AVG(avg_uv), 0) AS avg_uv
+    FROM
+      (SELECT
+              main_seq,
+              writedate,
+              DATE_FORMAT(writedate,"%H") AS hour_time,
+              AVG(temp) AS avg_temp,
+              AVG(reh) AS avg_reh,
+              AVG(ws) AS avg_ws,
+              AVG(solar) AS avg_solar,
+              AVG(solar) / ${divideTimeNumber} AS interval_solar,
+              AVG(inclined_solar) AS avg_inclined_solar,
+              COUNT(*) AS first_count
       FROM weather_device_data wdd
-      WHERE writedate>= "${searchRange.strBetweenStart}" and writedate<"${searchRange.strBetweenEnd}"
-      AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-      GROUP BY ${dateFormat.groupByFormat}
-      ORDER BY writedate
-    `;
-    return this.db.single(sql, '', false);
+      WHERE writedate>= "${strStartDate}" AND writedate<"${strEndDate}"
+        ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
+      GROUP BY ${firstGroupByFormat}, main_seq
+      ORDER BY main_seq, writedate
+      ) as main_group
+    GROUP BY main_group.main_seq, ${groupByFormat}
+        `;
+    // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
+    return this.db.single(sql, '', true);
   }
 
   /**

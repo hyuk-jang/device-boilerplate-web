@@ -70,11 +70,6 @@ router.get(
       },
     });
 
-    // const weatherDeviceRows = await weatherModel.getWeatherDeviceAverage(searchRange);
-
-    // BU.CLIN(inverterLineChart, 4);
-    // BU.CLIN(weatherDeviceRows);
-
     // 인버터 현재 데이터 동적 생성 돔
     _.set(
       req,

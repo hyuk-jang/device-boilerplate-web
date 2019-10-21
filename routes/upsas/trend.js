@@ -6,6 +6,7 @@ const moment = require('moment');
 const router = express.Router();
 
 const { BU } = require('base-util-jh');
+const commonUtil = require('../../models/templates/common.util');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
 
@@ -96,7 +97,7 @@ router.get(
 /** 인버터 트렌드 */
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
@@ -104,25 +105,89 @@ router.get(
     const { subCategory } = req.locals.trendInfo;
 
     // console.time('refinedInverterCharts');
-    const refinedInverterCharts = await refineModel.refineBlockCharts(
+    const refinedBlockCharts = await refineModel.refineBlockCharts(
       _.get(req, 'locals.searchRange'),
       subCategory,
       siteId,
     );
     // console.timeEnd('refinedInverterCharts');
 
+    // BU.CLIN(refinedBlockCharts);
+
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
     const inverterDomTemplate = _.template(`
         <div class="lineChart_box default_area" id="<%= domId %>"></div>
     `);
-    const divDomList = refinedInverterCharts.map(refinedChart =>
+    const divDomList = refinedBlockCharts.map(refinedChart =>
       inverterDomTemplate({
         domId: refinedChart.domId,
       }),
     );
 
     _.set(req, 'locals.dom.divDomList', divDomList);
-    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
+    _.set(req, 'locals.madeLineChartList', refinedBlockCharts);
+
+    if (subCategory === 'inverter') {
+      next();
+    } else {
+      res.render('./UPSAS/trend/trend', req.locals);
+    }
+  }),
+);
+
+/** 인버터 트렌드 */
+router.get(
+  ['/', '/:siteId', '/:siteId/inverter'],
+  asyncHandler(async (req, res) => {
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
+
+    const { siteId } = req.locals.mainInfo;
+    const searchRange = _.get(req, 'locals.searchRange');
+
+    const weatherDeviceRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+    // BU.CLI(weatherDeviceRows);
+    // plotSeries 를 구하기 위한 객체
+    const { plotSeries } = commonUtil.getMomentFormat(searchRange);
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    const strGroupDateList = commonUtil.getGroupDateList(searchRange);
+
+    // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
+    const blockDataRowsGroup = commonUtil.extPerfectRows(
+      'main_seq',
+      weatherDeviceRows,
+      strGroupDateList,
+    );
+
+    // BU.CLIN(blockDataRowsGroup);
+
+    const { madeLineChartList } = req.locals;
+
+    // BU.CLIN(weatherDeviceRows);
+
+    // BU.CLIN(req.locals);
+
+    /** @type {lineChartInfo} */
+    const acLineChart = _.head(madeLineChartList);
+
+    acLineChart.yAxis.push({
+      yTitle: '일사량(W/m²)',
+      // dataUnit: 'W/m²',
+    });
+
+    acLineChart.series.push({
+      name: '일사량',
+      // tooltip: {
+      //   valueSuffix: 'W/m²',
+      // },
+      color: 'red',
+      yAxis: 1,
+      // 임시로 박아둠
+      data: _.map(_.get(blockDataRowsGroup, siteId), 'avg_solar'),
+      // data: _.map(weatherDeviceRows, 'avg_solar').slice(0, _.head(acLineChart.series).data.length),
+    });
+
+    // BU.CLIN(_.head(madeLineChartList), 3);
 
     res.render('./UPSAS/trend/trend', req.locals);
   }),

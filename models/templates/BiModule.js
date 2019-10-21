@@ -82,7 +82,7 @@ class BiModule extends BM {
    */
   getConnectorPower(searchRange, moduleSeqList) {
     searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
 
     const sql = `
       SELECT
@@ -421,7 +421,7 @@ class BiModule extends BM {
    */
   getInverterPower(searchRange = this.createSearchRange(), inverterSeqList) {
     // let dateFormat = this.convertSearchType2DateFormat(searchRange.searchType);
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
     // BU.CLI(dateFormat);
     const sql = `
     SELECT
@@ -507,12 +507,11 @@ class BiModule extends BM {
               MAX(power_cp_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
       FROM pw_inverter_data id
-            WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
-      searchRange.strEndDate
-    }"
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
     ${inverterSeqList.length ? ` AND id.inverter_seq IN (${inverterSeqList})` : ''}
       GROUP BY ${firstGroupByFormat}, id.inverter_seq
-      ORDER BY id.inverter_seq, writedate) AS id_group
+      ORDER BY id.inverter_seq, writedate
+      ) AS id_group
       LEFT OUTER JOIN pw_inverter ivt
       ON ivt.inverter_seq = id_group.inverter_seq
     GROUP BY id_group.inverter_seq, ${groupByFormat}
@@ -541,7 +540,7 @@ class BiModule extends BM {
       );
     }
 
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
 
     const sql = `
       SELECT
@@ -757,7 +756,7 @@ class BiModule extends BM {
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
   async getInverterReport(searchRange, pageInfo, inverterSeqList) {
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
     let { page = 1, pageListCount = 10 } = pageInfo;
     page = Number(page);
     pageListCount = Number(pageListCount);

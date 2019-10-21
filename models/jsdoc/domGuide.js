@@ -35,7 +35,7 @@
  * @property {Object} xAxis
  * @property {string=} xAxis.title
  * @property {Object[]} yAxis
- * @property {string=} yAxis.title
+ * @property {string=} yAxis.yTitle
  * @property {string=} yAxis.dataUnit
  * @property {plotOptions=} plotOptions
  * @property {chartSeriesInfo[]} series
