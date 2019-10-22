@@ -98,7 +98,7 @@ const defaultDom = {
             .get(title).length, // get(인버터) -> [인버터, 인버터].length = 2
         };
       })
-      .map(domInfo => mainTitleTemplate(domInfo))
+      .map(mainTitleTemplate)
       .value();
 
     // 중분류 Header Dom 생성
@@ -175,10 +175,11 @@ const defaultDom = {
    * @param {Object} blockTableInfo
    * @param {Object[]} blockTableInfo.dataRows
    * @param {blockViewMakeOption[]} blockTableInfo.blockTableOptions
+   * @param {pageInfo=} pageInfo
    */
-  makeDynamicBlockTable(blockTableInfo) {
-    const tableHeaderDom = this.makeDynamicBlockTableHeader(blockTableInfo);
-    const tableBodyDom = this.makeDynamicBlockTableBody(blockTableInfo);
+  makeDynamicBlockTable(blockTableInfo, pageInfo) {
+    const tableHeaderDom = this.makeDynamicBlockTableHeader(blockTableInfo, !!pageInfo);
+    const tableBodyDom = this.makeDynamicBlockTableBody(blockTableInfo, pageInfo);
 
     return {
       tableHeaderDom,
@@ -191,9 +192,13 @@ const defaultDom = {
    * @param {Object} blockTableInfo
    * @param {string[]=} blockTableInfo.baseBuiltInTitleTHs
    * @param {blockViewMakeOption[]} blockTableInfo.blockTableOptions
+   * @param {boolean=} isAddNumbering 번호 추가 여부
    */
-  makeDynamicBlockTableHeader(blockTableInfo) {
+  makeDynamicBlockTableHeader(blockTableInfo, isAddNumbering = false) {
     const { baseBuiltInTitleTHs = [], blockTableOptions } = blockTableInfo;
+
+    // 번호 추가
+    isAddNumbering && baseBuiltInTitleTHs.unshift('번호');
 
     const headerMainDomList = [];
     const headerSubDomList = [];
@@ -268,14 +273,26 @@ const defaultDom = {
    * @param {Object} blockTableInfo
    * @param {Object[]} blockTableInfo.dataRows
    * @param {blockViewMakeOption[]} blockTableInfo.blockTableOptions
+   * @param {pageInfo=} pageInfo 번호
    */
-  makeDynamicBlockTableBody(blockTableInfo) {
+  makeDynamicBlockTableBody(blockTableInfo, pageInfo = {}) {
     const { blockTableOptions, dataRows } = blockTableInfo;
+    // 레포트 옵션 중 넘버링을 추가할 경우
+    const { page, pageListCount } = pageInfo;
+    const firstRowNum = _.chain(page)
+      .subtract(1)
+      .multiply(pageListCount)
+      .value();
 
     const bodyTemplate = _.template(
-      `<tr>${_.map(
+      `<tr>
+          ${_.isNumber(page) ? '<td class="text-center"><%= num %></td>' : ''}
+      ${_.map(
         blockTableOptions,
-        configInfo => `<td><%= ${configInfo.dataKey} %></td>`,
+        configInfo =>
+          `<td ${
+            _.isArray(configInfo.cssList) ? `class='${configInfo.cssList.toString()}'` : ''
+          } ><%= ${configInfo.dataKey} %></td>`,
       ).toString()}</tr>`,
     );
 
@@ -285,9 +302,12 @@ const defaultDom = {
     });
 
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
-    return dataRows.map(dataRow => {
+    return dataRows.map((dataRow, index) => {
+      // 첫번째 시작 번호가 숫자일 경우
+      _.isNumber(page) && _.set(dataRow, 'num', firstRowNum + index + 1);
+
       blockTableOptions.forEach(bodyConfig => {
-        const { dataKey, scale = 1, toFixed = 1 } = bodyConfig;
+        const { dataKey, scale = 1, toFixed = 1, isAddComma = true } = bodyConfig;
         let calcData = _.get(dataRow, [dataKey]);
         // 데이터 변형 목록에 있는지 확인
         if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
@@ -295,7 +315,7 @@ const defaultDom = {
           calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
         }
         // 천단위 기호 추가 후 본 객체에 적용
-        _.set(dataRow, [dataKey], this.addComma(calcData));
+        isAddComma && _.set(dataRow, [dataKey], this.addComma(calcData));
       });
 
       return bodyTemplate(dataRow);

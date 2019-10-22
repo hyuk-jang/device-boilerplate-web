@@ -1002,10 +1002,11 @@ class UpsasDP extends DeviceProtocol {
       },
       domTableColConfigs: [
         {
-          mainTitle: '',
+          mainTitle: '일시',
           dataKey: 'group_date',
-          dataName: '일시',
-          dataUnit: '',
+          isAddComma: false,
+          cssWidthPer: 15,
+          cssList: ['text-center'],
         },
         {
           mainTitle: '태양광',
@@ -1065,7 +1066,7 @@ class UpsasDP extends DeviceProtocol {
         },
         {
           mainTitle: '발전 현황',
-          dataKey: 'amount_power_cp_kwh',
+          dataKey: 'interval_power_cp_kwh',
           dataName: '발전량',
           dataUnit: 'kWh',
           toFixed: 1,

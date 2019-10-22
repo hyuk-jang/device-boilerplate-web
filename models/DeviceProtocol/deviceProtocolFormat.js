@@ -1,9 +1,15 @@
-// /**
-//  * @description REPORT
-//  * @typedef {Object} reportTableConfig 레포트 메뉴 설정
-//  * @property {dynamicQueryConfig} dbTableInfo DB에서 데이터를 가져오고 변환시킬 정보
-//  * @property {blockViewMakeOption[]} domTableColConfigs
-//  */
+/**
+ * @typedef {Object} dynamicQueryRowsGuideInfo 가져오는 조건에 따라 그룹바이하여 Rows 반환
+ * @property {searchRange} searchRange 검색 조건
+ * @property {whereColumnOption=} whereColumnInfo 가져올 특정 장소
+ * @property {dynamicQueryConfig} dynamicQueryConfig 동적 SQL 생성 Query 생성 정보
+ */
+
+/**
+ * @typedef {Object} whereColumnOption 가져오는 조건에 따라 그룹바이하여 Rows 반환
+ * @property {string} column 컬럼 ID
+ * @property {number[]} seqList 컬럼 시퀀스 목록
+ */
 
 /**
  * @description REPORT
@@ -141,6 +147,8 @@
  * @property {number=} scale 배율. 원 데이터에 곱할 수치
  * @property {number=} toFixed 최종 계산 결과 값에 소수점 절삭 처리할 자리수
  * @property {number=} cssWidthPer Table 셀 가로 길이(%) TH.style='width: ${cssWidthPer} %'
+ * @property {string[]=} cssList 해당 Dom Element에 적용할 css 목록
+ * @property {boolean=} isAddComma 천단위 기호 추가 여부. default true
  */
 
 module;

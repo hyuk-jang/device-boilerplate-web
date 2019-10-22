@@ -295,11 +295,11 @@ class BlockModel extends BiModule {
 
   /**
    * Report
-   * @param {searchRange} searchRange createSearchRange() Return 객체
-   * @param {{page: number, pageListCount: number}} pageInfo
+   * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo createSearchRange() Return 객체
+   * @param {pageInfo} pageInfo
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
-  async getDynamicReports(dynamicQueryGuideInfo, pageInfo) {
+  async getDynamicReport(dynamicQueryGuideInfo, pageInfo) {
     const sql = this.getDynamicBlockReportRows(dynamicQueryGuideInfo, true);
 
     const { page = 1, pageListCount = 10 } = pageInfo;
@@ -317,22 +317,18 @@ class BlockModel extends BiModule {
       reportRows,
     };
   }
+
+  /**
+   * Report
+   * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo createSearchRange() Return 객체
+   */
+  getDynamicTrend(dynamicQueryGuideInfo) {
+    const sql = this.getDynamicBlockReportRows(dynamicQueryGuideInfo);
+
+    return this.db.single(sql);
+  }
 }
 module.exports = BlockModel;
-
-/**
- * @typedef {Object} dynamicQueryRowsGuideInfo 가져오는 조건에 따라 그룹바이하여 Rows 반환
- * @property {searchRange} searchRange 검색 조건
- * @property {{column: string, seqList: number[]}=} whereColumnInfo 가져올 특정 장소
- * @property {dynamicQueryConfig} dynamicQueryConfig 동적 SQL 생성 Query 생성 정보
- */
-/**
- * @typedef {Object} dynamicQueryReportGuideInfo 레포트 형태로 가져올 Rows. 페이지네이션이 포함되어있음
- * @property {searchRange} searchRange 검색 조건
- * @property {{page: number, pageListCount: number}=} pageInfo 가져올 페이지
- * @property {{column: string, seqList: number[]}=} whereColumnInfo 가져올 특정 장소
- * @property {dynamicQueryConfig} dynamicQueryConfig 동적 SQL 생성 Query 생성 정보
- */
 
 // const reg = /[a-zA-Z]/;
 // _.forEach(columnList, calculate => {

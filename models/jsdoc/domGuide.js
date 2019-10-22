@@ -1,4 +1,17 @@
 /**
+ * @typedef {Object} subCategoryNameInfo subCategory 정보
+ * @property {number} seq 시퀀스
+ * @property {string} name 서브 카테고리 명
+ */
+
+/**
+ * 페이지네이션 정보
+ * @typedef {Object} pageInfo
+ * @property {number} page
+ * @property {number} pageListCount
+ */
+
+/**
  * Sub Category 정보
  * @typedef {Object} setCategoryInfo
  * @property {string} subCategory
