@@ -35,10 +35,10 @@ const subCategoryList = [
   //   subCategory: 'connector',
   //   btnName: '접속반',
   // },
-  {
-    subCategory: 'saltern',
-    btnName: '염전',
-  },
+  // {
+  //   subCategory: 'saltern',
+  //   btnName: '염전',
+  // },
 ];
 
 // report middleware

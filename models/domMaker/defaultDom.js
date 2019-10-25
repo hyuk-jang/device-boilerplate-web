@@ -296,11 +296,6 @@ const defaultDom = {
       ).toString()}</tr>`,
     );
 
-    // 데이터 변형을 사용할 목록 필터링
-    const calcBodyConfigList = blockTableOptions.filter(bodyInfo => {
-      return _.isNumber(bodyInfo.scale) || _.isNumber(bodyInfo.toFixed);
-    });
-
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
     return dataRows.map((dataRow, index) => {
       // 첫번째 시작 번호가 숫자일 경우
@@ -310,10 +305,8 @@ const defaultDom = {
         const { dataKey, scale = 1, toFixed = 1, isAddComma = true } = bodyConfig;
         let calcData = _.get(dataRow, [dataKey]);
         // 데이터 변형 목록에 있는지 확인
-        if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
-          calcData = scale !== 1 ? _.multiply(calcData, scale) : calcData;
-          calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
-        }
+        calcData = _.isNumber(scale) && scale !== 1 ? _.multiply(calcData, scale) : calcData;
+        calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
         // 천단위 기호 추가 후 본 객체에 적용
         isAddComma && _.set(dataRow, [dataKey], this.addComma(calcData));
       });

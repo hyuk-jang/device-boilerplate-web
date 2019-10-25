@@ -106,7 +106,7 @@ class BlockModel extends BiModule {
         // 계산식을 활용한 컬럼이 있을 경우 적용
         _.forEach(columnList, expressionInfo => {
           let { expression } = expressionInfo;
-          const { columnId, scale, toFixed } = expressionInfo;
+          const { columnId, scale, toFixed = 1 } = expressionInfo;
 
           if (_.isNumber(scale)) {
             expression = `(${expression}) * ${scale}`;
@@ -234,7 +234,7 @@ class BlockModel extends BiModule {
         // 계산식을 활용한 컬럼이 있을 경우 적용
         _.forEach(columnList, expressionInfo => {
           let { firstExpression } = expressionInfo;
-          const { columnId, scale, toFixed, secondExpression } = expressionInfo;
+          const { columnId, scale, toFixed = 1, secondExpression } = expressionInfo;
 
           if (_.isNumber(scale)) {
             firstExpression = `(${firstExpression}) * ${scale}`;
