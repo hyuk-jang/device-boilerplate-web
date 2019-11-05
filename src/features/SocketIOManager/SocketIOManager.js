@@ -12,6 +12,7 @@ const {
   reqWrapCmdFormat: reqWCF,
   reqWrapCmdType: reqWCT,
   commandStep: cmdStep,
+  nodePickKey,
 } = require('../../../../default-intelligence').dcmConfigModel;
 /** 무안 6kW TB */
 
@@ -36,9 +37,9 @@ class SocketIOManager extends AbstSocketIOManager {
     this.io.on('connection', socket => {
       BU.CLI('connection');
       // 접속한 Socket 등록
-      socket.on('certifySocket', target => {
+      socket.on('certifySocket', sessionInfo => {
         /** @type {msUserInfo} */
-        const msUser = target;
+        const msUser = sessionInfo;
         // 접속한 Socket 정보 정의
         msUser.socketClient = socket;
 
@@ -99,41 +100,47 @@ class SocketIOManager extends AbstSocketIOManager {
   /**
    * 노드 정보에서 UI에 보여줄 내용만을 반환
    * @param {msDataInfo} dataInfo
+   * @param {nodeInfo[]} renewalList 갱신된 노드
    */
-  pickNodeList(dataInfo) {
-    const pickList = ['node_id', 'nd_target_name', 'data'];
-    const { nodeList, placeList } = dataInfo;
+  pickNodeList(dataInfo, renewalList) {
+    const { placeList } = dataInfo;
 
-    return _.chain(nodeList)
+    // BU.CLIN(renewalList)
+
+    return _.chain(renewalList)
       .map(nodeInfo => {
-        return _.chain(nodeInfo)
-          .pick(pickList)
+        return _.chain(nodePickKey.FOR_USER)
+          .reduce((result, value, key) => {
+            result[value] = _.get(nodeInfo, key, '');
+            return result;
+          }, {})
           .thru(pickNode => {
+            // BU.CLIN(pickNode)
             const placeNameList = _(placeList)
               .filter({ node_real_id: nodeInfo.node_real_id })
-              .map('place_name');
-            return _.assign(pickNode, { place_name_list: placeNameList });
-          });
+              .map('place_name')
+              .value();
+            // BU.CLIN(placeNameList);
+            return _.assign(pickNode, { [[nodePickKey.FOR_USER.place_name_list]]: placeNameList });
+          })
+          .value();
       })
-      .sortBy('node_id')
+      .sortBy(nodePickKey.FOR_USER.node_id)
       .value();
 
-    return _(nodeList)
-      .map(nodeInfo => {
-        const placeNameList = _(placeList)
-          .filter(placeInfo => placeInfo.node_real_id === nodeInfo.node_real_id)
-          .map('place_name')
-          .value();
-        //  _.filter(placeList, placeInfo => {
-        //   placeInfo.node_real_id === nodeInfo.node_real_id;
-        // })
-        return _(nodeInfo)
-          .pick(pickList)
-          .assign({ place_name_list: placeNameList })
-          .value();
-      })
-      .sortBy('node_id')
-      .value();
+    // return _.chain(nodeList)
+    //   .map(nodeInfo => {
+    //     return _.chain(nodeInfo)
+    //       .pick(pickList)
+    //       .thru(pickNode => {
+    //         const placeNameList = _(placeList)
+    //           .filter({ node_real_id: nodeInfo.node_real_id })
+    //           .map('place_name');
+    //         return _.assign(pickNode, { place_name_list: placeNameList });
+    //       });
+    //   })
+    //   .sortBy('node_id')
+    //   .value();
   }
 
   // /**
@@ -211,16 +218,19 @@ class SocketIOManager extends AbstSocketIOManager {
     }
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateMsClientStatus', connectedStatus);
+      clientInfo.socketClient.emit('updateApiClientConn', connectedStatus);
     });
   }
 
   /**
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
    * @param {msInfo} msInfo
+   * @param {nodeInfo[]} renewalList 갱신된 노드. 차후에 속도에 문제가 된다면 갱신된 노드만 적용토록 해야함.
    */
-  submitNodeList(msInfo) {
-    const simpleNodeList = this.pickNodeList(msInfo.msDataInfo);
+  submitNodeList(msInfo, renewalList) {
+    // BU.CLIN(renewalList);
+    const simpleNodeList = this.pickNodeList(msInfo.msDataInfo, renewalList);
+    // BU.CLIN(simpleNodeList);
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateNode', simpleNodeList);

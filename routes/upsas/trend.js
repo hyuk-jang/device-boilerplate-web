@@ -171,21 +171,33 @@ router.get(
     const acLineChart = _.head(madeLineChartList);
 
     acLineChart.yAxis.push({
-      yTitle: '일사량(W/m²)',
+      yTitle: '일사량(W/m²)/기온(℃)',
       // dataUnit: 'W/m²',
     });
 
-    acLineChart.series.push({
-      name: '일사량',
-      // tooltip: {
-      //   valueSuffix: 'W/m²',
-      // },
-      color: 'red',
-      yAxis: 1,
-      // 임시로 박아둠
-      data: _.map(_.get(blockDataRowsGroup, siteId), 'avg_solar'),
-      // data: _.map(weatherDeviceRows, 'avg_solar').slice(0, _.head(acLineChart.series).data.length),
-    });
+    const avgSolarList = _.map(_.get(blockDataRowsGroup, siteId), 'avg_solar');
+    const avgTempList = _.map(_.get(blockDataRowsGroup, siteId), 'avg_temp');
+
+    acLineChart.series.push(
+      {
+        name: '일사량',
+        // tooltip: {
+        //   valueSuffix: 'W/m²',
+        // },
+        color: 'red',
+        yAxis: 1,
+        data: avgSolarList,
+      },
+      {
+        name: '기온',
+        // tooltip: {
+        //   valueSuffix: 'W/m²',
+        // },
+        color: 'purple',
+        yAxis: 0,
+        data: avgTempList,
+      },
+    );
 
     // BU.CLIN(_.head(madeLineChartList), 3);
 

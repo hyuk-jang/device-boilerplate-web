@@ -87,7 +87,7 @@ function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
 
   let dataUnit = getDataUnit(nodeDefId); // 데이터 단위
   if (data === '' || _.isNull(dataUnit)) dataUnit = ''; // 장치일 경우 단위가 없음
-  let [dx, dy, style, nodeName] = [0, 15, 'font-size: 15pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
+  let [dx, dy, style, nodeName] = [0, 15, 'font-size: 5pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
 
   // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
   const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });
@@ -99,15 +99,15 @@ function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
   isChangePlaceNodeName ? (nodeName = foundSvgTextInfo.id) : (nodeName = foundSvgTextInfo.name);
 
   // 데이터, 속성, 스타일 등을 적용해 tspan 다시 그리기
-  foundNodeTextChild.get(0).innerHTML = `<tspan id='nodeName' x="${
-    foundSvgTextInfo.textX
-  }"> ${nodeName}</tspan>`;
   foundNodeTextChild.get(
     0,
-  ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${
-    foundSvgTextInfo.textX
-  }" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
-  foundNodeTextChild.get(0).innerHTML += `<tspan>${dataUnit}</tspan>`; // data 단위 표시
+  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}"> ${nodeName}</tspan>`;
+  foundNodeTextChild.get(
+    0,
+  ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${foundSvgTextInfo.textX}" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
+  if (_.isString(dataUnit)) {
+    foundNodeTextChild.get(0).innerHTML += `<tspan>${dataUnit}</tspan>`; // data 단위 표시
+  }
 }
 
 /**
@@ -315,16 +315,21 @@ function bindingClickNodeEvent(socket, selectedModeVal = 'view') {
 
   realMap.drawInfo.positionInfo.svgNodeList.forEach(svgNodeInfo => {
     svgNodeInfo.defList.forEach(nodeDefInfo => {
+      // console.log(nodeDefInfo);
       const $drawedSvgElement = $(`#${nodeDefInfo.id}`);
 
       // 클릭 이벤트 바인딩
       $drawedSvgElement.on('click touchstart', () => {
         const deviceType = svgNodeInfo.is_sensor; // 장치 or 센서 구분  1: 센서, 0: 장치, -1: 미분류
-        const $nodeTspanEleInfo = $(`tspan.${nodeDefInfo.id}`); // svg 그려진 노드 <Tspan> 정보
+        const $nodeTspanEleList = $(`tspan.${nodeDefInfo.id}`); // svg 그려진 노드 <Tspan> 정보
 
         // 장치 and 제어모드
         if (deviceType === 0 && selectedModeVal === 'control') {
-          const currentNodeStatus = _.head($nodeTspanEleInfo).innerHTML; // 현재 들어오는 노드의 최근 데이터
+          if ($nodeTspanEleList.length === 0) {
+            return alert('장치 상태 미식별');
+          }
+
+          const currentNodeStatus = _.head($nodeTspanEleList).innerHTML; // 현재 들어오는 노드의 최근 데이터
           const checkedDataStatus = checkTrueFalseData(currentNodeStatus); // 데이터의 타입이 true데이터인지 false 데이터인지 체크
           // 현재 상태에 따라 confirm창 내용 변경
           if (checkedDataStatus === TRUE_DATA) {

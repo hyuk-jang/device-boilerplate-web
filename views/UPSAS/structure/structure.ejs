@@ -6,6 +6,12 @@
     <script src="/js/contents/master/mainUtil.js"></script>
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/js/drawSvg/drawSvg.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
   </head>
 
   <body>
@@ -228,10 +234,10 @@
                   <div class="panel-heading">명령 목록</div>
                   <div class="panel-body">
                     갱신 시간:
-                    <span id="CMD_order_date"></span>
+                    <span id="cmdUpdateDate"></span>
                   </div>
                   <!-- Table -->
-                  <table id="CMD_order_list" class="table">
+                  <table id="cmdTableBody" class="table">
                     <thead>
                       <tr>
                         <th data-field="wrapCmdFormat">명령 형식</th>
@@ -251,16 +257,16 @@
                   <div class="panel-heading">장치 상태 정보 목록</div>
                   <div class="panel-body">
                     갱신 시간:
-                    <span id="CMD_node_date"></span>
+                    <span id="nodeUpdateDate"></span>
                   </div>
                   <!-- Table -->
-                  <table id="MS_node_list" class="table">
+                  <table id="nodeTableBody" class="table">
                     <thead>
                       <tr>
-                        <th data-field="nd_target_name">장치 명</th>
-                        <th data-field="node_id">장치 ID</th>
-                        <th data-field="place_name_list">관련 장소</th>
-                        <th data-field="data">데이터</th>
+                        <th data-field="ntn">장치 명</th>
+                        <th data-field="ni">장치 ID</th>
+                        <th data-field="pnl">관련 장소</th>
+                        <th data-field="d">데이터</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -270,7 +276,7 @@
             </div>
           </div>
           <!-- structure Content -->
-          <div id="structureMode">
+          <div id="structureMode" >
             <div class="default_area pt_1rem">
               <!-- panzoom, mode select -->
               <div id="zoom" class="zoom_box">
@@ -283,11 +289,9 @@
                 <button id="reset" class="btn btn-default btn-sm mr_1rem">
                   <span class="glyphicon glyphicon-refresh"></span> Reset
                 </button>
-                <input id="placeNodeChangeNameToogleBtn" type="checkbox" data-toggle="toggle" />
                 <select class="form-control w_auto ml_1rem" id="controlMode">
-                  <option value="view" selected>뷰 모드</option>
-                  <option value="control">제어 모드</option>
-                  <option value="develop">개발 모드</option>
+                  <option value="view" >뷰 모드</option>
+                  <option value="control selected">제어 모드</option>
                 </select>
               </div>
               <!-- canvas -->
@@ -302,6 +306,7 @@
       <%- include("../master/footer.ejs") %>
     </div>
 
+    <!-- 서버사이드 데이터 정의 -->
     <script>
       // Map 정보
       var map = <%- JSON.stringify(map) %>;
@@ -309,6 +314,169 @@
       var controlInfo = <%- JSON.stringify(controlInfo) %>;
       // 제어 장치 돔 목록([{type: 'gateValue', category: "<option value="pump"> 펌프</option>" list: ['<option value="P_001">펌프 001</option>,...']}, ...])
       var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
+      // 세션 ID
+      var sessionID = <%- JSON.stringify(sessionID) %>;
+      // 로그인 사용자 정보
+      var user = <%- JSON.stringify(user) %>;
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // 명령 목록을 보여줄 돔
+      var $cmdTableDom;
+      var $cmdUpdateDom;
+      // 노드 상태를 보여줄 돔
+      var $nodeTableDom;
+      var $nodeUpdateDom;
+      //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
+      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
+        $cmdTableDom = $('#' + cmdTableDomId);
+        $cmdUpdateDom = $('#' + cmdUpdateDomId);
+        $nodeTableDom = $('#' + nodeTableDomId);
+        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      }
+
+      // 테이블 ID 정의
+      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+
+      
+      // Socket.IO 정의
+      var socket = io();
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
+
+      // 노드 클릭 이벤트가 발생할 경우 Socket.IO로 메시지를 전송할 객체 바인딩????
+      bindingClickNodeEvent(socket);
+
+      // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
+      socket.emit('certifySocket', {
+        sessionID: sessionID,
+        sessionUserInfo: user,
+      });
+
+      // 장치 연결 상태 반영
+      socket.on('updateApiClientConn', function(strConnStatus) {
+        // console.log(strConnStatus);
+        document.getElementById('device_connected_stauts').innerText = strConnStatus;
+      });
+
+      // 갱신 노드 반영
+      socket.on('updateNode', function(wsNodeList) {
+        console.log(wsNodeList);
+        var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
+
+        _.forEach(wsNodeList, function(wsNodeInfo) {
+          // draw map
+          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+
+          // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
+          var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
+          foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
+        });
+
+        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: currNodeList,
+        });
+        // 명령 갱신 시각 반영
+        $nodeUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 명령 관련 갱신 반영
+      socket.on('updateCommand', function(commandList) {
+        // console.log('updateCommand', commandList);
+        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+
+        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: commandList,
+        });
+        // 명령 갱신 시각 반영
+        $cmdUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // FIXME: 오류를 보기위하여 임시
+      // 명령 요청 결과 Alert
+      socket.on('resultExecCommand', function(message) {
+        // console.log(commandList)
+        document.getElementById('test_alert').innerText = message;
+      });
+
+      // TODO: socket.emit 함수 생성 및 장치 연결 중일 때만 emit하도록 해주는 함수 구현
+      // 저장된 명령을 실행하고자 할 경우 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
+      $('#automatic_control_div > button').on('click', function() {
+        var automaticId = $('#automatic_control_list option:selected').val();
+        // var controlType = $("#automatic_control_type option:selected").val();
+        var controlType = $(this).data('value');
+        // console.log(controlType);
+
+        var requestMsg = {
+          commandId: 'AUTOMATIC',
+          contents: {
+            /**
+             * 명령 제어 타입 (wrapCmdType)
+             * @example
+             * CONTROL: 장치 제어 요청
+             * CANCEL: 명령 제어 취소 요청
+             * MEASURE: 명령 계측 요청
+             */
+            wrapCmdType: controlType,
+            savedCommandId: automaticId,
+          },
+        };
+        socket.emit('executeCommand', requestMsg);
+      });
+
+      // 장치 단일 제어 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
+      $('#single_control_btn').on('click', function() {
+        var deviceId = $('#single_control_device_list option:selected').val();
+        var controlType = $('#single_control_type option:selected').val();
+        var controlRank = $('#single_control_rank option:selected').val();
+        var requestMsg = {
+          commandId: 'SINGLE',
+          contents: {
+            /**
+             * 명령 제어 타입 (wrapCmdType)
+             * @example
+             * CONTROL: 장치 제어 요청
+             * CANCEL: 명령 제어 취소 요청
+             * MEASURE: 명령 계측 요청
+             */
+            wrapCmdType: 'CONTROL', // 단일 동작 제어는 모두 명령 요청으로 처리
+            nodeId: deviceId,
+            /**
+             * 장치 제어 타입 (requestDeviceControlType)
+             * @example
+             * 0: 장치 Close, Off
+             * 1: 장치 Open, On
+             * 2: 장치 Measure
+             * 3: 장치 값 설정
+             */
+            singleControlType: controlType,
+            rank: Number(controlRank),
+          },
+        };
+        socket.emit('executeCommand', requestMsg);
+      });
+
+      // 시나리오 요청 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
+      $('#scenario_control_div > a').on('click', function() {
+        var controlType = $(this).data('value');
+        var requestMsg = {
+          commandId: 'SCENARIO',
+          contents: {
+            /**
+             * 명령 제어 타입 (wrapCmdType)
+             * @example
+             * CONTROL: 장치 제어 요청
+             * CANCEL: 명령 제어 취소 요청
+             * MEASURE: 명령 계측 요청
+             */
+            wrapCmdType: controlType,
+            scenarioId: 'scenario1',
+            rank: 1,
+          },
+        };
+        socket.emit('executeCommand', requestMsg);
+      });
     </script>
 
     <!-- 장치 제어 명령 Dom 생성 영역  -->
@@ -389,12 +557,11 @@
       setPanzoom(); // 줌 기능 세팅
 
       //모드 선택 설렉트 박스 and 한/영 토글 버튼
-      $('#controlMode, #placeNodeChangeNameToogleBtn').change(function() {
+      $('#controlMode').change(function() {
         var selectedMode = this.value;
-        var isChecked = $('#placeNodeChangeNameToogleBtn').prop('checked'); // 체크 상태 false: off, true: on
 
         $(`#canvas`).empty(); // svg가 그려진 공간 초기화
-        drawSvgBasePlace('canvas', isChecked); // 초기화 후 다시 그리기 (체크 상태 포함)
+        drawSvgBasePlace('canvas'); // 초기화 후 다시 그리기 (체크 상태 포함)
         bindingClickNodeEvent('', selectedMode); // 장치, 센서 클릭 이벤트 다시 바인딩
 
         // ↓ 다시 그려진 map에 데이터를 다시 뿌려준다.

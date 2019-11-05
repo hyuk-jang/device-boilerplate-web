@@ -262,22 +262,32 @@ class ApiServer extends AbstApiServer {
    * Site에서 보내온 NodeList 데이터와 현재 가지고 있는 데이터와 비교하여 변화가 있을 경우 해당 노드를 선별하여 부모 호출
    * @desc dcmWsModel.transmitToServerCommandType.NODE 명령 처리 메소드
    * @param {msInfo} msInfo
-   * @param {nodeInfo[]} updatedFieldNodeList
+   * @param {wsNodeInfo[]} updatedFieldNodeList
    */
   compareNodeList(msInfo, updatedFieldNodeList) {
+    // BU.CLIN(updatedFieldNodeList);
     try {
       /** @type {nodeInfo[]} */
       const renewalList = [];
       // 수신 받은 노드 리스트를 순회
-      _.forEach(updatedFieldNodeList, nodeInfo => {
+      _.forEach(updatedFieldNodeList, wsNodeInfo => {
+        const { nri: nodeRealId, d: data } = wsNodeInfo;
         const msNodeInfo = _.find(msInfo.msDataInfo.nodeList, {
-          node_real_id: nodeInfo.node_real_id,
+          node_real_id: nodeRealId,
         });
 
+        // if (_.includes(nodeRealId, 'WD_1')) {
+        //   BU.CLIN(nodeRealId);
+        // }
+
         // 데이터가 서로 다르다면 갱신된 데이터
-        if (!_.isEqual(nodeInfo.data, msNodeInfo.data)) {
-          msNodeInfo.data = nodeInfo.data;
+        if (!_.isEqual(data, msNodeInfo.data)) {
+          msNodeInfo.data = data;
           renewalList.push(msNodeInfo);
+
+          // if (_.includes(nodeRealId, 'WD_1')) {
+          //   BU.CLIN(msNodeInfo);
+          // }
         }
       });
 
@@ -290,7 +300,7 @@ class ApiServer extends AbstApiServer {
           }
         });
       }
-      // BU.CLI(renewalList);
+      // BU.CLIN(renewalList);
       return renewalList;
     } catch (error) {
       throw error;
@@ -339,3 +349,9 @@ class ApiServer extends AbstApiServer {
   }
 }
 module.exports = ApiServer;
+
+/**
+ * @typedef {Object} wsNodeInfo
+ * @property {string} nri node_real_id
+ * @property {number|string} d data
+ */
