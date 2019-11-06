@@ -9,11 +9,16 @@ const net = require('net');
 const AbstSocketIOManager = require('./AbstSocketIOManager');
 
 const {
-  reqWrapCmdFormat: reqWCF,
-  reqWrapCmdType: reqWCT,
-  commandStep: cmdStep,
-  nodePickKey,
-} = require('../../../../default-intelligence').dcmConfigModel;
+  dcmConfigModel: {
+    reqWrapCmdFormat: reqWCF,
+    reqWrapCmdType: reqWCT,
+    commandStep: cmdStep,
+    nodePickKey,
+  },
+  dccFlagModel: { definedCommandSetRank: cmdRank },
+  dcmWsModel: { transmitToClientCommandType },
+} = require('../../../../default-intelligence');
+
 /** 무안 6kW TB */
 
 class SocketIOManager extends AbstSocketIOManager {
@@ -78,13 +83,46 @@ class SocketIOManager extends AbstSocketIOManager {
       });
 
       // 사용자 브라우저에서 명령 요청이 발생할 경우 처리
-      socket.on('executeCommand', msg => {
+      socket.on('executeCommand', (generateControlCmdInfo = {}) => {
+        /** @type {wsGenerateControlCmdAPI} */
+        const {
+          cmdFormat: WCF,
+          cmdType: WCT,
+          cmdId: WCI,
+          cmdGoal: WCG,
+          nodeId: NI,
+          singleControlType: SCT,
+          controlSetValue: CSV,
+        } = generateControlCmdInfo;
+
+        /** @type {wsControlCmdAPI} */
+        const controlCmdInfo = {
+          WCF,
+          WCT,
+          WCI,
+          WCG,
+          rank: cmdRank.SECOND,
+        };
+
+        // 명령 형식에 따라 데이터 가공
+        switch (WCF) {
+          case reqWCF.SINGLE:
+            controlCmdInfo.NI = NI;
+            controlCmdInfo.SCT = SCT;
+            controlCmdInfo.CSV = CSV;
+            break;
+          default:
+            break;
+        }
+
         // BU.CLI(msg)
         /** @type {defaultFormatToRequest} */
-        const defaultFormatToRequestInfo = msg;
+        const defaultFormatToRequestInfo = {
+          commandId: transmitToClientCommandType.CMD,
+          uuid: uuidv4(),
+          contents: controlCmdInfo,
+        };
 
-        // uuid 추가
-        defaultFormatToRequestInfo.uuid = uuidv4();
         // Main Storage 찾음.
         const msInfo = this.findMainStorage(socket);
 

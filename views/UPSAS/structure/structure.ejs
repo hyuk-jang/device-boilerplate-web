@@ -46,141 +46,103 @@
             <span id="test_alert" class="color_red"></span>
           </h2>
         </div>
-        <!-- 단일 제어 명령 -->
-        <div
-          class="container_row flex_jus_end default_search_area"
-          name="controlArea"
-          data-area="single"
-        >
+        <!-- 제어 명령 -->
+        <div class="container_row flex_jus_end default_search_area">
           <div class="search_area">
+              <div class="user_box report_category  ml_2rem">
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    name="cmdGoal"
+                    data-goal-type="ADD"
+                  >
+                    목표 추가
+                  </button>
+                  <button
+                    type="button"
+                    class="ml_1rem btn btn-danger"
+                    name="cmdGoal"
+                    data-goal-type="DELETE"
+                  >
+                    목표 취소
+                  </button>
+                </div>
             <div class="search_box search_range_box">
               <span class="search_title">명령 형식</span>
-              <select class="form-control" name="cmdFormatSelector">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
+              <select class="form-control" id="cmdFormatSelector">
+                <option value="SINGLE">단일 제어</option>
+                <option value="SET">설정 제어</option>
+                <option value="FLOW">염수 이동</option>
+                <option value="SCENARIO">시나리오</option>
               </select>
             </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">장치 타입</span>
-              <select class="form-control" id="singleDeviceCate"> </select>
+            <!-- 단일 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="SINGLE">
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 타입</span>
+                <select class="form-control" id="singleDeviceCate"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 목록</span>
+                <select class="form-control" id="singleDeviceList">
+                  <option value=""></option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">제어 형식</span>
+                <select class="form-control" id="singleControlValue">
+                  <option value="1">Open / On</option>
+                  <option value="0">Close / Off</option>
+                </select>
+              </div>
             </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">장치 목록</span>
-              <select class="form-control" id="singleDeviceList">
-                <option value=""></option>
-              </select>
+            <!-- 설정 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="SET" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 종류</span>
+                <select class="form-control" id="setCmdSelList">
+                  <option value="closeAllDevice">모든 장치 폐쇄</option>
+                  <option value="rainMode">우천 대피</option>
+                </select>
+              </div>
             </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">제어 형식</span>
-              <select class="form-control">
-                <option value="1">Open / On</option>
-                <option value="0">Close / Off</option>
-              </select>
+
+            <!-- 흐름 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="FLOW" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">시작지</span>
+                <select class="form-control" id="flowCmdSrcPlace"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">도착지</span>
+                <select class="form-control" id="flowCmdDestPlace"> </select>
+              </div>
             </div>
+
+            <!-- 시나리오 명령 -->
+            <div name="cmdCore" data-cmd-core="SCENARIO" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">시나리오</span>
+                <select class="form-control" id="scenarioCmdSelList"> </select>
+              </div>
+            </div>
+
             <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
+              <button
+                id="testBtnClick"
+                type="button"
+                class="btn btn-success"
+                name="reqControlCmd"
+                data-cmd-type="CONTROL"
+              >
+                요청
               </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- 설정 제어 명령 -->
-        <div
-          class="container_row flex_jus_end default_search_area"
-          name="controlArea"
-          data-area="set"
-        >
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control" name="cmdFormatSelector">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 종류</span>
-              <select class="form-control" id="setCmdSelList">
-                <option value="closeAllDevice">모든 장치 폐쇄</option>
-                <option value="rainMode">우천 대피</option>
-              </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success mr_1rem" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- 흐름 제어 명령 -->
-        <div
-          class="container_row flex_jus_end default_search_area"
-          name="controlArea"
-          data-area="flow"
-        >
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control" name="cmdFormatSelector">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">시작지</span>
-              <select class="form-control" id="flowCmdSrcPlace"> </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">도착지</span>
-              <select class="form-control" id="flowCmdDestPlace"> </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- 시나리오 명령 -->
-        <div
-          class="container_row flex_jus_end default_search_area"
-          name="controlArea"
-          data-area="scenario"
-        >
-          <div class="search_area">
-            <div class="search_box search_range_box">
-              <span class="search_title">명령 형식</span>
-              <select class="form-control" name="cmdFormatSelector">
-                <option value="single">단일 제어</option>
-                <option value="set">설정 제어</option>
-                <option value="flow">염수 이동</option>
-                <option value="scenario">시나리오</option>
-              </select>
-            </div>
-            <div class="search_box search_range_box">
-              <span class="search_title">시나리오</span>
-              <select class="form-control" id="scenarioCmdSelList"> </select>
-            </div>
-            <div class="user_box report_category  ml_2rem">
-              <button type="button" class="btn btn-success" onclick="" id="">
-                제어
-              </button>
-              <button type="button" class="ml_1rem btn btn-danger" onclick="" id="">
+              <button
+                type="button"
+                class="ml_1rem btn btn-danger"
+                name="reqControlCmd"
+                data-cmd-type="CANCEL"
+              >
                 취소
               </button>
             </div>
@@ -276,7 +238,7 @@
             </div>
           </div>
           <!-- structure Content -->
-          <div id="structureMode" >
+          <div id="structureMode">
             <div class="default_area pt_1rem">
               <!-- panzoom, mode select -->
               <div id="zoom" class="zoom_box">
@@ -290,7 +252,7 @@
                   <span class="glyphicon glyphicon-refresh"></span> Reset
                 </button>
                 <select class="form-control w_auto ml_1rem" id="controlMode">
-                  <option value="view" >뷰 모드</option>
+                  <option value="view">뷰 모드</option>
                   <option value="control selected">제어 모드</option>
                 </select>
               </div>
@@ -320,6 +282,29 @@
       var user = <%- JSON.stringify(user) %>;
     </script>
 
+    <!-- 명령 형식 선택 이벤트 -->
+    <script>
+      // $('div[name=controlArea').each(function(index, value) {
+      //   $(value).data('area') !== 'SINGLE' && $(value).hide();
+      // });
+
+      $('#cmdFormatSelector').on('change', function() {
+        console.log('Change');
+        var cmdFormat = this.value; // 선택된 명령 형식
+        var $cmdCoreList = $('div[name="cmdCore"]');
+
+        // $('select[name="cmdFormatSelector"]')
+        //   .val(selectedForm)
+        //   .attr('selected', 'selected');
+
+        $cmdCoreList.each(function(index, cmdCoreDom) {
+          $(cmdCoreDom).data('cmd-core') === cmdFormat
+            ? $(cmdCoreDom).fadeIn()
+            : $(cmdCoreDom).hide();
+        });
+      });
+    </script>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       // 명령 목록을 보여줄 돔
@@ -339,7 +324,6 @@
       // 테이블 ID 정의
       initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
 
-      
       // Socket.IO 정의
       var socket = io();
       // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
@@ -400,83 +384,75 @@
         document.getElementById('test_alert').innerText = message;
       });
 
-      // TODO: socket.emit 함수 생성 및 장치 연결 중일 때만 emit하도록 해주는 함수 구현
-      // 저장된 명령을 실행하고자 할 경우 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
-      $('#automatic_control_div > button').on('click', function() {
-        var automaticId = $('#automatic_control_list option:selected').val();
-        // var controlType = $("#automatic_control_type option:selected").val();
-        var controlType = $(this).data('value');
-        // console.log(controlType);
-
-        var requestMsg = {
-          commandId: 'AUTOMATIC',
-          contents: {
-            /**
-             * 명령 제어 타입 (wrapCmdType)
-             * @example
-             * CONTROL: 장치 제어 요청
-             * CANCEL: 명령 제어 취소 요청
-             * MEASURE: 명령 계측 요청
-             */
-            wrapCmdType: controlType,
-            savedCommandId: automaticId,
-          },
-        };
-        socket.emit('executeCommand', requestMsg);
+      $('button[name="reqControlCmd"]').on('click', function(event) {
+        makeControlCommand(this);
       });
 
-      // 장치 단일 제어 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
-      $('#single_control_btn').on('click', function() {
-        var deviceId = $('#single_control_device_list option:selected').val();
-        var controlType = $('#single_control_type option:selected').val();
-        var controlRank = $('#single_control_rank option:selected').val();
-        var requestMsg = {
-          commandId: 'SINGLE',
-          contents: {
-            /**
-             * 명령 제어 타입 (wrapCmdType)
-             * @example
-             * CONTROL: 장치 제어 요청
-             * CANCEL: 명령 제어 취소 요청
-             * MEASURE: 명령 계측 요청
-             */
-            wrapCmdType: 'CONTROL', // 단일 동작 제어는 모두 명령 요청으로 처리
-            nodeId: deviceId,
-            /**
-             * 장치 제어 타입 (requestDeviceControlType)
-             * @example
-             * 0: 장치 Close, Off
-             * 1: 장치 Open, On
-             * 2: 장치 Measure
-             * 3: 장치 값 설정
-             */
-            singleControlType: controlType,
-            rank: Number(controlRank),
-          },
-        };
-        socket.emit('executeCommand', requestMsg);
+      // FIXME: TEXT 종료 후 삭제
+      $(document).ready(function() {
+        var thisSelectValue = CF_SINGLE;
+        // var thisSelectValue = CF_SET;
+        // var thisSelectValue = CF_FLOW;
+        // var thisSelectValue = CF_SCENARIO;
+
+        // 명령 형식 변경
+        $('#cmdFormatSelector')
+          .val(thisSelectValue)
+          .trigger('change');
+
+        $('#testBtnClick').trigger('click');
       });
 
-      // 시나리오 요청 (requestMsg는 명령 전송 객체 Key에 쓰이므로 임의 변경 불가)
-      $('#scenario_control_div > a').on('click', function() {
-        var controlType = $(this).data('value');
-        var requestMsg = {
-          commandId: 'SCENARIO',
-          contents: {
-            /**
-             * 명령 제어 타입 (wrapCmdType)
-             * @example
-             * CONTROL: 장치 제어 요청
-             * CANCEL: 명령 제어 취소 요청
-             * MEASURE: 명령 계측 요청
-             */
-            wrapCmdType: controlType,
-            scenarioId: 'scenario1',
-            rank: 1,
-          },
+      var CF_SINGLE = 'SINGLE';
+      var CF_SET = 'SET';
+      var CF_FLOW = 'FLOW';
+      var CF_SCENARIO = 'SCENARIO';
+
+      // TODO: DBS에 명령을 요청할 공통 형식
+      function makeControlCommand(reqCmdBtn) {
+        var reqCmdInfo = {
+          cmdFormat: $('#cmdFormatSelector').val(),
+          cmdType: $(reqCmdBtn).data('cmd-type'),
+          cmdGoal: {},
         };
-        socket.emit('executeCommand', requestMsg);
-      });
+
+        switch (reqCmdInfo.cmdFormat) {
+          case 'MEASURE':
+            break;
+          case CF_SINGLE:
+            // 제어 노드 ID 추가
+            _.set(reqCmdInfo, 'nodeId', $('#singleDeviceList').val());
+            // 제어 값 추가
+            _.set(reqCmdInfo, 'singleControlType', $('#singleControlValue').val());
+            // NOTE: 차후 제어 설정 값 있을 경우 추가
+            // _.set(reqCmdInfo, 'controlSetValue', $('').val());
+            // makeSingleControlCmd(domElement, reqCmdInfo)
+            break;
+          case CF_SET:
+            // 제어 노드 ID 추가
+            _.set(reqCmdInfo, 'cmdId', $('#setCmdSelList').val());
+            break;
+          case CF_FLOW:
+            // 도착지 돔 객체 정의
+            _.set(reqCmdInfo, 'cmdId', $('#flowCmdDestPlace').val());
+            // var flowCmdId = $('#flowCmdDestPlace').val();
+            // // 시작지와 도착지로 나눔
+            // var splitFlowCmdIdList = _.split(flowCmdId, '_TO_');
+            // _.set(reqCmdInfo, 'SPI', _.head(splitFlowCmdIdList));
+            // _.set(reqCmdInfo, 'DPI', _.last(splitFlowCmdIdList));
+            break;
+          case CF_SCENARIO:
+            _.set(reqCmdInfo, 'cmdId', $('#scenarioCmdSelList').val());
+            break;
+          default:
+            break;
+        }
+
+        // TODO: 달성 목표 추가 (cmdGoal)
+        console.log('makeResult', reqCmdInfo);
+
+        socket.emit('executeCommand', reqCmdInfo)
+      }
     </script>
 
     <!-- 장치 제어 명령 Dom 생성 영역  -->
@@ -492,7 +468,21 @@
       var cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
 
       /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
-      function setInitControlDom() {
+      function setInitControlDom(cmdFormat) {
+        switch (cmdFormat) {
+          case CF_SET:
+            // 설정 돔 설정
+            $('div[name="cmdCore"]').find('data');
+            $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+            break;
+          case CF_SINGLE:
+          default:
+            // 단일 명령 돔 설정
+            $('#singleDeviceCate').html(_.map(deviceDomList, 'category'));
+            // handleDeviceCategory() 실행 시킴
+            $('#singleDeviceCate').trigger('change');
+            break;
+        }
         // 단일 명령 돔 설정
         $('#singleDeviceCate').html(_.map(deviceDomList, 'category'));
 
@@ -618,22 +608,22 @@
 
     <!-- 명령 형식 선택 이벤트 -->
     <script>
-      $('div[name=controlArea').each(function(index, value) {
-        $(value).data('area') !== 'single' && $(value).hide();
-      });
+      // $('div[name=controlArea').each(function(index, value) {
+      //   $(value).data('area') !== 'SINGLE' && $(value).hide();
+      // });
 
-      $('select[name="cmdFormatSelector"]').on('change', function() {
-        var selectedForm = this.value; // 선택된 명령 형식
-        var $controlArea = $('div[name=controlArea');
+      $('#cmdFormatSelector').on('change', function() {
+        var cmdFormat = this.value; // 선택된 명령 형식
+        var $cmdCoreList = $('div[name="cmdCore"]');
 
-        $('select[name="cmdFormatSelector"]')
-          .val(selectedForm)
-          .attr('selected', 'selected');
+        // $('select[name="cmdFormatSelector"]')
+        //   .val(selectedForm)
+        //   .attr('selected', 'selected');
 
-        $controlArea.each(function(index, searchArea) {
-          $(searchArea).data('area') === selectedForm
-            ? $(searchArea).fadeIn()
-            : $(searchArea).hide();
+        $cmdCoreList.each(function(index, cmdCoreDom) {
+          $(cmdCoreDom).data('cmd-core') === cmdFormat
+            ? $(cmdCoreDom).fadeIn()
+            : $(cmdCoreDom).hide();
         });
       });
     </script>
