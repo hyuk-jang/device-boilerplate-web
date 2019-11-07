@@ -87,7 +87,7 @@ function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
 
   let dataUnit = getDataUnit(nodeDefId); // 데이터 단위
   if (data === '' || _.isNull(dataUnit)) dataUnit = ''; // 장치일 경우 단위가 없음
-  let [dx, dy, style, nodeName] = [0, 15, 'font-size: 5pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
+  let [dx, dy, style, nodeName] = [0, 7, 'font-size: 5pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
 
   // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
   const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });

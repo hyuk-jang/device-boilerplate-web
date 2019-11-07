@@ -169,7 +169,7 @@ class ApiServer extends AbstApiServer {
    * @return {defaultFormatToResponse} 정상적인 명령 해석이라면 true, 아니라면 throw
    */
   interpretCommand(fieldClient, fieldMessage) {
-    // BU.CLI(siteMessage);
+    // BU.CLI('interpretCommand');
     try {
       const {
         CERTIFICATION,
@@ -197,6 +197,7 @@ class ApiServer extends AbstApiServer {
       if (msInfo) {
         switch (commandId) {
           case NODE: // 노드 정보가 업데이트 되었을 경우
+            // BU.log(contents.length);
             this.compareNodeList(msInfo, contents);
             break;
           case COMMAND: // 명령 정보가 업데이트 되었을 경우
@@ -276,26 +277,37 @@ class ApiServer extends AbstApiServer {
           node_real_id: nodeRealId,
         });
 
-        // if (_.includes(nodeRealId, 'WD_1')) {
-        //   BU.CLIN(nodeRealId);
+        // BU.CLIS(wsNodeInfo);
+        // BU.CLIN(msNodeInfo, 2);
+
+        // 데이터가 없는 객체이거나 동일 데이터일 경우 중지
+        if (_.isEmpty(msNodeInfo) || _.isEqual(data, msNodeInfo.data)) return false;
+
+        // if (_.includes(nodeRealId, 'WD_1_001') || _.includes(nodeRealId, 'WD_1_004')) {
+        //   BU.CLIN(wsNodeInfo);
+        //   BU.CLIN(msNodeInfo);
         // }
 
         // 데이터가 서로 다르다면 갱신된 데이터
-        if (!_.isEqual(data, msNodeInfo.data)) {
-          msNodeInfo.data = data;
-          renewalList.push(msNodeInfo);
+        msNodeInfo.data = data;
+        renewalList.push(msNodeInfo);
 
-          // if (_.includes(nodeRealId, 'WD_1')) {
-          //   BU.CLIN(msNodeInfo);
-          // }
-        }
+        // if (_.includes(nodeRealId, 'WD_1_001') || _.includes(nodeRealId, 'WD_1_004')) {
+        //   BU.CLIN(renewalList);
+        // }
+
+        // if (_.includes(nodeRealId, 'WD_1')) {
+        //   BU.CLIN(msNodeInfo);
+        // }
       });
 
       // 업데이트 내역이 있다면 전송
       if (renewalList.length) {
+        // BU.CLIN(renewalList);
         // Observer가 해당 메소드를 가지고 있다면 전송
         this.observers.forEach(observer => {
           if (_.get(observer, 'updateNodeList')) {
+            // BU.log(renewalList.length);
             observer.updateNodeList(msInfo, renewalList);
           }
         });
@@ -303,6 +315,7 @@ class ApiServer extends AbstApiServer {
       // BU.CLIN(renewalList);
       return renewalList;
     } catch (error) {
+      BU.CLI(error);
       throw error;
     }
   }

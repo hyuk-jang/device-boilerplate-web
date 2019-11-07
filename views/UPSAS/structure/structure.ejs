@@ -49,24 +49,19 @@
         <!-- 제어 명령 -->
         <div class="container_row flex_jus_end default_search_area">
           <div class="search_area">
-              <div class="user_box report_category  ml_2rem">
-                  <button
-                    type="button"
-                    class="btn btn-success"
-                    name="cmdGoal"
-                    data-goal-type="ADD"
-                  >
-                    목표 추가
-                  </button>
-                  <button
-                    type="button"
-                    class="ml_1rem btn btn-danger"
-                    name="cmdGoal"
-                    data-goal-type="DELETE"
-                  >
-                    목표 취소
-                  </button>
-                </div>
+            <div class="user_box report_category  ml_2rem">
+              <button type="button" class="btn btn-success" name="cmdGoal" data-goal-type="ADD">
+                목표 추가
+              </button>
+              <button
+                type="button"
+                class="ml_1rem btn btn-danger"
+                name="cmdGoal"
+                data-goal-type="DELETE"
+              >
+                목표 취소
+              </button>
+            </div>
             <div class="search_box search_range_box">
               <span class="search_title">명령 형식</span>
               <select class="form-control" id="cmdFormatSelector">
@@ -129,8 +124,8 @@
 
             <div class="user_box report_category  ml_2rem">
               <button
-                id="testBtnClick"
                 type="button"
+                id="testRequestCmdBtn"
                 class="btn btn-success"
                 name="reqControlCmd"
                 data-cmd-type="CONTROL"
@@ -139,6 +134,7 @@
               </button>
               <button
                 type="button"
+                id="testCancelCmdBtn"
                 class="ml_1rem btn btn-danger"
                 name="reqControlCmd"
                 data-cmd-type="CANCEL"
@@ -346,7 +342,7 @@
 
       // 갱신 노드 반영
       socket.on('updateNode', function(wsNodeList) {
-        console.log(wsNodeList);
+        // console.log(wsNodeList);
         var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
@@ -390,9 +386,9 @@
 
       // FIXME: TEXT 종료 후 삭제
       $(document).ready(function() {
-        var thisSelectValue = CF_SINGLE;
+        // var thisSelectValue = CF_SINGLE;
         // var thisSelectValue = CF_SET;
-        // var thisSelectValue = CF_FLOW;
+        var thisSelectValue = CF_FLOW;
         // var thisSelectValue = CF_SCENARIO;
 
         // 명령 형식 변경
@@ -400,7 +396,8 @@
           .val(thisSelectValue)
           .trigger('change');
 
-        $('#testBtnClick').trigger('click');
+        $('#testRequestCmdBtn').trigger('click');
+        // $('#testCancelCmdBtn').trigger('click');
       });
 
       var CF_SINGLE = 'SINGLE';
@@ -433,13 +430,9 @@
             _.set(reqCmdInfo, 'cmdId', $('#setCmdSelList').val());
             break;
           case CF_FLOW:
-            // 도착지 돔 객체 정의
-            _.set(reqCmdInfo, 'cmdId', $('#flowCmdDestPlace').val());
-            // var flowCmdId = $('#flowCmdDestPlace').val();
-            // // 시작지와 도착지로 나눔
-            // var splitFlowCmdIdList = _.split(flowCmdId, '_TO_');
-            // _.set(reqCmdInfo, 'SPI', _.head(splitFlowCmdIdList));
-            // _.set(reqCmdInfo, 'DPI', _.last(splitFlowCmdIdList));
+            // 시작지와 도착지로 나눔
+            _.set(reqCmdInfo, 'SPI', $('#flowCmdSrcPlace').val());
+            _.set(reqCmdInfo, 'DPI', $('#flowCmdDestPlace').val());
             break;
           case CF_SCENARIO:
             _.set(reqCmdInfo, 'cmdId', $('#scenarioCmdSelList').val());
@@ -449,9 +442,9 @@
         }
 
         // TODO: 달성 목표 추가 (cmdGoal)
-        console.log('makeResult', reqCmdInfo);
+        // console.log('makeResult', reqCmdInfo);
 
-        socket.emit('executeCommand', reqCmdInfo)
+        socket.emit('executeCommand', reqCmdInfo);
       }
     </script>
 

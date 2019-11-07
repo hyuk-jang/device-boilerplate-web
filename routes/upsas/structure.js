@@ -113,7 +113,7 @@ function initCommand(deviceMap, placeList) {
       }
 
       flowSrcInfo.destList[desIndex] = {
-        cmdId: `${srcPlaceId}_TO_${destPlaceId}`,
+        cmdId: destPlaceId,
         cmdName: destPlaceName,
       };
 

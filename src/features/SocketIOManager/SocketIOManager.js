@@ -12,6 +12,7 @@ const {
   dcmConfigModel: {
     reqWrapCmdFormat: reqWCF,
     reqWrapCmdType: reqWCT,
+    reqDeviceControlType: reqDCT,
     commandStep: cmdStep,
     nodePickKey,
   },
@@ -55,17 +56,21 @@ class SocketIOManager extends AbstSocketIOManager {
 
         // 거점을 찾을 경우 초기 값을 보내줌.
         if (foundMsInfo) {
-          foundMsInfo.msUserList.push(msUser);
+          const {
+            msUserList,
+            msClient,
+            msDataInfo,
+            msDataInfo: { contractCmdList, nodeList },
+          } = foundMsInfo;
+          // 사용자 추가
+          msUserList.push(msUser);
 
-          const { contractCmdList } = foundMsInfo.msDataInfo;
+          // API Client와 연결 유무 정의
+          const connectedStatus = msClient instanceof net.Socket ? 'Connected' : 'Disconnected';
 
-          let connectedStatus = 'Disconnected';
-          if (foundMsInfo.msClient instanceof net.Socket) {
-            connectedStatus = 'Connected';
-          }
-
-          const pickedNodeList = this.pickNodeList(foundMsInfo.msDataInfo);
-          // BU.CLI(pickedNodeList);
+          // 첫 접속일 경우
+          const pickedNodeList = this.pickNodeList(msDataInfo, nodeList);
+          // BU.CLI(pickedNodeList.length);
           // Site 접속 상태 코드 전송
           socket.emit('updateMsClientStatus', connectedStatus);
           // NodeList 에서 선택한 key 만을 정제해서 전송
@@ -93,6 +98,8 @@ class SocketIOManager extends AbstSocketIOManager {
           nodeId: NI,
           singleControlType: SCT,
           controlSetValue: CSV,
+          SPI,
+          DPI,
         } = generateControlCmdInfo;
 
         /** @type {wsControlCmdAPI} */
@@ -104,16 +111,27 @@ class SocketIOManager extends AbstSocketIOManager {
           rank: cmdRank.SECOND,
         };
 
+        let isError = 1;
+
         // 명령 형식에 따라 데이터 가공
         switch (WCF) {
           case reqWCF.SINGLE:
             controlCmdInfo.NI = NI;
-            controlCmdInfo.SCT = SCT;
-            controlCmdInfo.CSV = CSV;
+            controlCmdInfo.SCT = _.isString(SCT) ? Number(SCT) : SCT;
+            controlCmdInfo.CSV = _.isString(CSV) ? Number(CSV) : CSV;
+            isError = _.includes(reqDCT, SCT) ? 0 : 1;
+            break;
+          case reqWCF.FLOW:
+            // 출발지와 도착지가 있을 경우 에러 해제
+            isError = SPI.length && DPI.length ? 0 : 1;
+            controlCmdInfo.SPI = SPI;
+            controlCmdInfo.DPI = DPI;
             break;
           default:
             break;
         }
+
+        // TODO: isError 가 1일 경우 명령 실패 처리
 
         // BU.CLI(msg)
         /** @type {defaultFormatToRequest} */
@@ -144,6 +162,12 @@ class SocketIOManager extends AbstSocketIOManager {
     const { placeList } = dataInfo;
 
     // BU.CLIN(renewalList)
+
+    // BU.CLIN(
+    //   _(renewalList)
+    //     .map(info => _.pick(info, ['node_id', 'data']))
+    //     .value(),
+    // );
 
     return _.chain(renewalList)
       .map(nodeInfo => {
@@ -250,10 +274,8 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {msInfo} msInfo
    */
   submitMsClientStatus(msInfo) {
-    let connectedStatus = 'Disconnected';
-    if (msInfo.msClient instanceof net.Socket) {
-      connectedStatus = 'Connected';
-    }
+    const connectedStatus = msInfo.msClient instanceof net.Socket ? 'Connected' : 'Disconnected';
+
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateApiClientConn', connectedStatus);
@@ -310,18 +332,6 @@ class SocketIOManager extends AbstSocketIOManager {
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateNode', simpleNodeList);
-    });
-  }
-
-  /**
-   * 현재 수행중인 명령 리스트를 io Client로 보냄
-   * @param {msInfo} msInfo
-   */
-  submitOrderListToIoClient(msInfo) {
-    const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
-    // 해당 Socket Client에게로 데이터 전송
-    msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateCommand', pickedOrderList);
     });
   }
 }

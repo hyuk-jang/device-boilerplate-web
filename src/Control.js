@@ -92,6 +92,10 @@ class Control {
     /** @type {nodeInfo[]} */
     const nodeList = await this.biModule.getTable('v_dv_node');
 
+    // 장소 단위로 묶을 장소 목록을 가져옴
+    /** @type {V_DV_PLACE[]} */
+    const placeList = await this.biModule.getTable('v_dv_place');
+
     /** @type {placeInfo[]} */
     const placeRelationList = await this.biModule.getTable('v_dv_place_relation');
 
@@ -100,18 +104,48 @@ class Control {
     mainList.forEach(mainInfo => {
       const { main_seq: mainSeq, map } = mainInfo;
 
-      if (BU.IsJsonString(map)) {
+      /** @type {mDeviceMap} */
+      const deviceMap = BU.IsJsonString(map) ? JSON.parse(map) : {};
+      // Main Storage에서 필수 요소가 아니고 CLI를 많이 차지하기 때문에 map 이동
+      if (!_.isEmpty(deviceMap)) {
         this.mapList.push({
           mainSeq,
-          map: JSON.parse(map),
+          map: deviceMap,
         });
 
         delete mainInfo.map;
       }
 
+      // API 서버로 필수 데이터만을 전송하기 위한 flag 설정을 위한 Map 표기 Node 내역 추출
+      const svgNodeList = _(deviceMap.drawInfo.positionInfo.svgNodeList)
+        .map('defList')
+        .flatten()
+        .value();
+
       const where = {
         main_seq: mainSeq,
       };
+
+      const filteredPlaceRelationList = _.filter(placeRelationList, where);
+      /** @type {nodeInfo[]} */
+      const filteredNodeList = [];
+
+      filteredPlaceRelationList.forEach(plaRelRow => {
+        // 장소 시퀀스와 노드 시퀀스를 불러옴
+        const { place_seq: placeSeq, node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
+        // 장소 시퀀스를 가진 객체 검색
+        const placeInfo = _.find(placeList, { place_seq: placeSeq });
+        // 노드 시퀀스를 가진 객체 검색
+        const nodeInfo = _.find(nodeList, { node_seq: nodeSeq });
+
+        // 장소에 해당 노드가 있다면 자식으로 설정. nodeList 키가 없을 경우 생성
+        if (_.isObject(placeInfo) && _.isObject(nodeInfo)) {
+          // 해당 svg 노드 목록 중에 id와 매칭되는 Node Id 객체가 존재할 경우 API Client 전송 flag 설정
+          _.find(svgNodeList, { id: nodeId }) &&
+            _.isUndefined(_.find(filteredNodeList, { node_id: nodeId })) &&
+            filteredNodeList.push(nodeInfo);
+        }
+      });
 
       /** @type {msInfo} */
       const mainStorageInfo = {
@@ -119,8 +153,8 @@ class Control {
         msClient: null,
         msDataInfo: {
           dataLoggerList: _.filter(dataLoggerList, where),
-          nodeList: _.filter(nodeList, where),
-          placeList: _.filter(placeRelationList, where),
+          nodeList: filteredNodeList,
+          placeList: filteredPlaceRelationList,
           contractCmdList: [],
         },
         msUserList: [],
