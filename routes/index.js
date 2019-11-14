@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const { BU } = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const admin = require('./admin/users');
 // const manager = require('./manager/users');
@@ -62,6 +62,12 @@ router.use((req, res, next) => {
 router.get('/intersection', (req, res) => {
   // BU.CLI(req.user);
   const grade = _.get(req, 'user.grade');
+
+  // 권한이 설정되어 있지 않고
+  if (_.isNil(grade) && process.env.IS_CHECK_USER_GRADE !== '0') {
+    return res.send(DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'));
+  }
+
   switch (grade) {
     // case 'admin':
     //   router.use('/admin', admin);

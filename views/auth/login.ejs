@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%- projectName %> : 로그인</title>
+    <title></title>
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,7 +39,7 @@
       <div class="d-flex justify-content-center h-100">
         <div class="card"  id ="loginArea">
           <div class="card-header">
-            <h3><%- projectName %></h3>
+            <h3 id="projectName" ></h3>
           </div>
           <div class="card-body">
             <form action="/auth/login" method="post">
@@ -86,15 +86,33 @@
 </html>
 
 <script>
- 
+  // 프로젝트에 따라 표현할 데이터
+  var projectSourceInfo = <%- JSON.stringify(projectSourceInfo) %>;
+  var projectName = projectSourceInfo.projectName;
+  var loginBG = projectSourceInfo.loginBG;
+  // 로그인 시도 에러 발생 시 결과 메시지
   var message = '<%- message %>';
-  var projectName = '<%- projectName %>';
+</script>
+
+<script>
+ 
 
   if (message.length) {
     $('#textErrorMessage').html(message);
   }
 
   $(document).ready(function(){
+    // BG Path가 존재할 경우 명시
+    if(typeof projectName === 'string' && projectName.length) {
+      document.getElementById('projectName').innerHTML = projectName;
+      document.querySelector('title').innerHTML = projectName + ' : 로그인';
+    }
+
+    if(typeof loginBG === 'string' && loginBG.length) {
+      document.body.style.backgroundImage = 'url(../../image/bg/' + loginBG + ')';
+    }
+
+
     $('#signUpArea').hide()
   })
   

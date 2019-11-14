@@ -508,6 +508,21 @@ article.sdv_w_side > p:last-child {
   align-items: center;
 }
 
+.component_ele_status {
+  margin: 2rem 0;
+}
+
+.component_ele_status > header {
+  margin: 0;
+  width: 100%;
+  font-weight: bold;
+  font-size: 1.5rem;
+  height: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* 검색 박스 */
 .search_area {
   display: flex;

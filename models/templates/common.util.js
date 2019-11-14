@@ -10,6 +10,7 @@ const BU = require('base-util-jh').baseUtil;
 function convertProjectSource(projectMainId) {
   let projectName = '';
   let projectImg = '';
+  let loginBG = '';
 
   switch (projectMainId) {
     case 'UPSAS':
@@ -19,16 +20,18 @@ function convertProjectSource(projectMainId) {
     case 'FP':
       projectImg = 'fp_logo.png';
       projectName = '농업병행 태양광발전 모니터링';
+      loginBG = 'bg_fp.jpg';
       break;
     case 'S2W':
       projectImg = 's2w_logo.png';
       projectName = '태양광 이모작 모니터링';
+      loginBG = 'bg_fp.jpg';
       break;
     default:
       break;
   }
 
-  return { projectName, projectImg };
+  return { projectName, projectImg, loginBG };
 }
 exports.convertProjectSource = convertProjectSource;
 

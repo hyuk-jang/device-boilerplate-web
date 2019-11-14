@@ -1,224 +1,305 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <!-- Default Js -->
 
-<head>
-  <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/contents/main/hichartMaker.js"></script>
+    <%- include("./mediaQuery.ejs") %>
+  </head>
 
-  <%- include("../master/head.ejs") %>
-  <script src="/js/contents/master/mainUtil.js"></script>
-  <script src="/js/contents/main/hichartMaker.js"></script>
-  <%- include("./mediaQuery.ejs") %>
-</head>
-
-<body style="background-color: #333">
-  <div id="wrap" class="wrap hidden">
-    <div class="center">
-      <!-- Header -->
-      <%- include("../master/header.ejs") %>
-      <!--메인-->
-      <div class="container_body">
-        <div class="container_row text-center" style="margin-bottom: 10px">
-          <div class="box" style="height: 500px; background-color: black">
-            <div class="cont-box-rotate_f">
-              <div class="cont-box-rotate" style="border-bottom: 35px solid black;"></div>
-            </div>
-            <div class="deve">
-              <p>발전현황</p>
-            </div>
-            <div id="powerInfo" class="deve_1">
-              <div class="stat">
-                <p><I>현재출력</I></p>
-                <input id="currPvW" class="wed_1" style="margin-left:13px;" type="text" value="">
-                <span>W</span>
+  <body style="background-color: #333">
+    <div id="wrap" class="wrap hidden">
+      <div class="center">
+        <!-- Header -->
+        <%- include("../master/header.ejs") %>
+        <!--메인-->
+        <div class="container_body">
+          <div class="container_row text-center" style="margin-bottom: 10px">
+            <div class="box" style="height: 500px; background-color: black">
+              <div class="cont-box-rotate_f">
+                <div class="cont-box-rotate" style="border-bottom: 35px solid black;"></div>
               </div>
-              <div class="stat">
-                <p><I>금일발전량</I></p>
-                <input id="dailyWh" class="wed_1" type="text" value="">
-                <span>Wh</span>
+              <div class="deve">
+                <p>발전현황</p>
               </div>
-              <div class="stat">
-                <p><I>당월발전량</I></p>
-                <input id="monthKwh" class="wed_1" type="text" value="">
-                <span>kWh</span>
-              </div>
-              <div class="stat">
-                <p><I>누적발전량</I></p>
-                <input id="cpKwh" class="wed_1" type="text" value="">
-                <span>kWh</span>
-              </div>
-              <!-- <div class="stat">
+              <div id="powerInfo" class="deve_1">
+                <div class="stat">
+                  <p><I>현재출력</I></p>
+                  <input
+                    id="currPvW"
+                    class="wed_1"
+                    style="margin-left:13px;"
+                    type="text"
+                    value=""
+                  />
+                  <span>W</span>
+                </div>
+                <div class="stat">
+                  <p><I>금일발전량</I></p>
+                  <input id="dailyWh" class="wed_1" type="text" value="" />
+                  <span>Wh</span>
+                </div>
+                <div class="stat">
+                  <p><I>당월발전량</I></p>
+                  <input id="monthKwh" class="wed_1" type="text" value="" />
+                  <span>kWh</span>
+                </div>
+                <div class="stat">
+                  <p><I>누적발전량</I></p>
+                  <input id="cpKwh" class="wed_1" type="text" value="" />
+                  <span>kWh</span>
+                </div>
+                <!-- <div class="stat">
                 <p><I>CO2저감량</I></p>
                 <input id="co2" class="wed_1" type="text" value="">
                 <span>Ton</span>
               </div> -->
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; width: 80%; ">
+              <section
+                class="box_2"
+                style="width: 50%; height: 250px; background-color: aliceblue;"
+              >
+                <p style="margin-top:10px; font-weight:bold;">냉각형 모듈 발전현황</p>
+                <div
+                  id="gauge-ice-curr-power"
+                  style="width:100%; height: 220px; background-color:#f1f1f1;"
+                >
+                  Graph
+                </div>
+              </section>
+              <section
+                class="box_2"
+                style="width: 50%; height: 250px; background-color: aliceblue; border-top:none "
+              >
+                <p style="margin-top:10px; font-weight:bold;">일반형 모듈 발전 현황</p>
+                <div
+                  id="gauge-normal-curr-power"
+                  style="width:100%; height: 220px; background-color:#f1f1f1;"
+                >
+                  Graph
+                </div>
+              </section>
+              <section
+                class="box_2"
+                style="width: 50%; height: 250px; background-color: aliceblue;  "
+              >
+                <p style="margin-top:10px; font-weight:bold;">냉각형 모듈 금일 발전량</p>
+                <div
+                  id="gauge-ice-daily-power"
+                  style="width:100%; height: 220px; background-color:#f1f1f1;"
+                >
+                  Graph
+                </div>
+              </section>
+              <section
+                class="box_2"
+                style="width: 50%; height: 250px; background-color: aliceblue;  "
+              >
+                <p style="margin-top:10px; font-weight:bold;">일반형 모듈 금일 발전량</p>
+                <div
+                  id="gauge-normal-daily-power"
+                  style="width:100%; height: 220px; background-color:#f1f1f1;"
+                >
+                  Graph
+                </div>
+              </section>
             </div>
           </div>
-          <div style="display: flex; flex-wrap: wrap; width: 80%; ">
-            <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue;">
-              <p style="margin-top:10px; font-weight:bold;">냉각형 모듈 발전현황</p>
-              <div id="gauge-ice-curr-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
-            </section>
-            <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue; border-top:none ">
-              <p style="margin-top:10px; font-weight:bold;">일반형 모듈 발전 현황</p>
-              <div id="gauge-normal-curr-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
-            </section>
-            <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue;  ">
-              <p style="margin-top:10px; font-weight:bold;">냉각형 모듈 금일 발전량</p>
-              <div id="gauge-ice-daily-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
-            </section>
-            <section class="box_2" style="width: 50%; height: 250px; background-color: aliceblue;  ">
-              <p style="margin-top:10px; font-weight:bold;">일반형 모듈 금일 발전량</p>
-              <div id="gauge-normal-daily-power" style="width:100%; height: 220px; background-color:#f1f1f1;">Graph</div>
-            </section>
 
+          <div class="text-center containerc">
+            <div class="box_4" style="height:230px; background-color: black">
+              <div class="cont-box-rotate_s">
+                <div class="cont-box-rotate_1" style="border-bottom: 35px solid black;"></div>
+              </div>
+              <div class="deve">
+                <p>센서정보</p>
+              </div>
+              <div id="currSensorDataInfo" class="deve_1">
+                <div class="stat">
+                  <p><I>모듈 온도</I></p>
+                  <input
+                    id="pvRearTemperature"
+                    class="wed_1"
+                    style="margin-left:13px;"
+                    type="text"
+                    value=""
+                  />
+                  <span>℃</span>
+                </div>
+                <div class="stat">
+                  <p><I>수온</I></p>
+                  <input id="waterTemperature" class="wed_1" type="text" value="" />
+                  <span>℃</span>
+                </div>
+                <div class="stat">
+                  <p><I>외기온도</I></p>
+                  <input id="outsideAirTemperature" class="wed_1" type="text" value="" />
+                  <span>℃</span>
+                </div>
+              </div>
+            </div>
+            <div class="box_5" style="width:80%; height: 230px;">
+              <section class="box_2" style="width: 100%; height: 230px; padding: 5px 30px">
+                <p style="margin-top:10px; font-weight:bold;">센서 데이터</p>
+                <div class="" style="">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr class="" style="">
+                        <th style="width:6%;">모듈 이름</th>
+                        <th style="width:5%;">모듈 후면 온도<br />(℃)</th>
+                        <th style="width:5%;">수온<br />(℃)</th>
+                        <th style="width:7%;">외기 온도<br />(℃)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="myTable">
+                      <tr id="currCoolingSensorDataInfo" class="sel active">
+                        <td class="td1" style="vertical-align: middle">냉각형 모듈(200 W)</td>
+                        <td
+                          key="pvRearTemperature"
+                          name="large"
+                          style="vertical-align: middle"
+                          data-id="battery_v"
+                        >
+                          29.2
+                        </td>
+                        <td
+                          key="waterTemperature"
+                          name="large"
+                          style="vertical-align: middle"
+                          data-id="battery_a"
+                        >
+                          25.3
+                        </td>
+                        <td
+                          key="outsideAirTemperature"
+                          name="large"
+                          style="vertical-align: middle"
+                          data-id="battery_charging_kw"
+                        >
+                          16.4
+                        </td>
+                      </tr>
+                      <tr id="currNormalSensorDataInfo" class="sel">
+                        <td class="td1" style="vertical-align: middle">일반형 모듈(200 W)</td>
+                        <td
+                          key="pvRearTemperature"
+                          name="small"
+                          style="vertical-align: middle"
+                          data-id="battery_v"
+                        >
+                          32.3
+                        </td>
+                        <td
+                          key="waterTemperature"
+                          name="small"
+                          style="vertical-align: middle"
+                          data-id="battery_a"
+                        >
+                          18.5
+                        </td>
+                        <td
+                          key="outsideAirTemperature"
+                          name="small"
+                          style="vertical-align: middle"
+                          data-id="battery_charging_kw"
+                        >
+                          16.4
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
           </div>
         </div>
-
-        <div class="text-center containerc">
-          <div class="box_4" style="height:230px; background-color: black">
-            <div class="cont-box-rotate_s">
-              <div class="cont-box-rotate_1" style="border-bottom: 35px solid black;"></div>
-            </div>
-            <div class="deve">
-              <p>센서정보</p>
-            </div>
-            <div id="currSensorDataInfo" class="deve_1">
-              <div class="stat">
-                <p><I>모듈 온도</I></p>
-                <input id="pvRearTemperature" class="wed_1" style="margin-left:13px;" type="text" value="">
-                <span>℃</span>
-              </div>
-              <div class="stat">
-                <p><I>수온</I></p>
-                <input id="waterTemperature" class="wed_1" type="text" value="">
-                <span>℃</span>
-              </div>
-              <div class="stat">
-                <p><I>외기온도</I></p>
-                <input id="outsideAirTemperature" class="wed_1" type="text" value="">
-                <span>℃</span>
-              </div>
-            </div>
-          </div>
-          <div class="box_5" style="width:80%; height: 230px;">
-            <section class="box_2" style="width: 100%; height: 230px; padding: 5px 30px">
-              <p style="margin-top:10px; font-weight:bold;">센서 데이터</p>
-              <div class="" style="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr class="" style="">
-                      <th style="width:6%;">모듈 이름</th>
-                      <th style="width:5%;">모듈 후면 온도<br>(℃)</th>
-                      <th style="width:5%;">수온<br>(℃)</th>
-                      <th style="width:7%;">외기 온도<br>(℃)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="myTable">
-                    <tr id="currCoolingSensorDataInfo" class="sel active">
-                      <td class="td1" style="vertical-align: middle">냉각형 모듈(200 W)</td>
-                      <td key="pvRearTemperature" name="large" style="vertical-align: middle" data-id="battery_v">29.2</td>
-                      <td key="waterTemperature" name="large" style="vertical-align: middle" data-id="battery_a">25.3</td>
-                      <td key="outsideAirTemperature" name="large" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
-                    </tr>
-                    <tr id="currNormalSensorDataInfo" class="sel">
-                      <td class="td1" style="vertical-align: middle">일반형 모듈(200 W)</td>
-                      <td key="pvRearTemperature" name="small" style="vertical-align: middle" data-id="battery_v">32.3</td>
-                      <td key="waterTemperature" name="small" style="vertical-align: middle" data-id="battery_a">18.5</td>
-                      <td key="outsideAirTemperature" name="small" style="vertical-align: middle" data-id="battery_charging_kw">16.4</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-
-        </div>
-
+        <!--하단1-->
+        <div class="container-fluid bg-3 text-center"></div>
+        <br />
+        <%- include("../master/footer.ejs") %>
       </div>
-      <!--하단1-->
-      <div class="container-fluid bg-3 text-center">
-      </div><br>
-      <%- include("../master/footer.ejs") %>
     </div>
-  </div>
-  <script>
-    let powerInfo = <%- JSON.stringify(powerInfo) %>;
-    let dailyPowerInfo = <%- JSON.stringify(dailyPowerInfo) %>;
-    let currSensorDataInfo = <%- JSON.stringify(currSensorDataInfo) %>;
-    let currNormalSensorDataInfo = <%- JSON.stringify(currNormalSensorDataInfo) %>;
-    let currCoolingSensorDataInfo = <%- JSON.stringify(currCoolingSensorDataInfo) %>;
-    setDomElementValueWithJson(document.getElementById('powerInfo'), powerInfo, 'value', 'id')
-    setDomElementValueWithJson(document.getElementById('currSensorDataInfo'), currSensorDataInfo, 'value', 'id')
-    setDomElementValueWithJson(document.getElementById('currNormalSensorDataInfo'), currNormalSensorDataInfo,
-      'innerHTML', 'key')
-    setDomElementValueWithJson(document.getElementById('currCoolingSensorDataInfo'), currCoolingSensorDataInfo,
-      'innerHTML', 'key')
+    <script>
+      let powerInfo = <%- JSON.stringify(powerInfo) %>;
+      let dailyPowerInfo = <%- JSON.stringify(dailyPowerInfo) %>;
+      let currSensorDataInfo = <%- JSON.stringify(currSensorDataInfo) %>;
+      let currNormalSensorDataInfo = <%- JSON.stringify(currNormalSensorDataInfo) %>;
+      let currCoolingSensorDataInfo = <%- JSON.stringify(currCoolingSensorDataInfo) %>;
+      setDomElementValueWithJson(document.getElementById('powerInfo'), powerInfo, 'value', 'id')
+      setDomElementValueWithJson(document.getElementById('currSensorDataInfo'), currSensorDataInfo, 'value', 'id')
+      setDomElementValueWithJson(document.getElementById('currNormalSensorDataInfo'), currNormalSensorDataInfo,
+        'innerHTML', 'key')
+      setDomElementValueWithJson(document.getElementById('currCoolingSensorDataInfo'), currCoolingSensorDataInfo,
+        'innerHTML', 'key')
 
-    // 금일 발전량 차트
-    makeGaugeChart({
-      domId: 'gauge-ice-curr-power',
-      yAxis: {
-        min: 0,
-        max: 200,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: currCoolingSensorDataInfo.pvW,
-        tooltip: {
-          valueSuffix: 'W'
-        }
-      },
-    })
+      // 금일 발전량 차트
+      makeGaugeChart({
+        domId: 'gauge-ice-curr-power',
+        yAxis: {
+          min: 0,
+          max: 200,
+          title: ''
+        },
+        series: {
+          name: '',
+          data: currCoolingSensorDataInfo.pvW,
+          tooltip: {
+            valueSuffix: 'W'
+          }
+        },
+      })
 
-    makeGaugeChart({
-      domId: 'gauge-normal-curr-power',
-      yAxis: {
-        min: 0,
-        max: 200,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: currNormalSensorDataInfo.pvW,
-        tooltip: {
-          valueSuffix: 'W'
-        }
-      },
-    })
+      makeGaugeChart({
+        domId: 'gauge-normal-curr-power',
+        yAxis: {
+          min: 0,
+          max: 200,
+          title: ''
+        },
+        series: {
+          name: '',
+          data: currNormalSensorDataInfo.pvW,
+          tooltip: {
+            valueSuffix: 'W'
+          }
+        },
+      })
 
-    makeGaugeChart({
-      domId: 'gauge-ice-daily-power',
-      yAxis: {
-        min: 0,
-        max: 1200,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: dailyPowerInfo.cooling,
-        tooltip: {
-          valueSuffix: 'Wh'
-        }
-      },
-    })
+      makeGaugeChart({
+          domId: 'gauge-ice-daily-power',
+        yAxis: {
+          min: 0,
+          max: 1200,
+          title: ''
+        },
+        series: {
+          name: '',
+          data: dailyPowerInfo.cooling,
+          tooltip: {
+            valueSuffix: 'Wh'
+          }
+        },
+      })
 
-    makeGaugeChart({
-      domId: 'gauge-normal-daily-power',
-      yAxis: {
-        min: 0,
-        max: 1200,
-        title: ''
-      },
-      series: {
-        name: '',
-        data: dailyPowerInfo.normal,
-        tooltip: {
-          valueSuffix: 'Wh'
-        }
-      },
-    })
-  </script>
-</body>
-
+      makeGaugeChart({
+        domId: 'gauge-normal-daily-power',
+        yAxis: {
+          min: 0,
+          max: 1200,
+          title: ''
+        },
+        series: {
+          name: '',
+          data: dailyPowerInfo.normal,
+          tooltip: {
+            valueSuffix: 'Wh'
+          }
+        },
+      })
+    </script>
+  </body>
 </html>

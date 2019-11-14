@@ -139,20 +139,10 @@ header {
 
 .component_ele_status {
   border: 0.1rem solid #443c3c;
-  margin: 2rem 0;
 }
 
 .component_ele_status > header {
   color: #fff;
-  /* background: linear-gradient(#130c72, #5d9a22); FIXME: */
-  margin: 0;
-  width: 100%;
-  font-weight: bold;
-  font-size: 1.5rem;
-  height: 3.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 /* 아래에 나오는 테이블을 설명하기 위한 Descrition 영역 */

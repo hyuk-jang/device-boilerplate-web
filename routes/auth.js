@@ -39,7 +39,7 @@ router.get(
 );
 
 router.get('/login', (req, res) => {
-  const { projectName } = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
+  const projectSourceInfo = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
   if (process.env.DEV_AUTO_AUTH === '1') {
     // BU.CLI('자동 로그인');
     // global.app.set('auth', true);
@@ -63,7 +63,10 @@ router.get('/login', (req, res) => {
     }
   } else {
     // BU.CLI('DEV_AUTO_AUTH false')
-    return res.render(`./${SITE_HEADER}login.ejs`, { message: req.flash('error'), projectName });
+    return res.render(`./${SITE_HEADER}login.ejs`, {
+      message: req.flash('error'),
+      projectSourceInfo,
+    });
   }
 });
 
@@ -127,8 +130,17 @@ router.post(
       throw new Error('Password hash failed.');
     }
 
+    // FIXME: 갱신일은 둘다 현 시점으로 처리함. 회원가입 갱신 기능이 추가될 경우 수정 필요
     /** @type {MEMBER} */
-    const newMemberInfo = { user_id: userid, name, tel, main_seq: place, is_deleted: 0 };
+    const newMemberInfo = {
+      user_id: userid,
+      name,
+      tel,
+      main_seq: place,
+      is_deleted: 0,
+      writedate: new Date(),
+      updatedate: new Date(),
+    };
 
     await biAuth.setMember(password, newMemberInfo);
 
