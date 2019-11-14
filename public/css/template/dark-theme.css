@@ -196,6 +196,24 @@ footer {
   background: linear-gradient(#359b5d, #2c774a);
 }
 
+.submit_box > button {
+  border: 1px solid #18984b;
+  background: linear-gradient(#3baf69, #349059);
+}
+
+.submit_box > button:hover {
+  background: linear-gradient(#359b5d, #2c774a);
+}
+
+.submit_box > button.btn-danger {
+  border: 1px solid #aa3224;
+  background: linear-gradient(#e74c3c, #aa3224);
+}
+
+.submit_box > button.btn-danger:hover {
+  background: linear-gradient(#862217, #aa3224);
+}
+
 .form-control {
   color: #fff;
   background: #12222f;

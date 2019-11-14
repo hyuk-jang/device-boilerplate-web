@@ -118,14 +118,11 @@ class BiModule extends BM {
       strStartDate = moment().format('YYYY-MM-DD'),
       strEndDate = '',
     } = searchRangeConfig;
-
-    // let {} = searchRangeConfig;
-
     // commonUtil.applyHasNumbericReqToNumber(req)를 사용할 경우 2018 년도 경우 숫자형으로 반환되버리므로 string 형으로 변환
-    const mStartDate = moment(strStartDate.toString());
 
     // 종료 날짜를 설정하기 위한 단위. 기본으로 1일을 더함
     let addUnit = 'days';
+    let initDateInfo = { hour: 0, minute: 0, second: 0 };
     const convertDateFormat = 'YYYY-MM-DD 00:00:00';
     // Web 상에 나타낼 Date Format
     let baseViewDateFormat = 'YYYY-MM-DD';
@@ -137,43 +134,42 @@ class BiModule extends BM {
     // 3. 사용자에게 보여질 시간 형태(en, kr)를 정의
     switch (searchType) {
       case 'days':
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
       case 'months':
-        mStartDate.set({ date: 1, hour: 0, minute: 0, second: 0 });
+        initDateInfo = { date: 1, hour: 0, minute: 0, second: 0 };
         addUnit = 'months';
         baseViewDateFormat = 'YYYY-MM';
         korViewDateFormat = 'YYYY년 MM월';
         break;
       case 'years':
-        mStartDate.set({ month: 1, date: 1, hour: 0, minute: 0, second: 0 });
+        initDateInfo = { month: 1, date: 1, hour: 0, minute: 0, second: 0 };
         addUnit = 'years';
         baseViewDateFormat = 'YYYY';
         korViewDateFormat = 'YYYY년';
         break;
       case 'range':
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
       default:
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
     }
+    // 날짜 형식 Format 지정
+    const mStartDate = moment(strStartDate.toString(), baseViewDateFormat).set(initDateInfo);
 
     let mEndDate;
     let realSearchType = '';
     // 기간 검색이라면 실제 구간 사이를 계산하여 정의
     if (searchType === 'range') {
       realSearchType = this.convertSearchTypeWithCompareDate(strEndDate, strStartDate);
-      mEndDate = moment(strEndDate);
+      mEndDate = moment(strEndDate, baseViewDateFormat);
     } else {
       // 기본 종료 기간은 검색일을 기준으로 함
       realSearchType = searchType;

@@ -117,7 +117,7 @@ class Control {
       }
 
       // API 서버로 필수 데이터만을 전송하기 위한 flag 설정을 위한 Map 표기 Node 내역 추출
-      const svgNodeList = _(deviceMap.drawInfo.positionInfo.svgNodeList)
+      const svgNodeList = _(_.get(deviceMap, 'drawInfo.positionInfo.svgNodeList', []))
         .map('defList')
         .flatten()
         .value();

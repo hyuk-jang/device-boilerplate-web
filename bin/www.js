@@ -42,6 +42,8 @@ server.listen(port, () => {
   operationController();
   console.log(`Server ${port} is Listening`);
 });
+// 최대 5분 기다림.
+server.timeout = 1000 * 60 * 5;
 server.on('error', onError);
 server.on('listening', onListening);
 
