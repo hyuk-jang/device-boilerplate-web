@@ -1,4 +1,7 @@
+const { BU } = require('base-util-jh');
+
 const Control = require('./Control');
+const UpsasControl = require('./projects/UPSAS/UpsasControl');
 const FpRndControl = require('./projects/FP/RnD/FpRndControl');
 const S2WRndControl = require('./projects/S2W/RnD/S2WRndControl');
 
@@ -17,19 +20,14 @@ class Main {
     const { projectInfo = {} } = config;
     const { projectMainId, projectSubId } = projectInfo;
 
+    // BU.CLI('projectMainId', projectInfo);
+
     let MainControl = Control;
 
     switch (projectMainId) {
-      // case 'UPSAS':
-      //   switch (projectSubId) {
-      //     case 'muan':
-      //       MainControl = MuanControl;
-      //       MainModel = MuanModel;
-      //       break;
-      //     default:
-      //       break;
-      //   }
-      //   break;
+      case 'UPSAS':
+        MainControl = UpsasControl;
+        break;
       case 'FP':
         switch (projectSubId) {
           case 'RnD':

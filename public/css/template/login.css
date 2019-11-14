@@ -4,7 +4,7 @@
 
 html,
 body {
-	background-image: url('../../image/bg_1025.jpg');
+	background-image: url('../../image/upsas_bg.png');
 	background-size: cover;
 	background-repeat: no-repeat;
 	height: 100%;
@@ -17,10 +17,10 @@ body {
 }
 
 .card {
-	height: 300px;
+	height: auto;
 	margin-top: auto;
 	margin-bottom: auto;
-	width: 450px;
+	width: auto;
 	background-color: rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -48,7 +48,7 @@ body {
 
 .input-group-prepend span {
 	width: 50px;
-	background-color: #ffc312;
+	background-color: #0084ff;
 	color: black;
 	border: 0 !important;
 }
@@ -71,8 +71,9 @@ input:focus {
 
 .login_btn {
 	color: black;
-	background-color: #ffc312;
+	background-color: #0084ff;
 	width: 100px;
+	font-weight: bold
 }
 
 .login_btn:hover {

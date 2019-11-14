@@ -38,6 +38,9 @@ _:-ms-input-placeholder,
   min-height: unset;
 }
 
+select {
+  cursor: pointer;
+}
 /***************************************/
 /************ Footer Master ************/
 /***************************************/
@@ -160,13 +163,13 @@ _:-ms-input-placeholder,
   padding: 15px 15px 15px;
   color: #333 !important;
   font-weight: bold;
-  font-size: 17px;
+  /* font-size: 17px; */
   display: flex;
   align-items: center;
 }
 
 .header_home_area > img {
-  width: 30px;
+  /* width: 30px; */
   height: 30px;
   margin: 0px;
   margin-right: 5px;
@@ -228,8 +231,9 @@ _:-ms-input-placeholder,
 }
 
 .component_side_box {
-  width: 20%;
-  height: 350px;
+  width: 230px;
+  min-width: 230px;
+  height: 370px;
 }
 
 .flex_dir_row {
@@ -283,9 +287,16 @@ _:-ms-input-placeholder,
 /***************************************/
 /********** Dash Board 영역 ************/
 /***************************************/
+.component_pieceDouble_box {
+  width: 60%;
+  height: 370px;
+}
+
 .component_piece_box {
-  width: 39%;
-  height: 350px;
+  width: 45%;
+  height: 370px;
+  display: flex;
+  justify-content: center;
 }
 
 .component_piece_area {
@@ -387,6 +398,16 @@ _:-ms-input-placeholder,
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/***************************************/
+/************** structure 영역 *********/
+/***************************************/
+
+/* FIXME: */
+.command_status_view {
+  width: 48%;
+  margin: 10px;
 }
 
 /***************************************/
@@ -565,6 +586,11 @@ article.sdv_w_side > p:last-child {
   min-height: 500px;
 }
 
+.zoom_box {
+  display: flex;
+  justify-content: center;
+}
+
 /***************************************/
 /************ Common *************/
 /***************************************/
@@ -611,7 +637,26 @@ article.sdv_w_side > p:last-child {
 /**************** Color ****************/
 /***************************************/
 .color_green {
-  color: #93d30a;
+  color: #38be55;
+}
+
+.color_red {
+  color: #e62f2f;
+}
+
+.color_blue {
+  color: #2c3aff;
+}
+
+.color_black {
+  color: black;
+}
+
+/***************************************/
+/**************** interval ****************/
+/***************************************/
+.w_auto {
+  width: auto;
 }
 
 .w_10per {
@@ -622,8 +667,16 @@ article.sdv_w_side > p:last-child {
   width: 20%;
 }
 
+.w_30per {
+  width: 30%;
+}
+
 .w_40per {
   width: 40%;
+}
+
+.w_50per {
+  width: 50%;
 }
 
 .w_90per {
@@ -632,6 +685,34 @@ article.sdv_w_side > p:last-child {
 
 .w_100per {
   width: 100%;
+}
+
+.w_1rem {
+  width: 1rem;
+}
+
+.w_2rem {
+  width: 2rem;
+}
+
+.w_3rem {
+  width: 3rem;
+}
+
+.w_4rem {
+  width: 4rem;
+}
+
+.w_5rem {
+  width: 5rem;
+}
+
+.w_6rem {
+  width: 6rem;
+}
+
+.w_7rem {
+  width: 7rem;
 }
 
 .ml0 {
@@ -646,8 +727,24 @@ article.sdv_w_side > p:last-child {
   margin-top: 2rem;
 }
 
+.mr_1rem {
+  margin-right: 1rem;
+}
+
 .mr_2rem {
   margin-right: 2rem;
+}
+
+.mr_3rem {
+  margin-right: 3rem;
+}
+
+.mr_4rem {
+  margin-right: 4rem;
+}
+
+.mr_5rem {
+  margin-right: 5rem;
 }
 
 .ml_1rem {
@@ -660,6 +757,14 @@ article.sdv_w_side > p:last-child {
 
 .mb_50rem {
   margin-bottom: 0.5rem;
+}
+
+.pt_1rem {
+  padding-top: 1rem;
+}
+
+.pt_1rem {
+  padding-top: 2rem;
 }
 
 @media all and (max-width: 942px) {
@@ -787,6 +892,16 @@ article.sdv_w_side > p:last-child {
   .submit_box > .icon {
     margin-left: 1rem;
   }
+
+  .rtsp_container {
+    flex-direction: column;
+    align-content: center;
+  }
+
+  .command_status_view {
+    width: 100%;
+    margin: 0;
+  }
 }
 
 @media all and (max-width: 550px) {
@@ -838,4 +953,27 @@ article.sdv_w_side > p:last-child {
   .table_desc_area {
     padding: 0;
   }
+}
+
+/* 기상 환경 정보 테이블  */
+.weather_forecast_table > tbody > tr > td > p {
+  border: 1px solid #d2d2d2;
+  background: white;
+  position: relative;
+  left: -18px;
+  top: 0px;
+  width: 22px;
+  line-height: 19px;
+  height: 19px;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.weather_forecast_table {
+  table-layout: auto;
+  width: 100%;
+  font-size: 1.2rem;
 }

@@ -21,140 +21,6 @@ class BiModule extends BM {
   }
 
   /**
-   * 에러 내역
-   * @param {searchRange} searchRange  검색 옵션
-   * @param {number} mainSeq
-   * @return {{comment: string, is_error: number}[]} SQL 실행 결과
-   */
-  getCalendarComment(searchRange, mainSeq) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
-
-    const sql = `
-      SELECT
-        cal.comment,
-        cal.is_error,
-        ${dateFormat.selectViewDate},
-        ${dateFormat.selectGroupDate}
-        FROM calendar cal
-        WHERE main_seq = ${mainSeq}
-         AND writedate>= "${searchRange.strBetweenStart}" and writedate<"${
-      searchRange.strBetweenEnd
-    }"
-        ORDER BY writedate
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
-   * 수위
-   * @param {searchRange} searchRange  검색 옵션
-   * @param {number[]=} inverter_seq_list
-   * @return {Promise} SQL 실행 결과
-   */
-  getWaterLevel(searchRange, inverter_seq_list) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'applydate');
-
-    // BU.CLI(dateFormat);
-    let sql = `
-      SELECT
-        twl.inverter_seq,
-        ROUND(AVG(water_level), 1) AS water_level,
-        DATE_FORMAT(applydate,'%H') AS hour_time,
-        ${dateFormat.selectViewDate},
-        ${dateFormat.selectGroupDate}
-        FROM temp_water_level twl
-        WHERE applydate>= "${searchRange.strBetweenStart}" and applydate<"${
-      searchRange.strBetweenEnd
-    }"
-    `;
-    if (inverter_seq_list) {
-      sql += `AND twl.inverter_seq IN (${inverter_seq_list})`;
-    }
-    sql += `
-          GROUP BY ${dateFormat.firstGroupByFormat}, twl.inverter_seq
-          ORDER BY twl.inverter_seq, applydate
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
-   * 기상 관측 장비의 최신 데이터 1row를 가져옴.
-   */
-  getWeather() {
-    const sql = 'SELECT * FROM weather_device_data ORDER BY writedate DESC LIMIT 1';
-    return this.db.single(sql, '', false);
-  }
-
-  /**
-   * 기상 계측 장치 평균을 구해옴
-   * @param {searchRange} searchRange  검색 옵션
-   * @return {weatherRowDataPacketList}
-   */
-  getWeatherDeviceAverage(searchRange) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
-    const sql = `
-      SELECT
-          writedate,
-          ${dateFormat.selectViewDate},
-          ${dateFormat.selectGroupDate},
-          AVG(temp) AS avg_temp,
-          AVG(reh) AS avg_reh,
-          AVG(ws) AS avg_ws,
-          AVG(solar) AS avg_solar,
-          AVG(solar) AS avg_inclined_solar,
-          ROUND(AVG(solar) / 6, 1) AS interval_solar,
-          COUNT(*) AS first_count
-      FROM weather_device_data wdd
-      WHERE writedate>= "${searchRange.strBetweenStart}" and writedate<"${
-      searchRange.strBetweenEnd
-    }"
-      AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-      GROUP BY ${dateFormat.groupByFormat}
-      ORDER BY writedate
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
-   * 날씨 평균을 구해옴
-   * @param {searchRange} searchRange  검색 옵션
-   * @return {weatherRowDataPacketList}
-   */
-  getWeatherCastAverage(searchRange, weatherLocationSeq) {
-    searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'applydate');
-    // BU.CLI(dateFormat);
-    // BU.CLI(searchRange);
-
-    const sql = `
-    SELECT main.*,
-    ${dateFormat.selectViewDate},
-    ${dateFormat.selectGroupDate},
-    ROUND(AVG(main.scale_sky), 1) AS avg_sky
-     FROM
-    (
-    SELECT *,
-        CASE
-        WHEN sky = 1 THEN 1
-        WHEN sky = 2 THEN 4
-        WHEN sky = 3 THEN 7
-        WHEN sky = 4 THEN 9.5
-        END AS scale_sky
-    FROM kma_data	
-    WHERE weather_location_seq = ${weatherLocationSeq}
-      AND applydate>= "${searchRange.strBetweenStart}" and applydate<"${searchRange.strBetweenEnd}"
-      AND DATE_FORMAT(applydate, '%H') >= '05' AND DATE_FORMAT(applydate, '%H') < '20'
-    ) main
-    GROUP BY ${dateFormat.groupByFormat}
-    ORDER BY applydate
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
    * 접속반 기준 Module 최신 데이터 가져옴
    *
    * @param {number|Array} photovoltaic_seq Format => Number or Array or undefinded
@@ -216,7 +82,7 @@ class BiModule extends BM {
    */
   getConnectorPower(searchRange, moduleSeqList) {
     searchRange = searchRange || this.createSearchRange();
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
 
     const sql = `
       SELECT
@@ -240,28 +106,6 @@ class BiModule extends BM {
   }
 
   /**
-   * 기상청 날씨를 가져옴
-   * @param {number} weatherLocationSeq 기상청 동네 예보 위치 seq
-   * @return {WC_KMA_DATA} 날씨 정보
-   */
-  async getCurrWeatherCast(weatherLocationSeq) {
-    const sql = `
-      SELECT *, 
-              ABS(CURRENT_TIMESTAMP() - applydate) AS cur_interval 
-       FROM wc_kma_data 
-      WHERE weather_location_seq = ${weatherLocationSeq}
-      ORDER BY cur_interval 
-      LIMIT 1
-    `;
-    /** @type {KMA_DATA[]} */
-    const weatherCastList = await this.db.single(sql, '', false);
-    if (weatherCastList.length) {
-      return _.head(weatherCastList);
-    }
-    return {};
-  }
-
-  /**
    * 검색 종류와 검색 기간에 따라 계산 후 검색 조건 객체 반환
    * @param {searchRangeConfig} searchRangeConfig
    * @return {searchRange} 검색 범위
@@ -274,14 +118,11 @@ class BiModule extends BM {
       strStartDate = moment().format('YYYY-MM-DD'),
       strEndDate = '',
     } = searchRangeConfig;
-
-    // let {} = searchRangeConfig;
-
     // commonUtil.applyHasNumbericReqToNumber(req)를 사용할 경우 2018 년도 경우 숫자형으로 반환되버리므로 string 형으로 변환
-    const mStartDate = moment(strStartDate.toString());
 
     // 종료 날짜를 설정하기 위한 단위. 기본으로 1일을 더함
     let addUnit = 'days';
+    let initDateInfo = { hour: 0, minute: 0, second: 0 };
     const convertDateFormat = 'YYYY-MM-DD 00:00:00';
     // Web 상에 나타낼 Date Format
     let baseViewDateFormat = 'YYYY-MM-DD';
@@ -293,43 +134,42 @@ class BiModule extends BM {
     // 3. 사용자에게 보여질 시간 형태(en, kr)를 정의
     switch (searchType) {
       case 'days':
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
       case 'months':
-        mStartDate.set({ date: 1, hour: 0, minute: 0, second: 0 });
+        initDateInfo = { date: 1, hour: 0, minute: 0, second: 0 };
         addUnit = 'months';
         baseViewDateFormat = 'YYYY-MM';
         korViewDateFormat = 'YYYY년 MM월';
         break;
       case 'years':
-        mStartDate.set({ month: 1, date: 1, hour: 0, minute: 0, second: 0 });
+        initDateInfo = { month: 1, date: 1, hour: 0, minute: 0, second: 0 };
         addUnit = 'years';
         baseViewDateFormat = 'YYYY';
         korViewDateFormat = 'YYYY년';
         break;
       case 'range':
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
       default:
-        mStartDate.set({ hour: 0, minute: 0, second: 0 });
         addUnit = 'days';
         baseViewDateFormat = 'YYYY-MM-DD';
         korViewDateFormat = 'YYYY년 MM월 DD일';
         break;
     }
+    // 날짜 형식 Format 지정
+    const mStartDate = moment(strStartDate.toString(), baseViewDateFormat).set(initDateInfo);
 
     let mEndDate;
     let realSearchType = '';
     // 기간 검색이라면 실제 구간 사이를 계산하여 정의
     if (searchType === 'range') {
       realSearchType = this.convertSearchTypeWithCompareDate(strEndDate, strStartDate);
-      mEndDate = moment(strEndDate);
+      mEndDate = moment(strEndDate, baseViewDateFormat);
     } else {
       // 기본 종료 기간은 검색일을 기준으로 함
       realSearchType = searchType;
@@ -577,7 +417,7 @@ class BiModule extends BM {
    */
   getInverterPower(searchRange = this.createSearchRange(), inverterSeqList) {
     // let dateFormat = this.convertSearchType2DateFormat(searchRange.searchType);
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
     // BU.CLI(dateFormat);
     const sql = `
     SELECT
@@ -601,51 +441,6 @@ class BiModule extends BM {
     ) AS main
     LEFT OUTER JOIN pw_inverter ivt
     ON ivt.inverter_seq = main.inverter_seq
-    `;
-    return this.db.single(sql, '', false);
-  }
-
-  /**
-   * 기상 관측 데이터 구해옴
-   * @param {searchRange} searchRange  검색 옵션
-   * @return {{view_date: string, group_date: string, avg_sm_infrared: number, avg_temp: number, avg_reh: number, avg_solar: number, total_interval_solar: number, avg_inclined_solar: number, total_interval_inclined_solar: number, avg_wd: number, avg_ws: number, avg_uv: number}[]}
-   */
-  getWeatherTrend(searchRange, main_seq) {
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
-    const sql = `
-      SELECT
-        ${dateFormat.selectViewDate},
-        ${dateFormat.selectGroupDate},
-          ROUND(AVG(avg_sm_infrared), 1) AS avg_sm_infrared,
-          ROUND(AVG(avg_temp), 1) AS avg_temp,
-          ROUND(AVG(avg_reh), 1) AS avg_reh,
-          ROUND(AVG(avg_solar), 0) AS avg_solar,
-          ROUND(SUM(interval_solar), 1) AS total_interval_solar,
-          ROUND(AVG(avg_inclined_solar), 0) AS avg_inclined_solar,
-          ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
-          ROUND(AVG(avg_wd), 0) AS avg_wd,	
-          ROUND(AVG(avg_ws), 1) AS avg_ws,	
-          ROUND(AVG(avg_uv), 0) AS avg_uv
-      FROM
-        (SELECT 
-          writedate,
-          AVG(sm_infrared) AS avg_sm_infrared,
-          AVG(temp) AS avg_temp,
-          AVG(reh) AS avg_reh,
-          AVG(solar) AS avg_solar,
-          AVG(solar) / ${dateFormat.divideTimeNumber} AS interval_solar,
-          AVG(inclined_solar) AS avg_inclined_solar,
-          AVG(inclined_solar) / ${dateFormat.divideTimeNumber} AS interval_inclined_solar,
-          AVG(wd) AS avg_wd,	
-          AVG(ws) AS avg_ws,	
-          AVG(uv) AS avg_uv,
-          COUNT(*) AS first_count
-        FROM weather_device_data
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-        AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-        AND main_seq = ${main_seq}
-        GROUP BY ${dateFormat.firstGroupByFormat}) AS result_wdd
-     GROUP BY ${dateFormat.groupByFormat}
     `;
     return this.db.single(sql, '', false);
   }
@@ -708,12 +503,11 @@ class BiModule extends BM {
               MAX(power_cp_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
       FROM pw_inverter_data id
-            WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
-      searchRange.strEndDate
-    }"
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
     ${inverterSeqList.length ? ` AND id.inverter_seq IN (${inverterSeqList})` : ''}
       GROUP BY ${firstGroupByFormat}, id.inverter_seq
-      ORDER BY id.inverter_seq, writedate) AS id_group
+      ORDER BY id.inverter_seq, writedate
+      ) AS id_group
       LEFT OUTER JOIN pw_inverter ivt
       ON ivt.inverter_seq = id_group.inverter_seq
     GROUP BY id_group.inverter_seq, ${groupByFormat}
@@ -742,7 +536,7 @@ class BiModule extends BM {
       );
     }
 
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
 
     const sql = `
       SELECT
@@ -958,7 +752,7 @@ class BiModule extends BM {
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
   async getInverterReport(searchRange, pageInfo, inverterSeqList) {
-    const dateFormat = this.makeDateFormatForReport(searchRange, 'writedate');
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
     let { page = 1, pageListCount = 10 } = pageInfo;
     page = Number(page);
     pageListCount = Number(pageListCount);
@@ -968,16 +762,22 @@ class BiModule extends BM {
         group_date,
         ROUND(AVG(avg_pv_v), 1) AS avg_pv_v,
         ROUND(AVG(avg_pv_a), 1) AS avg_pv_a,
+        ROUND(SUM(avg_pv_a), 1) AS sum_avg_pv_a,
         ROUND(AVG(avg_pv_kw), 1) AS avg_pv_kw,
+        ROUND(SUM(avg_pv_kw), 1) AS sum_avg_pv_kw,
         ROUND(AVG(avg_grid_rs_v), 1) AS avg_grid_rs_v,
         ROUND(AVG(avg_grid_st_v), 1) AS avg_grid_st_v,
         ROUND(AVG(avg_grid_tr_v), 1) AS avg_grid_tr_v,
         ROUND(AVG(avg_grid_r_a), 1) AS avg_grid_r_a,
+        ROUND(SUM(avg_grid_r_a), 1) AS sum_avg_grid_r_a,
         ROUND(AVG(avg_grid_s_a), 1) AS avg_grid_s_a,
+        ROUND(SUM(avg_grid_s_a), 1) AS sum_avg_grid_s_a,
         ROUND(AVG(avg_grid_t_a), 1) AS avg_grid_t_a,
+        ROUND(SUM(avg_grid_t_a), 1) AS sum_avg_grid_t_a,
         ROUND(AVG(avg_line_f), 1) AS avg_line_f,
         ROUND(AVG(avg_p_f), 1) AS avg_p_f,
         ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
+        ROUND(SUM(avg_power_kw), 1) AS sum_avg_power_kw,
         ROUND(SUM(interval_power), 2) AS interval_power,
         ROUND(SUM(max_c_kwh), 3) AS max_c_kwh
     FROM

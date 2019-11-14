@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/contents/inverter/setInverter.js"></script>
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">측정시간 &nbsp; <span id="measureTime"> </span></p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <colgroup>
+                <col width="12%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="6%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="5%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th rowspan="2"></th>
+                  <th colspan="3">태양광</th>
+                  <th colspan="5">인버터</th>
+                  <th colspan="3">발전현황</th>
+                </tr>
+                <tr>
+                  <th>DC 전류(A)</th>
+                  <th>DC 전압(V)</th>
+                  <th>DC 전력(kW)</th>
+                  <th>AC 전류(A)</th>
+                  <th>AC 전압(V)</th>
+                  <th>주파수(Hz)</th>
+                  <th>AC 전력(kW)</th>
+                  <th>효율(%)</th>
+                  <th>금일 발전량(kWh)</th>
+                  <th>누적 발전량(kWh)</th>
+                  <th>동작 여부</th>
+                </tr>
+              </thead>
+              <tbody id="inverterStatus"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            금일 시간 별 전력
+          </p>
+          <article id="divDomArea"></article>
+          <article id="chart_div" class="lineChart_box default_area"></article>
+        </div>
+      </div>
+      <!--하단1-->
+
+      <%- include("../master/footer.ejs") %>
+    </div>
+    <script>
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      var measureInfo = <%- JSON.stringify(measureInfo) %>;
+      // 측정 시간 입력
+      document.getElementById('measureTime').innerHTML = measureInfo.measureTime;
+      var siteId = _.get(measureInfo, 'siteId');
+      var subCategory = _.get(measureInfo, 'subCategory');
+    </script>
+
+    <!-- subCategoryDom 자동 이벤트 부여  -->
+    <script src="/js/contents/report/search.js"></script>
+
+    <script>
+      // 인버터 현재 상태 데이터 테이블 생성
+      $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+
+      // 차트를 그리기 위한 데이터
+      var inverterLineChart = <%- JSON.stringify(inverterLineChart) %>;
+
+      makeLineChart(inverterLineChart)
+    </script>
+  </body>
+</html>

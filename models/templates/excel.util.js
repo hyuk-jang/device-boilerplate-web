@@ -102,15 +102,16 @@ function makeBlockToTable(excelDataRows, baseDateList, blockTable = {}) {
     if (foundBlock) {
       _.map(blockViewOptionList, blockViewInfo => {
         // 가져올 객체 Key, 배율, 소수점 이하 자리수
-        const { dataKey, scale, toFixed } = blockViewInfo;
+        const { dataKey, scale, toFixed = 1 } = blockViewInfo;
         // 데이터 객체에서 Key가 매칭되는 데이터를 가져옴
         let dataValue = _.get(foundBlock, [dataKey], null);
         // 데이터가 존재하고 배율 옵션이 있다면 처리
-        if (dataValue && _.isNumber(scale)) {
-          if (_.isNumber(toFixed)) {
-            dataValue = _.round(_.multiply(dataValue, scale), toFixed);
-          } else {
+        if (dataValue) {
+          if (_.isNumber(scale)) {
             dataValue = _.multiply(dataValue, scale);
+          }
+          if (_.isNumber(toFixed)) {
+            dataValue = _.round(dataValue, toFixed);
           }
         }
         // 기존 데이터 객체에 덮어씌움.
@@ -891,21 +892,33 @@ function makeEWSWithBlock(trendList, makeOption) {
     const { rangeStart, rangeEnd = '' } = searchRangeInfo;
     // const strSearchRange = `${rangeStart}${rangeEnd && ` ~ ${rangeEnd}`}`;
 
-    const dataHeaderList = ['날짜'];
-    // const dataBodyList = [strGroupDateList]
+    const headerMainList = ['날짜'];
+    const headerSubList = [''];
 
-    // BU.CLIN(nodeDefStorageList, 3);
+    // 시트별 Data Table 제목 목록 생성
+    _.forEach(blockViewOptionList, blockInfo => {
+      const { mainTitle = '', dataName = '', dataUnit } = blockInfo;
+
+      headerMainList.push(mainTitle);
+      headerSubList.push(`${dataName}${_.isString(dataUnit) ? ` (${dataUnit})` : ''}`);
+    });
+    // 중복 제거
+    _.reduceRight(headerMainList, (prev, next, index) => {
+      if (prev.length && next.length && prev === next) {
+        headerMainList[index + 1] = '';
+      }
+      return next;
+    });
+
+    _.reduce(headerSubList, (prev, next, index) => {
+      if (prev.length && next.length && prev === next) {
+        headerSubList[index + 1] = '';
+      }
+      return next;
+    });
 
     // 데이터 Table
     const dataBodyList = [];
-
-    // 시트별 Data Table 제목 목록 생성
-    _.forEach(blockViewOptionList, pickTrendInfo => {
-      const { dataName, dataUnit } = pickTrendInfo;
-      // 헤더 명 추가
-      const headerName = `${dataName}${!_.isEmpty(dataUnit) ? ` (${dataUnit})` : ''}`;
-      dataHeaderList.push(headerName);
-    });
 
     // BU.CLI(blockViewOptionList);
     // Array Data Table 을 생성
@@ -918,7 +931,8 @@ function makeEWSWithBlock(trendList, makeOption) {
     // BU.CLI(dataBodyList);
 
     // 좌측열에 세울 날짜 삽입
-    dataBodyList.unshift(dataHeaderList);
+    dataBodyList.unshift(headerSubList);
+    dataBodyList.unshift(headerMainList);
 
     const wb = XLSX.utils.book_new();
     wb.SheetNames = [placeName];

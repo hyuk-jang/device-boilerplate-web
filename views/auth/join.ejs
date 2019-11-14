@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>회원가입</title>
+    <!-- Bootstrap -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- font awesome -->
+    <link
+      href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"
+      rel="stylesheet"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/template/common.css" />
+    <link rel="stylesheet" type="text/css" href="/css/template/join.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-6 col-md-offset-3">
+        <form role="form" action="/auth/join" method="post">
+          <div class="form-group">
+            <label for="inputUserid">아이디</label>
+            <input
+              type="text"
+              class="form-control"
+              id="inputUserid"
+              name="userid"
+              placeholder="아이디를 입력해 주세요"
+            />
+          </div>
+          <div class="form-group">
+            <label for="inputName">성명</label>
+            <input
+              type="text"
+              class="form-control"
+              id="inputName"
+              name="name"
+              placeholder="이름을 입력해 주세요"
+            />
+          </div>
+          <!-- <div class="form-group">
+            <label for="InputEmail">이메일 주소</label>
+            <input
+              type="email"
+              class="form-control"
+              id="InputEmail"
+              placeholder="이메일 주소를 입력해주세요"
+            />
+          </div> -->
+          <div class="form-group">
+            <label for="inputPassword">비밀번호</label>
+            <input
+              type="password"
+              class="form-control"
+              id="inputPassword"
+              name="password"
+              placeholder="비밀번호를 입력해주세요"
+            />
+          </div>
+          <div class="form-group">
+            <label for="inputPasswordCheck">비밀번호 확인</label>
+            <input
+              type="password"
+              class="form-control"
+              id="inputPasswordCheck"
+              name="passwordCheck"
+              placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요"
+            />
+          </div>
+          <div class="form-group">
+            <label for="inputTel">휴대폰 번호</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="inputTel"
+              name="tel"
+              placeholder="휴대폰번호를 입력해 주세요"
+            />
+          </div>
+          <div class="form-group">
+            <label for="selectPlace">장소</label>
+            <select class="form-control" id="selectPlace" name='place'></select>
+          </div>
+          <div class="form-group text-center">
+            <button type="submit" id="join-submit" class="btn btn-primary">
+              회원가입<i class="fa fa-check spaceLeft"></i>
+            </button>
+            <button disabled type="submit" formmethod= class="btn btn-warning" onclick="location.href='/login'">
+              가입취소<i class="fa fa-times spaceLeft"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+  $(function() {
+
+    var placeList =<%- JSON.stringify(placeList) %>;
+
+    placeList.forEach(function(place){
+      $('#selectPlace').append(`<option value=${place.mainSeq}>${place.name}</option>`)
+    })
+
+    // 회원 가입 처리
+    $('#join-submit').click(function(e) {
+      e.preventDefault();
+
+      var idReg = /^[A-Za-z0-9]{4,12}$/;
+      if (!idReg.test($('#inputUserid').val())) {
+        alert('4~12자의 영문, 숫자로만 사용 가능합니다.');
+        $('#inputUserid').focus();
+
+        return false;
+      }
+
+      if ($('#inputName').val() == '') {
+        alert('아이디를 입력하세요');
+        $('#inputUserid').focus();
+
+        return false;
+      }
+
+      if ($('#inputName').val() == '') {
+        alert('이름을 입력하세요');
+        $('#inputName').focus();
+
+        return false;
+      }
+
+      if ($('#inputPassword').val() == '') {
+        alert('비밀번호를 입력하세요');
+        $('#inputPassword').focus();
+
+        return false;
+      }
+
+      if ($('#inputPasswordCheck').val() == '') {
+        alert('비밀번호를 다시 한번 더 입력하세요');
+        $('#inputPasswordCheck').focus();
+
+        return false;
+      }
+
+      if ($('#inputPassword').val() !== $('#inputPasswordCheck').val()) {
+        alert('비밀번호를 둘다 동일하게 입력하세요');
+        return false;
+      }
+
+      if ($('#inputTel').val() == '') {
+        alert('휴대폰 번호를 입력하세요');
+        $('#inputTel').focus();
+        return false;
+      }
+
+      var form = document.querySelector('form');
+      form.submit();
+    });
+  });
+</script>

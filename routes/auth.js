@@ -14,6 +14,30 @@ router.get('/', (req, res) => {
   res.send('default main');
 });
 
+router.get(
+  '/join',
+  asyncHandler(async (req, res) => {
+    /** @type {BiAuth} */
+    const biAuth = global.app.get('biAuth');
+
+    /** @type {MAIN} */
+    const whereInfo = {
+      is_deleted: 0,
+    };
+
+    /** @type {MAIN} */
+    const mainList = await biAuth.getTable('MAIN', whereInfo);
+    const placeList = _.map(mainList, mainInfo => {
+      return { name: mainInfo.name, mainSeq: mainInfo.main_seq };
+    });
+    // BU.CLI(placeList);
+
+    _.set(req, 'locals.placeList', placeList);
+
+    res.render(`./${SITE_HEADER}join.ejs`, req.locals);
+  }),
+);
+
 router.get('/login', (req, res) => {
   const { projectName } = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
   if (process.env.DEV_AUTO_AUTH === '1') {
@@ -62,6 +86,55 @@ router.get('/logout', (req, res) => {
     return res.redirect(`/${SITE_HEADER}login`);
   });
 });
+
+// TODO:
+router.post(
+  '/join',
+  asyncHandler(async (req, res) => {
+    // BU.CLIS('tempJoin', req.body, req.query, req.params);
+    /** @type {BiAuth} */
+    const biAuth = global.app.get('biAuth');
+
+    const { password = '', userid = '', name = '', tel = '', place = '' } = _.pick(req.body, [
+      'userid',
+      'password',
+      'nickname',
+      'name',
+      'tel',
+      'place',
+    ]);
+
+    /** @type {MEMBER} */
+    const whereInfo = {
+      user_id: userid,
+      is_deleted: 0,
+    };
+
+    // 동일한 회원이 존재하는지 체크
+    const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
+
+    if (!_.isEmpty(memberInfo)) {
+      // return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/join'));
+      return res.send(DU.locationAlertGo('이미 사용중인 아이디입니다..', '/auth/join'));
+    }
+
+    const salt = BU.genCryptoRandomByte(16);
+
+    // const encryptPbkdf2 = Promise.promisify(BU.encryptPbkdf2);
+    const hashPw = await EU.encryptPbkdf2(password, salt);
+
+    if (hashPw instanceof Error) {
+      throw new Error('Password hash failed.');
+    }
+
+    /** @type {MEMBER} */
+    const newMemberInfo = { user_id: userid, name, tel, main_seq: place, is_deleted: 0 };
+
+    await biAuth.setMember(password, newMemberInfo);
+
+    return res.send(DU.locationAlertGo('가입이 완료되었습니다.', '/login'));
+  }),
+);
 
 router.post(
   '/temp-join',

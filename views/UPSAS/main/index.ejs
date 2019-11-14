@@ -1,0 +1,274 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row">
+          <div class="component_side_box">
+            <article class="component_side_area side_section_power">
+              <div class="data_title_section">
+                <h4>발전 현황</h4>
+                <h5>Power Status</h5>
+              </div>
+              <section id="powerStatus" class="data_view_section fs_150rem">
+                <article class="sensor_data_view sdv_w_side">
+                  <p>현재 출력</p>
+                  <p id="currKw">-</p>
+                  <p>kW</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>금일발전량</p>
+                  <p id="dailyPower">-</p>
+                  <p>kWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>당월발전량</p>
+                  <p id="monthPower">-</p>
+                  <p>kWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>누적발전량</p>
+                  <p id="cumulativePower">-</p>
+                  <p>MWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>CO2저감량</p>
+                  <p id="co2">123.2</p>
+                  <p>Ton</p>
+                </article>
+                <!-- TODO: -->
+                <article class="sensor_data_view sdv_w_side">
+                  <p>명일발전량</p>
+                  <!-- <select class="form-control">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                    </select> -->
+                  <p id="tomorrowPower">-</p>
+                  <p>kWh</p>
+                </article>
+              </section>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>
+                현재 발전현황
+              </header>
+              <div class="component_piece_body ">
+                <div id="current_power_graph" class="gauge_chart">Graph</div>
+                <section id="current_power_data" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>현재 출력</p>
+                    <p class="fs_150em" data-id="currKw">196</p>
+                    <p>kW</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>발전 효율</p>
+                    <p class="fs_150em" data-id="currPf">196</p>
+                    <p>%</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>금일발전량</header>
+              <div class="component_piece_body pt_1rem">
+                <div id="daily_power_graph" class="gauge_chart">Graph</div>
+                <section id="daily_power_data" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>당월 발전량</p>
+                    <p class="fs_150em" data-id="monthPower">196</p>
+                    <p>kWh</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>누적 발전량</p>
+                    <p class="fs_150em" data-id="cumulativePower">196</p>
+                    <p>MWh</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>인버터 전압/전류(AC)</header>
+              <section id="inverterStatus" class="component_piece_body">
+                <article class="component_ele_status">
+                  <header>나주 고정식 33 kW급 쏠라테크</header>
+                  <section class="sensor_data_view sddv_w35">
+                    <article class="sensor_data_view sdv_w541 fs_150rem">
+                      <p>전압</p>
+                      <p>243.3</p>
+                      <p>V</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_150rem">
+                      <p>전류</p>
+                      <p>43.3</p>
+                      <p>A</p>
+                    </article>
+                  </section>
+                </article>
+              </section>
+            </article>
+          </div>
+        </div>
+        <div class="container_row">
+          <div class="component_side_box">
+            <div class="component_side_area side_section_growth">
+              <div class="data_title_section">
+                <h4>염전 환경</h4>
+                <h5>Saltern Environment</h5>
+              </div>
+              <section id="salternEnv" class="data_view_section fs_150rem">
+                <article class="sensor_data_view sdv_w_side">
+                  <p>일사량</p>
+                  <p id="solar">-</p>
+                  <p>W/m²</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>온도</p>
+                  <p id="temp">-</p>
+                  <p>℃</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>습도</p>
+                  <p id="reh">-</p>
+                  <p>%</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>풍속</p>
+                  <p id="ws">-</p>
+                  <p>m/s</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>1시간 강수량</p>
+                  <p id="rain_h">-</p>
+                  <p>mm</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>금일 강수량</p>
+                  <p id="rain_d">-</p>
+                  <p>mm</p>
+                </article>
+              </section>
+            </div>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>금일 발전 현황</header>
+              <div id="daily_kw_graph" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>기상청 동네 예보</header>
+              <div id="weatherCastTable" class="component_piece_body p_column_rem_2"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      // 발전 현황 정보를 표현하기 위한 객체
+      var powerGenerationInfo = <%- JSON.stringify(powerGenerationInfo) %>;
+      // 염전 환경 정보를 표현하기 위한 객체
+      var salternEnvInfo = <%- JSON.stringify(salternEnvInfo) %>;
+      // 차트를 그리기 위한 데이터
+      var inverterLineChart = <%- JSON.stringify(inverterLineChart) %>;
+      //  TODO: 발전량 예측일 위한 데이터
+      var powerPredictionInfo =<%- JSON.stringify(powerPredictionInfo) %>
+
+      // console.log(inverterLineChart)
+      $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+
+      // 기상 환경 정보 테이블 세팅
+      $('#weatherCastTable').html(<%- JSON.stringify(dom.weatherCastTableDom) %>)
+    </script>
+
+    <script>
+      // 금일 발전 현황
+      makeAreaChart(inverterLineChart, true);
+
+      // 현재 발전 현황
+      setDomElementValueWithJson(
+        document.getElementById('current_power_data'),
+        powerGenerationInfo,
+        'innerHTML',
+        'data-id',
+      );
+      // 금일 발전량
+      setDomElementValueWithJson(
+        document.getElementById('daily_power_data'),
+        powerGenerationInfo,
+        'innerHTML',
+        'data-id',
+      );
+      // 발전 현황 정보
+      setDomElementValueWithJson(
+        document.getElementById('powerStatus'),
+        powerGenerationInfo,
+        'innerHTML',
+        'id',
+      );
+      // 염전 환경 정보
+      setDomElementValueWithJson(
+        document.getElementById('salternEnv'),
+        salternEnvInfo,
+        'innerHTML',
+        'id',
+      );
+
+      // 금일 발전량 차트
+      makeGaugeChart({
+        domId: 'daily_power_graph',
+        yAxis: {
+          min: 0,
+          max: powerGenerationInfo.currKwYaxisMax * 6,
+          title: '',
+        },
+        series: {
+          name: '',
+          data: powerGenerationInfo.dailyPower,
+          tooltip: {
+            valueSuffix: 'kWh',
+          },
+        },
+      });
+      // 현재 발전량 차트
+      makeGaugeChart({
+        domId: 'current_power_graph',
+        yAxis: {
+          min: 0,
+          max: powerGenerationInfo.currKwYaxisMax,
+          title: '',
+        },
+        series: {
+          name: '',
+          data: powerGenerationInfo.currKw,
+          tooltip: {
+            valueSuffix: 'kW',
+          },
+        },
+      });
+      // predictPower(document.getElementById('tomorrowPower'), {});
+      predictPower('tomorrowPower', powerPredictionInfo);
+    </script>
+  </body>
+</html>

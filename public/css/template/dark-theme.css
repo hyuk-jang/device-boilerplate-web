@@ -142,6 +142,17 @@ footer {
   border-bottom: 1px solid #232a33;
 }
 
+.component_piece_area .p_column_rem {
+  padding: 2rem 0 0;
+  overflow: hidden;
+}
+/* FIXME: */
+.component_piece_area .p_column_rem_2 {
+  padding: 1rem 0 0;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
 /* Body 단위 색상 녹색 */
 .sensor_data_view > p:nth-child(2) {
   color: #93d30a;
@@ -183,6 +194,24 @@ footer {
 
 .search_box > button:hover {
   background: linear-gradient(#359b5d, #2c774a);
+}
+
+.submit_box > button {
+  border: 1px solid #18984b;
+  background: linear-gradient(#3baf69, #349059);
+}
+
+.submit_box > button:hover {
+  background: linear-gradient(#359b5d, #2c774a);
+}
+
+.submit_box > button.btn-danger {
+  border: 1px solid #aa3224;
+  background: linear-gradient(#e74c3c, #aa3224);
+}
+
+.submit_box > button.btn-danger:hover {
+  background: linear-gradient(#862217, #aa3224);
 }
 
 .form-control {

@@ -57,6 +57,8 @@ class Control {
 
   async init() {
     await this.setMainStorage();
+
+    // this.setChildren();
   }
 
   /**
@@ -90,6 +92,10 @@ class Control {
     /** @type {nodeInfo[]} */
     const nodeList = await this.biModule.getTable('v_dv_node');
 
+    // 장소 단위로 묶을 장소 목록을 가져옴
+    /** @type {V_DV_PLACE[]} */
+    const placeList = await this.biModule.getTable('v_dv_place');
+
     /** @type {placeInfo[]} */
     const placeRelationList = await this.biModule.getTable('v_dv_place_relation');
 
@@ -98,24 +104,47 @@ class Control {
     mainList.forEach(mainInfo => {
       const { main_seq: mainSeq, map } = mainInfo;
 
-      if (BU.IsJsonString(map)) {
+      /** @type {mDeviceMap} */
+      const deviceMap = BU.IsJsonString(map) ? JSON.parse(map) : {};
+      // Main Storage에서 필수 요소가 아니고 CLI를 많이 차지하기 때문에 map 이동
+      if (!_.isEmpty(deviceMap)) {
         this.mapList.push({
           mainSeq,
-          map: JSON.parse(map),
+          map: deviceMap,
         });
 
         delete mainInfo.map;
       }
 
-      const filterdDataLoggerList = _.filter(dataLoggerList, {
-        main_seq: mainSeq,
-      });
-      const filterdNodeList = _.filter(nodeList, {
-        main_seq: mainSeq,
-      });
+      // API 서버로 필수 데이터만을 전송하기 위한 flag 설정을 위한 Map 표기 Node 내역 추출
+      const svgNodeList = _(_.get(deviceMap, 'drawInfo.positionInfo.svgNodeList', []))
+        .map('defList')
+        .flatten()
+        .value();
 
-      const filterdPlaceList = _.filter(placeRelationList, {
+      const where = {
         main_seq: mainSeq,
+      };
+
+      const filteredPlaceRelationList = _.filter(placeRelationList, where);
+      /** @type {nodeInfo[]} */
+      const filteredNodeList = [];
+
+      filteredPlaceRelationList.forEach(plaRelRow => {
+        // 장소 시퀀스와 노드 시퀀스를 불러옴
+        const { place_seq: placeSeq, node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
+        // 장소 시퀀스를 가진 객체 검색
+        const placeInfo = _.find(placeList, { place_seq: placeSeq });
+        // 노드 시퀀스를 가진 객체 검색
+        const nodeInfo = _.find(nodeList, { node_seq: nodeSeq });
+
+        // 장소에 해당 노드가 있다면 자식으로 설정. nodeList 키가 없을 경우 생성
+        if (_.isObject(placeInfo) && _.isObject(nodeInfo)) {
+          // 해당 svg 노드 목록 중에 id와 매칭되는 Node Id 객체가 존재할 경우 API Client 전송 flag 설정
+          _.find(svgNodeList, { id: nodeId }) &&
+            _.isUndefined(_.find(filteredNodeList, { node_id: nodeId })) &&
+            filteredNodeList.push(nodeInfo);
+        }
       });
 
       /** @type {msInfo} */
@@ -123,10 +152,10 @@ class Control {
         msFieldInfo: mainInfo,
         msClient: null,
         msDataInfo: {
-          dataLoggerList: filterdDataLoggerList,
-          nodeList: filterdNodeList,
-          placeList: filterdPlaceList,
-          simpleOrderList: [],
+          dataLoggerList: _.filter(dataLoggerList, where),
+          nodeList: filteredNodeList,
+          placeList: filteredPlaceRelationList,
+          contractCmdList: [],
         },
         msUserList: [],
       };
@@ -136,6 +165,29 @@ class Control {
 
     return this.mainStorageList;
   }
+
+  //   /**
+  //  * @desc Step 2
+  //  * Storage를 구동하기 위한 자식 객체를 생성
+  //  */
+  // setChildren() {
+  //   // 소켓 서버 구동
+  //   this.socketServer = new SocketServer({
+  //     dbInfo: this.config.dbInfo,
+  //     socketServerPort: this.config.socketServerPort,
+  //   });
+  //   this.socketServer.mainStorageList = this.mainStorageList;
+  //   // socket Server의 갱신 내용을 받기위해 Observer 등록
+  //   this.socketServer.attach(this);
+  //   this.socketServer.init();
+
+  //   // 태양광 발전 현황판 데이터 생성 객체
+  //   this.powerStatusMaker = new PowerStatusMaker({
+  //     dbInfo: this.config.dbInfo,
+  //   });
+  //   this.powerStatusMaker.mainStorageList = this.mainStorageList;
+  //   this.powerStatusMaker.runCronCalcPowerStatus();
+  // }
 
   /**
    * Field Socket Client의 접속 변화가 생겼을 경우
@@ -150,7 +202,9 @@ class Control {
    * @param {msInfo} msInfo
    * @param {defaultFormatToResponse} fieldMessage field 에서 요청한 명령에 대한 응답
    */
-  responseFieldMessage(msInfo, fieldMessage) {}
+  responseFieldMessage(msInfo, fieldMessage) {
+    BU.CLI('responseFieldMessage');
+  }
 
   /**
    * SocketServer로 수신받은 DataLogger Node 정보
@@ -158,7 +212,7 @@ class Control {
    * @param {nodeInfo[]} renewalList 갱신된 노드. 차후에 속도에 문제가 된다면 갱신된 노드만 적용토록 해야함.
    */
   updateNodeList(msInfo, renewalList) {
-    this.socketIoManager.submitNodeListToIoClient(msInfo, renewalList);
+    this.socketIoManager.submitNodeList(msInfo, renewalList);
   }
 
   /**
@@ -166,8 +220,8 @@ class Control {
    * SocketServer로 수신받은 DataLogger Order 정보
    * @param {msInfo} msInfo
    */
-  updateSimpleOrderList(msInfo) {
-    this.socketIoManager.submitOrderListToIoClient(msInfo);
+  updateContractCmdList(msInfo) {
+    this.socketIoManager.submitCommandList(msInfo);
   }
 }
 module.exports = Control;

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
+    <script src="/js/drawSvg/drawSvg.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body ">
+        <div class="container_row mb_50rem">
+          <div class="report_category">
+            <button
+              type="button"
+              name="selectMode"
+              data-value="structureMode"
+              class="btn btn-success"
+            >
+              구성도
+            </button>
+            <button type="button" name="selectMode" data-value="tableMode" class="btn btn-default">
+              테이블
+            </button>
+          </div>
+        </div>
+        <!-- 명령 상태, 결과 -->
+        <div class="container_row default_search_area">
+          <p>
+            장치 연결 상태:
+            <span id="device_connected_stauts"></span>
+          </p>
+          <h2>
+            <span>명령 처리 결과:</span>
+            <span id="test_alert" class="color_red"></span>
+          </h2>
+        </div>
+        <!-- 제어 명령 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="user_box report_category  ml_2rem">
+              <button type="button" class="btn btn-success" name="cmdGoal" data-goal-type="ADD">
+                목표 추가
+              </button>
+              <button
+                type="button"
+                class="ml_1rem btn btn-danger"
+                name="cmdGoal"
+                data-goal-type="DELETE"
+              >
+                목표 취소
+              </button>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">명령 형식</span>
+              <select class="form-control" id="cmdFormatSelector">
+                <option value="SINGLE">단일 제어</option>
+                <option value="SET">설정 제어</option>
+                <option value="FLOW">염수 이동</option>
+                <option value="SCENARIO">시나리오</option>
+              </select>
+            </div>
+            <!-- 단일 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="SINGLE">
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 타입</span>
+                <select class="form-control" id="singleDeviceCate"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">장치 목록</span>
+                <select class="form-control" id="singleDeviceList">
+                  <option value=""></option>
+                </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">제어 형식</span>
+                <select class="form-control" id="singleControlValue">
+                  <option value="1">Open / On</option>
+                  <option value="0">Close / Off</option>
+                </select>
+              </div>
+            </div>
+            <!-- 설정 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="SET" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">명령 종류</span>
+                <select class="form-control" id="setCmdSelList">
+                  <option value="closeAllDevice">모든 장치 폐쇄</option>
+                  <option value="rainMode">우천 대피</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 흐름 제어 명령 -->
+            <div name="cmdCore" data-cmd-core="FLOW" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">시작지</span>
+                <select class="form-control" id="flowCmdSrcPlace"> </select>
+              </div>
+              <div class="search_box search_range_box">
+                <span class="search_title">도착지</span>
+                <select class="form-control" id="flowCmdDestPlace"> </select>
+              </div>
+            </div>
+
+            <!-- 시나리오 명령 -->
+            <div name="cmdCore" data-cmd-core="SCENARIO" hidden>
+              <div class="search_box search_range_box">
+                <span class="search_title">시나리오</span>
+                <select class="form-control" id="scenarioCmdSelList"> </select>
+              </div>
+            </div>
+
+            <div class="user_box report_category  ml_2rem">
+              <button
+                type="button"
+                id="testRequestCmdBtn"
+                class="btn btn-success"
+                name="reqControlCmd"
+                data-cmd-type="CONTROL"
+              >
+                요청
+              </button>
+              <button
+                type="button"
+                id="testCancelCmdBtn"
+                class="ml_1rem btn btn-danger"
+                name="reqControlCmd"
+                data-cmd-type="CANCEL"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 명령 목표 -->
+        <div class="container_row flex_jus_end default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <span class="search_title">제한 시간(초)</span>
+              <div class="search_body">
+                <input type="text" class="input_tre" placeholder="Infinity" />
+              </div>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장소 타입</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">장소</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">센서 종류</span>
+              <select class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">달성 목표치</span>
+              <div class="search_body">
+                <input type="text" class="input_tre" placeholder="없음" />
+              </div>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">목표 범위</span>
+              <select class="form-control">
+                <option value="UPPER">이상</option>
+                <option value="EQUAL">동일</option>
+                <option value="LOWER">이하</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- Content -->
+        <div class="container_row flex_dir_col">
+          <!-- tableContent -->
+          <div id="tableMode" hidden>
+            <div class="flex_jus_center rtsp_container">
+              <div id="contents" class="row_st_line min_h_780 command_status_view">
+                <div class=" panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">명령 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="cmdUpdateDate"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="cmdTableBody" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="wrapCmdFormat">명령 형식</th>
+                        <th data-field="wrapCmdType">명령 타입</th>
+                        <th data-field="wrapCmdStep">명령 단계</th>
+                        <th data-field="wrapCmdId">명령 ID</th>
+                        <th data-field="wrapCmdName">명령 이름</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="contents" class="row_st_line min_h_780 command_status_view">
+                <div class="panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">장치 상태 정보 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="nodeUpdateDate"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="nodeTableBody" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="ntn">장치 명</th>
+                        <th data-field="ni">장치 ID</th>
+                        <th data-field="pnl">관련 장소</th>
+                        <th data-field="d">데이터</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- structure Content -->
+          <div id="structureMode">
+            <div class="default_area pt_1rem">
+              <!-- panzoom, mode select -->
+              <div id="zoom" class="zoom_box">
+                <button id="zoom-in" class="btn btn-default btn-sm mr_1rem">
+                  <span class="glyphicon glyphicon-zoom-in"></span> Zoom-in
+                </button>
+                <button id="zoom-out" class="btn btn-default btn-sm mr_1rem">
+                  <span class="glyphicon glyphicon-zoom-out"></span> Zoom-out
+                </button>
+                <button id="reset" class="btn btn-default btn-sm mr_1rem">
+                  <span class="glyphicon glyphicon-refresh"></span> Reset
+                </button>
+                <select class="form-control w_auto ml_1rem" id="controlMode">
+                  <option value="view">뷰 모드</option>
+                  <option value="control selected">제어 모드</option>
+                </select>
+              </div>
+              <!-- canvas -->
+              <div>
+                <div id="canvas"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <!-- 서버사이드 데이터 정의 -->
+    <script>
+      // Map 정보
+      var map = <%- JSON.stringify(map) %>;
+      // 제어 명령 정보
+      var controlInfo = <%- JSON.stringify(controlInfo) %>;
+      // 제어 장치 돔 목록([{type: 'gateValue', category: "<option value="pump"> 펌프</option>" list: ['<option value="P_001">펌프 001</option>,...']}, ...])
+      var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
+      // 세션 ID
+      var sessionID = <%- JSON.stringify(sessionID) %>;
+      // 로그인 사용자 정보
+      var user = <%- JSON.stringify(user) %>;
+    </script>
+
+    <!-- 명령 형식 선택 이벤트 -->
+    <script>
+      // $('div[name=controlArea').each(function(index, value) {
+      //   $(value).data('area') !== 'SINGLE' && $(value).hide();
+      // });
+
+      $('#cmdFormatSelector').on('change', function() {
+        console.log('Change');
+        var cmdFormat = this.value; // 선택된 명령 형식
+        var $cmdCoreList = $('div[name="cmdCore"]');
+
+        // $('select[name="cmdFormatSelector"]')
+        //   .val(selectedForm)
+        //   .attr('selected', 'selected');
+
+        $cmdCoreList.each(function(index, cmdCoreDom) {
+          $(cmdCoreDom).data('cmd-core') === cmdFormat
+            ? $(cmdCoreDom).fadeIn()
+            : $(cmdCoreDom).hide();
+        });
+      });
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // 명령 목록을 보여줄 돔
+      var $cmdTableDom;
+      var $cmdUpdateDom;
+      // 노드 상태를 보여줄 돔
+      var $nodeTableDom;
+      var $nodeUpdateDom;
+      //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
+      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
+        $cmdTableDom = $('#' + cmdTableDomId);
+        $cmdUpdateDom = $('#' + cmdUpdateDomId);
+        $nodeTableDom = $('#' + nodeTableDomId);
+        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      }
+
+      // 테이블 ID 정의
+      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+
+      // Socket.IO 정의
+      var socket = io();
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
+
+      // 노드 클릭 이벤트가 발생할 경우 Socket.IO로 메시지를 전송할 객체 바인딩????
+      bindingClickNodeEvent(socket);
+
+      // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
+      socket.emit('certifySocket', {
+        sessionID: sessionID,
+        sessionUserInfo: user,
+      });
+
+      // 장치 연결 상태 반영
+      socket.on('updateApiClientConn', function(strConnStatus) {
+        // console.log(strConnStatus);
+        document.getElementById('device_connected_stauts').innerText = strConnStatus;
+      });
+
+      // 갱신 노드 반영
+      socket.on('updateNode', function(wsNodeList) {
+        // console.log(wsNodeList);
+        var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
+
+        _.forEach(wsNodeList, function(wsNodeInfo) {
+          // draw map
+          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+
+          // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
+          var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
+          foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
+        });
+
+        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: currNodeList,
+        });
+        // 명령 갱신 시각 반영
+        $nodeUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 명령 관련 갱신 반영
+      socket.on('updateCommand', function(commandList) {
+        // console.log('updateCommand', commandList);
+        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+
+        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: commandList,
+        });
+        // 명령 갱신 시각 반영
+        $cmdUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // FIXME: 오류를 보기위하여 임시
+      // 명령 요청 결과 Alert
+      socket.on('resultExecCommand', function(message) {
+        // console.log(commandList)
+        document.getElementById('test_alert').innerText = message;
+      });
+
+      $('button[name="reqControlCmd"]').on('click', function(event) {
+        makeControlCommand(this);
+      });
+
+      // FIXME: TEXT 종료 후 삭제
+      $(document).ready(function() {
+        // var thisSelectValue = CF_SINGLE;
+        // var thisSelectValue = CF_SET;
+        var thisSelectValue = CF_FLOW;
+        // var thisSelectValue = CF_SCENARIO;
+
+        // 명령 형식 변경
+        $('#cmdFormatSelector')
+          .val(thisSelectValue)
+          .trigger('change');
+
+        $('#testRequestCmdBtn').trigger('click');
+        // $('#testCancelCmdBtn').trigger('click');
+      });
+
+      var CF_SINGLE = 'SINGLE';
+      var CF_SET = 'SET';
+      var CF_FLOW = 'FLOW';
+      var CF_SCENARIO = 'SCENARIO';
+
+      // TODO: DBS에 명령을 요청할 공통 형식
+      function makeControlCommand(reqCmdBtn) {
+        var reqCmdInfo = {
+          cmdFormat: $('#cmdFormatSelector').val(),
+          cmdType: $(reqCmdBtn).data('cmd-type'),
+          cmdGoal: {},
+        };
+
+        switch (reqCmdInfo.cmdFormat) {
+          case 'MEASURE':
+            break;
+          case CF_SINGLE:
+            // 제어 노드 ID 추가
+            _.set(reqCmdInfo, 'nodeId', $('#singleDeviceList').val());
+            // 제어 값 추가
+            _.set(reqCmdInfo, 'singleControlType', $('#singleControlValue').val());
+            // NOTE: 차후 제어 설정 값 있을 경우 추가
+            // _.set(reqCmdInfo, 'controlSetValue', $('').val());
+            // makeSingleControlCmd(domElement, reqCmdInfo)
+            break;
+          case CF_SET:
+            // 제어 노드 ID 추가
+            _.set(reqCmdInfo, 'cmdId', $('#setCmdSelList').val());
+            break;
+          case CF_FLOW:
+            // 시작지와 도착지로 나눔
+            _.set(reqCmdInfo, 'SPI', $('#flowCmdSrcPlace').val());
+            _.set(reqCmdInfo, 'DPI', $('#flowCmdDestPlace').val());
+            break;
+          case CF_SCENARIO:
+            _.set(reqCmdInfo, 'cmdId', $('#scenarioCmdSelList').val());
+            break;
+          default:
+            break;
+        }
+
+        // TODO: 달성 목표 추가 (cmdGoal)
+        // console.log('makeResult', reqCmdInfo);
+
+        socket.emit('executeCommand', reqCmdInfo);
+      }
+    </script>
+
+    <!-- 장치 제어 명령 Dom 생성 영역  -->
+    <script>
+      // 설정 명령 목록
+      var setCmdList = controlInfo.setCmdList;
+      // 염수 이동 명령 목록
+      var flowCmdList = controlInfo.flowCmdList;
+      // 시나리오 명령 목록
+      var scenarioCmdList = controlInfo.scenarioCmdList;
+
+      // 명령 Select Dom Template
+      var cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
+
+      /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
+      function setInitControlDom(cmdFormat) {
+        switch (cmdFormat) {
+          case CF_SET:
+            // 설정 돔 설정
+            $('div[name="cmdCore"]').find('data');
+            $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+            break;
+          case CF_SINGLE:
+          default:
+            // 단일 명령 돔 설정
+            $('#singleDeviceCate').html(_.map(deviceDomList, 'category'));
+            // handleDeviceCategory() 실행 시킴
+            $('#singleDeviceCate').trigger('change');
+            break;
+        }
+        // 단일 명령 돔 설정
+        $('#singleDeviceCate').html(_.map(deviceDomList, 'category'));
+
+        // handleDeviceCategory() 실행 시킴
+        $('#singleDeviceCate').trigger('change');
+
+        // 염수 이동 명령 배수지 Dom 생성
+        $('#flowCmdSrcPlace').html(_.map(flowCmdList, cmdTemplate));
+
+        // 염수 이동 명령 급수지 Dom 생성. handleFlowSrcPlace() 실행 시킴
+        $('#flowCmdSrcPlace').trigger('change');
+
+        // 설정 돔 설정
+        $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+        // 시나리오 돔 설정
+        $('#scenarioCmdSelList').html(_.map(scenarioCmdList, cmdTemplate));
+      }
+
+      // Single 제어 장치 타입 선택시 이벤트
+      $('#singleDeviceCate').on('change', function(event) {
+        // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
+        $('#singleDeviceList').html(_.find(deviceDomList, { type: this.value }).list);
+      });
+
+      // Flow 제어 배수지 선택시 이벤트 >>> 급수지 목록 변경
+      $('#flowCmdSrcPlace').on('change', function(event) {
+        // Flow Cmd: 급수지 목록 설정
+        $('#flowCmdDestPlace').html(
+          _.find(flowCmdList, { cmdId: this.value }).destList.map(cmdTemplate),
+        );
+      });
+
+      setInitControlDom();
+    </script>
+
+    <!-- 구성도 페이지 형식 선택 -->
+    <script>
+      var $selectModeBtns = $('button[name=selectMode]');
+
+      $selectModeBtns.on('click', function(event) {
+        var currValue = $(this).data('value');
+
+        $selectModeBtns.each(function(index, selectModeBtn) {
+          var btnValue = $(selectModeBtn).data('value');
+
+          if (currValue === btnValue) {
+            $(selectModeBtn).addClass('btn-success');
+            $(selectModeBtn).removeClass('btn-default');
+            $('#' + btnValue).removeAttr('hidden');
+          } else {
+            $(selectModeBtn).addClass('btn-default');
+            $(selectModeBtn).removeClass('btn-success');
+            $('#' + btnValue).attr('hidden', 'hidden');
+          }
+        });
+      });
+    </script>
+
+    <!-- structure Content 세팅 -->
+    <script>
+      drawSvgBasePlace('canvas'); // 멥 그리기
+      setPanzoom(); // 줌 기능 세팅
+
+      //모드 선택 설렉트 박스 and 한/영 토글 버튼
+      $('#controlMode').change(function() {
+        var selectedMode = this.value;
+
+        $(`#canvas`).empty(); // svg가 그려진 공간 초기화
+        drawSvgBasePlace('canvas'); // 초기화 후 다시 그리기 (체크 상태 포함)
+        bindingClickNodeEvent('', selectedMode); // 장치, 센서 클릭 이벤트 다시 바인딩
+
+        // ↓ 다시 그려진 map에 데이터를 다시 뿌려준다.
+      });
+
+      // jquery panzoom 옵션 세팅
+      function setPanzoom() {
+        var svgMap = SVG.get('svgCanvas'); //id가 svgCanvas인 svg 요소 선택
+        var $canvas = $('#canvas');
+        var matrix = `matrix(1, 0, 0, 1, 0, 0)`; // panzoom 기본 zoom 설정
+        var filter = 'win16|win32|win64|mac';
+
+        //모바일, pc 접속 분별하여 zoom in/out 활셩 여부 설정
+        if (0 > filter.indexOf(navigator.platform.toLowerCase())) {
+          // mobile panzoom option
+          $canvas.panzoom({
+            disablePan: true,
+            disableZoom: true,
+            startTransform: matrix,
+          });
+          // zoom(in,out), reset 버튼 숨김
+          $('#zoom-out', '#zoom-in', '#reset').hide();
+        } else {
+          // pc panzoom
+          $canvas.panzoom({
+            $reset: $('#reset'),
+            cursor: 'context-menu',
+            startTransform: matrix,
+          });
+
+          // mousewheel option
+          $canvas.panzoom().on('mousewheel.focal', function(e) {
+            const delta = e.delta || e.originalEvent.wheelDelta;
+            const zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+
+            e.preventDefault();
+
+            $canvas.panzoom('zoom', zoomOut, {
+              animate: false,
+              focal: e,
+            });
+          });
+
+          // zoom in, out 기능 적용
+          $('#zoom-in').click(function(e) {
+            $canvas.panzoom('zoom', {});
+          });
+          $('#zoom-out').click(function(e) {
+            $canvas.panzoom('zoom', 'zoomOut', {});
+          });
+        }
+      }
+    </script>
+
+    <!-- 명령 형식 선택 이벤트 -->
+    <script>
+      // $('div[name=controlArea').each(function(index, value) {
+      //   $(value).data('area') !== 'SINGLE' && $(value).hide();
+      // });
+
+      $('#cmdFormatSelector').on('change', function() {
+        var cmdFormat = this.value; // 선택된 명령 형식
+        var $cmdCoreList = $('div[name="cmdCore"]');
+
+        // $('select[name="cmdFormatSelector"]')
+        //   .val(selectedForm)
+        //   .attr('selected', 'selected');
+
+        $cmdCoreList.each(function(index, cmdCoreDom) {
+          $(cmdCoreDom).data('cmd-core') === cmdFormat
+            ? $(cmdCoreDom).fadeIn()
+            : $(cmdCoreDom).hide();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -9,6 +9,7 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const users = require('./users');
+const upsas = require('./upsas');
 
 const SITE_HEADER = 'app/';
 
@@ -18,7 +19,7 @@ switch (process.env.PJ_MAIN_ID) {
     selectedRouter = users;
     break;
   case 'UPSAS':
-    selectedRouter = users;
+    selectedRouter = upsas;
     break;
   default:
     selectedRouter = users;

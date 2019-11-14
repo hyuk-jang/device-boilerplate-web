@@ -26,23 +26,22 @@
           <div class="search_box search_interval_box">
             <span class="search_title">사진 촬영</span>
             <div>
-              <button type="button" id="btn_snapshot" title="Snapshot" class="btn btn-success" onclick="clientsidesnapshot()">사진
-                찍기</button>
+              <button type="button" id="btn_snapshot" title="Snapshot" class="btn btn-success"
+                onclick="clientsidesnapshot()">
+                사진 찍기
+              </button>
             </div>
           </div>
         </div>
-
       </div>
       <div class="container_row flex_dir_col mt0">
         <p class="table_desc_area">사진 촬영시각 &nbsp;<span id="snapshotDate"></span></p>
         <div class="cctv_box default_area">
-          <img id="img" src="" width="100%">
+          <img id="img" src="" width="100%" />
         </div>
       </div>
     </div>
     <%- include("../master/footer.ejs") %>
-
-
   </div>
 
   <script>
@@ -75,13 +74,13 @@
         commandId: "SINGLE",
         contents: {
           /**
-           * 명령 제어 타입 (requestOrderCommandType) 
+           * 명령 제어 타입 (reqWrapCmdType)
            * @example
            * CONTROL: 장치 제어 요청
            * CANCEL: 명령 제어 취소 요청
            * MEASURE: 명령 계측 요청
            */
-          requestCommandType: "CONTROL", // 단일 동작 제어는 모두 명령 요청으로 처리
+          wrapCmdType: "CONTROL", // 단일 동작 제어는 모두 명령 요청으로 처리
           nodeId: deviceId,
           /**
            * 장치 제어 타입 (requestDeviceControlType)
@@ -91,7 +90,7 @@
            * 2: 장치 Measure
            * 3: 장치 값 설정
            */
-          controlValue: controlType,
+          singleControlType: controlType,
           rank: 2,
           /** 로그인 한 사용자 정보 전송 */
           user: <%- JSON.stringify(user) %>
@@ -101,8 +100,6 @@
       socket.emit("executeCommand", requestMsg);
     })
   </script>
-
-
 </body>
 
 </html>

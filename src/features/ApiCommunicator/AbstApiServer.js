@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const net = require('net');
 
+const { BU } = require('base-util-jh');
+
 class AbstApiServer {
   /** @param {MainControl} controller */
   constructor(controller) {
@@ -8,6 +10,8 @@ class AbstApiServer {
     this.controller = controller;
     this.defaultConverter = controller.defaultConverter;
     this.mainStorageList = controller.mainStorageList;
+
+    this.observers = [];
 
     // this.init = _.once(this.init);
   }
@@ -18,6 +22,14 @@ class AbstApiServer {
    * @param {number} apiConfig.socketPort API Communicator 설정
    */
   init(apiConfig) {}
+
+  /**
+   *
+   * @param {Observer} observer
+   */
+  attach(observer) {
+    this.observers.push(observer);
+  }
 
   /**
    * Field Client 인증을 하고자 할 경우
@@ -62,9 +74,9 @@ class AbstApiServer {
    * FIXME: 명령은 전체 갱신 처리해버림.
    * @desc dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
-   * @param {simpleOrderInfo[]} updatedFieldSimpleOrderList
+   * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareSimpleOrderList(msInfo, updatedFieldSimpleOrderList) {}
+  compareContractCmdList(msInfo, updatedFieldContractCmdList) {}
 }
 module.exports = AbstApiServer;
 

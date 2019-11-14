@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%- projectName %> : 로그인</title>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--Jquery 3 CDN -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <!--Bootsrap 4 CDN-->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+
+  <!--Fontawesome CDN-->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+  <!--Custom styles-->
+  <link rel="stylesheet" type="text/css" href="/css/template/login.css">
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="d-flex justify-content-center h-100">
+      <div class="card">
+        <div class="card-header">
+          <h3><%- projectName %></h3>
+        </div>
+        <div class="card-body">
+          <form action="/auth/login" method="post">
+            <div class="input-group form-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-user"></i></span>
+              </div>
+              <input type="text" class="form-control" placeholder="아이디" name="userid">
+
+            </div>
+            <div class="input-group form-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-key"></i></span>
+              </div>
+              <input type="password" class="form-control" placeholder="비밀번호" name="password"
+                onkeypress="loginPress(event)">
+            </div>
+            <div class="d-flex justify-content-center links">
+              <span id="textErrorMessage">&nbsp;</span>
+            </div>
+            <div class="form-group">
+              <input type="button" value="로그인" class="btn float-right login_btn" onclick="login()">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+
+<script>
+  var message = "<%- message %>";
+  var projectName = "<%- projectName %>";
+
+  if (message.length) {
+    $("#textErrorMessage").html(message);
+  }
+
+  function loginPress(event) {
+    if (event.keyCode == 13) {
+      login()
+    }
+  }
+
+  function login() {
+    var form1 = document.querySelector("form");
+    var id = form1.userid.value;
+    var password = form1.password.value;
+
+    console.log(id, password)
+
+    if (id == "") {
+      $("#textErrorMessage").html(
+        "아이디를 입력하세요.");
+      return;
+    }
+
+
+    if (password == "") {
+      $("#textErrorMessage").html(
+        "비밀번호를 입력하세요");
+      return;
+    }
+
+    form1.submit();
+  }
+</script>

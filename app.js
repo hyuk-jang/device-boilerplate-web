@@ -37,6 +37,9 @@ const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
 const PowerModel = require('./models/templates/PowerModel');
+const WeatherModel = require('./models/templates/WeatherModel');
+const BlockModel = require('./models/templates/BlockModel');
+const RefineModel = require('./models/templates/RefineModel');
 
 app.use(bodyParser.json());
 app.use(
@@ -62,7 +65,7 @@ switch (projectMainId) {
     faviPath = 's2w.ico';
     break;
   case 'UPSAS':
-    faviPath = 'favicon.ico';
+    faviPath = 'kepco.ico';
     break;
   default:
     faviPath = 'favicon.ico';
@@ -75,6 +78,9 @@ app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
 app.set('powerModel', new PowerModel(dbInfo));
+app.set('weatherModel', new WeatherModel(dbInfo));
+app.set('blockModel', new BlockModel(dbInfo));
+app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(
   session({
@@ -110,10 +116,18 @@ app.use(express.json());
 // app.use(express.urlencoded({extended: `fa`lse}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// cctv 카메라 스냅샷 저장 경로
 app.use(
   '/snapshot',
   express.static(path.join(__dirname, 'snapshot'), {
     extensions: ['jpg'],
+  }),
+);
+// 맵 이미지 저장 경로
+app.use(
+  '/map',
+  express.static(path.join(__dirname, 'map'), {
+    extensions: ['jpg', 'png', 'gif'],
   }),
 );
 

@@ -1,4 +1,24 @@
 /**
+ * @typedef {Object} subCategoryNameInfo subCategory 정보
+ * @property {number} seq 시퀀스
+ * @property {string} name 서브 카테고리 명
+ */
+
+/**
+ * 페이지네이션 정보
+ * @typedef {Object} pageInfo
+ * @property {number} page
+ * @property {number} pageListCount
+ */
+
+/**
+ * Sub Category 정보
+ * @typedef {Object} setCategoryInfo
+ * @property {string} subCategory
+ * @property {string} btnName
+ */
+
+/**
  * @typedef {Object} domMainSensor
  * @property {string} ndId Node Def Id
  * @property {string} ndName 데이터 명
@@ -28,9 +48,9 @@
  * @property {Object} xAxis
  * @property {string=} xAxis.title
  * @property {Object[]} yAxis
- * @property {string=} yAxis.title
+ * @property {string=} yAxis.yTitle
  * @property {string=} yAxis.dataUnit
- * @property {plotSeries=} plotSeries
+ * @property {plotOptions=} plotOptions
  * @property {chartSeriesInfo[]} series
  */
 
@@ -47,7 +67,19 @@
  */
 
 /**
- * @typedef {Object} plotSeries
+ * @typedef {Object} plotOptions
+ * @property {plotOptionSplineInfo} spline 시작 UTC
+ */
+
+/**
+ * @typedef {Object} plotOptionSplineInfo
+ * @property {Object} marker 시작 UTC
+ * @property {number} pointStart 시작 UTC
+ * @property {number} pointInterval 시간 Interval
+ */
+
+/**
+ * @typedef {Object} plotSeriesInfo
  * @property {number} pointStart 시작 UTC
  * @property {number} pointInterval 시간 Interval
  */
