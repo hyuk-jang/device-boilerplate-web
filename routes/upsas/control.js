@@ -1,161 +1,209 @@
 const _ = require('lodash');
-const request = require('request');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
-const base64Img = require('base64-img');
-const moment = require('moment');
 
 const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-/* GET home page. */
+const defaultDom = require('../../models/domMaker/defaultDom');
+const controlDom = require('../../models/domMaker/controlDom');
+
+const commonUtil = require('../../models/templates/common.util');
+
+const DEFAULT_CATEGORY = 'commander';
+
+/** @type {setCategoryInfo[]} */
+const subCategoryList = [
+  {
+    subCategory: 'commander',
+    btnName: '제어관리',
+  },
+  {
+    subCategory: 'status',
+    btnName: '제어현황',
+  },
+  {
+    subCategory: 'eventManager',
+    btnName: '이벤트관리',
+  },
+];
+
+/* middleware. */
 router.get(
-  ['/', '/:siteId'],
-  asyncHandler(async (req, res) => {
-    // BU.CLI('control!!!');
+  ['/', '/:siteId', '/:siteId/:subCategory'],
+  asyncHandler(async (req, res, next) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId } = req.locals.mainInfo;
 
-    const { siteId, uuid } = req.locals.mainInfo;
+    const { subCategory = DEFAULT_CATEGORY } = req.params;
 
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    // 선택된 subCategoryDom 정의
+    const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
+    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
-    /** @type {CAMERA[]} */
-    const cameraList = await biDevice.getTable('camera', mainWhere, false);
-
-    /** @type {CAMERA_SNAPSHOT_DATA[]} */
-    const snapshotDataRows = await biDevice.getCameraSnapshot(_.map(cameraList, 'camera_seq'));
-
-    const snapshotStorageList = [];
-
-    snapshotDataRows.forEach(snapshotDataRow => {
-      const { snapshot_uuid: snapshotPath, camera_seq, writedate } = snapshotDataRow;
-      const cameraInfo = _.find(cameraList, { camera_seq });
-
-      const snapshotStorage = {
-        cameraSeq: cameraInfo.camera_seq,
-        cameraName: cameraInfo.camera_name,
-        snapshotPath: `snapshot/${uuid}/${snapshotPath}`,
-        snapshotTime: moment(writedate).format('YYYY-MM-DD hh:mm:ss'),
-      };
-
-      snapshotStorageList.push(snapshotStorage);
-
-      // const img = fs.readFileSync(`${process.cwd}/snapshot/${uuid}/${snapshotPath}`);
-      // res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-
-      // res.end(img, 'binary');
-    });
-
+    //  로그인 한 사용자 세션 저장
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;
-    req.locals.snapshotStorageList = snapshotStorageList;
 
-    res.render('./control/control', req.locals);
+    next();
   }),
 );
 
-/* GET home page. */
+/* GET 제어 관리. */
 router.get(
-  ['/:siteId/snapshot'],
+  ['/', '/:siteId', '/:siteId/commander'],
   asyncHandler(async (req, res) => {
-    // BU.CLI('control!!!');
-    request
-      .get('http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg')
-      .on('error', function(err) {
-        console.log(err);
-      })
-      .pipe(res);
-    // const requestGet = Promise.promisify(request.get);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    // const { statusCode, headers, body } = await requestGet(
-    //   // const { error, response, body } = await requestGet(
-    //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-    // );
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId, mainWhere } = req.locals.mainInfo;
 
-    // console.log(body);
+    /** @type {MAIN} */
+    const mainRow = await biModule.getTableRow('main', mainWhere);
+    /** @type {MAIN_MAP} */
+    const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
-    // fs.readFile(
-    //   './video.jpg',
-    //   {
-    //     encoding: 'base64',
-    //   },
-    //   (err, result) => {
-    //     BU.CLIS(err, result);
-    //   },
-    // );
+    /** @type {V_DV_NODE[]} */
+    const nodeList = await biModule.getTable('v_dv_node', mainWhere);
 
-    // res.send('hi');
+    // 장치 카테고리 별 Dom 생성
+    const deviceDomList = controlDom.makeNodeDom(nodeList);
+    const sensorDomList = controlDom.makeNodeDom(nodeList, false);
 
-    // if (statusCode !== 200) {
-    //   return res.status(statusCode).send('err');
-    // }
+    // BU.CLI(deviceInfoList);
 
-    // const data = `data:${headers['content-type']};base64,${Buffer.from(body).toString('base64')}`;
+    /** @type {V_DV_PLACE[]} */
+    const placeList = await biModule.getTable('v_dv_place', mainWhere);
 
-    // BU.CLI(data);
+    // BU.CLI(placeList);
 
-    // res.send(data);
+    // BU.CLIN(mainRow.map);
+    /** @type {mDeviceMap} */
+    const map = JSON.parse(mainRow.map);
 
-    // BU.CLIS(error, response, body);
+    controlDom.initCommand(map, placeList);
 
-    // if (error) {
-    //   return res.status(500).send('error');
-    // }
+    // const flowCmdDom = controlDom.makeFlowCmdDom(placeList, map.controlInfo.flowCmdList);
 
-    // const data = `data:${response.headers['content-type']};base64,${Buffer.from(body, 'base64')}`;
+    // BU.CLI(flowCmdDom);
 
-    // // BU.CLI(data);
+    // 명령 정보만 따로 저장
+    req.locals.controlInfo = map.controlInfo;
+    delete map.controlInfo;
 
-    // res.send(data);
+    //  Map 경로 재설정
+    _.set(map, 'drawInfo.frame.mapInfo.backgroundInfo.backgroundData', `/map/${mainMapRow.path}`);
+    req.locals.map = map;
+
+    req.locals.deviceDomList = deviceDomList;
+
+    // BU.CLI(req.locals);
+
+    res.render('./UPSAS/control/commander', req.locals);
   }),
 );
 
-// router.get('/:siteId/snapshot', (req, res) => {
-//   // request.get(
-//   //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//   //   (error, response, body) => {
-//   //     if (!error && response.statusCode === 200) {
-//   //       BU.CLI('complete');
-//   //       // const data = `data:${response.headers['content-type']};base64,${Buffer.from(
-//   //       //   body,
-//   //       //   'base64',
-//   //       // )}`;
+/* GET 제어 현황. */
+router.get(
+  ['/:siteId', '/:siteId/status'],
+  asyncHandler(async (req, res) => {
+    // BU.CLI(req.locals);
 
-//   //       // console.log(body);
-//   //       // return res.send(data);
-//   //     }
-//   //     BU.CLI('error', error);
-//   //     // res.status(500).send('');
-//   //   },
-//   // );
-//   request.get(
-//     'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//     (error, response, body) => {
-//       if (!error && response.statusCode == 200) {
-//         const data = `data:${response.headers['content-type']};base64,${Buffer.from(body).toString(
-//           'base64',
-//         )}`;
-//         BU.CLI('@@');
-//         console.log(data);
-//       }
-//       // res.status(500).send('');
-//     },
-//   );
-
-//   // request.get(
-//   //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//   //   (error, response, body) => {
-//   //     if (error) {
-//   //       return res.send(error);
-//   //     }
-
-//   //     return res.send(body);
-//   //   },
-//   // );
-// });
+    res.render('./UPSAS/control/status', req.locals);
+  }),
+);
 
 module.exports = router;
+
+// /**
+//  *
+//  * @param {mDeviceMap} deviceMap
+//  * @param {V_DV_PLACE[]} placeList
+//  */
+// function initCommand(deviceMap, placeList) {
+//   const {
+//     controlInfo: { flowCmdList, setCmdList, scenarioCmdList },
+//   } = deviceMap;
+
+//   // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력
+//   flowCmdList.forEach((flowSrcInfo, srcIndex) => {
+//     const { srcPlaceId, destList } = flowSrcInfo;
+//     // 출발지 한글 이름
+//     let { srcPlaceName } = flowSrcInfo;
+
+//     if (_.isNil(srcPlaceName)) {
+//       srcPlaceName = _.chain(placeList)
+//         .find({ place_id: srcPlaceId })
+//         .get('place_name')
+//         .value();
+//     }
+//     // 출발지 한글이름 추가
+//     // simpleCommandInfo.srcPlaceName ||
+//     _.set(flowSrcInfo, 'srcPlaceName', srcPlaceName);
+//     // 목적지 목록을 순회하면서 상세 명령 정보 정의
+//     destList.forEach((flowDesInfo, desIndex) => {
+//       const { destPlaceId } = flowDesInfo;
+//       let { destPlaceName } = flowDesInfo;
+//       // 목적지 한글 이름
+//       if (_.isNil(destPlaceName)) {
+//         destPlaceName = _.chain(placeList)
+//           .find({ place_id: destPlaceId })
+//           .get('place_name')
+//           .value();
+//       }
+
+//       flowSrcInfo.destList[desIndex] = {
+//         cmdId: destPlaceId,
+//         cmdName: destPlaceName,
+//       };
+
+//       // 목적지 한글이름 추가 및 명령 정보 정의
+//       // _.set(scDesInfo, 'destPlaceName', destPlaceName);
+//       // _.set(scDesInfo, 'cmdId', `${srcPlaceId}_TO_${destPlaceId}`);
+//       // _.set(scDesInfo, 'cmdName', `${srcPlaceName} → ${destPlaceName}`);
+//     });
+
+//     flowCmdList[srcIndex] = {
+//       cmdId: srcPlaceId,
+//       cmdName: srcPlaceName,
+//       destList,
+//     };
+//   });
+
+//   // 설정 명령 세팅
+//   setCmdList.forEach((cmdInfo, index) => {
+//     const { cmdId, cmdName = '' } = cmdInfo;
+
+//     setCmdList[index] = {
+//       cmdId,
+//       cmdName: cmdName.length ? cmdName : cmdId,
+//     };
+//     // setCmdInfo.scenarioName = cmdName.length ? cmdName : cmdId;
+//   });
+
+//   // 시나리오 명령 세팅
+//   scenarioCmdList.forEach((cmdInfo, index) => {
+//     const { scenarioId: cmdId, scenarioName: cmdName = '' } = cmdInfo;
+
+//     scenarioCmdList[index] = {
+//       cmdId,
+//       cmdName: cmdName.length ? cmdName : cmdId,
+//     };
+//     // scenarioCmdInfo.scenarioName = scenarioName.length ? scenarioName : scenarioId;
+//   });
+
+//   const mapCmdInfo = {
+//     /** @type {flowCmdInfo[]} 기존 Map에 있는 Flow Command를 변형 처리 */
+//     flowCmdList,
+//     setCmdList,
+//     scenarioCmdList,
+//   };
+
+//   return mapCmdInfo;
+// }
