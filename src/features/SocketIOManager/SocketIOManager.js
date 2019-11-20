@@ -41,7 +41,7 @@ class SocketIOManager extends AbstSocketIOManager {
     this.io = new SocketIO(httpServer);
 
     this.io.on('connection', socket => {
-      BU.CLI('connection');
+      // BU.CLI('connection');
       // 접속한 Socket 등록
       socket.on('certifySocket', sessionInfo => {
         /** @type {msUserInfo} */
@@ -102,6 +102,8 @@ class SocketIOManager extends AbstSocketIOManager {
           DPI,
         } = generateControlCmdInfo;
 
+        BU.CLI(generateControlCmdInfo);
+
         /** @type {wsControlCmdAPI} */
         const controlCmdInfo = {
           WCF,
@@ -140,6 +142,8 @@ class SocketIOManager extends AbstSocketIOManager {
           uuid: uuidv4(),
           contents: controlCmdInfo,
         };
+
+        // BU.CLI(defaultFormatToRequestInfo);
 
         // Main Storage 찾음.
         const msInfo = this.findMainStorage(socket);

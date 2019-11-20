@@ -252,6 +252,10 @@ _:-ms-input-placeholder,
   justify-content: flex-end;
 }
 
+.flex_jus_bet {
+  justify-content: space-between;
+}
+
 /***************************************/
 /*         Container - Side            */
 /***************************************/

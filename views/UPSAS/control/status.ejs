@@ -4,13 +4,22 @@
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
     <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
   </head>
-
+  <!-- 서버사이드 데이터 정의 -->
+  <script>
+    // 서브 카테고리 Dom
+    var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
+    // 세션 ID
+    var sessionID = <%- JSON.stringify(sessionID) %>;
+    // 로그인 사용자 정보
+    var user = <%- JSON.stringify(user) %>;
+  </script>
   <body>
     <div id="wrap" class="wrap hidden">
       <!-- Header -->
@@ -76,18 +85,10 @@
       <%- include("../master/footer.ejs") %>
     </div>
 
-    <!-- 서버사이드 데이터 정의 -->
+    <!-- Default Setting -->
     <script>
-      // 서브 카테고리 자동 설정
-      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
-      // 세션 ID
-      var sessionID = <%- JSON.stringify(sessionID) %>;
-      // 로그인 사용자 정보
-      var user = <%- JSON.stringify(user) %>;
-    </script>
+      $('#subCategoryDom').html(subCategoryDom);
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
       // 명령 목록을 보여줄 돔
       var $cmdTableDom;
       var $cmdUpdateDom;
@@ -104,11 +105,11 @@
 
       // 테이블 ID 정의
       initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+    </script>
 
-      // Socket.IO 정의
+    <!-- Socket.IO 이벤트 바인딩 -->
+    <script>
       var socket = io();
-      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
-      var currNodeList = [];
 
       // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
       socket.emit('certifySocket', {
@@ -116,6 +117,8 @@
         sessionUserInfo: user,
       });
 
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
       // 갱신 노드 반영
       socket.on('updateNode', function(wsNodeList) {
         // console.log(wsNodeList);

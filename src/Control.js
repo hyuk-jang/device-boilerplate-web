@@ -10,6 +10,9 @@ const AbstRtspManager = require('./features/RtspManager/AbstRtspManager');
 const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
 
 const { BaseModel } = require('../../../module/device-protocol-converter-jh');
+const {
+  dcmWsModel: { wsNodePickKey },
+} = require('../../../module/default-intelligence');
 
 // class Control extends EventEmitter {
 class Control {
@@ -57,6 +60,9 @@ class Control {
 
   async init() {
     await this.setMainStorage();
+
+    // routes에서 사용할 수 있도록 전역 변수로 선언
+    global.mainStorageList = this.mainStorageList;
 
     // this.setChildren();
   }
@@ -203,7 +209,7 @@ class Control {
    * @param {defaultFormatToResponse} fieldMessage field 에서 요청한 명령에 대한 응답
    */
   responseFieldMessage(msInfo, fieldMessage) {
-    BU.CLI('responseFieldMessage');
+    BU.CLI('responseFieldMessage', fieldMessage);
   }
 
   /**
