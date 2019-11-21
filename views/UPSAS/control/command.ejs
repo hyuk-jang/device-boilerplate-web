@@ -3,7 +3,7 @@
   <head>
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
-    <script src="/js/contents/master/mainUtil.js"></script>
+    <!-- <script src="/js/contents/master/mainUtil.js"></script> -->
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/js/drawSvg/drawSvg.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -13,6 +13,7 @@
   <script>
     // 서브 카테고리 Dom
     var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
+
     // Map 정보
     var map = <%- JSON.stringify(map) %>;
     // 제어 명령 정보
@@ -206,5 +207,7 @@
         }
       }
     </script>
+    <!-- 검색 관련 js 모음 -->
+    <script src="/js/contents/report/search.js"></script>
   </body>
 </html>

@@ -11,7 +11,7 @@ const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
 
 const { BaseModel } = require('../../../module/device-protocol-converter-jh');
 const {
-  dcmWsModel: { wsNodePickKey },
+  dcmWsModel: { wsNodePickKey, wsPlaceRelationPickKey },
 } = require('../../../module/default-intelligence');
 
 // class Control extends EventEmitter {
@@ -62,7 +62,7 @@ class Control {
     await this.setMainStorage();
 
     // routes에서 사용할 수 있도록 전역 변수로 선언
-    global.mainStorageList = this.mainStorageList;
+    global.mainControl = this;
 
     // this.setChildren();
   }
@@ -102,7 +102,7 @@ class Control {
     /** @type {V_DV_PLACE[]} */
     const placeList = await this.biModule.getTable('v_dv_place');
 
-    /** @type {placeInfo[]} */
+    /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationList = await this.biModule.getTable('v_dv_place_relation');
 
     mainList = _.sortBy(mainList, 'main_seq');
@@ -132,25 +132,43 @@ class Control {
         main_seq: mainSeq,
       };
 
-      const filteredPlaceRelationList = _.filter(placeRelationList, where);
+      /** @type {V_DV_PLACE_RELATION[]} */
+      const filteredPlaceRelList = _.filter(placeRelationList, where);
+
       /** @type {nodeInfo[]} */
       const filteredNodeList = [];
 
-      filteredPlaceRelationList.forEach(plaRelRow => {
+      /** @type {wsPlaceRelInfo[]} */
+      const simplePlaceRelationList = filteredPlaceRelList.map(plaRelRow => {
         // 장소 시퀀스와 노드 시퀀스를 불러옴
         const { place_seq: placeSeq, node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
         // 장소 시퀀스를 가진 객체 검색
-        const placeInfo = _.find(placeList, { place_seq: placeSeq });
+        // const placeInfo = _.find(placeList, { place_seq: placeSeq });
         // 노드 시퀀스를 가진 객체 검색
         const nodeInfo = _.find(nodeList, { node_seq: nodeSeq });
 
-        // 장소에 해당 노드가 있다면 자식으로 설정. nodeList 키가 없을 경우 생성
-        if (_.isObject(placeInfo) && _.isObject(nodeInfo)) {
-          // 해당 svg 노드 목록 중에 id와 매칭되는 Node Id 객체가 존재할 경우 API Client 전송 flag 설정
-          _.find(svgNodeList, { id: nodeId }) &&
-            _.isUndefined(_.find(filteredNodeList, { node_id: nodeId })) &&
+        // API Server로 데이터를 전송하는 Node만 필터링
+        if (plaRelRow.is_submit_api === 1) {
+          _.isUndefined(_.find(filteredNodeList, { node_id: nodeId })) &&
             filteredNodeList.push(nodeInfo);
         }
+
+        return _.reduce(
+          wsPlaceRelationPickKey.FOR_MAIN_STORAGE,
+          (result, value, key) => {
+            result[value] = _.get(nodeInfo, key, '');
+            return result;
+          },
+          {},
+        );
+
+        // // 장소에 해당 노드가 있다면 자식으로 설정. nodeList 키가 없을 경우 생성
+        // if (_.isObject(placeInfo) && _.isObject(nodeInfo)) {
+        //   // 해당 svg 노드 목록 중에 id와 매칭되는 Node Id 객체가 존재할 경우 API Client 전송 flag 설정
+        //   _.find(svgNodeList, { id: nodeId }) &&
+        //     _.isUndefined(_.find(filteredNodeList, { node_id: nodeId })) &&
+        //     filteredNodeList.push(nodeInfo);
+        // }
       });
 
       /** @type {msInfo} */
@@ -160,7 +178,7 @@ class Control {
         msDataInfo: {
           dataLoggerList: _.filter(dataLoggerList, where),
           nodeList: filteredNodeList,
-          placeList: filteredPlaceRelationList,
+          placeRelList: filteredPlaceRelList,
           contractCmdList: [],
         },
         msUserList: [],
@@ -170,6 +188,55 @@ class Control {
     });
 
     return this.mainStorageList;
+  }
+
+  /**
+   *
+   * @param {nodeInfo[]} nodeList
+   * @param {Object} pickInfo default: 브라우저를 위한 값
+   */
+  convertNodesToWsNodes(nodeList, pickInfo = wsNodePickKey.FOR_BROWSER) {
+    return _.map(nodeList, nodeInfo => {
+      // BU.CLI(nodeInfo)
+      return _.reduce(
+        pickInfo,
+        (result, value, key) => {
+          result[value] = _.get(nodeInfo, key, '');
+          return result;
+        },
+        {},
+      );
+    });
+  }
+
+  /**
+   *
+   * @param {Object} convertInfo
+   * @param {V_DV_PLACE_RELATION[]} convertInfo.placeRelationRows
+   * @param {Object} convertInfo.pickInfo default: 브라우저를 위한 값
+   * @param {number=} convertInfo.isSubmitAPI 1일 경우  API Server 에서 사용되는 정보만 추출.
+   */
+  convertPlaRelsToWsPlaRels(convertInfo) {
+    const {
+      placeRelationRows,
+      pickInfo = wsPlaceRelationPickKey.FOR_BROWSER,
+      isSubmitAPI = 0,
+    } = convertInfo;
+
+    const placeRelRows =
+      isSubmitAPI === 1 ? _.filter(placeRelationRows, { is_submit_api: 1 }) : placeRelationRows;
+
+    return _.map(placeRelRows, nodeInfo => {
+      // BU.CLI(nodeInfo)
+      return _.reduce(
+        pickInfo,
+        (result, value, key) => {
+          result[value] = _.get(nodeInfo, key, '');
+          return result;
+        },
+        {},
+      );
+    });
   }
 
   //   /**

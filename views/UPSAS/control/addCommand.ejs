@@ -1,3 +1,9 @@
+<!-- 서버사이드 데이터 정의 -->
+<script>
+  // place relation 정보
+  var wsPlaceRelList = <%- JSON.stringify(wsPlaceRelList) %>;
+</script>
+
 <!-- 제어 명령 -->
 <div class="container_row flex_dir_col default_search_area">
   <div class="search_area">
@@ -84,6 +90,9 @@
 <!-- <script type="text/template" id="cmdGoalTemplate" ></script> -->
 <template id="cmdGoalTemplate">
   <div class="search_area">
+    <div class="search_box ">
+      <button name="deleteCmdGoal">-</button>
+    </div>
     <div class="search_box search_range_box">
       <span class="search_title">제한 시간(초)</span>
       <div class="search_body">
@@ -252,5 +261,13 @@
     var cmdGoalDomTemplate = _.template($('#cmdGoalTemplate').html());
     $('#cmdGoalArea').append(cmdGoalDomTemplate());
   });
+  // FIXME: 테스트 후 삭제
   $('#addCmdGoalBtn').trigger('click');
+
+  // 목표 삭제 버튼 클릭 시 해당 목표 삭제
+  $('#cmdGoalArea').on('click', 'button[name="deleteCmdGoal"]', function() {
+    $(this)
+      .parentsUntil('#cmdGoalArea')
+      .remove();
+  });
 </script>

@@ -163,7 +163,7 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {nodeInfo[]} renewalList 갱신된 노드
    */
   pickNodeList(dataInfo, renewalList) {
-    const { placeList } = dataInfo;
+    const { placeRelList } = dataInfo;
 
     // BU.CLIN(renewalList)
 
@@ -182,7 +182,7 @@ class SocketIOManager extends AbstSocketIOManager {
           }, {})
           .thru(pickNode => {
             // BU.CLIN(pickNode)
-            const placeNameList = _(placeList)
+            const placeNameList = _(placeRelList)
               .filter({ node_real_id: nodeInfo.node_real_id })
               .map('place_name')
               .value();

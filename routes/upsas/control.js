@@ -11,6 +11,8 @@ const controlDom = require('../../models/domMaker/controlDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
+const { wsPlaceRelationPickKey } = require('../../../default-intelligence').dcmWsModel;
+
 const DEFAULT_CATEGORY = 'command';
 
 /** @type {setCategoryInfo[]} */
@@ -86,21 +88,29 @@ router.get(
     const placeRows = await biModule.getTable('v_dv_place', mainWhere);
     // BU.CLI(placeRows);
 
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
+    // /** @type {V_DV_PLACE_RELATION[]} */
+    // const placeRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
 
     /**
      * Main Storage List에서 각각의 거점 별 모든 정보를 가지고 있을 객체 정보 목록
      * @type {msInfo[]} mainStorageList
      */
-    const mainStorages = global.mainStorageList;
-    const foundMsInfo = _.find(mainStorages, msInfo =>
+    /** @type {MainControl} */
+    const mainController = global.mainControl;
+
+    const foundMsInfo = _.find(mainController.mainStorageList, msInfo =>
       _.isEqual(msInfo.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
     );
     // BU.CLIN(foundMsInfo.msDataInfo.placeList);
     if (foundMsInfo) {
-      const { nodeList, placeList } = foundMsInfo.msDataInfo;
-      // BU.CLIN(nodeList);
+      const wsPlaceRelList = mainController.convertPlaRelsToWsPlaRels({
+        placeRelationRows: foundMsInfo.msDataInfo.placeRelList,
+        isSubmitAPI: 1,
+      });
+      // BU.CLIN(wsPlaceRelList);
+      req.locals.wsPlaceRelList = wsPlaceRelList;
+    } else {
+      req.locals.wsPlaceRelList = [];
     }
 
     // BU.CLIN(mainRow.map);
