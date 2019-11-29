@@ -682,6 +682,10 @@ article.sdv_w_side > p:last-child {
   width: 10%;
 }
 
+.w_15per {
+  width: 15%;
+}
+
 .w_20per {
   width: 20%;
 }
@@ -732,6 +736,46 @@ article.sdv_w_side > p:last-child {
 
 .w_7rem {
   width: 7rem;
+}
+
+.mw_1rem {
+  min-width: 1rem;
+}
+
+.mw_2rem {
+  min-width: 2rem;
+}
+
+.mw_3rem {
+  min-width: 3rem;
+}
+
+.mw_4rem {
+  min-width: 4rem;
+}
+
+.mw_5rem {
+  min-width: 5rem;
+}
+
+.mw_6rem {
+  min-width: 6rem;
+}
+
+.mw_7rem {
+  min-width: 7rem;
+}
+
+.mw_8rem {
+  min-width: 8rem;
+}
+
+.mw_9rem {
+  min-width: 9rem;
+}
+
+.mw_10rem {
+  min-width: 10rem;
 }
 
 .ml0 {

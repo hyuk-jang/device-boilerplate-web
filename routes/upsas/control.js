@@ -108,7 +108,8 @@ router.get(
         isSubmitAPI: 1,
       });
       // BU.CLIN(wsPlaceRelList);
-      req.locals.wsPlaceRelList = wsPlaceRelList;
+      // FIXME: 만약 제어 장치도 넣고자 할 경우 EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
+      req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr => _.omit(pr, 'is'));
     } else {
       req.locals.wsPlaceRelList = [];
     }
