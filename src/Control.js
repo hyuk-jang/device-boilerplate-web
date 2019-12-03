@@ -296,5 +296,15 @@ class Control {
   updateContractCmdList(msInfo) {
     this.socketIoManager.submitCommandList(msInfo);
   }
+
+  /**
+   * 업데이트 내용만을 전달하고자 할 경우
+   * @param {msInfo} msInfo
+   * @param {string} eventName 'MODE', ... ETC
+   * @param {Object} choresInfo
+   */
+  updateChores(msInfo, eventName, choresInfo) {
+    this.socketIoManager.submitChores(msInfo, eventName, choresInfo);
+  }
 }
 module.exports = Control;

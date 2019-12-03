@@ -5,6 +5,13 @@
     <%- include("../master/head.ejs") %>
     <!-- <script src="/js/contents/master/mainUtil.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
+    <!-- SVG Map 을 생성하기 위한 필수 Library -->
+    <script src="/js/svg/svg.js"></script>
+    <script src="/js/svg/svg.filter.js"></script>
+    <script src="/js/jquery.panzoom.js"></script>
+    <script src="/js/jquery.mousewheel.js"></script>
+
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/js/drawSvg/drawSvg.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -40,12 +47,16 @@
         <div class="container_row default_search_area">
           <p>
             장치 연결 상태:
-            <span id="device_connected_stauts"></span>
+            <span id="updateApiClientConn"></span>
           </p>
           <h2>
             <span>명령 처리 결과:</span>
-            <span id="test_alert" class="color_red"></span>
+            <span id="resultExecCommand" class="color_red"></span>
           </h2>
+          <p>
+            시스템 구동 모드:
+            <input type="text" name="" id="algorithmId"></input>
+          </p>
         </div>
         <%- include("./addCommand.ejs") %>
         <!-- Content -->
@@ -97,14 +108,48 @@
       // 명령 요청 결과 Alert
       socket.on('resultExecCommand', function(message) {
         // console.log(commandList)
-        document.getElementById('test_alert').innerText = message;
+        document.getElementById('resultExecCommand').innerText = message;
       });
 
       // 장치 연결 상태 반영
       socket.on('updateApiClientConn', function(strConnStatus) {
         // console.log(strConnStatus);
-        document.getElementById('device_connected_stauts').innerText = strConnStatus;
+        document.getElementById('updateApiClientConn').innerText = strConnStatus;
       });
+
+      // 잡다한 업데이트 처리
+      socket.on('updateChores', function(eventName, choresInfo) {
+        switch (eventName) {
+          case 'MODE':
+            updateMode(choresInfo);
+            break;
+
+          default:
+            break;
+        }
+        // console.log(strConnStatus);
+        document.getElementById('updateApiClientConn').innerText = strConnStatus;
+      });
+
+      // 제어 모드 정보
+      var currModeInfo = {
+        controlModeInfo: {
+          id: '',
+          name: '',
+        },
+        cmdStrategy: '',
+      };
+
+      /**
+       * @param {Object} modeInfo 
+       * @param {Object} modeInfo.controlModeInfo 제어 모드(알고리즘)
+       * @param {string} modeInfo.controlModeInfo.id 알고리즘 ID
+       * @param {string} modeInfo.controlModeInfo.name 알고리즘 Name
+       * @param {string} modeInfo.cmdStrategy 명령 전략 ID
+       */
+      function updateMode(modeInfo) {
+        currModeInfo = modeInfo;
+      }
 
       // 갱신 노드 반영
       socket.on('updateNode', function(wsNodeList) {

@@ -4,6 +4,11 @@
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
     <script src="/js/contents/master/mainUtil.js"></script>
+
+    <!-- toggle library -->
+    <script src="/js/bootstrap-toggle.min.js"></script>
+    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
+
     <script src="/socket.io/socket.io.js"></script>
     <link
       rel="stylesheet"
@@ -139,7 +144,7 @@
 
       // 명령 관련 갱신 반영
       socket.on('updateCommand', function(commandList) {
-        // console.log('updateCommand', commandList);
+        console.log('updateCommand', commandList);
         var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
         $cmdTableDom.bootstrapTable('destroy').bootstrapTable({

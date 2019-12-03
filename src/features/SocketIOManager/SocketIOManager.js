@@ -17,7 +17,7 @@ const {
     nodePickKey,
   },
   dccFlagModel: { definedCommandSetRank: cmdRank },
-  dcmWsModel: { transmitToClientCommandType },
+  dcmWsModel: { transmitToClientCommandType, transmitToServerCommandType },
 } = require('../../../../default-intelligence');
 
 /** 무안 6kW TB */
@@ -138,7 +138,7 @@ class SocketIOManager extends AbstSocketIOManager {
         // BU.CLI(msg)
         /** @type {defaultFormatToRequest} */
         const defaultFormatToRequestInfo = {
-          commandId: transmitToClientCommandType.CMD,
+          commandId: transmitToServerCommandType.COMMAND,
           uuid: uuidv4(),
           contents: controlCmdInfo,
         };
@@ -310,6 +310,19 @@ class SocketIOManager extends AbstSocketIOManager {
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateCommand', msInfo.msDataInfo.contractCmdList);
+    });
+  }
+
+  /**
+   * 업데이트 내용만을 전달하고자 할 경우
+   * @param {msInfo} msInfo
+   * @param {string} eventName 'MODE', ... ETC
+   * @param {Object} choresInfo
+   */
+  updateChores(msInfo, eventName, choresInfo) {
+    // 해당 Socket Client에게로 데이터 전송
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('updateChores', eventName, choresInfo);
     });
   }
 

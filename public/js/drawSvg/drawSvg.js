@@ -370,17 +370,28 @@ function bindingClickNodeEvent(socket, selectedModeVal = 'view') {
  * @param {string} nodeId
  */
 function executeCommand(socket, controlType, nodeId) {
-  const requestMsg = {
-    commandId: 'SINGLE',
-    contents: {
-      wrapCmdType: 'CONTROL',
-      nodeId,
-      singleControlType: controlType,
-      rank: 2,
-    },
+  const reqCmdInfo = {
+    cmdFormat: 'SINGLE',
+    cmdType: 'CONTROL',
+    nodeId,
+    singleControlType: controlType,
+    // cmdType: $(reqCmdBtn).data('cmd-type'),
+    // cmdGoal: {
+    //   goalDataList: [],
+    // },
   };
-  console.log(requestMsg);
-  socket.emit('executeCommand', requestMsg);
+
+  // const requestMsg = {
+  //   commandId: 'SINGLE',
+  //   contents: {
+  //     wrapCmdType: 'CONTROL',
+  //     nodeId,
+  //     singleControlType: controlType,
+  //     rank: 2,
+  //   },
+  // };
+  // console.log(requestMsg);
+  socket.emit('executeCommand', reqCmdInfo);
 }
 
 /**

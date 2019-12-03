@@ -6,7 +6,9 @@ const net = require('net');
 
 const AbstApiServer = require('./AbstApiServer');
 
-const { dcmWsModel } = require('../../../../default-intelligence');
+const {
+  dcmWsModel: { transmitToServerCommandType },
+} = require('../../../../default-intelligence');
 
 class ApiServer extends AbstApiServer {
   /**
@@ -171,13 +173,7 @@ class ApiServer extends AbstApiServer {
   interpretCommand(fieldClient, fieldMessage) {
     // BU.CLI('interpretCommand');
     try {
-      const {
-        CERTIFICATION,
-        COMMAND,
-        NODE,
-        STAUTS,
-        POWER_BOARD,
-      } = dcmWsModel.transmitToServerCommandType;
+      const { CERTIFICATION, COMMAND, MODE, NODE, POWER_BOARD } = transmitToServerCommandType;
       // client를 인증하고자 하는 경우
       if (fieldMessage.commandId === CERTIFICATION) {
         return this.certifyFieldClient(fieldClient, fieldMessage);
@@ -203,9 +199,9 @@ class ApiServer extends AbstApiServer {
           case COMMAND: // 명령 정보가 업데이트 되었을 경우
             this.compareContractCmdList(msInfo, contents);
             break;
-          // case STAUTS: //
-          //   this.transmitDataToClient(msInfo.msClient, msInfo.msDataInfo.statusBoard);
-          //   break;
+          case MODE: // 제어 모드가 업데이트 되었을 경우
+            this.controller.updateChores(msInfo, transmitToServerCommandType.MODE, contents);
+            break;
           case POWER_BOARD: // 현황판 데이터를 요청할 경우
             responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
             // BU.CLI(responseDataByServer)
@@ -326,8 +322,8 @@ class ApiServer extends AbstApiServer {
    * @param {msInfo} msInfo
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareContractCmdList(msInfo, updatedFieldContractCmdList) {
-    // BU.CLI(receiveContractCmdList);
+  compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
+    BU.CLI(updatedFieldContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
       msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;

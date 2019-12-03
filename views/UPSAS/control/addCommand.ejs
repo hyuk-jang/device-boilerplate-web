@@ -112,7 +112,7 @@
     </div>
     <div class="search_box search_range_box">
       <span class="search_title">장소 타입</span>
-      <select class="form-control" name="placeTypeSel" id="kaak">
+      <select class="form-control" name="placeTypeSel">
         <option value="all">모두</option>
       </select>
     </div>
@@ -345,16 +345,10 @@
       .find('select[name="placeNameSel"]')
       .first();
 
-    // 장치명(소분류) Dom 객체 정의
-    var $sensorNameSel = $(this)
-      .parentsUntil('div[name="cmdGoalArea"]')
-      .find('select[name="sensorNameSel"]')
-      .first();
-
     // 장소명(중분류) Select Dom 동적 생성
     setPlaceNameDom($placeNameSel, this.value);
-    // 장치명(소분류) Select Dom 동적 생성
-    setSensorDom($sensorNameSel, $placeNameSel.val());
+
+    $placeNameSel.trigger('change');
   });
 
   // 장소명(중분류)이 변경되었을 경우 센서 목록 변경
