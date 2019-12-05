@@ -51,7 +51,7 @@ class AbstSocketIOManager {
    * Data Logger 상태를 io Client로 보냄
    * @param {msInfo} msInfo
    */
-  submitMsClientStatus(msInfo) {}
+  submitApiClientIsConn(msInfo) {}
 
   /**
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
@@ -71,17 +71,5 @@ class AbstSocketIOManager {
    * @param {defaultFormatToResponse} execCommandResultInfo
    */
   submitExecCommandResult(msInfo, execCommandResultInfo) {}
-
-  /**
-   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
-   * @param {msInfo} msInfo
-   */
-  submitNodeListToIoClient(msInfo) {}
-
-  /**
-   * 현재 수행중인 명령 리스트를 io Client로 보냄
-   * @param {msInfo} msInfo
-   */
-  submitOrderListToIoClient(msInfo) {}
 }
 module.exports = AbstSocketIOManager;

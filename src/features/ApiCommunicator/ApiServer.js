@@ -32,7 +32,7 @@ class ApiServer extends AbstApiServer {
     const server = net
       .createServer(socket => {
         // socket.end('goodbye\n');
-        console.log(`client is Connected ${apiPort}\n addressInfo: ${socket.remoteAddress}`);
+        console.log(`client is Connected ${apiPort} ===> addressInfo: ${socket.remoteAddress}`);
 
         // steram 연결 및 파서 등록
         const stream = socket.pipe(split(EOT));
@@ -57,7 +57,7 @@ class ApiServer extends AbstApiServer {
             // 2. Field -> 서버로 보내온 메시지 일 수 있음.
             /** @type {defaultFormatToRequest|defaultFormatToResponse} */
             const fieldMessage = JSON.parse(strData);
-            // BU.CLI(requestedDataByDataLogger);
+            // BU.CLI(fieldMessage);
 
             // isError Key가 존재하고 Number 형태라면 요청에 대한 응답이라고 판단하고 이벤트 발생
             if (_.isNumber(_.get(fieldMessage, 'isError'))) {
@@ -131,7 +131,7 @@ class ApiServer extends AbstApiServer {
    * @return {defaultFormatToResponse}
    */
   certifyFieldClient(fieldClient, fieldMessage) {
-    BU.CLI('certifyClient');
+    BU.log('certifyClient');
     // 사이트에서 보내온 메시지 명령 타입, 세부 내용
     const { commandId, contents } = fieldMessage;
 
@@ -146,7 +146,7 @@ class ApiServer extends AbstApiServer {
     );
     // 인증이 성공했다면 Socket Client를 적용.
     if (foundMainStorage) {
-      BU.CLI('인증 성공');
+      // BU.CLI('인증 성공');
       foundMainStorage.msClient = fieldClient;
       responseFieldMessage.isError = 0;
 
@@ -192,15 +192,15 @@ class ApiServer extends AbstApiServer {
       const msInfo = this.findMainStorage(fieldClient);
       if (msInfo) {
         switch (commandId) {
+          case MODE: // 제어 모드가 업데이트 되었을 경우
+            this.controller.updateMode(msInfo, contents);
+            break;
           case NODE: // 노드 정보가 업데이트 되었을 경우
             // BU.log(contents.length);
             this.compareNodeList(msInfo, contents);
             break;
           case COMMAND: // 명령 정보가 업데이트 되었을 경우
             this.compareContractCmdList(msInfo, contents);
-            break;
-          case MODE: // 제어 모드가 업데이트 되었을 경우
-            this.controller.updateChores(msInfo, transmitToServerCommandType.MODE, contents);
             break;
           case POWER_BOARD: // 현황판 데이터를 요청할 경우
             responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
@@ -323,7 +323,7 @@ class ApiServer extends AbstApiServer {
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
   compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
-    BU.CLI(updatedFieldContractCmdList);
+    // BU.CLI(updatedFieldContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
       msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;

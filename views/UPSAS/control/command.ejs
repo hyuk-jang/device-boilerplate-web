@@ -47,7 +47,7 @@
         <div class="container_row default_search_area">
           <p>
             장치 연결 상태:
-            <span id="updateApiClientConn"></span>
+            <span id="updateIsApiClientConn"></span>
           </p>
           <h2>
             <span>명령 처리 결과:</span>
@@ -55,7 +55,7 @@
           </h2>
           <p>
             시스템 구동 모드:
-            <input type="text" name="" id="algorithmId"></input>
+            <input type="text" name="" id="algorithmId" />
           </p>
         </div>
         <%- include("./addCommand.ejs") %>
@@ -107,28 +107,17 @@
       // FIXME: 오류를 보기위하여 임시
       // 명령 요청 결과 Alert
       socket.on('resultExecCommand', function(message) {
-        // console.log(commandList)
+        // console.log(message)
         document.getElementById('resultExecCommand').innerText = message;
       });
 
       // 장치 연결 상태 반영
-      socket.on('updateApiClientConn', function(strConnStatus) {
-        // console.log(strConnStatus);
-        document.getElementById('updateApiClientConn').innerText = strConnStatus;
-      });
-
-      // 잡다한 업데이트 처리
-      socket.on('updateChores', function(eventName, choresInfo) {
-        switch (eventName) {
-          case 'MODE':
-            updateMode(choresInfo);
-            break;
-
-          default:
-            break;
-        }
-        // console.log(strConnStatus);
-        document.getElementById('updateApiClientConn').innerText = strConnStatus;
+      var isApiClientConn = false;
+      socket.on('updateIsApiClientConn', function(isConn) {
+        // console.log(isConn);
+        isApiClientConn = isConn;
+        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
+        document.getElementById('updateIsApiClientConn').innerText = connStatus;
       });
 
       // 제어 모드 정보
@@ -139,17 +128,17 @@
         },
         cmdStrategy: '',
       };
-
       /**
-       * @param {Object} modeInfo 
+       * @param {Object} modeInfo
        * @param {Object} modeInfo.controlModeInfo 제어 모드(알고리즘)
        * @param {string} modeInfo.controlModeInfo.id 알고리즘 ID
        * @param {string} modeInfo.controlModeInfo.name 알고리즘 Name
        * @param {string} modeInfo.cmdStrategy 명령 전략 ID
        */
-      function updateMode(modeInfo) {
+      socket.on('updateMode', function(modeInfo) {
+        console.log(modeInfo);
         currModeInfo = modeInfo;
-      }
+      });
 
       // 갱신 노드 반영
       socket.on('updateNode', function(wsNodeList) {

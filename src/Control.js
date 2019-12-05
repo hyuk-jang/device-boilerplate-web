@@ -122,12 +122,6 @@ class Control {
         delete mainInfo.map;
       }
 
-      // API 서버로 필수 데이터만을 전송하기 위한 flag 설정을 위한 Map 표기 Node 내역 추출
-      const svgNodeList = _(_.get(deviceMap, 'drawInfo.positionInfo.svgNodeList', []))
-        .map('defList')
-        .flatten()
-        .value();
-
       const where = {
         main_seq: mainSeq,
       };
@@ -141,7 +135,7 @@ class Control {
       /** @type {wsPlaceRelInfo[]} */
       const simplePlaceRelationList = filteredPlaceRelList.map(plaRelRow => {
         // 장소 시퀀스와 노드 시퀀스를 불러옴
-        const { place_seq: placeSeq, node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
+        const { node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
         // 장소 시퀀스를 가진 객체 검색
         // const placeInfo = _.find(placeList, { place_seq: placeSeq });
         // 노드 시퀀스를 가진 객체 검색
@@ -176,6 +170,13 @@ class Control {
         msFieldInfo: mainInfo,
         msClient: null,
         msDataInfo: {
+          modeInfo: {
+            controlModeInfo: {
+              id: '',
+              name: '',
+            },
+            cmdStrategy: '',
+          },
           dataLoggerList: _.filter(dataLoggerList, where),
           nodeList: filteredNodeList,
           placeRelList: filteredPlaceRelList,
@@ -267,7 +268,7 @@ class Control {
    * @param {msInfo} msInfo
    */
   updateMsFieldClient(msInfo) {
-    this.socketIoManager.submitMsClientStatus(msInfo);
+    this.socketIoManager.submitApiClientIsConn(msInfo);
   }
 
   /**
@@ -298,13 +299,12 @@ class Control {
   }
 
   /**
-   * 업데이트 내용만을 전달하고자 할 경우
+   * 제어 모드 업데이트
    * @param {msInfo} msInfo
-   * @param {string} eventName 'MODE', ... ETC
-   * @param {Object} choresInfo
+   * @param {wsModeInfo} modeInfo
    */
-  updateChores(msInfo, eventName, choresInfo) {
-    this.socketIoManager.submitChores(msInfo, eventName, choresInfo);
+  updateMode(msInfo, modeInfo) {
+    this.socketIoManager.submitMode(msInfo, modeInfo);
   }
 }
 module.exports = Control;

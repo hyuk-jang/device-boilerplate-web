@@ -60,21 +60,18 @@ class SocketIOManager extends AbstSocketIOManager {
             msUserList,
             msClient,
             msDataInfo,
-            msDataInfo: { contractCmdList, nodeList },
+            msDataInfo: { contractCmdList, nodeList, modeInfo },
           } = foundMsInfo;
           // 사용자 추가
           msUserList.push(msUser);
 
-          // API Client와 연결 유무 정의
-          const connectedStatus = msClient instanceof net.Socket ? 'Connected' : 'Disconnected';
-
           // 첫 접속일 경우
-          const pickedNodeList = this.pickNodeList(msDataInfo, nodeList);
-          // BU.CLI(pickedNodeList.length);
-          // Site 접속 상태 코드 전송
-          socket.emit('updateMsClientStatus', connectedStatus);
+          // API Client와 연결 유무 정의
+          socket.emit('updateIsApiClientConn', msClient instanceof net.Socket);
+          // DBS 구동 모드 정보
+          socket.emit('updateMode', modeInfo);
           // NodeList 에서 선택한 key 만을 정제해서 전송
-          socket.emit('updateNode', pickedNodeList);
+          socket.emit('updateNode', this.pickNodeList(msDataInfo, nodeList));
           // OrderList에서 명령 타입을 한글로 변환 후 전송
           socket.emit('updateCommand', this.pickContractCmdList(contractCmdList));
         }
@@ -277,12 +274,25 @@ class SocketIOManager extends AbstSocketIOManager {
    * Data Logger 상태를 io Client로 보냄
    * @param {msInfo} msInfo
    */
-  submitMsClientStatus(msInfo) {
-    const connectedStatus = msInfo.msClient instanceof net.Socket ? 'Connected' : 'Disconnected';
+  submitApiClientIsConn(msInfo) {
+    const isApiClientConn = msInfo.msClient instanceof net.Socket;
 
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateApiClientConn', connectedStatus);
+      clientInfo.socketClient.emit('updateIsApiClientConn', isApiClientConn);
+    });
+  }
+
+  /**
+   * 업데이트 내용만을 전달하고자 할 경우
+   * @param {msInfo} msInfo
+   * @param {string} eventName 'MODE', ... ETC
+   * @param {wsModeInfo} modeInfo
+   */
+  submitMode(msInfo) {
+    // 해당 Socket Client에게로 데이터 전송
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('updateMode', msInfo.msDataInfo.modeInfo);
     });
   }
 
@@ -314,19 +324,6 @@ class SocketIOManager extends AbstSocketIOManager {
   }
 
   /**
-   * 업데이트 내용만을 전달하고자 할 경우
-   * @param {msInfo} msInfo
-   * @param {string} eventName 'MODE', ... ETC
-   * @param {Object} choresInfo
-   */
-  updateChores(msInfo, eventName, choresInfo) {
-    // 해당 Socket Client에게로 데이터 전송
-    msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateChores', eventName, choresInfo);
-    });
-  }
-
-  /**
    * 현재 수행중인 명령 리스트를 io Client로 보냄
    * @param {msInfo} msInfo
    * @param {defaultFormatToResponse} execCommandResultInfo
@@ -338,18 +335,6 @@ class SocketIOManager extends AbstSocketIOManager {
       clientInfo.socketClient.emit('resultExecCommand', execCommandResultInfo.message);
     });
     // 해당 Socket Client에게로 데이터 전송
-  }
-
-  /**
-   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
-   * @param {msInfo} msInfo
-   */
-  submitNodeListToIoClient(msInfo) {
-    const simpleNodeList = this.pickNodeList(msInfo.msDataInfo);
-    // 해당 Socket Client에게로 데이터 전송
-    msInfo.msUserList.forEach(clientInfo => {
-      clientInfo.socketClient.emit('updateNode', simpleNodeList);
-    });
   }
 }
 module.exports = SocketIOManager;
