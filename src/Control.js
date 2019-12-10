@@ -171,11 +171,12 @@ class Control {
         msClient: null,
         msDataInfo: {
           modeInfo: {
-            controlModeInfo: {
-              id: '',
-              name: '',
+            operationConfig: {
+              algorithmId: '',
+              algorithmName: '',
+              cmdStrategy: '',
             },
-            cmdStrategy: '',
+            operationConfigList: [],
           },
           dataLoggerList: _.filter(dataLoggerList, where),
           nodeList: filteredNodeList,

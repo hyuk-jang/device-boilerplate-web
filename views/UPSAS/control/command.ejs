@@ -44,7 +44,7 @@
           <div id="subCategoryDom" class="report_category"></div>
         </div>
         <!-- 명령 상태, 결과 -->
-        <div class="container_row default_search_area">
+        <div class="container_row">
           <p>
             장치 연결 상태:
             <span id="updateIsApiClientConn"></span>
@@ -63,6 +63,12 @@
               data-algorithm-name=""
               data-cmd-strategy=""
             />
+            <select class="form-control w_auto" id="operationModeSel">
+              <option selected value="DEFAULT">기본 모드</option>
+            </select>
+            <button id="changeOperationModeBtn" class="btn btn-success">
+              구동 모드 변경
+            </button>
           </p>
         </div>
         <%- include("./addCommand.ejs") %>
@@ -145,16 +151,46 @@
        * @param {operationConfig[]} modeInfo.operationConfigList 구동 모드 가능 목록
        */
       socket.on('updateMode', function(modeInfo) {
-        console.log(modeInfo);
+        // console.log(modeInfo);
         currModeInfo = modeInfo;
 
-        var controlModeDom = document.getElementById('operationSystem');
+        // 현재 수행중인 구동 모드 View
+        var operationSystemDom = document.getElementById('operationSystem');
 
-        controlModeDom.dataset.algorithmId = currModeInfo.operationConfig.algorithmId;
-        controlModeDom.dataset.algorithmName = currModeInfo.operationConfig.algorithmName;
-        controlModeDom.dataset.cmdStrategy = currModeInfo.operationConfig.cmdStrategy;
+        var operConfig = currModeInfo.operationConfig;
 
-        controlModeDom.value = currModeInfo.operationConfig.algorithmName;
+        // 데이터셋을 돌면서 값 세팅
+        for (const key in operationSystemDom.dataset) {
+          if (operationSystemDom.dataset.hasOwnProperty(key)) {
+            operationSystemDom.dataset[key] = operConfig[key];
+          }
+        }
+        // input Value 갱신
+        operationSystemDom.value = operConfig.algorithmName;
+
+        // 구동 모드 설정 목록이 없다면 종료
+        if (_.isEmpty(currModeInfo.operationConfigList)) return false;
+
+        // 변경 가능한 구동 모드 목록
+        var operationModeSelDom = document.getElementById('operationModeSel');
+
+        // 템플릿 정의
+        var optionTemplate = Handlebars.compile(
+          '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
+        );
+        // select option 동적 생성
+        var optionDomList = _.map(currModeInfo.operationConfigList, function(oConfig) {
+          // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
+          var strSelected = oConfig.algorithmId === operConfig.algorithmId ? 'selected' : '';
+          // 템플릿 적용하여 Dom 생성
+          return optionTemplate({
+            selected: strSelected,
+            optionId: oConfig.algorithmId,
+            optionValue: oConfig.algorithmName,
+          });
+        });
+        // Select Dom 적용
+        operationModeSelDom.innerHTML = optionDomList;
       });
 
       // 갱신 노드 반영
@@ -193,6 +229,22 @@
 
         // $('#testRequestCmdBtn').trigger('click');
         // $('#testCancelCmdBtn').trigger('click');
+      });
+    </script>
+
+    <!-- 제어 관리 js 세팅 및 바인딩 -->
+    <script>
+      $('#changeOperationModeBtn').on('click', function() {
+        var selectedAlgorithmId = $('#operationModeSel option:selected').val();
+
+        // 현재 수행 중인 구동 모드와 같을 경우 처리하지 않음
+        if (currModeInfo.operationConfig.algorithmId === selectedAlgorithmId) {
+          return false;
+        }
+        // console.log(selectedAlgorithmId);
+
+        // 제어 모드 변경 요청
+        socket.emit('changeOperationMode', selectedAlgorithmId);
       });
     </script>
 

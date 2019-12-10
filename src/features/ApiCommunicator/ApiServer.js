@@ -193,7 +193,7 @@ class ApiServer extends AbstApiServer {
       if (msInfo) {
         switch (commandId) {
           case MODE: // 제어 모드가 업데이트 되었을 경우
-            this.controller.updateMode(msInfo, contents);
+            this.updateOperationMode(msInfo, contents);
             break;
           case NODE: // 노드 정보가 업데이트 되었을 경우
             // BU.log(contents.length);
