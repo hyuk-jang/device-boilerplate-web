@@ -55,7 +55,14 @@
           </h2>
           <p>
             시스템 구동 모드:
-            <input type="text" name="" id="algorithmId" />
+            <input
+              type="text"
+              id="operationSystem"
+              name=""
+              data-algorithm-id=""
+              data-algorithm-name=""
+              data-cmd-strategy=""
+            />
           </p>
         </div>
         <%- include("./addCommand.ejs") %>
@@ -122,22 +129,32 @@
 
       // 제어 모드 정보
       var currModeInfo = {
-        controlModeInfo: {
-          id: '',
-          name: '',
+        operationConfig: {
+          algorithmId: '',
+          algorithmName: '',
+          cmdStrategy: '',
         },
-        cmdStrategy: '',
+        operationConfigList: [],
       };
       /**
        * @param {Object} modeInfo
-       * @param {Object} modeInfo.controlModeInfo 제어 모드(알고리즘)
-       * @param {string} modeInfo.controlModeInfo.id 알고리즘 ID
-       * @param {string} modeInfo.controlModeInfo.name 알고리즘 Name
-       * @param {string} modeInfo.cmdStrategy 명령 전략 ID
+       * @param {Object} modeInfo.operationConfig 제어 모드(알고리즘)
+       * @param {string} modeInfo.operationConfig.algorithmId 알고리즘 ID
+       * @param {string} modeInfo.operationConfig.algorithmName 알고리즘 Name
+       * @param {string} modeInfo.operationConfig.cmdStrategy 명령 전략
+       * @param {operationConfig[]} modeInfo.operationConfigList 구동 모드 가능 목록
        */
       socket.on('updateMode', function(modeInfo) {
         console.log(modeInfo);
         currModeInfo = modeInfo;
+
+        var controlModeDom = document.getElementById('operationSystem');
+
+        controlModeDom.dataset.algorithmId = currModeInfo.operationConfig.algorithmId;
+        controlModeDom.dataset.algorithmName = currModeInfo.operationConfig.algorithmName;
+        controlModeDom.dataset.cmdStrategy = currModeInfo.operationConfig.cmdStrategy;
+
+        controlModeDom.value = currModeInfo.operationConfig.algorithmName;
       });
 
       // 갱신 노드 반영

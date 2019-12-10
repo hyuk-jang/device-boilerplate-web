@@ -284,10 +284,8 @@ class SocketIOManager extends AbstSocketIOManager {
   }
 
   /**
-   * 업데이트 내용만을 전달하고자 할 경우
+   * 제어 모드 업데이트
    * @param {msInfo} msInfo
-   * @param {string} eventName 'MODE', ... ETC
-   * @param {wsModeInfo} modeInfo
    */
   submitMode(msInfo) {
     // 해당 Socket Client에게로 데이터 전송

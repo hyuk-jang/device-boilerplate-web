@@ -54,6 +54,12 @@ class AbstSocketIOManager {
   submitApiClientIsConn(msInfo) {}
 
   /**
+   * 제어 모드 업데이트
+   * @param {msInfo} msInfo
+   */
+  submitMode(msInfo) {}
+
+  /**
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
    * @param {msInfo} msInfo
    */

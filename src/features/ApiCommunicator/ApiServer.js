@@ -240,24 +240,39 @@ class ApiServer extends AbstApiServer {
     }
   }
 
-  // /**
-  //  * Client로 데이터를 보내는 메소드. data가 null이라면 데이터 전송하지 않음.
-  //  * @param {net.Socket} fieldClient
-  //  * @param {Buffer} data
-  //  */
-  // transmitDataToClient(fieldClient, data) {
-  //   try {
-  //     if (!_.isNull(data)) {
-  //       fieldClient.write(data);
-  //     }
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  /**
+   * 구동 모드 갱신 알림해올경우
+   * @description dcmWsModel.transmitToServerCommandType.MODE 명렁 처리 메소드
+   * @param {msInfo} msInfo
+   * @param {wsModeInfo} updatedModeInfo
+   */
+  updateOperationMode(msInfo, updatedModeInfo) {
+    const { operationConfig, operationConfigList = [] } = updatedModeInfo;
+
+    const { modeInfo } = msInfo.msDataInfo;
+
+    // 구동 모드 설정 정보 목록이 존재할 경우에만 덮어씌움
+    if (operationConfigList.length) {
+      modeInfo.operationConfigList = operationConfigList;
+    }
+
+    // 현재 모드와 동일할 경우 갱신하지 않음
+    if (_.isEqual(modeInfo.operationConfig, operationConfig)) return false;
+
+    // 구동 모드 정보 갱신
+    modeInfo.operationConfig = operationConfig;
+
+    // 사용자에게 알림
+    this.observers.forEach(observer => {
+      if (_.get(observer, 'updateOperationMode')) {
+        observer.updateOperationMode(msInfo);
+      }
+    });
+  }
 
   /**
    * Site에서 보내온 NodeList 데이터와 현재 가지고 있는 데이터와 비교하여 변화가 있을 경우 해당 노드를 선별하여 부모 호출
-   * @desc dcmWsModel.transmitToServerCommandType.NODE 명령 처리 메소드
+   * @description dcmWsModel.transmitToServerCommandType.NODE 명령 처리 메소드
    * @param {msInfo} msInfo
    * @param {wsNodeInfo[]} updatedFieldNodeList
    */
@@ -318,7 +333,7 @@ class ApiServer extends AbstApiServer {
 
   /**
    * FIXME: 명령은 전체 갱신 처리해버림.
-   * @desc dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
+   * @description dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */

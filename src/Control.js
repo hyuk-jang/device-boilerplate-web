@@ -281,6 +281,14 @@ class Control {
   }
 
   /**
+   * 제어 모드 업데이트
+   * @param {msInfo} msInfo
+   */
+  updateOperationMode(msInfo) {
+    this.socketIoManager.submitMode(msInfo);
+  }
+
+  /**
    * SocketServer로 수신받은 DataLogger Node 정보
    * @param {msInfo} msInfo
    * @param {nodeInfo[]} renewalList 갱신된 노드. 차후에 속도에 문제가 된다면 갱신된 노드만 적용토록 해야함.
@@ -296,15 +304,6 @@ class Control {
    */
   updateContractCmdList(msInfo) {
     this.socketIoManager.submitCommandList(msInfo);
-  }
-
-  /**
-   * 제어 모드 업데이트
-   * @param {msInfo} msInfo
-   * @param {wsModeInfo} modeInfo
-   */
-  updateMode(msInfo, modeInfo) {
-    this.socketIoManager.submitMode(msInfo, modeInfo);
   }
 }
 module.exports = Control;
