@@ -3,7 +3,6 @@
   <head>
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
-    <!-- <script src="/js/contents/master/mainUtil.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
@@ -15,6 +14,17 @@
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/js/drawSvg/drawSvg.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- toggle library -->
+    <script src="/js/bootstrap-toggle.min.js"></script>
+    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
+
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
   </head>
 
   <!-- 서버사이드 데이터 정의 -->
@@ -55,26 +65,45 @@
           </h2>
           <p>
             시스템 구동 모드:
-            <input
-              type="text"
+            <span
               id="operationSystem"
-              name=""
               data-algorithm-id=""
               data-algorithm-name=""
               data-cmd-strategy=""
-            />
+            ></span>
+
             <select class="form-control w_auto" id="operationModeSel">
               <option selected value="DEFAULT">기본 모드</option>
             </select>
             <button id="changeOperationModeBtn" class="btn btn-success">
               구동 모드 변경
             </button>
+            <template id="tempTest">
+              <div>
+                <input type="text" name="" id="" value="{{ inputValue }}" />
+              </div>
+            </template>
           </p>
         </div>
         <%- include("./addCommand.ejs") %>
         <!-- Content -->
-        <div class="container_row flex_dir_col">
-          <div class="default_area pt_1rem">
+        <div class="container_row flex_dir_col" id="dataViewArea">
+          <input
+            type="button"
+            name="dataView"
+            class="btn btn-danger"
+            data-view="svgMapArea"
+            value="Map"
+          />
+          <input
+            type="button"
+            name="dataView"
+            class="btn btn-default"
+            data-view="operStatusTableArea"
+            value="Table"
+          />
+          <!-- Svg Map -->
+          <div class="default_area pt_1rem" id="svgMapArea" >
             <div id="zoom" class="zoom_box">
               <!-- panzoom, mode select -->
               <button id="zoom-in" class="btn btn-default btn-sm mr_1rem">
@@ -96,6 +125,54 @@
               <div id="canvas"></div>
             </div>
           </div>
+          <!-- tableContent -->
+          <div class="flex_jus_center rtsp_container" id="operStatusTableArea" hidden>
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class=" panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">명령 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="cmdUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="cmdTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="wrapCmdFormat">명령 형식</th>
+                      <th data-field="wrapCmdType">명령 타입</th>
+                      <th data-field="wrapCmdStep">명령 단계</th>
+                      <th data-field="wrapCmdId">명령 ID</th>
+                      <th data-field="wrapCmdName">명령 이름</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">장치 상태 정보 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="nodeUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="nodeTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="ntn">장치 명</th>
+                      <th data-field="ni">장치 ID</th>
+                      <th data-field="pnl">관련 장소</th>
+                      <th data-field="d">데이터</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!--하단1-->
@@ -105,6 +182,23 @@
     <!-- Default Setting -->
     <script>
       $('#subCategoryDom').html(subCategoryDom);
+
+      // 명령 목록을 보여줄 돔
+      var $cmdTableDom;
+      var $cmdUpdateDom;
+      // 노드 상태를 보여줄 돔
+      var $nodeTableDom;
+      var $nodeUpdateDom;
+      //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
+      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
+        $cmdTableDom = $('#' + cmdTableDomId);
+        $cmdUpdateDom = $('#' + cmdUpdateDomId);
+        $nodeTableDom = $('#' + nodeTableDomId);
+        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      }
+
+      // 테이블 ID 정의
+      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
     </script>
 
     <!-- Socket.IO 이벤트 바인딩 -->
@@ -135,29 +229,32 @@
 
       // 제어 모드 정보
       var currModeInfo = {
-        operationConfig: {
-          algorithmId: '',
-          algorithmName: '',
-          cmdStrategy: '',
-        },
+        algorithmId: '',
         operationConfigList: [],
       };
       /**
        * @param {Object} modeInfo
-       * @param {Object} modeInfo.operationConfig 제어 모드(알고리즘)
-       * @param {string} modeInfo.operationConfig.algorithmId 알고리즘 ID
+       * @param {string} modeInfo.algorithmId 알고리즘 ID
        * @param {string} modeInfo.operationConfig.algorithmName 알고리즘 Name
        * @param {string} modeInfo.operationConfig.cmdStrategy 명령 전략
        * @param {operationConfig[]} modeInfo.operationConfigList 구동 모드 가능 목록
        */
       socket.on('updateMode', function(modeInfo) {
-        // console.log(modeInfo);
         currModeInfo = modeInfo;
 
         // 현재 수행중인 구동 모드 View
         var operationSystemDom = document.getElementById('operationSystem');
 
-        var operConfig = currModeInfo.operationConfig;
+        // 현재 수행 중인 알고리즘 ID 가 존재하지 않을 경우
+        if (currModeInfo.algorithmId === undefined) return false;
+
+        // 현재 수행 중인 알고리즘 정보를 가져옴
+        var operConfig = _.find(currModeInfo.operationConfigList, {
+          algorithmId: currModeInfo.algorithmId,
+        });
+
+        // 구동 모드 목록 중에 해당 값이 존재하지 않을 경우
+        if (_.isEmpty(operConfig)) return false;
 
         // 데이터셋을 돌면서 값 세팅
         for (const key in operationSystemDom.dataset) {
@@ -166,7 +263,7 @@
           }
         }
         // input Value 갱신
-        operationSystemDom.value = operConfig.algorithmName;
+        operationSystemDom.innerText = operConfig.algorithmName;
 
         // 구동 모드 설정 목록이 없다면 종료
         if (_.isEmpty(currModeInfo.operationConfigList)) return false;
@@ -181,6 +278,7 @@
         // select option 동적 생성
         var optionDomList = _.map(currModeInfo.operationConfigList, function(oConfig) {
           // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
+          // console.log(oConfig, operConfig);
           var strSelected = oConfig.algorithmId === operConfig.algorithmId ? 'selected' : '';
           // 템플릿 적용하여 Dom 생성
           return optionTemplate({
@@ -193,15 +291,38 @@
         operationModeSelDom.innerHTML = optionDomList;
       });
 
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
       // 갱신 노드 반영
       socket.on('updateNode', function(wsNodeList) {
         // console.log(wsNodeList);
         var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
-          // draw map
+          // SVG draw map
           showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
+          var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
+          foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
         });
+
+        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: currNodeList,
+        });
+        // 명령 갱신 시각 반영
+        $nodeUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 명령 관련 갱신 반영
+      socket.on('updateCommand', function(commandList) {
+        // console.log('updateCommand', commandList);
+        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+
+        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: commandList,
+        });
+        // 명령 갱신 시각 반영
+        $cmdUpdateDom.html(new Date().toLocaleString());
       });
 
       // 서버로 명령 실행 요청
@@ -237,14 +358,47 @@
       $('#changeOperationModeBtn').on('click', function() {
         var selectedAlgorithmId = $('#operationModeSel option:selected').val();
 
+        console.log('test', currModeInfo);
+
         // 현재 수행 중인 구동 모드와 같을 경우 처리하지 않음
-        if (currModeInfo.operationConfig.algorithmId === selectedAlgorithmId) {
-          return false;
-        }
+        // if (currModeInfo.algorithmId === selectedAlgorithmId) {
+        //   alert('현재 모드와 같습니다.');
+        //   return false;
+        // }
         // console.log(selectedAlgorithmId);
 
         // 제어 모드 변경 요청
         socket.emit('changeOperationMode', selectedAlgorithmId);
+      });
+
+      // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
+      $('input[name="dataView"]').on('click', function() {
+        var dataView = $(this).data('view');
+
+        // 버튼 색상 변경
+        $('#dataViewArea')
+          .children('input')
+          .each(function(index, inputElement) {
+            var currDataView = $(inputElement).data('view');
+            if (currDataView === dataView) {
+              $(this).addClass('btn-danger');
+              $(this).removeClass('btn-default');
+            } else {
+              $(this).removeClass('btn-danger');
+              $(this).addClass('btn-default');
+            }
+          });
+
+        // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
+        $('#dataViewArea')
+          .children('div')
+          .each(function(index, domElement) {
+            if (domElement.id === dataView) {
+              domElement.hidden = false;
+            } else {
+              domElement.hidden = true;
+            }
+          });
       });
     </script>
 
@@ -256,7 +410,7 @@
       //모드 선택 설렉트 박스 and 한/영 토글 버튼
       $('#controlMode').change(function() {
         var selectedMode = this.value;
-        console.log(selectedMode);
+        // console.log(selectedMode);
 
         // $(`#canvas`).empty(); // svg가 그려진 공간 초기화
         // drawSvgBasePlace('canvas'); // 초기화 후 다시 그리기 (체크 상태 포함)

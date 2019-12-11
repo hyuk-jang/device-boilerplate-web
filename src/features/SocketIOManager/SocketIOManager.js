@@ -17,7 +17,7 @@ const {
     nodePickKey,
   },
   dccFlagModel: { definedCommandSetRank: cmdRank },
-  dcmWsModel: { transmitToClientCommandType, transmitToServerCommandType },
+  dcmWsModel: { transmitToClientCommandType, transmitToServerCommandType: transmitToServerCT },
 } = require('../../../../default-intelligence');
 
 /** 무안 6kW TB */
@@ -135,7 +135,7 @@ class SocketIOManager extends AbstSocketIOManager {
         // BU.CLI(msg)
         /** @type {defaultFormatToRequest} */
         const defaultFormatToRequestInfo = {
-          commandId: transmitToServerCommandType.COMMAND,
+          commandId: transmitToServerCT.COMMAND,
           uuid: uuidv4(),
           contents: controlCmdInfo,
         };
@@ -144,6 +144,30 @@ class SocketIOManager extends AbstSocketIOManager {
 
         // Main Storage 찾음.
         const msInfo = this.findMainStorage(socket);
+
+        // Data Logger와 연결이 되어야만 명령 요청 가능
+        if (msInfo && msInfo.msClient instanceof net.Socket) {
+          // Socket Client로 명령 전송
+          msInfo.msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));
+        }
+      });
+
+      socket.on('changeOperationMode', algorithmId => {
+        /** @type {defaultFormatToRequest} */
+        const defaultFormatToRequestInfo = {
+          commandId: transmitToServerCT.MODE,
+          uuid: uuidv4(),
+          contents: algorithmId,
+        };
+        // BU.log(defaultFormatToRequestInfo);
+
+        const msInfo = this.findMainStorage(socket);
+
+        // 변경할려고 하는 알고리즘이 현재와 같을 경우 실행하지 않음
+        if (msInfo.msDataInfo.modeInfo.algorithmId === algorithmId) {
+          BU.CLI('변경하고자 하는 알고리즘이 현재와 동일합니다.');
+          return false;
+        }
 
         // Data Logger와 연결이 되어야만 명령 요청 가능
         if (msInfo && msInfo.msClient instanceof net.Socket) {
@@ -163,12 +187,6 @@ class SocketIOManager extends AbstSocketIOManager {
     const { placeRelList } = dataInfo;
 
     // BU.CLIN(renewalList)
-
-    // BU.CLIN(
-    //   _(renewalList)
-    //     .map(info => _.pick(info, ['node_id', 'data']))
-    //     .value(),
-    // );
 
     return _.chain(renewalList)
       .map(nodeInfo => {
@@ -190,79 +208,12 @@ class SocketIOManager extends AbstSocketIOManager {
       })
       .sortBy(nodePickKey.FOR_USER.node_id)
       .value();
-
-    // return _.chain(nodeList)
-    //   .map(nodeInfo => {
-    //     return _.chain(nodeInfo)
-    //       .pick(pickList)
-    //       .thru(pickNode => {
-    //         const placeNameList = _(placeList)
-    //           .filter({ node_real_id: nodeInfo.node_real_id })
-    //           .map('place_name');
-    //         return _.assign(pickNode, { place_name_list: placeNameList });
-    //       });
-    //   })
-    //   .sortBy('node_id')
-    //   .value();
   }
-
-  // /**
-  //  * 노드 정보에서 UI에 보여줄 내용만을 반환
-  //  * @param {contractCmdInfo[]} contractCmdList
-  //  */
-  // pickContractCmdList(contractCmdList) {
-  //   const pickList = ['reqWrapCmdType', 'wrapCmdStep', 'commandId', 'commandName'];
-  //   const returnValue = _.map(contractCmdList, contractCmdInfo => {
-  //     const pickInfo = _.pick(contractCmdInfo, pickList);
-
-  //     // 명령 타입 한글로 변경
-  //     switch (contractCmdInfo.reqWrapCmdType) {
-  //       case reqWCT.CONTROL:
-  //         pickInfo.reqWrapCmdType = '명령 제어';
-  //         break;
-  //       case reqWCT.CANCEL:
-  //         pickInfo.reqWrapCmdType = '명령 취소';
-  //         break;
-  //       case reqWCT.MEASURE:
-  //         pickInfo.reqWrapCmdType = '계측';
-  //         break;
-  //       default:
-  //         pickInfo.reqWrapCmdType = '알수없음';
-  //         break;
-  //     }
-
-  //     // 명령 상태 한글로 변경
-  //     switch (contractCmdInfo.wrapCmdStep) {
-  //       case cmdStep.WAIT:
-  //         pickInfo.wrapCmdStep = '대기 중';
-  //         pickInfo.index = 0;
-  //         break;
-  //       case cmdStep.PROCEED:
-  //         pickInfo.wrapCmdStep = '진행 중';
-  //         pickInfo.index = 1;
-  //         break;
-  //       case cmdStep.COMPLETE:
-  //         pickInfo.wrapCmdStep = '진행 중';
-  //         pickInfo.index = 1;
-  //         break;
-  //       case cmdStep.RUNNING:
-  //         pickInfo.wrapCmdStep = '실행 중';
-  //         pickInfo.index = 2;
-  //         break;
-  //       default:
-  //         pickInfo.wrapCmdStep = '알수없음';
-  //         pickInfo.index = 3;
-  //         break;
-  //     }
-  //     return pickInfo;
-  //   });
-
-  //   return _.sortBy(returnValue, 'index');
-  // }
 
   /**
    * 접속한 SocketIO 객체 정보가 등록된 Main Storage를 반환
    * @param {net.Socket} socket
+   * @return {msInfo}
    */
   findMainStorage(socket) {
     return _.find(this.mainStorageList, msInfo =>

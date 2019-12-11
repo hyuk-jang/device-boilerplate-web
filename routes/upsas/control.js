@@ -22,10 +22,6 @@ const subCategoryList = [
     btnName: '제어관리',
   },
   {
-    subCategory: 'status',
-    btnName: '제어현황',
-  },
-  {
     subCategory: 'event',
     btnName: '이벤트관리',
   },
@@ -142,11 +138,12 @@ router.get(
 
 /* GET 제어 현황. */
 router.get(
-  ['/:siteId', '/:siteId/status'],
+  ['/:siteId', '/:siteId/temp'],
   asyncHandler(async (req, res) => {
     // BU.CLI(req.locals);
 
-    res.render('./UPSAS/control/status', req.locals);
+    res.send('');
+    // res.render('./UPSAS/control/status', req.locals);
   }),
 );
 

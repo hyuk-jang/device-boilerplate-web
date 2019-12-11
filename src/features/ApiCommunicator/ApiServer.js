@@ -193,6 +193,7 @@ class ApiServer extends AbstApiServer {
       if (msInfo) {
         switch (commandId) {
           case MODE: // 제어 모드가 업데이트 되었을 경우
+            // BU.CLI(fieldMessage);
             this.updateOperationMode(msInfo, contents);
             break;
           case NODE: // 노드 정보가 업데이트 되었을 경우
@@ -247,7 +248,8 @@ class ApiServer extends AbstApiServer {
    * @param {wsModeInfo} updatedModeInfo
    */
   updateOperationMode(msInfo, updatedModeInfo) {
-    const { operationConfig, operationConfigList = [] } = updatedModeInfo;
+    // BU.CLIN(updatedModeInfo);
+    const { algorithmId, operationConfigList = [] } = updatedModeInfo;
 
     const { modeInfo } = msInfo.msDataInfo;
 
@@ -257,10 +259,10 @@ class ApiServer extends AbstApiServer {
     }
 
     // 현재 모드와 동일할 경우 갱신하지 않음
-    if (_.isEqual(modeInfo.operationConfig, operationConfig)) return false;
+    if (_.isEqual(modeInfo.algorithmId, algorithmId)) return false;
 
     // 구동 모드 정보 갱신
-    modeInfo.operationConfig = operationConfig;
+    modeInfo.algorithmId = algorithmId;
 
     // 사용자에게 알림
     this.observers.forEach(observer => {
