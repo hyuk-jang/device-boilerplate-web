@@ -71,7 +71,10 @@ class ApiServer extends AbstApiServer {
 
             // JSON 객체 분석 메소드 호출
             const responseDataByServer = this.interpretCommand(socket, fieldMessage);
-            // 여기까지 오면 유효한 데이터로 생각하고 완료 처리
+
+            // 응답할 데이터가 존재하지 않을 경우 무시
+            if (_.isEmpty(responseDataByServer)) return false;
+
             // BU.CLI(responseDataByServer);
             socket.write(encodingMsg(responseDataByServer));
           } catch (error) {
@@ -172,52 +175,52 @@ class ApiServer extends AbstApiServer {
    */
   interpretCommand(fieldClient, fieldMessage) {
     // BU.CLI('interpretCommand');
+    // 사이트에서 보내온 메시지 명령 타입, 세부 내용
+    const { commandId, contents } = fieldMessage;
+
+    /** @type {defaultFormatToResponse} */
+    const responseDataByServer = {
+      commandId,
+      isError: 0,
+      message: '',
+    };
+
     try {
       const { CERTIFICATION, COMMAND, MODE, NODE, POWER_BOARD } = transmitToServerCommandType;
       // client를 인증하고자 하는 경우
-      if (fieldMessage.commandId === CERTIFICATION) {
+      if (commandId === CERTIFICATION) {
         return this.certifyFieldClient(fieldClient, fieldMessage);
       }
 
-      // 사이트에서 보내온 메시지 명령 타입, 세부 내용
-      const { commandId, contents } = fieldMessage;
-
-      /** @type {defaultFormatToResponse} */
-      const responseDataByServer = {
-        commandId,
-        isError: 0,
-        message: '',
-      };
-
       const msInfo = this.findMainStorage(fieldClient);
-      if (msInfo) {
-        switch (commandId) {
-          case MODE: // 제어 모드가 업데이트 되었을 경우
-            // BU.CLI(fieldMessage);
-            this.updateOperationMode(msInfo, contents);
-            break;
-          case NODE: // 노드 정보가 업데이트 되었을 경우
-            // BU.log(contents.length);
-            this.compareNodeList(msInfo, contents);
-            break;
-          case COMMAND: // 명령 정보가 업데이트 되었을 경우
-            this.compareContractCmdList(msInfo, contents);
-            break;
-          case POWER_BOARD: // 현황판 데이터를 요청할 경우
-            responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
-            // BU.CLI(responseDataByServer)
-            break;
-          default:
-            responseDataByServer.isError = 1;
-            responseDataByServer.message = `${commandId}은 등록되지 않은 명령입니다.`;
-        }
-        return responseDataByServer;
+
+      // const msInfo = this.findMainStorage(fieldClient);
+      switch (commandId) {
+        case MODE: // 제어 모드가 업데이트 되었을 경우
+          // BU.CLI(fieldMessage);
+          this.updateOperationMode(msInfo, contents);
+          break;
+        case NODE: // 노드 정보가 업데이트 되었을 경우
+          // BU.log(contents.length);
+          this.compareNodeList(msInfo, contents);
+          break;
+        case COMMAND: // 명령 정보가 업데이트 되었을 경우
+          this.compareContractCmdList(msInfo, contents);
+          break;
+        case POWER_BOARD: // 현황판 데이터를 요청할 경우
+          responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
+          // BU.CLI(responseDataByServer)
+          break;
+        default:
+          throw new Error(`${commandId}은 등록되지 않은 명령입니다.`);
       }
-      responseDataByServer.isError = 1;
-      responseDataByServer.message = '사용자 인증이 필요합니다.';
-      return responseDataByServer;
+
+      // 정보가 정상적으로 처리되었고 단순 정보 알림에 관한 내용은 따로 응답하지 않음
+      return {};
     } catch (error) {
-      throw error;
+      responseDataByServer.isError = 1;
+      responseDataByServer.message = error.message;
+      return responseDataByServer;
     }
   }
 

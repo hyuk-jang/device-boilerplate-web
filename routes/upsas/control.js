@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const { BU } = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
 const controlDom = require('../../models/domMaker/controlDom');
@@ -138,11 +138,13 @@ router.get(
 
 /* GET 제어 현황. */
 router.get(
-  ['/:siteId', '/:siteId/temp'],
+  ['/:siteId', '/:siteId/:feature'],
   asyncHandler(async (req, res) => {
     // BU.CLI(req.locals);
 
-    res.send('');
+    res.send(DU.locationAlertBack(`${req.params.feature} 은 준비 중입니다.`));
+
+    // res.send('');
     // res.render('./UPSAS/control/status', req.locals);
   }),
 );
