@@ -165,44 +165,6 @@ module.exports = {
       })
       .value();
 
-    const placeDomList = _(flowCmdList)
-      .map('srcPlaceId')
-      .union()
-      .map(placeId => {
-        return _.find(placeList, { place_id: placeId });
-      })
-      .unionBy('pd_target_id')
-      .map(placeInfo => {
-        const templateInfo = _.isUndefined(placeInfo)
-          ? { pd_target_id: '', pd_target_name: '기타' }
-          : placeInfo;
-        return placeCategoryTemplate(templateInfo);
-      })
-      .value();
-
-    // const placeDomList = _(flowCmdList)
-    //   .map(flowCmdInfo => {
-    //     const templateInfo = _.isNil(flowCmdInfo.srcPlaceId)
-    //       ? { pd_target_id: '', pd_target_name: '기타' }
-    //       : placeInfo;
-    //     return placeCategoryTemplate(templateInfo);
-    //   })
-    //   .value();
-
-    // BU.CLI(placeDomList);
-
-    // placeList[0].pd_target_id
-
-    // 장치 카테고리 별 Dom 생성
-    // const deviceDomList = _.unionBy(flowCmdList, 'nd_target_id').map(nodeInfo => {
-    //   return {
-    //     type: nodeInfo.nd_target_id,
-    //     list: [],
-    //     category: nodeCategoryTemplate(nodeInfo),
-    //     controlType: [],
-    //   };
-    // });
-
     // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력
     flowCmdList.forEach(flowCmdInfo => {
       const { srcPlaceId } = flowCmdInfo;

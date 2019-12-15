@@ -16,13 +16,13 @@
         <option value="SCENARIO">시나리오</option>
       </select>
     </div>
-    <div class="search_box search_interval_box">
+    <!-- <div class="search_box search_interval_box">
       <span class="search_title">명령 유형</span>
       <select class="form-control" id="cmdTypeSel">
         <option value="CONTROL">제어</option>
         <option value="CANCEL">취소</option>
       </select>
-    </div>
+    </div> -->
 
     <!-- 단일 제어 명령 -->
     <div name="cmdCore" data-cmd-core="SINGLE">
@@ -97,8 +97,7 @@
 <div hidden name="cmdGoalArea" id="tempArea"></div>
 
 <!-- FIXME: 템플릿 코드 최종버젼에서는 script 로 이동(IE 호환 문제) -->
-<!-- <script type="text/template" id="cmdGoalTemplate" ></script> -->
-<template id="cmdGoalTemplate">
+<script type="text/template" id="cmdGoalTemplate">
   <div class="search_area">
     <div class="search_box ">
       <button name="deleteCmdGoal">-</button>
@@ -141,8 +140,7 @@
       </select>
     </div>
   </div>
-</template>
-
+</script>
 <!-- 명령 목표 -->
 <!-- <div id="cmdGoalArea" class="container_row flex_jus_end default_search_area"></div> -->
 
@@ -169,8 +167,7 @@
     // console.log('makeControlCommand', reqCmdBtn);
     var reqCmdInfo = {
       cmdFormat: $('#cmdFormatSel').val(),
-      cmdType: $('#cmdTypeSel').val(),
-      // cmdType: $(reqCmdBtn).data('cmd-type'),
+      // cmdType: $('#cmdTypeSel').val(),
       cmdGoal: {
         goalDataList: [],
       },

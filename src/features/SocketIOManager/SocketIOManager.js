@@ -89,7 +89,8 @@ class SocketIOManager extends AbstSocketIOManager {
         /** @type {wsGenerateControlCmdAPI} */
         const {
           cmdFormat: WCF,
-          cmdType: WCT,
+          // 기본 값은 명령 요청
+          cmdType: WCT = reqWCT.CONTROL,
           cmdId: WCI,
           cmdGoal: WCG,
           nodeId: NI,
