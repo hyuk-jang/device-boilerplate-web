@@ -8,10 +8,8 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const sensorUtil = require('../../models/templates/sensor.util');
-const excelUtil = require('../../models/templates/excel.util');
 const commonUtil = require('../../models/templates/common.util');
-
-const webUtil = require('../../models/templates/web.util');
+const defaultDom = require('../../models/domMaker/defaultDom');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
@@ -20,7 +18,19 @@ const DEFAULT_SEARCH_TYPE = 'days';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
-const DEFAULT_CATEGORY = 'sensor';
+const DEFAULT_CATEGORY = 'inverter';
+
+/** @type {setCategoryInfo[]} */
+const subCategoryList = [
+  {
+    subCategory: 'inverter',
+    btnName: '인버터',
+  },
+  {
+    subCategory: 'sensor',
+    btnName: '생육환경',
+  },
+];
 
 // trend middleware
 router.get(
@@ -33,6 +43,10 @@ router.get(
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
+
+    // 선택된 subCategoryDom 정의
+    const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
+    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
     // req.query 값 비구조화 할당
     const {
@@ -65,6 +79,7 @@ router.get(
     const trendInfo = {
       siteId,
       subCategory,
+      subCategoryName: _.find(subCategoryList, { subCategory }).btnName,
       strStartDateInputValue: searchRange.strStartDateInputValue,
       strEndDateInputValue: searchRange.strEndDateInputValue,
       searchType,
@@ -78,9 +93,45 @@ router.get(
   }),
 );
 
+/** 인버터 트렌드 */
+router.get(
+  ['/', '/:siteId', '/:siteId/inverter'],
+  asyncHandler(async (req, res, next) => {
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    /** @type {MEMBER} */
+    const { siteId } = req.locals.mainInfo;
+
+    const refinedInverterCharts = await refineModel.refineBlockCharts(
+      _.get(req, 'locals.searchRange'),
+      'inverter',
+      siteId,
+    );
+
+    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+    const inverterDomTemplate = _.template(`
+        <div class="lineChart_box default_area" id="<%= domId %>"></div>
+    `);
+    const divDomList = refinedInverterCharts.map(refinedChart =>
+      inverterDomTemplate({
+        domId: refinedChart.domId,
+      }),
+    );
+
+    _.set(req, 'locals.dom.divDomList', divDomList);
+    // _.set(req, 'locals.madeLineChartList', madeLineChartList);
+    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
+
+    // BU.CLIN(inverterTrendRows);
+
+    res.render('./trend/inverterTrend', req.locals);
+  }),
+);
+
 /** 생육 환경 트렌드 */
 router.get(
-  ['/', '/:siteId', '/:siteId/sensor'],
+  ['/:siteId/sensor'],
   asyncHandler(async (req, res) => {
     commonUtil.applyHasNumbericReqToNumber(req);
 
@@ -190,107 +241,4 @@ router.get(
     res.render('./trend/sensorTrend', req.locals);
   }),
 );
-
-/** 인버터 트렌드 */
-router.get(
-  ['/:siteId', '/:siteId/inverter'],
-  asyncHandler(async (req, res, next) => {
-    /** @type {RefineModel} */
-    const refineModel = global.app.get('refineModel');
-
-    /** @type {MEMBER} */
-    const { siteId } = req.locals.mainInfo;
-
-    const refinedInverterCharts = await refineModel.refineBlockCharts(
-      _.get(req, 'locals.searchRange'),
-      'inverter',
-      siteId,
-    );
-
-    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
-    const inverterDomTemplate = _.template(`
-        <div class="lineChart_box default_area" id="<%= domId %>"></div>
-    `);
-    const divDomList = refinedInverterCharts.map(refinedChart =>
-      inverterDomTemplate({
-        domId: refinedChart.domId,
-      }),
-    );
-
-    _.set(req, 'locals.dom.divDomList', divDomList);
-    // _.set(req, 'locals.madeLineChartList', madeLineChartList);
-    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
-
-    // BU.CLIN(inverterTrendRows);
-
-    res.render('./trend/inverterTrend', req.locals);
-  }),
-);
-
-/** FIXME: 구 버젼 인버터 트렌드 */
-// router.get(
-//   ['/:siteId', '/:siteId/inverter'],
-//   asyncHandler(async (req, res, next) => {
-//     /** @type {PowerModel} */
-//     const powerModel = global.app.get('powerModel');
-
-//     /** @type {searchRange} */
-//     const searchRangeInfo = _.get(req, 'locals.searchRange');
-
-//     // commonUtil.applyHasNumbericReqToNumber(req);
-
-//     /** @type {MEMBER} */
-//     const { siteId } = req.locals.mainInfo;
-
-//     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-//     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
-
-//     /** @type {V_PW_PROFILE[]} */
-//     const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-//     // BU.CLI(powerProfileRows);
-
-//     // 인버터 Seq 목록
-//     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-//     // const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-
-//     const deviceProtocol = new DeviceProtocol(siteId);
-
-//     const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-
-//     // plotSeries 를 구하기 위한 객체
-//     const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
-
-//     // BU.CLI(strGroupDateList);
-
-//     const madeLineChartList = await powerModel.getInverterLineChart(
-//       searchRangeInfo,
-//       deviceProtocol.trendInverterViewList,
-//       inverterSeqList,
-//       {
-//         strGroupDateList,
-//         plotSeries: momentFormat.plotSeries,
-//       },
-//     );
-
-//     // BU.CLIN(madeLineChartList, 3);
-
-//     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
-//     const inverterDomTemplate = _.template(`
-//         <div class="lineChart_box default_area" id="<%= domId %>"></div>
-//     `);
-//     const divDomList = madeLineChartList.map(refinedChart =>
-//       inverterDomTemplate({
-//         domId: refinedChart.domId,
-//       }),
-//     );
-
-//     _.set(req, 'locals.dom.divDomList', divDomList);
-//     _.set(req, 'locals.madeLineChartList', madeLineChartList);
-
-//     // BU.CLIN(inverterTrendRows);
-
-//     res.render('./trend/inverterTrend', req.locals);
-//   }),
-// );
-
 module.exports = router;
