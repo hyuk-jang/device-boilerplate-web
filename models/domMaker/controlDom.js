@@ -4,6 +4,93 @@ const { BU } = require('base-util-jh');
 
 module.exports = {
   /**
+   *
+   * @param {mDeviceMap} deviceMap
+   * @param {V_DV_PLACE[]} placeList
+   */
+  initCommand(deviceMap, placeList) {
+    const {
+      controlInfo: { flowCmdList, setCmdList, scenarioCmdList },
+    } = deviceMap;
+
+    // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력
+    flowCmdList.forEach((flowSrcInfo, srcIndex) => {
+      const { srcPlaceId, destList } = flowSrcInfo;
+      // 출발지 한글 이름
+      let { srcPlaceName } = flowSrcInfo;
+
+      if (_.isNil(srcPlaceName)) {
+        srcPlaceName = _.chain(placeList)
+          .find({ place_id: srcPlaceId })
+          .get('place_name')
+          .value();
+      }
+      // 출발지 한글이름 추가
+      // simpleCommandInfo.srcPlaceName ||
+      _.set(flowSrcInfo, 'srcPlaceName', srcPlaceName);
+      // 목적지 목록을 순회하면서 상세 명령 정보 정의
+      destList.forEach((flowDesInfo, desIndex) => {
+        const { destPlaceId } = flowDesInfo;
+        let { destPlaceName } = flowDesInfo;
+        // 목적지 한글 이름
+        if (_.isNil(destPlaceName)) {
+          destPlaceName = _.chain(placeList)
+            .find({ place_id: destPlaceId })
+            .get('place_name')
+            .value();
+        }
+
+        flowSrcInfo.destList[desIndex] = {
+          cmdId: destPlaceId,
+          cmdName: destPlaceName,
+        };
+
+        // 목적지 한글이름 추가 및 명령 정보 정의
+        // _.set(scDesInfo, 'destPlaceName', destPlaceName);
+        // _.set(scDesInfo, 'cmdId', `${srcPlaceId}_TO_${destPlaceId}`);
+        // _.set(scDesInfo, 'cmdName', `${srcPlaceName} → ${destPlaceName}`);
+      });
+
+      flowCmdList[srcIndex] = {
+        cmdId: srcPlaceId,
+        cmdName: srcPlaceName,
+        destList,
+      };
+    });
+
+    // 설정 명령 세팅
+    setCmdList.forEach((cmdInfo, index) => {
+      const { cmdId, cmdName = '' } = cmdInfo;
+
+      setCmdList[index] = {
+        cmdId,
+        cmdName: cmdName.length ? cmdName : cmdId,
+      };
+      // setCmdInfo.scenarioName = cmdName.length ? cmdName : cmdId;
+    });
+
+    // 시나리오 명령 세팅
+    scenarioCmdList.forEach((cmdInfo, index) => {
+      const { scenarioId: cmdId, scenarioName: cmdName = '' } = cmdInfo;
+
+      scenarioCmdList[index] = {
+        cmdId,
+        cmdName: cmdName.length ? cmdName : cmdId,
+      };
+      // scenarioCmdInfo.scenarioName = scenarioName.length ? scenarioName : scenarioId;
+    });
+
+    const mapCmdInfo = {
+      /** @type {flowCmdInfo[]} 기존 Map에 있는 Flow Command를 변형 처리 */
+      flowCmdList,
+      setCmdList,
+      scenarioCmdList,
+    };
+
+    return mapCmdInfo;
+  },
+
+  /**
    * 장치 류 돔을 생성할 경우
    * @param {V_DV_NODE[]} nodeList
    * @param {boolean=} isDevice 장치류 돔 여부
@@ -41,15 +128,14 @@ module.exports = {
   },
 
   /**
-   * 
-   * @param {mDeviceMap} deviceMapInfo 
+   *
+   * @param {mDeviceMap} deviceMapInfo
    */
   makePlace(deviceMapInfo) {
-    const {setInfo, relationInfo: {placeRelationList}}= deviceMapInfo;
-
-
-
-
+    const {
+      setInfo,
+      relationInfo: { placeRelationList },
+    } = deviceMapInfo;
   },
 
   /**
@@ -78,44 +164,6 @@ module.exports = {
         return placeCategoryTemplate(templateInfo);
       })
       .value();
-
-    const placeDomList = _(flowCmdList)
-      .map('srcPlaceId')
-      .union()
-      .map(placeId => {
-        return _.find(placeList, { place_id: placeId });
-      })
-      .unionBy('pd_target_id')
-      .map(placeInfo => {
-        const templateInfo = _.isUndefined(placeInfo)
-          ? { pd_target_id: '', pd_target_name: '기타' }
-          : placeInfo;
-        return placeCategoryTemplate(templateInfo);
-      })
-      .value();
-
-    // const placeDomList = _(flowCmdList)
-    //   .map(flowCmdInfo => {
-    //     const templateInfo = _.isNil(flowCmdInfo.srcPlaceId)
-    //       ? { pd_target_id: '', pd_target_name: '기타' }
-    //       : placeInfo;
-    //     return placeCategoryTemplate(templateInfo);
-    //   })
-    //   .value();
-
-    // BU.CLI(placeDomList);
-
-    // placeList[0].pd_target_id
-
-    // 장치 카테고리 별 Dom 생성
-    // const deviceDomList = _.unionBy(flowCmdList, 'nd_target_id').map(nodeInfo => {
-    //   return {
-    //     type: nodeInfo.nd_target_id,
-    //     list: [],
-    //     category: nodeCategoryTemplate(nodeInfo),
-    //     controlType: [],
-    //   };
-    // });
 
     // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력
     flowCmdList.forEach(flowCmdInfo => {

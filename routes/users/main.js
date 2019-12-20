@@ -25,6 +25,8 @@ router.get(
     const biModule = global.app.get('biModule');
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
 
     // Site Sequence.지점 Id를 불러옴
     const { siteId } = req.locals.mainInfo;
@@ -32,10 +34,13 @@ router.get(
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
-    /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
-    // BU.CLI(powerProfileRows);
+    // ********** Power 관련
+    // 발전 현황을 나타내는 기본적인 정보
+    const { powerGenerationInfo, validInverterDataList } = await refineModel.refineGeneralPowerInfo(
+      siteId,
+    );
 
+    // ********** Sensor 관련
     /** @type {V_DV_NODE_DEF[]} */
     const viewNodeDefRows = await biModule.getTable('v_dv_node_def');
     // console.time('getSensorProfile');
@@ -73,30 +78,6 @@ router.get(
       _.assign(sensorDataInfo, { [ndId]: result });
     });
 
-    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
-    // Site 발전 현황 구성.
-    // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
-    let searchRange = biModule.createSearchRange({
-      searchType: 'months',
-      searchInterval: 'month',
-    });
-    // BU.CLI(searchRange);
-    // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
-    // console.time('getInverterStatistics');
-    const inverterStatisticsRows = await biModule.getInverterStatistics(
-      searchRange,
-      inverterSeqList,
-    );
-    // console.timeEnd('getInverterStatistics');
-    // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
-    const monthPower = webUtil.reduceDataList(inverterStatisticsRows, 'interval_power');
-
-    // 금일 발전 현황 데이터
-    searchRange = biModule.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'hour',
-    });
     // searchRange = biModule.createSearchRange({
     //   strStartDate: '2018-11-01',
     //   searchType: 'days',
@@ -104,120 +85,6 @@ router.get(
     // });
     // BU.CLI(searchRange);
     // 인버터 트렌드 구함
-    // console.time('getInverterTrend');
-    const inverterTrend = await biModule.getInverterTrend(searchRange, inverterSeqList);
-    // console.timeEnd('getInverterTrend');
-    // BU.CLI(inverterTrend);
-
-    // 구한 인버터 Trend는 grouping 구간의 최대 최소 값이므로 오차가 발생. 따라서 이전 grouping 최대 값끼리 비교 연산 필요.
-    webUtil.refineDataRows(searchRange, inverterTrend, {
-      calcMaxKey: 'max_c_kwh',
-      calcMinKey: 'min_c_kwh',
-      resultKey: 'interval_power',
-      groupKey: 'inverter_seq',
-      rangeOption: {
-        dateKey: 'group_date',
-        minRequiredCountKey: 'total_count',
-      },
-    });
-
-    // 차트를 생성하기 위한 옵션.
-    const chartOption = {
-      selectKey: 'interval_power',
-      dateKey: 'group_date',
-      hasArea: true,
-    };
-    // 데이터 현황에 따라 동적 차트 궝
-    // const chartData = webUtil.makeDynamicLineChart(inverterTrend, chartOption);
-
-    // 일별 차트로 구성
-    // webUtil.applyScaleChart(chartData, 'day');
-    // webUtil.mappingChartDataName(chartData, '인버터 시간별 발전량');
-
-    // 인버터 현재 발전 현황
-    // console.time('v_pw_inverter_status');
-    /** @type {V_PW_INVERTER_STATUS[]} */
-    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
-    // console.timeEnd('v_pw_inverter_status');
-    // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
-    inverterStatusRows.forEach(inverterStatus => {
-      const { inverter_seq: inverterSeq } = inverterStatus;
-      // BU.CLI(foundPlaceData);
-      // 인버터 Sequence가 동일한 Power Profile을 가져옴
-      const foundProfile = _.find(powerProfileRows, { inverter_seq: inverterSeq });
-      // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
-      const {
-        m_name: mainName = '',
-        ivt_target_name: subName,
-        ivt_director_name: company = '',
-        ivt_amount: amount,
-      } = foundProfile;
-      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
-        _.isString(company) && company.length ? company : ''
-      }`;
-
-      // Inverter Status Row에 경사 일사량 확장
-      _.assign(inverterStatus, {
-        siteName,
-      });
-    });
-
-    // 인버터 발전 현황 데이터 검증
-    const validInverterDataList = webUtil.checkDataValidation(
-      inverterStatusRows,
-      new Date(),
-      'writedate',
-    );
-
-    // 설치 인버터 총 용량
-    const ivtAmount = _(powerProfileRows)
-      .map('ivt_amount')
-      .sum();
-
-    // Curr PV 전력
-    const pvKw = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'pv_kw', false),
-      1,
-      3,
-    );
-    // Curr Power 전력
-    const currKw = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'power_kw', false),
-      1,
-      2,
-    );
-
-    // 금일 발전량
-    const dailyPower = _(inverterStatusRows)
-      .map('daily_power_kwh')
-      .sum();
-
-    // Curr Power 전력
-    const cumulativePower = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', true),
-      0.001,
-      3,
-    );
-
-    // 현재 발전 효율
-    const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
-
-    const powerGenerationInfo = {
-      currKw,
-      currPf: _.isNaN(currPf) ? '-' : currPf,
-      currKwYaxisMax: _.round(ivtAmount),
-      dailyPower,
-      monthPower,
-      cumulativePower,
-      // co2: _.round(cumulativePower * 0.424, 3),
-      isOperationInverter: _.chain(validInverterDataList)
-        .map('hasValidData')
-        .values()
-        .every(Boolean)
-        .value(),
-      hasAlarm: false, // TODO 알람 정보 작업 필요
-    };
-
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     _.set(
       req,

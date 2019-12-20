@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
@@ -13,7 +14,6 @@ const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
 
-const webUtil = require('../../models/templates/web.util');
 const commonUtil = require('../../models/templates/common.util');
 
 const domMakerMaster = require('../../models/domMaker/masterDom');
@@ -33,6 +33,12 @@ const DEFAULT_SITE_ID = 'all';
 
 //   next();
 // });
+
+// 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_TYPE = 'days';
+// Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
+const DEFAULT_SEARCH_INTERVAL = 'hour';
+const DEFAULT_SEARCH_OPTION = 'merge';
 
 // server middleware
 router.get(
@@ -55,12 +61,42 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = 'main', siteId = userMainSeq } = req.params;
+    const { naviMenu = 'main', siteId = userMainSeq, subCategory = '' } = req.params;
+
+    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
     /** @type {WeatherModel} */
     const weatherModel = global.app.get('weatherModel');
+
+    // req.query 값 비구조화 할당
+    const {
+      searchType = DEFAULT_SEARCH_TYPE,
+      searchInterval = DEFAULT_SEARCH_INTERVAL,
+      searchOption = DEFAULT_SEARCH_OPTION,
+      strStartDateInputValue = moment().format('YYYY-MM-DD'),
+      strEndDateInputValue = '',
+    } = req.query;
+
+    // BU.CLI(req.query);
+
+    // SQL 질의를 위한 검색 정보 옵션 객체 생성
+    const searchRange = biModule.createSearchRange({
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
+    });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'days',
+    //   searchInterval: 'hour',
+    //   strStartDate: '2019-08-05',
+    //   strEndDate: '',
+    // });
+
+    _.set(req, 'locals.searchRange', searchRange);
 
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
@@ -89,8 +125,10 @@ router.get(
 
     _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
+    _.set(req, 'locals.mainInfo.subCategory', subCategory);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
+    _.set(req, 'locals.mainInfo.mainWhere', mainWhere);
 
     // BU.CLI(req.locals.mainInfo);
 

@@ -8,11 +8,10 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const main = require('./main');
-const structure = require('./structure');
+const control = require('./control');
 const status = require('./status');
 const trend = require('./trend');
 const report = require('./report');
-const control = require('./control');
 
 const commonUtil = require('../../models/templates/common.util');
 
@@ -61,7 +60,7 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = 'main', siteId = userMainSeq } = req.params;
+    const { naviMenu = 'main', siteId = userMainSeq, subCategory = '' } = req.params;
 
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
@@ -127,6 +126,7 @@ router.get(
 
     _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
+    _.set(req, 'locals.mainInfo.subCategory', subCategory);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
     _.set(req, 'locals.mainInfo.mainWhere', mainWhere);
@@ -150,8 +150,8 @@ router.get(
         name: '메인',
       },
       {
-        href: 'structure',
-        name: '구성도',
+        href: 'control',
+        name: '제어',
       },
       {
         href: 'status',
@@ -224,13 +224,10 @@ router.get(
 
 // Router 추가
 router.use('/', main);
-router.use('/structure', structure);
+router.use('/control', control);
 router.use('/status', status);
-// router.use('/connector', connector);
-// router.use('/inverter', inverter);
 router.use('/trend', trend);
 router.use('/report', report);
-router.use('/control', control);
 router.use('/cctv', control);
 
 // router.use('/users', users);

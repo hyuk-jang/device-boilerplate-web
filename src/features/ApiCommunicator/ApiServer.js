@@ -6,7 +6,9 @@ const net = require('net');
 
 const AbstApiServer = require('./AbstApiServer');
 
-const { dcmWsModel } = require('../../../../default-intelligence');
+const {
+  dcmWsModel: { transmitToServerCommandType },
+} = require('../../../../default-intelligence');
 
 class ApiServer extends AbstApiServer {
   /**
@@ -30,7 +32,7 @@ class ApiServer extends AbstApiServer {
     const server = net
       .createServer(socket => {
         // socket.end('goodbye\n');
-        console.log(`client is Connected ${apiPort}\n addressInfo: ${socket.remoteAddress}`);
+        console.log(`client is Connected ${apiPort} ===> addressInfo: ${socket.remoteAddress}`);
 
         // steram 연결 및 파서 등록
         const stream = socket.pipe(split(EOT));
@@ -55,7 +57,7 @@ class ApiServer extends AbstApiServer {
             // 2. Field -> 서버로 보내온 메시지 일 수 있음.
             /** @type {defaultFormatToRequest|defaultFormatToResponse} */
             const fieldMessage = JSON.parse(strData);
-            // BU.CLI(requestedDataByDataLogger);
+            // BU.CLI(fieldMessage);
 
             // isError Key가 존재하고 Number 형태라면 요청에 대한 응답이라고 판단하고 이벤트 발생
             if (_.isNumber(_.get(fieldMessage, 'isError'))) {
@@ -69,7 +71,10 @@ class ApiServer extends AbstApiServer {
 
             // JSON 객체 분석 메소드 호출
             const responseDataByServer = this.interpretCommand(socket, fieldMessage);
-            // 여기까지 오면 유효한 데이터로 생각하고 완료 처리
+
+            // 응답할 데이터가 존재하지 않을 경우 무시
+            if (_.isEmpty(responseDataByServer)) return false;
+
             // BU.CLI(responseDataByServer);
             socket.write(encodingMsg(responseDataByServer));
           } catch (error) {
@@ -129,7 +134,7 @@ class ApiServer extends AbstApiServer {
    * @return {defaultFormatToResponse}
    */
   certifyFieldClient(fieldClient, fieldMessage) {
-    BU.CLI('certifyClient');
+    BU.log('certifyClient');
     // 사이트에서 보내온 메시지 명령 타입, 세부 내용
     const { commandId, contents } = fieldMessage;
 
@@ -144,7 +149,7 @@ class ApiServer extends AbstApiServer {
     );
     // 인증이 성공했다면 Socket Client를 적용.
     if (foundMainStorage) {
-      BU.CLI('인증 성공');
+      // BU.CLI('인증 성공');
       foundMainStorage.msClient = fieldClient;
       responseFieldMessage.isError = 0;
 
@@ -170,57 +175,52 @@ class ApiServer extends AbstApiServer {
    */
   interpretCommand(fieldClient, fieldMessage) {
     // BU.CLI('interpretCommand');
+    // 사이트에서 보내온 메시지 명령 타입, 세부 내용
+    const { commandId, contents } = fieldMessage;
+
+    /** @type {defaultFormatToResponse} */
+    const responseDataByServer = {
+      commandId,
+      isError: 0,
+      message: '',
+    };
+
     try {
-      const {
-        CERTIFICATION,
-        COMMAND,
-        NODE,
-        STAUTS,
-        POWER_BOARD,
-      } = dcmWsModel.transmitToServerCommandType;
+      const { CERTIFICATION, COMMAND, MODE, NODE, POWER_BOARD } = transmitToServerCommandType;
       // client를 인증하고자 하는 경우
-      if (fieldMessage.commandId === CERTIFICATION) {
+      if (commandId === CERTIFICATION) {
         return this.certifyFieldClient(fieldClient, fieldMessage);
       }
 
-      // 사이트에서 보내온 메시지 명령 타입, 세부 내용
-      const { commandId, contents } = fieldMessage;
-
-      /** @type {defaultFormatToResponse} */
-      const responseDataByServer = {
-        commandId,
-        isError: 0,
-        message: '',
-      };
-
       const msInfo = this.findMainStorage(fieldClient);
-      if (msInfo) {
-        switch (commandId) {
-          case NODE: // 노드 정보가 업데이트 되었을 경우
-            // BU.log(contents.length);
-            this.compareNodeList(msInfo, contents);
-            break;
-          case COMMAND: // 명령 정보가 업데이트 되었을 경우
-            this.compareContractCmdList(msInfo, contents);
-            break;
-          // case STAUTS: //
-          //   this.transmitDataToClient(msInfo.msClient, msInfo.msDataInfo.statusBoard);
-          //   break;
-          case POWER_BOARD: // 현황판 데이터를 요청할 경우
-            responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
-            // BU.CLI(responseDataByServer)
-            break;
-          default:
-            responseDataByServer.isError = 1;
-            responseDataByServer.message = `${commandId}은 등록되지 않은 명령입니다.`;
-        }
-        return responseDataByServer;
+
+      // const msInfo = this.findMainStorage(fieldClient);
+      switch (commandId) {
+        case MODE: // 제어 모드가 업데이트 되었을 경우
+          // BU.CLI(fieldMessage);
+          this.updateOperationMode(msInfo, contents);
+          break;
+        case NODE: // 노드 정보가 업데이트 되었을 경우
+          // BU.log(contents.length);
+          this.compareNodeList(msInfo, contents);
+          break;
+        case COMMAND: // 명령 정보가 업데이트 되었을 경우
+          this.compareContractCmdList(msInfo, contents);
+          break;
+        case POWER_BOARD: // 현황판 데이터를 요청할 경우
+          responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
+          // BU.CLI(responseDataByServer)
+          break;
+        default:
+          throw new Error(`${commandId}은 등록되지 않은 명령입니다.`);
       }
-      responseDataByServer.isError = 1;
-      responseDataByServer.message = '사용자 인증이 필요합니다.';
-      return responseDataByServer;
+
+      // 정보가 정상적으로 처리되었고 단순 정보 알림에 관한 내용은 따로 응답하지 않음
+      return {};
     } catch (error) {
-      throw error;
+      responseDataByServer.isError = 1;
+      responseDataByServer.message = error.message;
+      return responseDataByServer;
     }
   }
 
@@ -244,24 +244,40 @@ class ApiServer extends AbstApiServer {
     }
   }
 
-  // /**
-  //  * Client로 데이터를 보내는 메소드. data가 null이라면 데이터 전송하지 않음.
-  //  * @param {net.Socket} fieldClient
-  //  * @param {Buffer} data
-  //  */
-  // transmitDataToClient(fieldClient, data) {
-  //   try {
-  //     if (!_.isNull(data)) {
-  //       fieldClient.write(data);
-  //     }
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  /**
+   * 구동 모드 갱신 알림해올경우
+   * @description dcmWsModel.transmitToServerCommandType.MODE 명렁 처리 메소드
+   * @param {msInfo} msInfo
+   * @param {wsModeInfo} updatedModeInfo
+   */
+  updateOperationMode(msInfo, updatedModeInfo) {
+    // BU.CLIN(updatedModeInfo);
+    const { algorithmId, operationConfigList = [] } = updatedModeInfo;
+
+    const { modeInfo } = msInfo.msDataInfo;
+
+    // 구동 모드 설정 정보 목록이 존재할 경우에만 덮어씌움
+    if (operationConfigList.length) {
+      modeInfo.operationConfigList = operationConfigList;
+    }
+
+    // 현재 모드와 동일할 경우 갱신하지 않음
+    if (_.isEqual(modeInfo.algorithmId, algorithmId)) return false;
+
+    // 구동 모드 정보 갱신
+    modeInfo.algorithmId = algorithmId;
+
+    // 사용자에게 알림
+    this.observers.forEach(observer => {
+      if (_.get(observer, 'updateOperationMode')) {
+        observer.updateOperationMode(msInfo);
+      }
+    });
+  }
 
   /**
    * Site에서 보내온 NodeList 데이터와 현재 가지고 있는 데이터와 비교하여 변화가 있을 경우 해당 노드를 선별하여 부모 호출
-   * @desc dcmWsModel.transmitToServerCommandType.NODE 명령 처리 메소드
+   * @description dcmWsModel.transmitToServerCommandType.NODE 명령 처리 메소드
    * @param {msInfo} msInfo
    * @param {wsNodeInfo[]} updatedFieldNodeList
    */
@@ -322,12 +338,12 @@ class ApiServer extends AbstApiServer {
 
   /**
    * FIXME: 명령은 전체 갱신 처리해버림.
-   * @desc dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
+   * @description dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareContractCmdList(msInfo, updatedFieldContractCmdList) {
-    // BU.CLI(receiveContractCmdList);
+  compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
+    // BU.CLI(updatedFieldContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
       msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;

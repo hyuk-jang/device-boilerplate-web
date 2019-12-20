@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
+    <!-- SVG Map 을 생성하기 위한 필수 Library -->
+    <script src="/js/svg/svg.js"></script>
+    <script src="/js/svg/svg.filter.js"></script>
+    <script src="/js/jquery.panzoom.js"></script>
+    <script src="/js/jquery.mousewheel.js"></script>
+
+    <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
+    <script src="/js/drawSvg/drawSvg.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- toggle library -->
+    <script src="/js/bootstrap-toggle.min.js"></script>
+    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
+
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+  </head>
+
+  <!-- 서버사이드 데이터 정의 -->
+  <script>
+    // 서브 카테고리 Dom
+    var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
+
+    // Map 정보
+    var map = <%- JSON.stringify(map) %>;
+    // 제어 명령 정보
+    var controlInfo = <%- JSON.stringify(controlInfo) %>;
+    // 제어 장치 돔 목록([{type: 'gateValue', category: "<option value="pump"> 펌프</option>" list: ['<option value="P_001">펌프 001</option>,...']}, ...])
+    var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
+    // 세션 ID
+    var sessionID = <%- JSON.stringify(sessionID) %>;
+    // 로그인 사용자 정보
+    var user = <%- JSON.stringify(user) %>;
+  </script>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body ">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <!-- 명령 상태, 결과 -->
+        <div class="container_row">
+          <p>
+            장치 연결 상태:
+            <span id="updateIsApiClientConn"></span>
+          </p>
+          <h2>
+            <span>명령 처리 결과:</span>
+            <span id="resultExecCommand" class="color_red"></span>
+          </h2>
+          <p>
+            시스템 구동 모드:
+            <span
+              id="operationSystem"
+              data-algorithm-id=""
+              data-algorithm-name=""
+              data-cmd-strategy=""
+            ></span>
+
+            <select class="form-control w_auto" id="operationModeSel">
+              <option selected value="DEFAULT">기본 모드</option>
+            </select>
+            <button id="changeOperationModeBtn" class="btn btn-success">
+              구동 모드 변경
+            </button>
+            <template id="tempTest">
+              <div>
+                <input type="text" name="" id="" value="{{ inputValue }}" />
+              </div>
+            </template>
+          </p>
+        </div>
+        <%- include("./addCommand.ejs") %>
+        <!-- Content -->
+        <div class="container_row flex_dir_col" id="dataViewArea">
+          <input
+            type="button"
+            name="dataView"
+            class="btn btn-danger"
+            data-view="svgMapArea"
+            value="Map"
+          />
+          <input
+            type="button"
+            name="dataView"
+            class="btn btn-default"
+            data-view="operStatusTableArea"
+            value="Table"
+          />
+          <!-- Svg Map -->
+          <div class="default_area pt_1rem" id="svgMapArea" >
+            <div id="zoom" class="zoom_box">
+              <!-- panzoom, mode select -->
+              <button id="zoom-in" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-zoom-in"></span> Zoom-in
+              </button>
+              <button id="zoom-out" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-zoom-out"></span> Zoom-out
+              </button>
+              <button id="reset" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-refresh"></span> Reset
+              </button>
+              <select class="form-control w_auto ml_1rem" id="controlMode">
+                <option value="view">뷰 모드</option>
+                <option selected value="control">제어 모드</option>
+              </select>
+            </div>
+            <!-- canvas -->
+            <div>
+              <div id="canvas"></div>
+            </div>
+          </div>
+          <!-- tableContent -->
+          <div class="flex_jus_center rtsp_container" id="operStatusTableArea" hidden>
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class=" panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">명령 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="cmdUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="cmdTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="wrapCmdFormat">명령 형식</th>
+                      <th data-field="wrapCmdType">명령 타입</th>
+                      <th data-field="wrapCmdStep">명령 단계</th>
+                      <th data-field="wrapCmdId">명령 ID</th>
+                      <th data-field="wrapCmdName">명령 이름</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">장치 상태 정보 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="nodeUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="nodeTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="ntn">장치 명</th>
+                      <th data-field="ni">장치 ID</th>
+                      <th data-field="pnl">관련 장소</th>
+                      <th data-field="d">데이터</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <!-- Default Setting -->
+    <script>
+      $('#subCategoryDom').html(subCategoryDom);
+
+      // 명령 목록을 보여줄 돔
+      var $cmdTableDom;
+      var $cmdUpdateDom;
+      // 노드 상태를 보여줄 돔
+      var $nodeTableDom;
+      var $nodeUpdateDom;
+      //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
+      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
+        $cmdTableDom = $('#' + cmdTableDomId);
+        $cmdUpdateDom = $('#' + cmdUpdateDomId);
+        $nodeTableDom = $('#' + nodeTableDomId);
+        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      }
+
+      // 테이블 ID 정의
+      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+    </script>
+
+    <!-- Socket.IO 이벤트 바인딩 -->
+    <script>
+      var socket = io();
+
+      // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
+      socket.emit('certifySocket', {
+        sessionID: sessionID,
+        sessionUserInfo: user,
+      });
+
+      // FIXME: 오류를 보기위하여 임시
+      // 명령 요청 결과 Alert
+      socket.on('resultExecCommand', function(message) {
+        // console.log(message)
+        document.getElementById('resultExecCommand').innerText = message;
+      });
+
+      // 장치 연결 상태 반영
+      var isApiClientConn = false;
+      socket.on('updateIsApiClientConn', function(isConn) {
+        // console.log(isConn);
+        isApiClientConn = isConn;
+        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
+        document.getElementById('updateIsApiClientConn').innerText = connStatus;
+      });
+
+      // 제어 모드 정보
+      var currModeInfo = {
+        algorithmId: '',
+        operationConfigList: [],
+      };
+      /**
+       * @param {Object} modeInfo
+       * @param {string} modeInfo.algorithmId 알고리즘 ID
+       * @param {string} modeInfo.operationConfig.algorithmName 알고리즘 Name
+       * @param {string} modeInfo.operationConfig.cmdStrategy 명령 전략
+       * @param {operationConfig[]} modeInfo.operationConfigList 구동 모드 가능 목록
+       */
+      socket.on('updateMode', function(modeInfo) {
+        currModeInfo = modeInfo;
+
+        // 현재 수행중인 구동 모드 View
+        var operationSystemDom = document.getElementById('operationSystem');
+
+        // 현재 수행 중인 알고리즘 ID 가 존재하지 않을 경우
+        if (currModeInfo.algorithmId === undefined) return false;
+
+        // 현재 수행 중인 알고리즘 정보를 가져옴
+        var operConfig = _.find(currModeInfo.operationConfigList, {
+          algorithmId: currModeInfo.algorithmId,
+        });
+
+        // 구동 모드 목록 중에 해당 값이 존재하지 않을 경우
+        if (_.isEmpty(operConfig)) return false;
+
+        // 데이터셋을 돌면서 값 세팅
+        for (const key in operationSystemDom.dataset) {
+          if (operationSystemDom.dataset.hasOwnProperty(key)) {
+            operationSystemDom.dataset[key] = operConfig[key];
+          }
+        }
+        // input Value 갱신
+        operationSystemDom.innerText = operConfig.algorithmName;
+
+        // 구동 모드 설정 목록이 없다면 종료
+        if (_.isEmpty(currModeInfo.operationConfigList)) return false;
+
+        // 변경 가능한 구동 모드 목록
+        var operationModeSelDom = document.getElementById('operationModeSel');
+
+        // 템플릿 정의
+        var optionTemplate = Handlebars.compile(
+          '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
+        );
+        // select option 동적 생성
+        var optionDomList = _.map(currModeInfo.operationConfigList, function(oConfig) {
+          // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
+          // console.log(oConfig, operConfig);
+          var strSelected = oConfig.algorithmId === operConfig.algorithmId ? 'selected' : '';
+          // 템플릿 적용하여 Dom 생성
+          return optionTemplate({
+            selected: strSelected,
+            optionId: oConfig.algorithmId,
+            optionValue: oConfig.algorithmName,
+          });
+        });
+        // Select Dom 적용
+        operationModeSelDom.innerHTML = optionDomList;
+      });
+
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
+      // 갱신 노드 반영
+      socket.on('updateNode', function(wsNodeList) {
+        // console.log(wsNodeList);
+        var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
+
+        _.forEach(wsNodeList, function(wsNodeInfo) {
+          // SVG draw map
+          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
+          var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
+          foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
+        });
+
+        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: currNodeList,
+        });
+        // 명령 갱신 시각 반영
+        $nodeUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 명령 관련 갱신 반영
+      socket.on('updateCommand', function(commandList) {
+        // console.log('updateCommand', commandList);
+        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+
+        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: commandList,
+        });
+        // 명령 갱신 시각 반영
+        $cmdUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 서버로 명령 실행 요청
+      // $('button[name="reqControlCmd"]').on('click', function(event) {
+      $('#testRequestCmdBtn').on('click', function(event) {
+        var reqCmdInfo = makeControlCommand(this);
+
+        // FIXME: 명령을 정상적으로 요청하였을 경우 요청하였다는 메시지 출력
+        !_.isEmpty(reqCmdInfo) &&
+          socket.emit('executeCommand', reqCmdInfo) &&
+          $('#cmdGoalArea').html('');
+      });
+
+      // FIXME: TEXT 종료 후 삭제
+      $(document).ready(function() {
+        // var thisSelectValue = CF_SINGLE;
+        // var thisSelectValue = CF_SET;
+        var thisSelectValue = CF_FLOW;
+        // var thisSelectValue = CF_SCENARIO;
+
+        // 명령 형식 변경
+        $('#cmdFormatSel')
+          .val(thisSelectValue)
+          .trigger('change');
+
+        // $('#testRequestCmdBtn').trigger('click');
+        // $('#testCancelCmdBtn').trigger('click');
+      });
+    </script>
+
+    <!-- 제어 관리 js 세팅 및 바인딩 -->
+    <script>
+      $('#changeOperationModeBtn').on('click', function() {
+        var selectedAlgorithmId = $('#operationModeSel option:selected').val();
+
+        console.log('test', currModeInfo);
+
+        // 현재 수행 중인 구동 모드와 같을 경우 처리하지 않음
+        // if (currModeInfo.algorithmId === selectedAlgorithmId) {
+        //   alert('현재 모드와 같습니다.');
+        //   return false;
+        // }
+        // console.log(selectedAlgorithmId);
+
+        // 제어 모드 변경 요청
+        socket.emit('changeOperationMode', selectedAlgorithmId);
+      });
+
+      // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
+      $('input[name="dataView"]').on('click', function() {
+        var dataView = $(this).data('view');
+
+        // 버튼 색상 변경
+        $('#dataViewArea')
+          .children('input')
+          .each(function(index, inputElement) {
+            var currDataView = $(inputElement).data('view');
+            if (currDataView === dataView) {
+              $(this).addClass('btn-danger');
+              $(this).removeClass('btn-default');
+            } else {
+              $(this).removeClass('btn-danger');
+              $(this).addClass('btn-default');
+            }
+          });
+
+        // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
+        $('#dataViewArea')
+          .children('div')
+          .each(function(index, domElement) {
+            if (domElement.id === dataView) {
+              domElement.hidden = false;
+            } else {
+              domElement.hidden = true;
+            }
+          });
+      });
+    </script>
+
+    <!-- SVG Map 세팅 -->
+    <script>
+      drawSvgBasePlace('canvas'); // 멥 그리기
+      setPanzoom(); // 줌 기능 세팅
+
+      //모드 선택 설렉트 박스 and 한/영 토글 버튼
+      $('#controlMode').change(function() {
+        var selectedMode = this.value;
+        // console.log(selectedMode);
+
+        // $(`#canvas`).empty(); // svg가 그려진 공간 초기화
+        // drawSvgBasePlace('canvas'); // 초기화 후 다시 그리기 (체크 상태 포함)
+        bindingClickNodeEvent(socket, selectedMode); // 장치, 센서 클릭 이벤트 다시 바인딩
+
+        // ↓ 다시 그려진 map에 데이터를 다시 뿌려준다.
+      });
+      // 노드 클릭 이벤트가 발생할 경우 Socket.IO로 메시지를 전송할 객체 바인딩????
+      $('#controlMode').trigger('change');
+
+      // jquery panzoom 옵션 세팅
+      function setPanzoom() {
+        var svgMap = SVG.get('svgCanvas'); //id가 svgCanvas인 svg 요소 선택
+        var $canvas = $('#canvas');
+        var matrix = `matrix(1, 0, 0, 1, 0, 0)`; // panzoom 기본 zoom 설정
+        var filter = 'win16|win32|win64|mac';
+
+        //모바일, pc 접속 분별하여 zoom in/out 활셩 여부 설정
+        if (0 > filter.indexOf(navigator.platform.toLowerCase())) {
+          // mobile panzoom option
+          $canvas.panzoom({
+            disablePan: true,
+            disableZoom: true,
+            startTransform: matrix,
+          });
+          // zoom(in,out), reset 버튼 숨김
+          $('#zoom-out', '#zoom-in', '#reset').hide();
+        } else {
+          // pc panzoom
+          $canvas.panzoom({
+            $reset: $('#reset'),
+            cursor: 'context-menu',
+            startTransform: matrix,
+          });
+
+          // mousewheel option
+          $canvas.panzoom().on('mousewheel.focal', function(e) {
+            const delta = e.delta || e.originalEvent.wheelDelta;
+            const zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+
+            e.preventDefault();
+
+            $canvas.panzoom('zoom', zoomOut, {
+              animate: false,
+              focal: e,
+            });
+          });
+
+          // zoom in, out 기능 적용
+          $('#zoom-in').click(function(e) {
+            $canvas.panzoom('zoom', {});
+          });
+          $('#zoom-out').click(function(e) {
+            $canvas.panzoom('zoom', 'zoomOut', {});
+          });
+        }
+      }
+    </script>
+    <!-- 검색 관련 js 모음 -->
+    <script src="/js/contents/report/search.js"></script>
+  </body>
+</html>

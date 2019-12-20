@@ -12,7 +12,7 @@
     ]
   },
   "scripts": {
-    "start": "nodemon --trace-warnings ./bin/www.js",
+    "start": "nodemon --trace-warnings --ignore public/* ./bin/www.js",
     "build": "pkg . --out-path dist",
     "build:win": "pkg . --out-path dist --targets node8-win-x64",
     "build:linux": "pkg . --out-path dist --targets node8-linux-x64",

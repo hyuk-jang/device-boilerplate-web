@@ -1,0 +1,494 @@
+<!-- 서버사이드 데이터 정의 -->
+<script>
+  // place relation 정보
+  var wsPlaceRelList = <%- JSON.stringify(wsPlaceRelList) %>;
+</script>
+
+<!-- 제어 명령 -->
+<div class="container_row flex_dir_col default_search_area">
+  <div class="search_area">
+    <div class="search_box search_range_box">
+      <span class="search_title">명령 형식</span>
+      <select class="form-control" id="cmdFormatSel">
+        <option value="SINGLE">단일 제어</option>
+        <option value="SET">설정 제어</option>
+        <option value="FLOW">염수 이동</option>
+        <option value="SCENARIO">시나리오</option>
+      </select>
+    </div>
+    <!-- <div class="search_box search_interval_box">
+      <span class="search_title">명령 유형</span>
+      <select class="form-control" id="cmdTypeSel">
+        <option value="CONTROL">제어</option>
+        <option value="CANCEL">취소</option>
+      </select>
+    </div> -->
+
+    <!-- 단일 제어 명령 -->
+    <div name="cmdCore" data-cmd-core="SINGLE">
+      <div class="search_box search_range_box">
+        <span class="search_title">장치 타입</span>
+        <select class="form-control" id="deviceCateSel"> </select>
+      </div>
+      <div class="search_box search_range_box">
+        <span class="search_title">장치 목록</span>
+        <select class="form-control" id="deviceInfoSel"> </select>
+      </div>
+      <div class="search_box search_range_box">
+        <span class="search_title">제어 형식</span>
+        <select class="form-control" id="singleControlValue">
+          <option value="1">Open / On</option>
+          <option value="0">Close / Off</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 설정 제어 명령 -->
+    <div name="cmdCore" data-cmd-core="SET" hidden>
+      <div class="search_box search_range_box">
+        <span class="search_title">명령 종류</span>
+        <select class="form-control" id="setCmdSelList"></select>
+      </div>
+    </div>
+
+    <!-- 흐름 제어 명령 -->
+    <div name="cmdCore" data-cmd-core="FLOW" hidden>
+      <div class="search_box search_range_box">
+        <span class="search_title">시작지</span>
+        <select class="form-control" id="flowCmdSrcPlaceSel"> </select>
+      </div>
+      <div class="search_box search_range_box">
+        <span class="search_title">도착지</span>
+        <select class="form-control" id="flowCmdDestPlaceSel"> </select>
+      </div>
+    </div>
+
+    <!-- 시나리오 명령 -->
+    <div name="cmdCore" data-cmd-core="SCENARIO" hidden>
+      <div class="search_box search_range_box">
+        <span class="search_title">시나리오</span>
+        <select class="form-control" id="scenarioCmdSelList"> </select>
+      </div>
+    </div>
+
+    <div class="search_box search_range_box">
+      <span class="search_title">제한 시간(초)</span>
+      <div class="search_body">
+        <input type="text" class="input_tre" id="limitTimeSec" placeholder="Infinity" />
+      </div>
+    </div>
+  </div>
+  <div class="container_row">
+    <div class="user_box report_category ml_2rem">
+      <button type="button" class="btn btn-success" id="addCmdGoalBtn">
+        목표 추가
+      </button>
+    </div>
+
+    <div class="user_box report_category ml_2rem">
+      <button type="button" class="btn btn-success" id="testRequestCmdBtn">
+        실행
+      </button>
+    </div>
+  </div>
+  <div name="cmdGoalArea" id="cmdGoalArea"></div>
+</div>
+
+<div hidden name="cmdGoalArea" id="tempArea"></div>
+
+<!-- FIXME: 템플릿 코드 최종버젼에서는 script 로 이동(IE 호환 문제) -->
+<script type="text/template" id="cmdGoalTemplate">
+  <div class="search_area">
+    <div class="search_box ">
+      <button name="deleteCmdGoal">-</button>
+    </div>
+    <div class="search_box mw_7rem">
+      <span class="search_title">목표 종료</span>
+      <select class="form-control" name="isCompleteClear">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+      </select>
+    </div>
+    <div class="search_box search_range_box">
+      <span class="search_title">장소 타입</span>
+      <select class="form-control" name="placeTypeSel">
+        <option value="all">모두</option>
+      </select>
+    </div>
+    <div class="search_box search_range_box">
+      <span class="search_title">장소</span>
+      <select class="form-control" name="placeNameSel">
+        <option value="all">모두</option>
+      </select>
+    </div>
+    <div class="search_box search_range_box">
+      <span class="search_title">센서</span>
+      <select class="form-control" name="sensorNameSel"> </select>
+    </div>
+    <div class="search_box w_15per mw_10rem">
+      <span class="search_title">달성 목표치</span>
+      <div class="search_body">
+        <input type="text" class="input_tre" name="goalValue" placeholder="없음" />
+      </div>
+    </div>
+    <div class="search_box mw_8rem">
+      <span class="search_title">목표 범위</span>
+      <select class="form-control" name="goalRange">
+        <option value="UPPER">이상</option>
+        <option value="EQUAL">동일</option>
+        <option value="LOWER">이하</option>
+      </select>
+    </div>
+  </div>
+</script>
+<!-- 명령 목표 -->
+<!-- <div id="cmdGoalArea" class="container_row flex_jus_end default_search_area"></div> -->
+
+<!-- 장치 제어 명령 Dom 생성 영역  -->
+<script>
+  // console.log(deviceDomList);
+  var CF_SINGLE = 'SINGLE';
+  var CF_SET = 'SET';
+  var CF_FLOW = 'FLOW';
+  var CF_SCENARIO = 'SCENARIO';
+
+  // 설정 명령 목록
+  var setCmdList = controlInfo.setCmdList;
+  // 흐름 명령 목록
+  var flowCmdList = controlInfo.flowCmdList;
+  // 시나리오 명령 목록
+  var scenarioCmdList = controlInfo.scenarioCmdList;
+
+  // 명령 Select Dom Template
+  var cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
+
+  // TODO: DBS에 명령을 요청할 공통 형식
+  function makeControlCommand(reqCmdBtn) {
+    // console.log('makeControlCommand', reqCmdBtn);
+    var reqCmdInfo = {
+      cmdFormat: $('#cmdFormatSel').val(),
+      // cmdType: $('#cmdTypeSel').val(),
+      cmdGoal: {
+        goalDataList: [],
+      },
+    };
+
+    // console.log(reqCmdInfo);
+
+    switch (reqCmdInfo.cmdFormat) {
+      case 'MEASURE':
+        break;
+      case CF_SINGLE:
+        // 제어 노드 ID 추가
+        _.set(reqCmdInfo, 'nodeId', $('#deviceInfoSel').val());
+        // 제어 값 추가
+        _.set(reqCmdInfo, 'singleControlType', $('#singleControlValue').val());
+        // NOTE: 차후 제어 설정 값 있을 경우 추가
+        // _.set(reqCmdInfo, 'controlSetValue', $('').val());
+        // makeSingleControlCmd(domElement, reqCmdInfo)
+        break;
+      case CF_SET:
+        // 제어 노드 ID 추가
+        _.set(reqCmdInfo, 'cmdId', $('#setCmdSelList').val());
+        break;
+      case CF_FLOW:
+        // 시작지와 도착지로 나눔
+        _.set(reqCmdInfo, 'SPI', $('#flowCmdSrcPlaceSel').val());
+        _.set(reqCmdInfo, 'DPI', $('#flowCmdDestPlaceSel').val());
+        break;
+      case CF_SCENARIO:
+        _.set(reqCmdInfo, 'cmdId', $('#scenarioCmdSelList').val());
+        break;
+      default:
+        break;
+    }
+
+    // TODO: 달성 목표 추가 (cmdGoal)
+    // console.log('makeResult', reqCmdInfo);
+    var $limitTimeSec = $('#limitTimeSec');
+    var limitTimeSec = $limitTimeSec.val();
+    // 사용자가 제한 시간을 입력하였을 경우
+    if (limitTimeSec.length) {
+      // 제한 시간에 문자가 들어있을 경우
+      if (/[a-z]/.test(limitTimeSec)) {
+        alert('제한시간에 문자는 입력할 수 없습니다.');
+        return $limitTimeSec.focus();
+      }
+      // 제한시간이 0초 이하일 경우
+      else if (_.toNumber(limitTimeSec) <= 0) {
+        alert('제한시간에 0을 초과하는 수를 입력하세요.');
+        return $limitTimeSec.focus();
+      }
+      reqCmdInfo.cmdGoal.limitTimeSec = _.toNumber(limitTimeSec);
+    }
+
+    var isError = 0;
+    // 달성 목표 체크
+    $('#cmdGoalArea')
+      .children()
+      .each(function(index, cmdGoalEle) {
+        // 달성 목표 객체
+        var goalInfo = {};
+        var nodeId = $(cmdGoalEle)
+          .find('select[name="sensorNameSel"]')
+          .first()
+          .val();
+
+        var $goalValue = $(cmdGoalEle)
+          .find('input[name="goalValue"]')
+          .first();
+
+        var goalRange = $(cmdGoalEle)
+          .find('select[name="goalRange"]')
+          .first()
+          .val();
+
+        var isCompleteClear = $(cmdGoalEle)
+          .find('select[name="isCompleteClear"]')
+          .first()
+          .val();
+
+        // 달성 목표치가 없을 경우 False
+        // FIXME: 달성 목표 문자 타입 체크 필요
+        if (_.isEmpty($goalValue.val())) {
+          alert('달성 목표를 확인해주세요');
+
+          $goalValue.focus();
+
+          isError = 1;
+          return false;
+        } else {
+          goalInfo.nodeId = nodeId;
+          goalInfo.goalValue = $goalValue.val();
+          goalInfo.goalRange = goalRange;
+          goalInfo.isCompleteClear = isCompleteClear;
+          reqCmdInfo.cmdGoal.goalDataList.push(goalInfo);
+        }
+      });
+
+    // console.log(reqCmdInfo.cmdGoal.goalDataList);
+
+    return isError ? {} : reqCmdInfo;
+    // return reqCmdInfo;
+  }
+
+  /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
+  function setInitControlDom(cmdFormat) {
+    // console.log('setInitControlDom', cmdFormat);
+    switch (cmdFormat) {
+      case CF_SET:
+        // 설정 돔 설정
+        $('div[name="cmdCore"]').find('data');
+        $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+        break;
+      case CF_SINGLE:
+      default:
+        // 단일 명령 돔 설정
+        $('#deviceCateSel').html(_.map(deviceDomList, 'category'));
+        // handleDeviceCategory() 실행 시킴
+        $('#deviceCateSel').trigger('change');
+        break;
+    }
+    // 단일 명령 돔 설정
+    $('#deviceCateSel').html(_.map(deviceDomList, 'category'));
+    // handleDeviceCategory() 실행 시킴
+    $('#deviceCateSel').trigger('change');
+
+    // 흐름 명령 배수지 Dom 생성
+    $('#flowCmdSrcPlaceSel').html(_.map(flowCmdList, cmdTemplate));
+    // 흐름 명령 급수지 Dom 생성. handleFlowSrcPlace() 실행 시킴
+    $('#flowCmdSrcPlaceSel').trigger('change');
+
+    // 설정 돔 설정
+    $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+
+    // 시나리오 돔 설정
+    $('#scenarioCmdSelList').html(_.map(scenarioCmdList, cmdTemplate));
+  }
+
+  // Single 제어 장치 타입 선택시 이벤트
+  $('#deviceCateSel').on('change', function(event) {
+    // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
+    $('#deviceInfoSel').html(_.find(deviceDomList, { type: this.value }).list);
+  });
+
+  // Flow 제어 배수지 선택시 이벤트 >>> 급수지 목록 변경
+  $('#flowCmdSrcPlaceSel').on('change', function(event) {
+    // Flow Cmd: 급수지 목록 설정
+    $('#flowCmdDestPlaceSel').html(
+      _.find(flowCmdList, { cmdId: this.value }).destList.map(cmdTemplate),
+    );
+  });
+
+  setInitControlDom();
+
+  // 명령 형식 선택 이벤트
+  $('#cmdFormatSel').on('change', function() {
+    var cmdFormat = this.value; // 선택된 명령 형식
+
+    $('div[name="cmdCore"]').each(function(index, cmdCoreDom) {
+      $(cmdCoreDom).data('cmd-core') === cmdFormat ? $(cmdCoreDom).fadeIn() : $(cmdCoreDom).hide();
+    });
+  });
+</script>
+
+<!-- 목표 추가 데이터 정의 및 Event Binding -->
+<script>
+  // 장소 타입(대분류)이 변경되었을 경우 장소 Select 목록 변경
+  $(document).on('change', 'select[name="placeTypeSel"]', function() {
+    // 장소명(중분류) Dom 객체 정의
+    var $placeNameSel = $(this)
+      .parentsUntil('div[name="cmdGoalArea"]')
+      .find('select[name="placeNameSel"]')
+      .first();
+
+    // 장소명(중분류) Select Dom 동적 생성
+    setPlaceNameDom($placeNameSel, this.value);
+
+    $placeNameSel.trigger('change');
+  });
+
+  // 장소명(중분류)이 변경되었을 경우 센서 목록 변경
+  $(document).on('change', 'select[name="placeNameSel"]', function() {
+    // 장치명(소분류) Dom 객체 정의
+    var $sensorNameSel = $(this)
+      .parentsUntil('div[name="cmdGoalArea"]')
+      .find('select[name="sensorNameSel"]')
+      .first();
+
+    // 장치명(소분류) Select Dom 동적 생성
+    setSensorDom($sensorNameSel, this.value);
+  });
+
+  // 목표 추가 버튼 클릭 시 달성 목표 Div에 Dom 추가
+  $('#addCmdGoalBtn').on('click', function() {
+    // 목표 추가 템플릿을 Dom으로 변경하기 위한 임시 영역에 Dom 생성
+    var tempGoalDiv = $('#tempArea').html($('#cmdGoalTemplate').html());
+
+    // 장소타입(대분류) Dom 객체 정의
+    var placeSelTypeDom = $(tempGoalDiv).find('select[name="placeTypeSel"]');
+    // 장소명(중분류) Dom 객체 정의
+    var placeNameSelDom = $(tempGoalDiv).find('select[name="placeNameSel"]');
+    // 장치명(소분류) Dom 객체 정의
+    var sensorNameSelDom = $(tempGoalDiv).find('select[name="sensorNameSel"]');
+    // 장소타입(대분류) Select Dom 동적 정의
+    setPlaceTypeDom(placeSelTypeDom);
+    // 장소명(중분류) Select Dom 동적 정의
+    setPlaceNameDom(placeNameSelDom);
+    // 장치명(소분류) Select Dom 동적 정의
+    setSensorDom(sensorNameSelDom);
+    // 장소명(중분류)에 대한 장치명 Filtering 처리가 안되었으므로 이벤트 발생
+    $(placeNameSelDom).trigger('change');
+    // 목표추가 Dom 영역 마지막에 목표추가 Dom 객체 추가
+    $('#cmdGoalArea').append(tempGoalDiv.children());
+  });
+
+  // 목표 삭제 버튼 클릭 시 해당 목표 삭제
+  $('#cmdGoalArea').on('click', 'button[name="deleteCmdGoal"]', function() {
+    $(this)
+      .parentsUntil('#cmdGoalArea')
+      .remove();
+  });
+
+  // is, ni, nn, pdti, pdtn, pn
+
+  // Tree 구조로 생성. 1 LV: pdtn, 2 LV: 'pn', 3 LV: 'nn'
+  // 장소 타입
+
+  // wsPlaceRelInfo
+  // {
+  //   is: 0,
+  //   ni: 'WD_001',
+  //   nn: '수문 001',
+  //   pdti: 'normalEvaporationBlock',
+  // };
+
+  // Handlebars Template Library 사용 (EJS 문법 충돌로 인한 lodash Template 사용 불가)
+  var optionTemplate = Handlebars.compile(
+    '<option value="{{ optionId }}">{{ optionValue }}</option>',
+  );
+  // Select Option에서 '모두' 값 추가할 경우 사용될 Format
+  var defaultSelOption = {
+    optionId: 'all',
+    optionValue: '모두',
+  };
+
+  // 센서타입이 1이 아닌 인자는 제어 목표 대상에서 제거
+  // console.log(wsPlaceRelList);
+  // Place Define Target Name 으로 그룹
+  var gTypePlaceRelInfo = _.groupBy(wsPlaceRelList, 'pdtn');
+  // Place detail Name 으로 그룹
+  var gNamePlaceRelInfo = _.groupBy(wsPlaceRelList, 'pn');
+
+  /**
+   * 장소 타입(대분류) Select Dom 재정의
+   * @param {HtmlElement} domElement Select Element
+   */
+  function setPlaceTypeDom(domElement) {
+    var optionDomList = _(gTypePlaceRelInfo)
+      .keys()
+      .sort()
+      .map(function(key) {
+        return optionTemplate({ optionId: key, optionValue: key });
+      })
+      .thru(function(domList) {
+        domList.unshift(optionTemplate(defaultSelOption));
+        return domList;
+      })
+      .value();
+    // Html Select Element InnerHtml 값 변경
+    $(domElement).html(optionDomList);
+  }
+
+  /**
+   * 장소타입(대분류)에 따른 장소명(중분류) Select Dom 재정의
+   * @param {HtmlElement} domElement 장소명(중분류) Select Element
+   * @param {string=} placeType 장소타입(대분류) Select Value
+   */
+  function setPlaceNameDom(domElement, placeType) {
+    // placeType gTypePlaceRelInfo.keys 일치하는 인자가 있을 경우 pdtn 그룹내 개체, 아닐 경우 원데이터
+    var placeRelList = _.includes(_.keys(gTypePlaceRelInfo), placeType)
+      ? _.get(gTypePlaceRelInfo, placeType)
+      : wsPlaceRelList;
+
+    // 장소 타입 형식에 맞는 장소 명 Select 생성
+    var optionDomList = _(placeRelList)
+      .sortBy('pn')
+      .unionBy('pn')
+      .map(function(placeRelInfo) {
+        return optionTemplate({ optionId: placeRelInfo.pn, optionValue: placeRelInfo.pn });
+      })
+      .value();
+
+    // Html Select Element InnerHtml 값 변경
+    $(domElement).html(optionDomList);
+  }
+
+  /**
+   * 장소명(중분류)에 따른 장치명(소분류) Select Dom 재정의
+   * @param {HtmlElement} domElement 장소타입(대분류) Select Element
+   * @param {string=} placeName 장소명(중분류) Select Value
+   */
+  function setSensorDom(domElement, placeName) {
+    // placeName이 gNamePlaceRelInfo.keys 일치하는 인자가 있을 경우 pn 그룹내 개체, 아닐 경우 원데이터
+    var placeRelList = _.includes(_.keys(gNamePlaceRelInfo), placeName)
+      ? _.get(gNamePlaceRelInfo, placeName)
+      : wsPlaceRelList;
+
+    // 장소 타입 형식에 맞는 장소 명 Select 생성
+    var optionDomList = _(placeRelList)
+      .sortBy('nn')
+      .unionBy('ni')
+      // .filter('is')
+      .map(function(placeRelInfo) {
+        return optionTemplate({ optionId: placeRelInfo.ni, optionValue: placeRelInfo.nn });
+      })
+      .value();
+
+    // Html Select Element InnerHtml 값 변경
+    $(domElement).html(optionDomList);
+  }
+
+  // FIXME: 테스트 후 삭제
+  $('#addCmdGoalBtn').trigger('click');
+</script>

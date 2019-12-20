@@ -1,161 +1,152 @@
 const _ = require('lodash');
-const request = require('request');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
-const base64Img = require('base64-img');
-const moment = require('moment');
 
 const router = express.Router();
 
-const { BU } = require('base-util-jh');
+const { BU, DU } = require('base-util-jh');
 
-/* GET home page. */
+const defaultDom = require('../../models/domMaker/defaultDom');
+const controlDom = require('../../models/domMaker/controlDom');
+
+const commonUtil = require('../../models/templates/common.util');
+
+const { wsPlaceRelationPickKey } = require('../../../default-intelligence').dcmWsModel;
+
+const DEFAULT_CATEGORY = 'command';
+
+/** @type {setCategoryInfo[]} */
+const subCategoryList = [
+  {
+    subCategory: 'command',
+    btnName: '제어관리',
+  },
+  {
+    subCategory: 'event',
+    btnName: '이벤트관리',
+  },
+  {
+    subCategory: 'threshold',
+    btnName: '임계치관리',
+  },
+];
+
+/* middleware. */
 router.get(
-  ['/', '/:siteId'],
-  asyncHandler(async (req, res) => {
-    // BU.CLI('control!!!');
+  ['/', '/:siteId', '/:siteId/:subCategory'],
+  asyncHandler(async (req, res, next) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId } = req.locals.mainInfo;
 
-    const { siteId, uuid } = req.locals.mainInfo;
+    const { subCategory = DEFAULT_CATEGORY } = req.params;
 
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
+    // 선택된 subCategoryDom 정의
+    const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
+    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
-    /** @type {CAMERA[]} */
-    const cameraList = await biDevice.getTable('camera', mainWhere, false);
-
-    /** @type {CAMERA_SNAPSHOT_DATA[]} */
-    const snapshotDataRows = await biDevice.getCameraSnapshot(_.map(cameraList, 'camera_seq'));
-
-    const snapshotStorageList = [];
-
-    snapshotDataRows.forEach(snapshotDataRow => {
-      const { snapshot_uuid: snapshotPath, camera_seq, writedate } = snapshotDataRow;
-      const cameraInfo = _.find(cameraList, { camera_seq });
-
-      const snapshotStorage = {
-        cameraSeq: cameraInfo.camera_seq,
-        cameraName: cameraInfo.camera_name,
-        snapshotPath: `snapshot/${uuid}/${snapshotPath}`,
-        snapshotTime: moment(writedate).format('YYYY-MM-DD hh:mm:ss'),
-      };
-
-      snapshotStorageList.push(snapshotStorage);
-
-      // const img = fs.readFileSync(`${process.cwd}/snapshot/${uuid}/${snapshotPath}`);
-      // res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-
-      // res.end(img, 'binary');
-    });
-
+    //  로그인 한 사용자 세션 저장
     req.locals.sessionID = req.sessionID;
     req.locals.user = req.user;
-    req.locals.snapshotStorageList = snapshotStorageList;
 
-    res.render('./control/control', req.locals);
+    next();
   }),
 );
 
-/* GET home page. */
+/* GET 제어 관리. */
 router.get(
-  ['/:siteId/snapshot'],
+  ['/', '/:siteId', '/:siteId/command'],
   asyncHandler(async (req, res) => {
-    // BU.CLI('control!!!');
-    request
-      .get('http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg')
-      .on('error', function(err) {
-        console.log(err);
-      })
-      .pipe(res);
-    // const requestGet = Promise.promisify(request.get);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    // const { statusCode, headers, body } = await requestGet(
-    //   // const { error, response, body } = await requestGet(
-    //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-    // );
+    // Site Sequence.지점 Id를 불러옴
+    const { siteId, mainWhere } = req.locals.mainInfo;
 
-    // console.log(body);
+    /** @type {MAIN} */
+    const mainRow = await biModule.getTableRow('main', mainWhere);
+    /** @type {MAIN_MAP} */
+    const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
-    // fs.readFile(
-    //   './video.jpg',
-    //   {
-    //     encoding: 'base64',
-    //   },
-    //   (err, result) => {
-    //     BU.CLIS(err, result);
-    //   },
-    // );
+    /** @type {V_DV_NODE[]} */
+    const nodeRows = await biModule.getTable('v_dv_node', mainWhere);
 
-    // res.send('hi');
+    // 장치 카테고리 별 Dom 생성
+    const deviceDomList = controlDom.makeNodeDom(nodeRows);
+    const sensorDomList = controlDom.makeNodeDom(nodeRows, false);
 
-    // if (statusCode !== 200) {
-    //   return res.status(statusCode).send('err');
-    // }
+    // BU.CLI(deviceInfoList);
 
-    // const data = `data:${headers['content-type']};base64,${Buffer.from(body).toString('base64')}`;
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await biModule.getTable('v_dv_place', mainWhere);
+    // BU.CLI(placeRows);
 
-    // BU.CLI(data);
+    // /** @type {V_DV_PLACE_RELATION[]} */
+    // const placeRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
 
-    // res.send(data);
+    /**
+     * Main Storage List에서 각각의 거점 별 모든 정보를 가지고 있을 객체 정보 목록
+     * @type {msInfo[]} mainStorageList
+     */
+    /** @type {MainControl} */
+    const mainController = global.mainControl;
 
-    // BU.CLIS(error, response, body);
+    const foundMsInfo = _.find(mainController.mainStorageList, msInfo =>
+      _.isEqual(msInfo.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
+    );
+    // BU.CLIN(foundMsInfo.msDataInfo.placeList);
+    if (foundMsInfo) {
+      const wsPlaceRelList = mainController.convertPlaRelsToWsPlaRels({
+        placeRelationRows: foundMsInfo.msDataInfo.placeRelList,
+        isSubmitAPI: 1,
+      });
+      // BU.CLIN(wsPlaceRelList);
+      // FIXME: 만약 제어 장치도 넣고자 할 경우 EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
+      req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr => _.omit(pr, 'is'));
+    } else {
+      req.locals.wsPlaceRelList = [];
+    }
 
-    // if (error) {
-    //   return res.status(500).send('error');
-    // }
+    // BU.CLIN(mainRow.map);
+    /** @type {mDeviceMap} */
+    const map = JSON.parse(mainRow.map);
 
-    // const data = `data:${response.headers['content-type']};base64,${Buffer.from(body, 'base64')}`;
+    controlDom.initCommand(map, placeRows);
 
-    // // BU.CLI(data);
+    // const flowCmdDom = controlDom.makeFlowCmdDom(placeList, map.controlInfo.flowCmdList);
 
-    // res.send(data);
+    // BU.CLI(flowCmdDom);
+
+    // 명령 정보만 따로 저장
+    req.locals.controlInfo = map.controlInfo;
+    delete map.controlInfo;
+
+    //  Map 경로 재설정
+    _.set(map, 'drawInfo.frame.mapInfo.backgroundInfo.backgroundData', `/map/${mainMapRow.path}`);
+    req.locals.map = map;
+
+    req.locals.deviceDomList = deviceDomList;
+
+    // BU.CLI(req.locals);
+
+    res.render('./UPSAS/control/command', req.locals);
   }),
 );
 
-// router.get('/:siteId/snapshot', (req, res) => {
-//   // request.get(
-//   //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//   //   (error, response, body) => {
-//   //     if (!error && response.statusCode === 200) {
-//   //       BU.CLI('complete');
-//   //       // const data = `data:${response.headers['content-type']};base64,${Buffer.from(
-//   //       //   body,
-//   //       //   'base64',
-//   //       // )}`;
+/* GET 제어 현황. */
+router.get(
+  ['/:siteId', '/:siteId/:feature'],
+  asyncHandler(async (req, res) => {
+    // BU.CLI(req.locals);
 
-//   //       // console.log(body);
-//   //       // return res.send(data);
-//   //     }
-//   //     BU.CLI('error', error);
-//   //     // res.status(500).send('');
-//   //   },
-//   // );
-//   request.get(
-//     'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//     (error, response, body) => {
-//       if (!error && response.statusCode == 200) {
-//         const data = `data:${response.headers['content-type']};base64,${Buffer.from(body).toString(
-//           'base64',
-//         )}`;
-//         BU.CLI('@@');
-//         console.log(data);
-//       }
-//       // res.status(500).send('');
-//     },
-//   );
+    res.send(DU.locationAlertBack(`${req.params.feature} 은 준비 중입니다.`));
 
-//   // request.get(
-//   //   'http://smsoft.iptime.org:38080/cgi-bin/viewer/video.jpg',
-//   //   (error, response, body) => {
-//   //     if (error) {
-//   //       return res.send(error);
-//   //     }
-
-//   //     return res.send(body);
-//   //   },
-//   // );
-// });
+    // res.send('');
+    // res.render('./UPSAS/control/status', req.locals);
+  }),
+);
 
 module.exports = router;

@@ -37,6 +37,8 @@ class RefineModel extends BiModule {
   async refineGeneralPowerInfo(siteId) {
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
+    // BU.CLI(mainWhere);
+
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await this.getTable('v_pw_profile', mainWhere);
 
@@ -45,6 +47,8 @@ class RefineModel extends BiModule {
 
     // 인버터 검색 Where 절
     const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+
+    // BU.CLI(inverterWhere);
 
     // 인버터 월간 정보 추출
     const monthSearchRange = this.createSearchRange({
@@ -119,11 +123,12 @@ class RefineModel extends BiModule {
       .sum();
 
     // Curr Power 전력
-    const cumulativePower = webUtil.calcValue(
-      webUtil.calcValidDataList(validInverterDataList, 'power_cp_kwh', false),
-      0.001,
-      3,
-    );
+    const cumulativePower = _.chain(inverterStatusRows)
+      .map('power_cp_kwh')
+      .sum()
+      .divide(1000)
+      .round(3)
+      .value();
 
     // 현재 발전 효율
     const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';

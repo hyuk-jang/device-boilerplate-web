@@ -30,8 +30,9 @@ class AbstSocketIOManager {
   /**
    * 노드 정보에서 UI에 보여줄 내용만을 반환
    * @param {msDataInfo} dataInfo
+   * @param {nodeInfo[]} renewalList 갱신된 노드
    */
-  pickNodeList(dataInfo) {}
+  pickNodeList(dataInfo, renewalList) {}
 
   /**
    * 노드 정보에서 UI에 보여줄 내용만을 반환
@@ -50,7 +51,13 @@ class AbstSocketIOManager {
    * Data Logger 상태를 io Client로 보냄
    * @param {msInfo} msInfo
    */
-  submitMsClientStatus(msInfo) {}
+  submitApiClientIsConn(msInfo) {}
+
+  /**
+   * 제어 모드 업데이트
+   * @param {msInfo} msInfo
+   */
+  submitMode(msInfo) {}
 
   /**
    * 등록되어져 있는 노드 리스트를 io Client로 보냄.
@@ -70,17 +77,5 @@ class AbstSocketIOManager {
    * @param {defaultFormatToResponse} execCommandResultInfo
    */
   submitExecCommandResult(msInfo, execCommandResultInfo) {}
-
-  /**
-   * 등록되어져 있는 노드 리스트를 io Client로 보냄.
-   * @param {msInfo} msInfo
-   */
-  submitNodeListToIoClient(msInfo) {}
-
-  /**
-   * 현재 수행중인 명령 리스트를 io Client로 보냄
-   * @param {msInfo} msInfo
-   */
-  submitOrderListToIoClient(msInfo) {}
 }
 module.exports = AbstSocketIOManager;
