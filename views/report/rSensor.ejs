@@ -57,6 +57,9 @@
       $('#sensorReportHeaderDom').html(<%- JSON.stringify(dom.sensorReportHeaderDom) %>);
       $('#sensorReportBodyDom').html(<%- JSON.stringify(dom.sensorReportBodyDom) %>);
       $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
       // 초기 시작시 라디오 체크버튼 클릭처리
       var searchRange = <%- JSON.stringify(searchRange) %>;
       var reportInfo = <%- JSON.stringify(reportInfo) %>;

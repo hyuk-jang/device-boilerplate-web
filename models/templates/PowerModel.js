@@ -41,7 +41,7 @@ class PowerModel extends BiModule {
         amount,
       } = inverterProfile;
 
-      const siteName = `${mainName} ${subName || ''} ${_.round(amount)} kW급 ${
+      const siteName = `${mainName} ${subName || ''} ${_.round(amount, 2)} kW급 ${
         _.isString(company) && company.length ? company : ''
       }`;
 

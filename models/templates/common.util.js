@@ -22,6 +22,11 @@ function convertProjectSource(projectMainId) {
       projectName = '농업병행 태양광발전 모니터링';
       loginBG = 'bg_fp.jpg';
       break;
+    case 'HS':
+      projectImg = 's2w_logo.png';
+      projectName = '농가 보급형 태양광';
+      loginBG = 'bg_fp.jpg';
+      break;
     case 'S2W':
       projectImg = 's2w_logo.png';
       projectName = '태양광 이모작 모니터링';

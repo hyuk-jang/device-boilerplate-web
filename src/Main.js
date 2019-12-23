@@ -37,6 +37,7 @@ class Main {
             break;
         }
         break;
+      case 'HS':
       case 'S2W':
         switch (projectSubId) {
           case 'RnD':

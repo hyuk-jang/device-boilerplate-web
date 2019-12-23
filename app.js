@@ -62,6 +62,7 @@ switch (projectMainId) {
     faviPath = 'fp.ico';
     break;
   case 'S2W':
+  case 'HS':
     faviPath = 's2w.ico';
     break;
   case 'UPSAS':

@@ -19,7 +19,7 @@ const DEFAULT_SEARCH_TYPE = 'days';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
-const DEFAULT_CATEGORY = 'sensor';
+const DEFAULT_CATEGORY = 'inverter';
 const DEFAULT_SUB_SITE = 'all';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
@@ -481,8 +481,6 @@ router.get(
     res.send({ fileName, workBook: excelWorkBook });
   }),
 );
-
-
 
 module.exports = router;
 

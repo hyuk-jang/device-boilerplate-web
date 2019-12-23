@@ -63,7 +63,7 @@ class RefineModel extends BiModule {
 
     // console.timeEnd('getInverterStatistics');
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
-    const monthPower = webUtil.reduceDataList(monthInverterStatusRows, 'interval_power');
+    const monthPower = webUtil.reduceDataList(monthInverterStatusRows, 'interval_power').toFixed(1);
 
     /** @type {V_PW_INVERTER_STATUS[]} */
     const inverterStatusRows = await this.getTable('v_pw_inverter_status', inverterWhere);
@@ -118,9 +118,11 @@ class RefineModel extends BiModule {
     );
 
     // 금일 발전량
-    const dailyPower = _(inverterStatusRows)
+    const dailyPower = _.chain(inverterStatusRows)
       .map('daily_power_kwh')
-      .sum();
+      .sum()
+      .round(3)
+      .value();
 
     // Curr Power 전력
     const cumulativePower = _.chain(inverterStatusRows)

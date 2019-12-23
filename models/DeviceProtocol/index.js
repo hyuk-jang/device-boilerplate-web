@@ -22,6 +22,7 @@ function selectDeviceProtocol() {
     case 'FP':
       DeviceProtocol = FarmParallelDP;
       break;
+    case 'HS':
     case 'S2W':
       DeviceProtocol = Solar2WayDP;
       break;
