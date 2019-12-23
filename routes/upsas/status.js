@@ -44,7 +44,6 @@ router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
     // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
 
     // 선택된 subCategoryDom 정의
@@ -52,8 +51,6 @@ router.get(
     _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
     const measureInfo = {
-      siteId,
-      subCategory,
       measureTime: `${moment().format('YYYY-MM-DD HH:mm')}:00`,
     };
 
@@ -343,22 +340,25 @@ router.get(
 router.get(
   ['/:siteId/inverter'],
   asyncHandler(async (req, res) => {
+    const {
+      mainInfo: { mainWhere },
+      viewPowerProfileRows,
+    } = req.locals;
+
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    /** @type {V_PW_PROFILE[]} powerProfileRows */
-    const powerProfileRows = req.locals.viewPowerProfileRows;
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
 
     // 인버터 Seq 목록
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    BU.CLI('hi');
-    const refinedInverterStatusList = await refineModel.refineInverterStatus(inverterSeqList);
+
+    const inverterStatusList = await refineModel.refineInverterStatus(inverterSeqList);
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 상태 데이터 동적 생성 돔
-    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(
-      refinedInverterStatusList,
-    );
+    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(inverterStatusList);
 
     _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 

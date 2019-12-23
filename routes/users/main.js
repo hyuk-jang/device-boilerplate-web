@@ -6,11 +6,8 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const webUtil = require('../../models/templates/web.util');
-
 const domMakerMain = require('../../models/domMaker/mainDom');
 
-const commonUtil = require('../../models/templates/common.util');
 const sensorUtil = require('../../models/templates/sensor.util');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
@@ -20,19 +17,16 @@ require('../../models/jsdoc/domGuide');
 router.get(
   ['/', '/main', '/main/:siteId'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
+    const {
+      mainInfo: { siteId, mainWhere },
+    } = req.locals;
+
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
-
-    // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
-
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     // ********** Power 관련
     // 발전 현황을 나타내는 기본적인 정보

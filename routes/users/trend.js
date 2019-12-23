@@ -8,7 +8,6 @@ const router = express.Router();
 const { BU } = require('base-util-jh');
 
 const sensorUtil = require('../../models/templates/sensor.util');
-const commonUtil = require('../../models/templates/common.util');
 const defaultDom = require('../../models/domMaker/defaultDom');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
@@ -36,13 +35,13 @@ const subCategoryList = [
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
-    // console.time('Trend Middleware');
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
+
+    // console.time('Trend Middleware');
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
     // 선택된 subCategoryDom 정의
     const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
@@ -97,11 +96,11 @@ router.get(
 router.get(
   ['/', '/:siteId', '/:siteId/inverter'],
   asyncHandler(async (req, res, next) => {
-    /** @type {RefineModel} */
-    const refineModel = global.app.get('refineModel');
-
     /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
+
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
 
     const refinedInverterCharts = await refineModel.refineBlockCharts(
       _.get(req, 'locals.searchRange'),
@@ -133,16 +132,13 @@ router.get(
 router.get(
   ['/:siteId/sensor'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
+    const {
+      mainInfo: { siteId, mainWhere },
+    } = req.locals;
 
     /** @type {BiDevice} */
     const biDevice = global.app.get('biDevice');
 
-    // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
-
-    // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     // console.time('init');
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);

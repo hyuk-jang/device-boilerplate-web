@@ -35,12 +35,8 @@ const subCategoryList = [
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
-
-    // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
 
     const { subCategory = DEFAULT_CATEGORY } = req.params;
 
