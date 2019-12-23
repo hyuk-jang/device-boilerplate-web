@@ -51,7 +51,6 @@ router.get(
     '/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
@@ -119,15 +118,14 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     const {
-      mainInfo: { siteId },
+      mainInfo: { mainWhere },
+      viewPowerProfileRows,
       reportInfo: { subCategoryId },
     } = req.locals;
 
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
     /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
 
     // 인버터 Seq 목록
     const inverterSeqList = _(powerProfileRows)
@@ -172,7 +170,6 @@ router.get(
     /** @type {BlockModel} */
     const blockModel = global.app.get('blockModel');
 
-    /** @type {MEMBER} */
     const { siteId } = req.locals.mainInfo;
     const { subCategory, subCategoryId } = req.locals.reportInfo;
 
@@ -326,8 +323,6 @@ module.exports = router;
 //   asyncHandler(async (req, res, next) => {
 //     /** @type {PowerModel} */
 //     const powerModel = global.app.get('powerModel');
-
-//     commonUtil.applyHasNumbericReqToNumber(req);
 
 //     /** @type {MEMBER} */
 //     const { siteId } = req.locals.mainInfo;

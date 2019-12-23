@@ -17,10 +17,7 @@
       <!--메인-->
       <div class="container_body">
         <div class="container_row flex_dir_col">
-          <p class="table_desc_area">
-            인버터 모니터링 측정시간 &nbsp;
-            <span id="inverterMeasureTime"> 2018-10-17 10:27:00</span>
-          </p>
+          <p class="table_desc_area">측정시간 &nbsp; <span id="measureTime"> </span></p>
           <div class="table-responsive default_area">
             <table class="table table-bordered number_table">
               <colgroup>
@@ -74,8 +71,8 @@
       <%- include("../master/footer.ejs") %>
     </div>
     <script>
-      // 인버터 측정 시간 입력
-      document.getElementById('inverterMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
+      // 측정 시간 입력
+      document.getElementById('measureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
 
       // 인버터 현재 상태 데이터 테이블 생성
       $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)

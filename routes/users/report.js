@@ -47,12 +47,12 @@ router.get(
     '/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE } = req.params;
+    /** @type {BiModule} */
+
+    const biModule = global.app.get('biModule');
 
     // 선택된 subCategoryDom 정의
     const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
@@ -113,13 +113,14 @@ router.get(
     '/:siteId/inverter/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
+    const {
+      mainInfo: { siteId, mainWhere },
+      viewPowerProfileRows,
+    } = req.locals;
+
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
-    commonUtil.applyHasNumbericReqToNumber(req);
-
-    /** @type {MEMBER} */
-    const { siteId } = req.locals.mainInfo;
     // req.param 값 비구조화 할당
     const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
@@ -127,11 +128,10 @@ router.get(
     const { page = 1 } = req.query;
 
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
 
     /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(req.locals.viewPowerProfileRows, mainWhere);
+    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
 
     // 인버터 Seq 목록
     const inverterSeqList = _(powerProfileRows)
@@ -210,7 +210,6 @@ router.get(
   ['/:siteId/inverter/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
     // BU.CLI('인버터 엑셀 다운');
-    commonUtil.applyHasNumbericReqToNumber(req);
 
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
@@ -283,8 +282,6 @@ router.get(
     '/:siteId/sensor/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
-
     const { siteId } = req.locals.mainInfo;
     const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
@@ -416,8 +413,6 @@ router.get(
 router.get(
   ['/:siteId/sensor/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
-
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
     /** @type {V_DV_PLACE[]} */

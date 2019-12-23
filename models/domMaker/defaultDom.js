@@ -374,8 +374,11 @@ const defaultDom = {
    */
   addComma(num) {
     try {
-      const regexp = /\B(?=(\d{3})+(?!\d))/g;
-      return num.toString().replace(regexp, ',');
+      if (num >= 1) {
+        const regexp = /\B(?=(\d{3})+(?!\d))/g;
+        return num.toString().replace(regexp, ',');
+      }
+      return num;
     } catch (error) {
       return '';
     }

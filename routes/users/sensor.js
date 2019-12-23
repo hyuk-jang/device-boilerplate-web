@@ -10,14 +10,14 @@ const { BU } = require('base-util-jh');
 
 const sensorDom = require('../../models/domMaker/sensorDom');
 
-const commonUtil = require('../../models/templates/common.util');
-
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
 router.get(
   ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
+    const {
+      mainInfo: { siteId, mainWhere },
+    } = req.locals;
 
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
@@ -28,16 +28,6 @@ router.get(
     const { mainInfo } = req.locals;
     /** @type {{siteId: string, m_name: string}[]} */
     const mainSiteList = mainInfo.siteList;
-
-    // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
-
-    // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId)
-      ? {
-          main_seq: siteId,
-        }
-      : null;
 
     // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
