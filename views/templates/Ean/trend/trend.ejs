@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+  <%- include("../master/head.ejs") %>
+  <script src="/js/hichart/exporting.js"></script>
+  <script src="/js/hichart/export-data.js"></script>
+  <!-- <script src="/js/contents/master/mainUtil.js"></script> -->
+  <script src="/js/contents/main/hichartMaker.js"></script>
+  <link href="/css/spinner.css" rel="stylesheet" />
+  <%- include("./mediaQuery.ejs") %>
+</head>
+
+<body style="background-color: #333">
+  <%- include("../../../master/spinner.ejs") %>
+  <div id="wrap" class="wrap hidden">
+    <div class="center">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="text-center" style="background-color:#fff; height:auto;">
+          <div class="row row_width  top_box" style="padding:5px;">
+            <!-- <div id="subCategoryDom" class="table-responsive row_width" style="text-align: left">
+              <button type="button" value="sensor" class="btn btn-success btn1">생육환경</button>
+              <button type="button" value="inverter" class="btn btn-default btn2">인버터</button>
+            </div> -->
+            <div class="sel">
+              <div class="sel_box2">
+                <span>조회기간</span>
+                <select id="searchType" class="form-control">
+                  <option value="days">일일</option>
+                  <option value="months">월간</option>
+                  <option value="years">년간</option>
+                  <option value="range">기간선택</option>
+                </select>
+              </div>
+              <div class="sel_box2">
+                <span>조회간격</span>
+                <select id="searchInterval" class="form-control">
+                  <option value="min">1분</option>
+                  <option value="min10">10분</option>
+                  <option value="hour">1시간</option>
+                  <option value="day">1일</option>
+                  <option value="month">1달</option>
+                  <option value="year">1년</option>
+                </select>
+              </div>
+              <!-- <div class="sel_box3">
+                    <span>조회설정</span>
+                    <select id="searchOption" class="form-control">
+                      <option value="merge">병합</option>
+                      <option value="individual">개별</option>
+                    </select>
+                  </div> -->
+              <!--</div>-->
+              <div class="serch_st sel_box_data">
+                날짜 &nbsp;
+                <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly="">
+                <span id="between-start-end" hidden>~</span>
+                <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly="" hidden="hidden"
+                  style="display: none;">
+                <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">검색</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 20px;" class="row_title">
+            <div id="sensorArea"></div>
+          </div>
+          <div class="title_box2" id="test"></div>
+        </div>
+      </div>
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
+      </div>
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </div>
+  </div>
+  <script>
+    let sensorDivDomList = <%- JSON.stringify(dom.sensorDivDomList) %>;
+    let madeSensorChartList = <%- JSON.stringify(madeSensorChartList) %>;
+
+    // 초기 시작시 라디오 체크버튼 클릭처리
+    var searchRange = <%- JSON.stringify(searchRange) %>;
+    const {
+      siteId
+    } = <%- JSON.stringify(trendInfo) %>;
+
+    $('#sensorArea').html(sensorDivDomList)
+
+    madeSensorChartList.forEach(chartInfo => {
+      makeLineChart(chartInfo)
+    });
+  </script>
+
+  <script src="/js/contents/report/search.js"></script>
+  <!-- 기본 데이터 세팅 -->
+  <script>
+    checkSelectBoxOption("searchInterval", searchRange.searchInterval)
+    checkSelectBoxOption("searchType", searchRange.searchType)
+    checkSelectBoxOption("searchOption", searchRange.searchOption)
+
+    // 검색 타입에 따라 적용
+    applySearchType(searchRange.searchType)
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+{
+  "name": "device-boilerplate-web",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "app": "./bin/www.js"
+  },
+  "pkg": {
+    "assets": [
+      "views/**/*",
+      "public/**/*"
+    ]
+  },
+  "scripts": {
+    "start": "nodemon --trace-warnings ./bin/www.js",
+    "build": "pkg . --out-path dist",
+    "build:win": "pkg . --out-path dist --targets node8-win-x64",
+    "build:linux": "pkg . --out-path dist --targets node8-linux-x64",
+    "build:macos": "pkg . --out-path dist --targets node8-macos-x64",
+    "fix-code": "prettier-eslint --write 'src/**/*.{js,jsx}' ",
+    "fix-styles": "prettier-stylelint --write 'public/**/*.{css,scss}' "
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.136",
+    "docdash": "^1.1.1",
+    "dotenv": "^8.0.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.1",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-react": "^7.14.3",
+    "jsdoc": "^3.6.3",
+    "pkg": "^4.4.0",
+    "prettier": "^1.18.2"
+  },
+  "dependencies": {
+    "base-model-jh": "^1.2.5",
+    "base-util-jh": "^1.2.4",
+    "base64-img": "^1.0.4",
+    "body-parser": "^1.19.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.4",
+    "cron": "^1.7.1",
+    "debug": "^4.1.1",
+    "ejs": "^2.6.2",
+    "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
+    "express-mysql-session": "^2.1.0",
+    "express-session": "^1.16.2",
+    "http-errors": "^1.7.3",
+    "lodash": "^4.17.15",
+    "method-override": "^3.0.0",
+    "moment": "^2.24.0",
+    "morgan": "^1.9.1",
+    "mysql": "^2.17.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "request": "^2.88.0",
+    "rtsp-ffmpeg": "0.0.14",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^2.2.0",
+    "split": "^1.0.1",
+    "uuid": "^3.3.2",
+    "weather-cast": "^0.2.3",
+    "ws": "^6.2.1",
+    "xlsx": "^0.14.5"
+  }
+}

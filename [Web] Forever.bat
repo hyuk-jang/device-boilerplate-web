@@ -1,0 +1,1 @@
+forever start -o ../out.log -e ../err.log --minUptime 5000 --spinSleepTime 2000 -a bin/www.js

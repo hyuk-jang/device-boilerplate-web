@@ -1,0 +1,384 @@
+
+
+2018-10-25 09:36:42
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:36:42
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:36:42
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:36:42
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:36:42
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:24
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:24
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:24
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:24
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:24
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:38:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:39:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:39:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:39:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:39:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:39:44
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:42:22
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:42:22
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:42:22
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:42:22
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:42:22
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:20
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:20
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:20
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:20
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:20
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:40
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:40
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:40
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:40
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:52:40
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:54:09
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:54:09
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:54:09
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:54:09
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-25 09:54:09
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:29:43
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:30:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:31:06
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:32:17
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:00
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:34:36
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-26 09:35:20
+TypeError: Cannot read property 'forEach' of undefined
+
+
+2018-10-27 22:10:22
+Error: ER_NO_SUCH_TABLE: Table 'fp.kma_data' doesn't exist
+
+
+2018-10-27 22:10:22
+Error: ER_NO_SUCH_TABLE: Table 'fp.kma_data' doesn't exist
+
+
+2018-10-27 22:10:22
+Error: ER_NO_SUCH_TABLE: Table 'fp.kma_data' doesn't exist
+
+
+2018-10-27 22:10:22
+Error: ER_NO_SUCH_TABLE: Table 'fp.kma_data' doesn't exist
+
+
+2018-10-27 22:10:22
+Error: ER_NO_SUCH_TABLE: Table 'fp.kma_data' doesn't exist
+
+
+2018-11-01 21:55:56
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-01 21:55:57
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-01 21:55:57
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-01 21:55:57
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-01 21:55:57
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:25.895
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:25.899
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.851
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.862
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-05 20:41:26.866
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-06 21:24:42.732
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-06 21:24:42.735
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-06 21:24:43.721
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-06 21:24:43.725
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-06 21:24:43.728
+Error: ER_NO_SUCH_TABLE: Table 'farm_parallel.kma_data' doesn't exist
+
+
+2018-11-19 22:24:57.313
+Error: Handshake inactivity timeout

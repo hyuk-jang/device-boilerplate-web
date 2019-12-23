@@ -1,0 +1,195 @@
+/***************************************/
+/************ Master ************/
+/***************************************/
+
+body {
+  color: #fff;
+  background: #3c4854;
+}
+
+body a {
+  color: #fff;
+}
+
+header {
+  background: #122330;
+  border-bottom: #091219 solid 1px;
+}
+
+.table thead {
+  background: linear-gradient(#2c5364, #0f2027);
+}
+
+/***************************************/
+/************ Header Master ************/
+/***************************************/
+.container-fluid {
+  background: #091219;
+  width: 100%;
+}
+
+.header_home_area {
+  color: #fff !important;
+}
+
+.user_box .user_id {
+  color: #e5ff00;
+}
+
+.user_box .logout {
+  background: linear-gradient(#555, #444);
+}
+
+.user_box .logout:hover {
+  background: linear-gradient(#444, #333);
+}
+
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:focus,
+.navbar-inverse .navbar-nav > .active > a:hover {
+  background: #2a506c;
+}
+
+.navbar-inverse {
+  border-top: 1px solid #31373a;
+}
+
+/* Site 선택지 */
+.siteList {
+  /* background: linear-gradient(to bottom, #424242, #272727); */
+  background: #000;
+  color: #e9e9e9;
+  border: 1px solid #e9e9e9;
+}
+
+.siteList option {
+  background: #1c1c1d;
+}
+
+.navbar-inverse .navbar-toggle {
+  border-color: #8e8e8e;
+}
+/***************************************/
+/************ Footer Master ************/
+/***************************************/
+footer {
+  border-top: 1px solid #31373a;
+  background: #091219;
+}
+
+/***************************************/
+/************** Container **************/
+/***************************************/
+
+/* 로그아웃 버튼 */
+.glyphicon-log-out:before {
+  content: '\e163';
+  color: #dfdfdf;
+}
+
+/* 가장 기본적으로 쓰일 컴포넌트 스타일 */
+.default_area {
+  background: linear-gradient(to bottom right, #2a2a2b, #3e3e40);
+  box-shadow: 5px 2px 10px #091219;
+}
+
+.default_search_area {
+  background: linear-gradient(to bottom right, #2a506c, #305a77);
+  box-shadow: 5px 2px 10px #091219;
+  border: 1px solid #3f5d8a;
+}
+
+/***************************************/
+/*         Container - Side            */
+/***************************************/
+.side_section_power {
+  background: #2a506c;
+  box-shadow: 5px 2px 10px #091219;
+}
+
+.side_section_growth {
+  background: #1b616b;
+  box-shadow: 5px 2px 10px #091219;
+}
+
+/* 발전 현황 정보 데이터 색상 */
+.side_section_power .sensor_data_view > p:nth-child(2) {
+  color: #93d30a;
+}
+
+/* 생육 환경 정보 데이터 색상 */
+.side_section_growth .sensor_data_view > p:nth-child(2) {
+  color: #93d30a;
+}
+
+.power_img {
+  background-image: url('../../image/development.jpg');
+}
+
+/***************************************/
+/*         Container - Body            */
+/***************************************/
+
+/* 박스 In Chart */
+.component_piece_area {
+  background: linear-gradient(to bottom right, #2a2a2b, #3e3e40);
+  box-shadow: 5px 2px 10px #091219;
+}
+
+.component_piece_area > header {
+  background: linear-gradient(#535a61, #3c424c);
+  border-top: 1px solid #39414c;
+  border-bottom: 1px solid #232a33;
+}
+
+/* Body 단위 색상 녹색 */
+.sensor_data_view > p:nth-child(2) {
+  color: #93d30a;
+}
+
+.table_desc_area {
+  background: linear-gradient(#3f619e, #382b80);
+  box-shadow: 2px 1px 5px #091219;
+}
+
+.table_desc_area > span {
+  color: #fff934;
+}
+
+.component_ele_status {
+  border: 0.1rem solid #e9e9e9;
+  margin: 2rem 0;
+}
+
+.component_ele_status > header {
+  background: linear-gradient(#1b616b, #19525a);
+}
+
+.search_box,
+.search_box > .search_title {
+  color: #fff;
+}
+
+.search_box input[type='text'] {
+  color: #fff;
+  background: #12222f;
+  border: 1px solid rgb(204, 204, 204);
+}
+
+.search_box > button {
+  border: 1px solid #19462b;
+  background: linear-gradient(#3baf69, #349059);
+}
+
+.search_box > button:hover {
+  background: linear-gradient(#359b5d, #2c774a);
+}
+
+.form-control {
+  color: #fff;
+  background: #12222f;
+}
+
+.input_tre {
+  color: #333;
+}

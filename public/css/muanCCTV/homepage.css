@@ -1,0 +1,416 @@
+/* ------------------------------- */
+/* HTML Elements
+/* ------------------------------- */
+body {
+  margin: 0px auto;
+  text-align: center;
+  font-family: 'lucida grande', arial, verdana, sans-serif;
+  background-color: #f1f1f1;
+}
+
+img {
+  border: 0px;
+}
+
+a,
+a:link a:visited {
+  text-decoration: none;
+}
+
+/* select {
+  border: 1px solid #777777;
+  font-family: 'lucida grande', arial, verdana, sans-serif;
+  font-size: 11px;
+  height: 18px;
+  *height: 20px;
+  width: 46px;
+  font-weight: bold;
+} */
+
+table {
+  border: 0;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+table td {
+  padding: 0;
+}
+
+table.index td {
+  vertical-align: top;
+}
+/*=============  Outter-Wrapper =============*/
+#case-wrapper {
+  width: 984px;
+  margin: 10px auto;
+  background: #0186d1;
+  padding: 2px;
+  position: relative;
+  z-index: 12;
+}
+
+#outter-wrapper {
+  text-align: left;
+  background-color: #ffffff;
+  position: relative;
+}
+
+/*=============  Shadow Box =============*/
+div#shadow_container {
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  width: 1004px;
+  z-index: 11;
+  margin-bottom: 15px;
+  margin-top: -621px;
+  *margin-top: -619px;
+}
+
+div#shadow_content {
+  background: transparent url(../../image/muanCCTV/shadow-bottom.png) no-repeat scroll 0pt 100%;
+  padding-bottom: 15px;
+}
+div#shadow_content div.top {
+  background: transparent url(../../image/muanCCTV/shadow-top.png) no-repeat scroll 0% 0%;
+  padding-top: 15px;
+}
+
+div#shadow_content div.bottom {
+  background: transparent url(../../image/muanCCTV/shadow-content.png) repeat-y scroll 0%;
+  overflow: hidden;
+  padding-top: 588px;
+  *padding-top: 563px;
+}
+
+/*=============  Sidebar =============*/
+
+#sidebar {
+  width: 180px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+#control-area {
+  min-height: 375px; /* 375 */
+  height: auto !important;
+  height: 375px;
+  padding: 0 10px;
+}
+
+table.CtrlArea {
+  margin: 10px auto 5px auto;
+  font-weight: normal;
+  font-size: 13px;
+  font-family: 'lucida grande', arial, verdana, sans-serif;
+  color: #000;
+}
+
+table.CtrlArea td {
+  vertical-align: middle;
+  padding: 0px;
+}
+
+table.CameraCtrlBlock1 {
+  margin: 5px auto 0px auto;
+}
+
+table.CameraCtrlBlock1 td {
+  padding: 1px;
+}
+
+#ptz_pan_speed td,
+#ptz_tilt_speed td,
+#ptz_zoom_speed td,
+#ptz_focus_speed td {
+  padding: 2px;
+}
+#video_stream td,
+#digital_output td {
+  padding: 2px;
+}
+
+#configuration-area {
+  min-height: 130px;
+  height: auto !important;
+  height: 130px;
+  padding: 0 10px;
+}
+
+#configuration-area table {
+  text-align: left;
+  color: #fff;
+  margin: 10px auto;
+  font-weight: normal;
+  font-size: 13px;
+  font-family: 'lucida grande', arial, verdana, sans-serif;
+}
+
+#configuration-area tr {
+  padding: 0 0px 0px 0;
+  cursor: pointer;
+}
+
+#configuration-area td {
+  padding: 0 5px 3px 0;
+}
+
+#configuration-area td a {
+  color: #fff;
+}
+
+#configuration-area td a:hover {
+  text-decoration: none;
+}
+
+/*=============  Main =============*/
+#main {
+  width: 760px;
+  padding-left: 22px;
+  margin: 0px;
+  margin-bottom: -3px; /*for niftycube when switch stream 1/2*/
+}
+
+div#page_title {
+  font-family: 'lucida grande', verdana, arial, sans-serif;
+  font-size: 26px;
+  color: #098bd6;
+  font-weight: bold;
+}
+
+#video-area {
+  text-align: center;
+}
+
+#video-area table {
+  margin: 11px auto;
+  margin-bottom: 0px;
+  text-align: center;
+}
+
+.showimage_class {
+  margin-top: 0px;
+}
+
+#RtspCtrlBtn-bar {
+  display: block;
+  position: relative;
+  z-index: 2;
+  height: 28px;
+  text-align: center;
+  margin: 8px 0 8px 0;
+}
+
+/*=============  others =============*/
+
+#LanguageSelectorDiv {
+  /*padding-left:30px;*/
+}
+
+#footer-wrapper {
+  clear: both;
+  line-height: 9px;
+}
+
+/*a,button { noFocusLine: expression(this.onFocus=this.blur())}  for IE, remove focus outline! remove for bad performance*/
+button:focus::-moz-focus-inner {
+  border-color: transparent !important;
+}
+
+#RtspCtrlBtn-bar button {
+  *margin-right: 5px;
+  width: 28px;
+  height: 28px;
+  background: url(../../image/muanCCTV/plugin.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+  z-index: 9;
+}
+
+#btn_ptz_up,
+#btn_ptz_down {
+  width: 23px;
+  height: 36px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+}
+
+#btn_ptz_left,
+#btn_ptz_right {
+  width: 36px;
+  height: 23px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+}
+
+#btn_ptz_home {
+  width: 23px;
+  height: 23px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+}
+
+#btn_ptz_zoomWide,
+#btn_ptz_zoomTele,
+#btn_ptz_focusNear,
+#btn_ptz_focusFar,
+#btn_ptz_irisInc,
+#btn_ptz_irisDec {
+  width: 28px;
+  height: 18px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+}
+#btn_ptz_zoom,
+#btn_ptz_focusAuto,
+#btn_ptz_irisAuto {
+  width: 70px;
+  height: 18px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  padding: 0px;
+  color: #0184ca;
+  font-size: 12px;
+}
+#btn_ptz_pan,
+#btn_ptz_stop,
+#btn_ptz_patrol {
+  width: 42px;
+  height: 18px;
+  background-image: url(../../image/muanCCTV/PTZ_Control.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+}
+
+.CameraCtrlBlock2 {
+  text-align: center;
+  margin: 3px 0;
+  font-size: 0px;
+  display: flex;
+  align-items: center;
+}
+.CameraCtrlBlock2 button {
+  margin-right: -1px;
+  text-align: center;
+  font-family: 'lucida grande', arial, verdana, sans-serif;
+}
+
+#digitalOutPut-bar button {
+  width: 24px;
+  height: 18px;
+  background: url(../../image/muanCCTV/digitaloutput.gif);
+  background-position: 0 0;
+  border: 0;
+  position: relative;
+  margin-right: -6px;
+  *margin-right: -2px;
+}
+
+#configuration-area button {
+  background-position: 0 0;
+  border: 0;
+  width: 20px;
+  height: 20px;
+  background: url(../../image/muanCCTV/configuration-area.gif);
+  cursor: pointer;
+}
+
+/*
+* "wrap to center(Absolute Horizontal and Vertical Centering)" hack, for IE/win, Firefox, IE/MAC
+*/
+
+.wraptocenter {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.wraptocenter * {
+  vertical-align: middle;
+}
+
+.wraptocenter span {
+  *display: inline-block;
+  *height: 100%;
+}
+
+/* Hack for IE/Mac */
+/*\*/ /*/
+.wraptocenter {
+  display: block;
+}
+.wraptocenter span {
+  display: inline-block;
+  height: 100%;
+  width: 1px;
+}
+/**/
+
+.wraptocenter_logo {
+  width: 180px;
+  height: 56px;
+}
+
+.wraptocenter_title {
+  width: 760px;
+  height: 56px;
+}
+
+.wraptocenter_footerlogo {
+  width: 180px;
+  height: 30px;
+  display: block;
+}
+
+#LanguageSelectorDiv ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  background-color: #fff;
+  border: 1px solid #000;
+  opacity: 0.85;
+  -moz-opacity: 0.85;
+  filter: alpha(Opacity=85);
+  *width: 100%; /*for IE opacity*/
+  _width: 65px;
+}
+
+#LanguageSelectorDiv ul li a {
+  width: 65px;
+  display: block;
+  padding: 3px 12px;
+  background-color: #fff;
+  color: #333;
+}
+
+#LanguageSelectorDiv ul li a:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+#LanguageSelectorDiv ul li a:active {
+  background-color: #06f;
+  color: #fff;
+}
+
+/*  CSS Hack
+#someNode
+{
+  position: fixed; // for all
+ *position: fixed; //for All IE
+ #position: fixed; //for IE7 
+ _position: fixed; //for IE6
+}
+*/

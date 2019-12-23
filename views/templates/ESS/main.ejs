@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Default Js -->
+
+  <%- include("../../master/head.ejs") %>
+  <script src="/js/contents/master/mainUtil.js"></script>
+  <script src="/js/contents/main/makeGaugeChart.js"></script>
+  <%- include("./mediaQuery.ejs") %>
+</head>
+
+<body>
+  <div id="wrap" class="wrap hidden" style="background-image: url('/image/bg_1025.jpg'); background-color:#e9e9e9;">
+    <div class="center">
+      <!-- Header -->
+      <%- include("../../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row text-center">
+          <div class="box">
+            <div class="cont-box-rotate_f">
+              <div class="cont-box-rotate"></div>
+            </div>
+            <div class="deve">
+              <p>발전현황</p>
+              <p>Development status</p>
+            </div>
+            <div id="powerStatus" class="deve_1">
+              <div class="stat">z
+                <p><I>현재출력</I></p>
+                <input id="currKw" class="wed_1" style="margin-left:13px;" type="text" value="">
+                <span>kW</span>
+              </div>
+              <div class="stat">
+                <p><I>금일발전량</I></p>
+                <input id="dailyPower" class="wed_1" type="text" value="">
+                <span>kWh</span>
+              </div>
+              <div class="stat">
+                <p><I>당월발전량</I></p>
+                <input id="monthPower" class="wed_1" type="text" value="">
+                <span>kWh</span>
+              </div>
+              <div class="stat">
+                <p><I>누적발전량</I></p>
+                <input id="cumulativePower" class="wed_1" type="text" value="">
+                <span>MWh</span>
+              </div>
+              <div class="stat">
+                <p><I>CO2저감량</I></p>
+                <input id="co2" class="wed_1" type="text" value="">
+                <span>Ton</span>
+              </div>
+            </div>
+          </div>
+          <div class="box_2">
+            <p style="margin-top:10px; font-weight:bold;">현재 발전현황</p>
+            <div id="current-power-graph" style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
+            <!--<div> <span>&nbsp&nbsp &nbsp현재발전</span><input class="wed_2" type="text" value="17.7">kW</div>
+      <div> <span>금일발전량</span><input class="wed_2" type="text" value="700">kW</div>-->
+          </div>
+          <div class="box_3">
+            <p style="margin-top:10px; font-weight:bold;">금일발전량</p>
+            <div id="daily-power-graph" style="width:100%; height:80%; background-color:#e9e9e9;">Graph</div>
+          </div>
+        </div>
+        <div class="text-center containerc">
+          <div class="box_4">
+            <div class="cont-box-rotate_s">
+              <div class="cont-box-rotate_1"></div>
+            </div>
+            <div class="deve">
+              <p>상세정보</p>
+              <p>More information</p>
+            </div>
+            <div class="deve_1">
+              <div class="stat">
+                <p><I>기계</I></p>
+                <input class="wed_1" type="text" value="정상">
+              </div>
+            </div>
+          </div>
+          <div class="box_5">
+            <p>인버터 전압/전류</p>
+            <div id="inverterStatus" class="box_5_bg">
+              <div class="box_5_in">
+                <input class="input-tx" type="text">
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+              </div>
+              <div class="box_5_in">
+                <input class="input-tx" type="text">
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+              </div>
+              <div class="box_5_in">
+                <input class="input-tx" type="text">
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전압</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+                <div class="box_5_a">
+                  <div class="box_5_in_sp">
+                    <p>AC전류</p>
+                  </div>
+                  <div> <input class="wed_3" type="text"><span>(v)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="box_6">
+            <div class="box_6_in">
+              <div class="box_6_in_4">
+                <img src="/image/no1.png" />
+                <p>일사량</p>
+                <input id="inclinedSolar" class="wed_4" type="text" value=""><span> W/㎥</span>
+              </div>
+              <div class="box_6_in_4">
+                <img src="/image/no2.png" />
+                <p>모듈온도</p>
+                <input class="wed_4" type="text" value="7.1"><span> ℃</span>
+              </div>
+              <div class="box_6_in_4">
+                <img src="/image/no3.png" />
+                <p>인버터</p>
+                <input class="wed_4" type="text" value="STOP">
+              </div>
+              <div class="box_6_in_4">
+                <img src="/image/no4.png" />
+                <p>경보</p>
+                <input class="wed_4" type="text" value="정상">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <div class="container-fluid bg-3 text-center">
+      </div><br>
+      <%- include("../../master/footer.ejs") %>
+    </div>
+  </div>
+  </div>
+
+</body>
+
+</html>

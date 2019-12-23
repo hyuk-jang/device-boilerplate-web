@@ -1,0 +1,51 @@
+<title> 냉각형 태양광 모듈 발전 모니터링</title>
+<meta charset="utf-8">
+<!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<!-- 위 3개의 메타 태그는 *반드시* head 태그의 처음에 와야합니다; 어떤 다른 콘텐츠들은 반드시 이 태그들 *다음에* 와야 합니다 -->
+<!-- <link href="css/main.css" rel="stylesheet" /> -->
+<script src="/js/lodash.min.js"></script>
+
+<!-- Default Publishing -->
+<!-- jQuery (부트스트랩의 자바스크립트 플러그인을 위해 필요합니다) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<link href="/css/bootstrap.min.css" rel="stylesheet" />
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery-3.1.1.min.js"></script>
+<link href="/css/StyleSheet.css" rel="stylesheet" />
+
+<!-- <link rel="shortcut icon" href="/image/farm_icon_SFk_icon.ico"> -->
+
+
+<!-- DatePicker -->
+<link href="/css/datepicker3.css" rel="stylesheet" />
+<script src="/js/bootstrap-datepicker.js"></script>
+<script src="/js/bootstrap-datepicker.kr.js"></script>
+<script src="/js/common-html/date-picker.js"></script>
+
+
+
+<!-- 차트 관련 -->
+<!-- <script src="https://www.gstatic.com/charts/loader.js"></script> -->
+<!-- <link href="fonts/font-awesome.min.css" rel="stylesheet" /> -->
+<script src="/js/hichart/hichart.js"></script>
+<!-- <script src="/js/hichart/highcharts.src.js"></script> -->
+<script src="/js/hichart/highcharts-more.js"></script>
+<script src="/js/hichart/solid-gauge.js"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $(".sel").each(function () {
+      $(this).click(function () {
+        $(this).addClass("active"); //클릭된 부분을 상단에 정의된 CCS인 selected클래스로 적용
+        $(this).siblings().removeClass("active"); //siblings:형제요소들,    removeClass:선택된 클래스의 특성을 없앰
+      });
+    });
+  });
+</script>
+
+<!-- <script src="js/pager.js"></script> -->

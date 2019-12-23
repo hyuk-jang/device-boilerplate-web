@@ -1,0 +1,858 @@
+/***************************************/
+/************ Master ************/
+/***************************************/
+.navbar {
+  margin-bottom: 0;
+  border-radius: 0;
+  border-top: 1px solid #080808;
+  border-left: 0;
+  border-right: 0;
+}
+
+.table > thead > tr > th {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th {
+  vertical-align: middle;
+}
+
+.wrap {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+_:-ms-input-placeholder,
+:root .wrap {
+  overflow: inherit;
+  display: block;
+  min-height: unset;
+}
+
+/***************************************/
+/************ Footer Master ************/
+/***************************************/
+footer {
+  background: #f2f2f2;
+  padding: 1rem;
+  margin-top: auto;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+}
+
+_:-ms-input-placeholder,
+:root .footer_area {
+  margin-top: 5rem;
+}
+
+.footer_copyright {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.footer_logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.footer_logo > span {
+  font-weight: bold;
+  font-size: 2rem;
+  text-indent: 1rem;
+}
+
+/***************************************/
+/************ Header Master ************/
+/***************************************/
+.nav_row_st_right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  color: #fff;
+  margin-right: 2rem;
+}
+
+.nav_row_st_right > img {
+  height: 30px;
+  width: 30px;
+  margin: 5px;
+}
+
+.weacast_txt {
+  margin-left: 2rem;
+}
+
+.weathercast_temp {
+  height: 3rem;
+  width: 7rem;
+  color: #000;
+  text-align: center;
+  border-radius: 2rem;
+  margin-right: 0.4rem;
+}
+
+.weathercast_data_unit {
+  align-self: flex-end;
+  padding-bottom: 0.4rem;
+}
+
+.header_top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.3rem 0;
+}
+
+.user_box {
+  display: flex;
+  align-items: center;
+}
+
+.user_box .user_nim {
+  color: #fff;
+  margin-right: 1rem;
+}
+
+.user_box .logout {
+  height: 3rem;
+  width: 8rem;
+  border-radius: 2rem;
+  text-align: center;
+}
+
+.header_w_r {
+  /* padding: 0 1rem; */
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.header_w_r:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.container-fluid {
+  background: linear-gradient(#fbfbfb, #e8e8e8);
+  width: 100%;
+}
+
+.max_w1024 {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.header_home_area {
+  padding: 15px 15px 15px;
+  color: #333 !important;
+  font-weight: bold;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+}
+
+.header_home_area > img {
+  /* width: 30px; */
+  height: 30px;
+  margin: 0px;
+  margin-right: 5px;
+}
+
+.header_home_area > span {
+  font-size: 1em;
+}
+
+.navbar-inverse .navbar-nav > li:hover {
+  background: #817e7e;
+}
+
+.header_sub_area {
+  background: linear-gradient(to bottom, #343535, #272727);
+}
+
+/* Site 선택지 */
+.siteList {
+  height: 30px;
+  padding-left: 10px;
+  background: #fff;
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  border: 1px solid #333;
+  border-radius: 3px;
+}
+
+.siteList option {
+  background: #fff;
+}
+
+.header_sub_area .header_sub_box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+/***************************************/
+/************** Container **************/
+/***************************************/
+.container_body {
+  max-width: 95%;
+  min-height: 700px;
+  margin-bottom: 1rem;
+  margin-left: 2.5%;
+  padding: 0;
+  flex: 1;
+}
+
+.container_row {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 2rem auto 0;
+}
+
+.component_side_box {
+  width: 200px;
+  min-width: 200px;
+  height: 350px;
+}
+
+.flex_dir_row {
+  flex-direction: row;
+}
+
+.flex_dir_col {
+  flex-direction: column;
+}
+
+.flex_jus_center {
+  justify-content: center;
+}
+
+.flex_jus_end {
+  justify-content: flex-end;
+}
+
+/***************************************/
+/*         Container - Side            */
+/***************************************/
+.component_side_area {
+  display: flex;
+  flex-direction: column;
+  height: 98%;
+  width: 97%;
+  color: #fff;
+}
+
+.component_side_area > header {
+  background: inherit;
+  border: 0;
+  text-align: left;
+  padding: 0 2rem;
+}
+
+.data_title_section {
+  padding: 1.5rem;
+}
+
+.data_view_section {
+  padding: 0 1rem;
+}
+
+.power_img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+}
+
+/***************************************/
+/********** Dash Board 영역 ************/
+/***************************************/
+.component_pieceDouble_box {
+  width: 60%;
+  height: 350px;
+}
+
+.component_piece_box {
+  width: 45%;
+  height: 350px;
+  display: flex;
+  justify-content: center;
+}
+
+.component_piece_area {
+  display: flex;
+  flex-direction: column;
+  height: 98%;
+  width: 98%;
+}
+
+.component_piece_area > header {
+  margin: 0;
+  height: 13%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.gauge_chart {
+  height: 75%;
+}
+
+.component_piece_body {
+  height: 87%;
+  padding: 0 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.component_piece_body > .gauge_contents {
+  padding: 0 2rem;
+  height: 25%;
+  position: relative;
+  bottom: 2.2rem;
+}
+
+.component_piece_body input {
+  background: transparent;
+}
+
+/* 센서 데이터 뷰 */
+.sensor_data_view {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-around;
+  height: 2em;
+}
+
+.sensor_data_view > p {
+  margin: 0;
+}
+
+.data_view_section .sensor_data_view > p:first-child {
+  text-align: left;
+  font-size: 1.3rem;
+  text-indent: 10%;
+}
+
+.sensor_data_view > p:first-child {
+  text-align: left;
+  font-size: 1.5rem;
+  text-indent: 10%;
+}
+
+.sensor_data_view > p:nth-child(2) {
+  text-align: right;
+  font-size: 1.6rem;
+
+  /* color: #93d30a; */
+}
+
+.sensor_data_view > p:last-child {
+  text-indent: 0.5rem;
+  text-align: left;
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+/***************************************/
+/************** Report 영역 ************/
+/***************************************/
+.report_category {
+  /* text-indent: 1rem; */
+}
+
+.report_category > button {
+  width: 10rem;
+}
+
+.table_pagenation {
+  display: flex;
+  justify-content: center;
+}
+
+.lineChart_box {
+  text-align: center;
+  margin-bottom: 2rem;
+  height: 40rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/***************************************/
+/************** Table 영역 *************/
+/***************************************/
+
+.elipsis {
+  word-break: break-word;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Numerical Talbe 수치 테이블   */
+.number_table {
+  table-layout: fixed;
+  overflow-x: visible;
+  margin-bottom: 0;
+}
+
+.number_table thead th {
+  word-break: keep-all;
+  overflow: hidden;
+
+  /* white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden; */
+}
+
+.number_table tbody {
+  text-align: right;
+}
+
+.number_table tbody td:first-child {
+  /* text-align: left;
+	word-break: break-word;
+	white-space: nowrsap;
+	text-overflow: ellipsis;
+	overflow: hidden; */
+}
+
+.number_table .table_title {
+  text-align: left;
+  word-break: break-word;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.table_desc_area {
+  margin: 0.5rem 0;
+  padding: 0 1rem;
+  height: 3rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  width: intrinsic;
+  width: -webkit-fit-content;
+  width: -moz-max-content;
+  width: -o-max-content;
+}
+
+/* 센서 데이터 뷰 50% 40% 10% */
+article.sdv_w541 > p:first-child {
+  width: 50%;
+}
+
+article.sdv_w541 > p:nth-child(2) {
+  width: 40%;
+}
+
+article.sdv_w541 > p:last-child {
+  width: 10%;
+}
+
+article.sdv_w_side > p:first-child {
+  width: 45%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+article.sdv_w_side > p:nth-child(2) {
+  width: 32%;
+}
+
+article.sdv_w_side > p:last-child {
+  width: 23%;
+}
+
+/* 한 행에 2개의 센서 데이터가 들어갈 경우 */
+/* Sensor Data Dual View(SDDV) */
+.sddv_w35 > article {
+  width: 35%;
+}
+
+.sddv_w35 .sensor_data_view {
+  align-items: center;
+}
+
+/* 검색 박스 */
+.search_area {
+  display: flex;
+  justify-content: start;
+  padding: 1rem;
+}
+
+.search_box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 3rem;
+}
+
+.search_box > .search_title {
+  font-size: 1.5rem;
+  height: 2.3rem;
+  overflow: hidden;
+}
+
+.search_box > .search_body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.submit_box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-left: 3rem;
+}
+
+.submit_box > .btn {
+  width: 8rem;
+  height: 4.5rem;
+  font-size: 2rem;
+  text-align: center;
+  border-radius: 1rem;
+
+  /* transition: all 0.4s ease; */
+}
+
+.submit_box > .icon {
+  width: 6rem;
+  height: 6rem;
+  margin-left: 2rem;
+  padding: 0;
+}
+
+.search_box input[type='text'] {
+  height: 34px;
+  width: 100px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.search_category_box {
+  width: 25%;
+  min-width: 130px;
+}
+
+.search_range_box {
+  width: 15%;
+  min-width: 130px;
+}
+
+.search_interval_box {
+  width: 10%;
+  min-width: 100px;
+}
+
+.cctv_box {
+  min-height: 500px;
+}
+
+/***************************************/
+/************ Common *************/
+/***************************************/
+
+/***************************************/
+/************ Font-Size Rem ************/
+/***************************************/
+.fs_100rem {
+  font-size: 1rem !important;
+}
+
+.fs_120rem {
+  font-size: 1.2rem !important;
+}
+
+.fs_130rem {
+  font-size: 1.3rem !important;
+}
+
+.fs_150rem {
+  font-size: 1.5rem !important;
+}
+
+.fs_170rem {
+  font-size: 1.7rem !important;
+}
+
+.fs_200rem {
+  font-size: 2rem !important;
+}
+
+/***************************************/
+/************ Font-Size EM *************/
+/***************************************/
+.fs_120em {
+  font-size: 1.2em !important;
+}
+
+.fs_150em {
+  font-size: 1.5em !important;
+}
+
+/***************************************/
+/**************** Color ****************/
+/***************************************/
+.color_green {
+  color: #93d30a;
+}
+
+.w_10per {
+  width: 10%;
+}
+
+.w_20per {
+  width: 20%;
+}
+
+.w_40per {
+  width: 40%;
+}
+
+.w_90per {
+  width: 90%;
+}
+
+.w_100per {
+  width: 100%;
+}
+
+.ml0 {
+  margin-left: 0;
+}
+
+.mt0 {
+  margin-top: 0;
+}
+
+.mt_2rem {
+  margin-top: 2rem;
+}
+
+.mr_2rem {
+  margin-right: 2rem;
+}
+
+.ml_1rem {
+  margin-left: 1rem;
+}
+
+.ml_2rem {
+  margin-left: 2rem;
+}
+
+.mr_1rem {
+  margin-right: 1rem;
+}
+
+.mr_2rem {
+  margin-right: 2rem;
+}
+
+.mb_50rem {
+  margin-bottom: 0.5rem;
+}
+
+@media all and (max-width: 942px) {
+  .container-fluid {
+    padding: 0;
+  }
+  .header_w_r {
+    /* padding: 0 1rem; */
+  }
+  .container_body {
+    width: 100%;
+    max-width: none;
+    margin: auto 0;
+  }
+
+  .container_row {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .component_side_box {
+    width: 100%;
+    height: auto;
+  }
+
+  .power_img {
+    display: none;
+  }
+
+  .component_piece_box {
+    width: 100%;
+  }
+
+  .component_side_area,
+  .component_piece_area {
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+  }
+
+  .table_desc_area {
+    text-indent: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table {
+    table-layout: auto;
+  }
+
+  .report_category {
+    text-indent: 1rem;
+  }
+}
+
+@media all and (max-width: 942px) and (min-width: 551px) {
+  .data_view_section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+
+  .data_view_section .sensor_data_view {
+    width: 40%;
+  }
+}
+
+/* 헤더 서브 축약 */
+@media all and (max-width: 700px) {
+  .weacast_txt,
+  .user_box > span {
+    display: none;
+  }
+
+  .nav_row_st_right > .weathercast_temp {
+    width: 5rem;
+  }
+}
+
+@media all and (max-width: 850px) {
+  .header_w_r:first-child {
+    /* border-bottom: 1px solid #807a7a; */
+  }
+
+  .search_area {
+    flex-direction: column;
+  }
+
+  .search_box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    margin: 0;
+    padding: 1rem 0;
+  }
+
+  .search_box .search_title {
+    text-align: right;
+    margin-right: 1.5rem;
+    width: 20%;
+  }
+
+  .search_box > .search_body {
+    width: 80%;
+  }
+
+  .search_box > .search_body > input {
+    width: 45%;
+  }
+
+  .search_box select {
+    width: 80%;
+  }
+
+  .submit_box {
+    margin: 1rem 0;
+  }
+
+  .submit_box > .btn {
+    width: calc(100% - 5rem);
+  }
+
+  .submit_box > .icon {
+    margin-left: 1rem;
+  }
+}
+
+@media all and (max-width: 550px) {
+  .container-fluid {
+    padding-left: 0;
+  }
+
+  .header_sub_area .header_sub_box {
+    align-items: normal;
+    flex-direction: column;
+  }
+
+  .weacast_txt {
+    margin: 0 2rem 1rem;
+  }
+
+  .header_w_r:first-child {
+    border-bottom: 1px solid #807a7a;
+  }
+
+  .header_w_r {
+    /* padding: 0 2rem; */
+  }
+
+  .data_view_section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .data_view_section .sensor_data_view {
+    width: 47%;
+  }
+}
+
+@media all and (max-width: 380px) {
+  html {
+    font-size: 9px;
+  }
+  .navbar-toggle {
+    margin-right: 0;
+  }
+
+  .nav_row_st_right,
+  .header_home_area {
+    font-size: 1em;
+  }
+
+  .table_desc_area {
+    padding: 0;
+  }
+}

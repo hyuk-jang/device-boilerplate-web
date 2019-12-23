@@ -1,0 +1,61 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+
+  <!-- <script src="http://cdn.shinobi.video/js/socket.io.js"></script> -->
+  <!-- <script src="http://cdn.shinobi.video/js/jquery.min.js"></script> -->
+  <!--Special JSMPEG Start-->
+  <!--You need this version. Check for updates here https://github.com/ShinobiCCTV/jsmpeg-pipe -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="http://cdn.shinobi.video/js/jsmpeg.pipe.js"></script>
+
+</head>
+
+<body>
+  <div style="width:500px; height: 500px">
+    <!--Special JSMPEG End-->
+    <canvas id="canvas" height=500 width=500></canvas>
+  </div>
+
+  <script>
+    //start socket.io client connection
+    var socket = io();
+
+    socket.emit("certifySocket", {
+      sessionUserInfo: {
+        main_seq: 1
+      },
+    });
+
+    //on socket.io connection success
+    socket.on('connect', function () {
+      //pretend this is the command you use to initiate getting H.264 (MPEG) data
+      socket.emit('f', {
+        function: 'getStream',
+        feed: '2'
+      })
+    });
+
+    // initiate a player that can be piped to.
+    var player = new JSMpeg.Player('pipe', {
+      canvas: document.getElementById('canvas')
+    });
+
+    //on data from "h264" handle
+    socket.on('h264', function (data) {
+      // `data.buffer` is the raw video data from FFMPEG
+      // pretend you are getting data as follows
+      // var data = {buffer:ArrayBuffer}
+      player.write(data.buffer)
+    });
+  </script>
+
+
+</body>
+
+</html>

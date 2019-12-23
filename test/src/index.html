@@ -1,0 +1,55 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <!-- <script src="jsmpeg.min.js"></script> -->
+</head>
+
+<body>
+  <!-- <div class="jsmpeg"></div> -->
+  <!-- <div class="jsmpeg" data-url="video.ts"></div> -->
+  <!-- <canvas id="canvas"></canvas> -->
+  hi
+  <img id="img" width="2688" height="1520">
+  <!-- <script src="/socket.io.js"></script> -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var img = document.getElementById('img');
+
+    // var socket = io('http://localhost');
+    var socket = io('');
+
+    socket.emit("certifySocket", {
+      sessionUserInfo: {
+        main_seq: 1
+      },
+    });
+
+
+    socket.on('data', function (data) {
+      // console.log(data);
+      // socket.emit('my other event', { my: 'data' });
+      img.src = 'data:image/jpeg;base64,' + data;
+    });
+
+    //   socket = io('');
+    // socket.on('data', function (data) {
+    //   console.log(data)
+    //   // img.src = 'data:image/jpeg;base64,' + data;
+    // });
+  </script>
+
+</body>
+
+<script>
+  // client = new WebSocket('ws://localhost:9999');
+  // player = new jsmpeg(client, {
+  //   canvas: document.getElementById('canvas') // Canvas should be a canvas DOM element
+  //   // canvas: canvas // Canvas should be a canvas DOM element
+  // });
+</script>
+
+</html>
