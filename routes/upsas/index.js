@@ -12,6 +12,7 @@ const control = require('./control');
 const status = require('./status');
 const trend = require('./trend');
 const report = require('./report');
+const cctv = require('./cctv');
 
 const commonUtil = require('../../models/templates/common.util');
 
@@ -228,7 +229,7 @@ router.use('/control', control);
 router.use('/status', status);
 router.use('/trend', trend);
 router.use('/report', report);
-router.use('/cctv', control);
+router.use('/cctv', cctv);
 
 // router.use('/users', users);
 
