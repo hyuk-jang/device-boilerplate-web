@@ -47,11 +47,11 @@ router.get(
     '/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    // req.param 값 비구조화 할당
-    const { siteId } = req.locals.mainInfo;
-    const { subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE } = req.params;
-    /** @type {BiModule} */
+    const {
+      mainInfo: { siteId, subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE },
+    } = req.locals;
 
+    /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
     // 선택된 subCategoryDom 정의
@@ -114,19 +114,15 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     const {
-      mainInfo: { siteId, mainWhere },
+      mainInfo: { siteId, subCategoryId = DEFAULT_SUB_SITE, mainWhere },
       viewPowerProfileRows,
     } = req.locals;
 
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
 
-    // req.param 값 비구조화 할당
-    const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
-
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
-
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
     const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
 

@@ -1,13 +1,13 @@
-<script type="text/javascript" async="" src="http://www.google-analytics.com/ga.js"></script>
-<script type="text/javascript" src="//unpkg.com/xlsx/dist/shim.min.js"></script>
+<script type="text/javascript" async="" src="/js/xlsx/ga.js"></script>
+<script type="text/javascript" src="/js/xlsx/shim.min.js"></script>
 <script type="text/vbscript" language="vbscript">
   IE_GetProfileAndPath_Key = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders\"
   Function IE_GetProfileAndPath(key): Set wshell = CreateObject("WScript.Shell"): IE_GetProfileAndPath = wshell.RegRead(IE_GetProfileAndPath_Key & key): IE_GetProfileAndPath = wshell.ExpandEnvironmentStrings("%USERPROFILE%") & "!" & IE_GetProfileAndPath: End Function
   Function IE_SaveFile_Impl(FileName, payload): Dim data, plen, i, bit: data = CStr(payload): plen = Len(data): Set fso = CreateObject("Scripting.FileSystemObject"): fso.CreateTextFile FileName, True: Set f = fso.GetFile(FileName): Set stream = f.OpenAsTextStream(2, 0): For i = 1 To plen Step 3: bit = Mid(data, i, 2): stream.write Chr(CLng("&h" & bit)): Next: stream.Close: IE_SaveFile_Impl = True: End Function
-  </script>
+</script>
 <script type="text/vbscript" language="vbscript">
   Function IE_LoadFile_Impl(FileName): Dim out(), plen, i, cc: Set fso = CreateObject("Scripting.FileSystemObject"): Set f = fso.GetFile(FileName): Set stream = f.OpenAsTextStream(1, 0): plen = f.Size: ReDim out(plen): For i = 1 To plen Step 1: cc = Hex(Asc(stream.read(1))): If Len(cc) < 2 Then: cc = "0" & cc: End If: out(i) = cc: Next: IE_LoadFile_Impl = Join(out,""): End Function
 </script>
-<script type="text/javascript" src="//unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-<script type="text/javascript" src="//unpkg.com/blob.js@1.0.1/Blob.js"></script>
-<script type="text/javascript" src="//unpkg.com/file-saver@1.3.3/FileSaver.js"></script>
+<script type="text/javascript" src="/js/xlsx/xlsx.full.min.js"></script>
+<script type="text/javascript" src="/js/xlsx/Blob.js"></script>
+<script type="text/javascript" src="/js/xlsx/FileSaver.js"></script>

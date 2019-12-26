@@ -52,6 +52,7 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     commonUtil.applyHasNumbericReqToNumber(req);
+    // BU.CLI(req.params);
     /** @type {MEMBER} */
     const user = _.get(req, 'user', {});
 
@@ -61,7 +62,7 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = 'main', siteId = userMainSeq, subCategory = '' } = req.params;
+    const { naviMenu = 'main', siteId = userMainSeq, subCategory = '', subCategoryId } = req.params;
 
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
@@ -125,8 +126,9 @@ router.get(
 
     _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
-    _.set(req, 'locals.mainInfo.subCategory', subCategory);
     _.set(req, 'locals.mainInfo.siteId', siteId);
+    _.set(req, 'locals.mainInfo.subCategory', subCategory);
+    _.set(req, 'locals.mainInfo.subCategoryId', subCategoryId);
     _.set(req, 'locals.mainInfo.siteList', siteList);
     _.set(req, 'locals.mainInfo.mainWhere', mainWhere);
 
