@@ -62,7 +62,7 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = 'main', siteId = userMainSeq, subCategory = '', subCategoryId } = req.params;
+    const { naviMenu = 'main', siteId = userMainSeq, subCategory, subCategoryId } = req.params;
 
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 

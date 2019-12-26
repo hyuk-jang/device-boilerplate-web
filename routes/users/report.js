@@ -51,6 +51,8 @@ router.get(
       mainInfo: { siteId, subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE },
     } = req.locals;
 
+    // BU.CLI(subCategory);
+
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
 
