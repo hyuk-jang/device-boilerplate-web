@@ -51,14 +51,12 @@ router.get(
     '/:siteId/:subCategory/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
+    const {
+      mainInfo: { siteId, subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE },
+    } = req.locals;
+
     /** @type {BiModule} */
     const biModule = global.app.get('biModule');
-
-    // req.param 값 비구조화 할당
-    const { siteId } = req.locals.mainInfo;
-
-    // BU.CLI(siteId);
-    const { subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
     // 선택된 subCategoryDom 정의
     const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);

@@ -22,8 +22,12 @@ module.exports = {
         ivt_target_name: ivtName = '',
         ivt_director_name: ivtDirectorName = '',
       } = row;
+
       _.set(row, 'selected', _.eq(row.inverter_seq, inverterSeq) ? 'selected' : '');
-      const inverterName = `${mainName} ${_.round(ivtAmount)}kW급 ${ivtName} ${ivtDirectorName}`;
+      const inverterName = `${mainName} ${_.round(ivtAmount)}kW급 ${ivtName} ${
+        ivtDirectorName === null ? '' : ivtDirectorName
+      }`;
+
       _.set(row, 'inverterName', inverterName);
       return inverterSiteDom(row);
     });
