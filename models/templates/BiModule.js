@@ -397,9 +397,10 @@ class BiModule extends BM {
                 MIN(power_cp_kwh) AS min_c_kwh,       
                 ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 1) AS interval_power
           FROM pw_inverter_data
-          WHERE writedate >= "${searchRange.strStartDate}" 
+          WHERE
+            ${inverterSeqList.length ? `inverter_seq IN (${inverterSeqList}) AND ` : ''}
+            writedate >= "${searchRange.strStartDate}" 
            AND writedate < "${searchRange.strEndDate}"
-           ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
           GROUP BY ${groupByFormat}, inverter_seq
           ) AS main
         LEFT OUTER JOIN pw_inverter ivt

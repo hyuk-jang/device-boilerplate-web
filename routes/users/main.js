@@ -27,12 +27,13 @@ router.get(
     const biDevice = global.app.get('biDevice');
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
-
     // ********** Power 관련
+    // console.time('refineGeneralPowerInfo');
     // 발전 현황을 나타내는 기본적인 정보
     const { powerGenerationInfo, validInverterDataList } = await refineModel.refineGeneralPowerInfo(
       siteId,
     );
+    // console.timeEnd('refineGeneralPowerInfo');
 
     // ********** Sensor 관련
     /** @type {V_DV_NODE_DEF[]} */
