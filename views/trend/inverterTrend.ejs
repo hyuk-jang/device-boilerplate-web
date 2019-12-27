@@ -44,6 +44,7 @@
       // 초기 시작시 라디오 체크버튼 클릭처리
       var searchRange = <%- JSON.stringify(searchRange) %>;
       var trendInfo = <%- JSON.stringify(trendInfo) %>;
+      var subCategory = _.get(trendInfo, 'subCategory');
 
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
       $('#categoryName').html(<%- JSON.stringify(trendInfo.subCategoryName) %>);

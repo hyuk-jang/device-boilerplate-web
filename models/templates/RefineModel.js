@@ -38,10 +38,10 @@ class RefineModel extends BiModule {
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     // BU.CLI(mainWhere);
-
+    // console.time('viewPowerProfileRows');
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await this.getTable('v_pw_profile', mainWhere);
-
+    // console.timeEnd('viewPowerProfileRows');
     // 연결된 모든 인버터 Seq 목록 추출
     const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
 
@@ -55,18 +55,19 @@ class RefineModel extends BiModule {
       searchType: 'months',
       searchInterval: 'month',
     });
-
+    // console.time('getInverterStatistics');
     const monthInverterStatusRows = await this.getInverterStatistics(
       monthSearchRange,
       inverterSeqList,
     );
-
     // console.timeEnd('getInverterStatistics');
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
     const monthPower = webUtil.reduceDataList(monthInverterStatusRows, 'interval_power').toFixed(1);
 
+    // console.time('v_pw_inverter_status');
     /** @type {V_PW_INVERTER_STATUS[]} */
     const inverterStatusRows = await this.getTable('v_pw_inverter_status', inverterWhere);
+    // console.timeEnd('v_pw_inverter_status');
 
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq: inverterSeq } = inverterStatus;
