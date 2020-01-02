@@ -35,32 +35,63 @@ class BiAuth extends BM {
   /**
    * 로그인 정보와 DB에 저장된 회원정보를 비교하여 pw를 검증
    * @param {{userId: string, password: string}} loginInfo
-   * @return {Promise.<MEMBER>} 회원정보가 정확하다면 반환. 아니라면 {} 반환
    */
   async getAuthMember(loginInfo) {
+    const LOGIN_FAIL_COUNT = 5;
     /** @type {MEMBER} */
     const whereInfo = {
       user_id: loginInfo.userId,
       is_deleted: 0,
     };
     // ID와 삭제가 되지 않은 해당 ID를 찾음.
-    const memberList = await this.getTable('MEMBER', whereInfo);
+    /** @type {MEMBER} */
+    const memberRow = await this.getTableRow('MEMBER', whereInfo);
+
     // 매칭되는 회원이 없다면
-    if (memberList.length === 0) {
-      // return {};
+    if (_.isEmpty(memberRow)) {
       throw new Error(`We could not find a member that matches id: ${whereInfo.user_id}.`);
     }
-    /** @type {MEMBER} */
-    const memberInfo = _.head(memberList);
+
+    // 잠긴 계정은 로그인 못함
+    if (memberRow.is_account_lock === 1) {
+      throw new RangeError(
+        '해당 계정은 로그인 시도 제한을 초과하였습니다. 관리자에게 문의하십시오.',
+      );
+    }
 
     // Hash 비밀번호의 동일함을 체크
-    // const hashPw = await encryptPbkdf2(loginInfo.userId, memberInfo.pw_salt);
-    const hashPw = await EU.encryptPbkdf2(loginInfo.password, memberInfo.pw_salt);
-    if (_.isEqual(hashPw, memberInfo.pw_hash)) {
-      // BU.CLI(memberInfo);
-      return memberInfo;
+    const hashPw = await EU.encryptPbkdf2(loginInfo.password, memberRow.pw_salt);
+    // 로그인 성공
+    if (_.isEqual(hashPw, memberRow.pw_hash)) {
+      // 로그인 실패 횟수 초기화 및 계정 잠김 여부 초기화, 최근 로그인 날짜 업데이트
+      await this.updateTable(
+        'MEMBER',
+        { member_seq: memberRow.member_seq },
+        { login_fail_count: 0, is_account_lock: 0, lastest_login_date: new Date() },
+      );
+      // 회원 정보 반환
+      return memberRow;
     }
-    // return {};
+    // 회원 정보 Id는 동일하나 password가 다를 경우 로그인 시도 횟수 증가
+    const loginFailCount = _.isNumber(memberRow.login_fail_count)
+      ? memberRow.login_fail_count + 1
+      : 1;
+
+    // 로그인 재시도 횟수가 5회 이상일 경우 계정 잠김
+    const isAccountLock = loginFailCount >= LOGIN_FAIL_COUNT ? 1 : 0;
+
+    // 로그인 실패 횟수 반영
+    await this.updateTable(
+      'MEMBER',
+      { member_seq: memberRow.member_seq },
+      { login_fail_count: loginFailCount, is_account_lock: isAccountLock },
+    );
+
+    // 아직 계정이 잠긴 상태가 아닐 경우 남은 로그인 시도 횟수 출력 (그냥 재시도 횟수 출력 안함)
+    // if (!isAccountLock) {
+    //   throw new RangeError(`비밀번호 오류. 남은 재시도 횟수: ${LOGIN_FAIL_COUNT - loginFailCount}`);
+    // }
+
     throw new Error('Please confirm your membership information..');
   }
 }

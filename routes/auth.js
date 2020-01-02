@@ -40,14 +40,15 @@ router.get(
 
 router.get('/login', (req, res) => {
   const projectSourceInfo = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
-  if (process.env.DEV_AUTO_AUTH === '1') {
+  if (process.env.IS_DEV_AUTO_AUTH === '1' && process.env.IS_USE_TLS === '0') {
     // BU.CLI('자동 로그인');
     // global.app.set('auth', true);
     if (!req.user) {
       // BU.CLI('poost!');
+      const urlPort = process.env.IS_USE_PROXY === '1' ? '' : `:${process.env.PJ_HTTP_PORT}`;
       request.post(
         {
-          url: `http://localhost:${process.env.PJ_HTTP_PORT}/${SITE_HEADER}login`,
+          url: `http://localhost${urlPort}/${SITE_HEADER}login`,
           headers: req.headers,
           form: {
             userid: process.env.DEV_USER_ID,

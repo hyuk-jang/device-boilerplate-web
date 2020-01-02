@@ -47,14 +47,7 @@ class Control {
 
   /**
    * 생성된 Feature를 구동시킴
-   * @param {Object} featureConfig
-   * @param {Object} featureConfig.ioConfig SocketIOManager 설정
-   * @param {httpServer} featureConfig.ioConfig.httpServer http 객체
-   * @param {Object} featureConfig.apiConfig API Communicator 설정
-   * @param {number} featureConfig.apiConfig.apiPort API Communicator 설정
-   * @param {Object} featureConfig.rtspConfig rtspConfig 설정
-   * @param {string} featureConfig.rtspConfig.rtspUrl RTSP URL
-   * @param {number} featureConfig.rtspConfig.streamWebPort RTSP 데이터를 변환처리 할 Sub Express Web Server Port
+   * @param {featureConfig} featureConfig
    */
   runFeature(featureConfig) {}
 

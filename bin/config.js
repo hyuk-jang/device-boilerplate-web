@@ -15,9 +15,7 @@ module.exports = {
         // rtspUrl: 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov',
         streamWebPort: 40404,
       },
-      weathercastConfig: {
-        isRunWeathercast: ENV.IS_RUN_WEATHERCAST === '0',
-      },
+      isStopWeathercast: ENV.IS_STOP_WEATHERCAST === '1',
     },
   },
   webServer: {

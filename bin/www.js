@@ -20,7 +20,7 @@ const config = require('./config');
 
 const { projectInfo, dbInfo, webServer } = config;
 const { featureConfig } = projectInfo;
-const { apiConfig, rtspConfig, weathercastConfig } = featureConfig;
+const { apiConfig, rtspConfig, isStopWeathercast } = featureConfig;
 
 /**
  * Get port from environment and store in Express.
@@ -50,7 +50,6 @@ server.on('listening', onListening);
 // 컨트롤러 구동 시작
 async function operationController() {
   try {
-    // BU.CLI(process.env.DEV_MODE);
     const main = new Main();
     const srcController = main.createControl({
       projectInfo,
@@ -68,7 +67,7 @@ async function operationController() {
         httpServer: server,
       },
       rtspConfig,
-      weathercastConfig,
+      isStopWeathercast,
     });
   } catch (error) {
     BU.CLI(error);

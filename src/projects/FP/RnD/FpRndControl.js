@@ -14,7 +14,7 @@ const DBA = require('../../../../../device-boilerplate-abbreviation');
 
 class FpRndControl extends Control {
   bindingFeature() {
-    BU.CLI('bindingFeature');
+    // BU.CLI('bindingFeature');
     this.weathercast = new Weathercast();
     /** @type {SocketIOManager} */
     this.socketIoManager = new SocketIOManager(this);
@@ -28,18 +28,14 @@ class FpRndControl extends Control {
 
   /**
    * 생성된 Feature를 구동시킴
-   * @param {Object} featureConfig
-   * @param {Object} featureConfig.ioConfig SocketIOManager 설정
-   * @param {httpServer} featureConfig.ioConfig.httpServer http 객체
-   * @param {Object} featureConfig.apiConfig API Communicator 설정
-   * @param {number} featureConfig.apiConfig.socketPort API Communicator 설정
-   * @param {Object} featureConfig.rtspConfig rtspConfig 설정
-   * @param {string} featureConfig.rtspConfig.rtspUrl RTSP URL
-   * @param {number} featureConfig.rtspConfig.webPort Local Web Server Port
+   * @param {featureConfig} featureConfig
    */
   runFeature(featureConfig) {
-    const { ioConfig, apiConfig, rtspConfig } = featureConfig;
-    this.weathercast.init(this.dbInfo);
+    const { isStopWeathercast = false, ioConfig, apiConfig, rtspConfig } = featureConfig;
+
+    // 기상청 동네예보 스케줄러 구동
+    !isStopWeathercast && this.weathercast.init(this.dbInfo);
+
     this.socketIoManager.init(ioConfig);
 
     this.apiServer.init(apiConfig);

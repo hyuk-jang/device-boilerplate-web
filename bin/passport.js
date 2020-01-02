@@ -19,25 +19,31 @@ module.exports = (app, dbInfo) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  const localStrategyInfo = {
+    usernameField: 'userid',
+    passwordField: 'password',
+    session: true,
+    passReqToCallback: false,
+  };
+
   passport.use(
-    new LocalStrategy(
-      {
-        usernameField: 'userid',
-        passwordField: 'password',
-        session: true,
-        passReqToCallback: false,
-      },
-      (userId, password, done) => {
-        // BU.CLIS(userId, password);
-        biAuth
-          .getAuthMember({
-            userId,
-            password,
-          })
-          .then(memberInfo => done(null, memberInfo))
-          .catch(err => done(null, false, { message: '아이디와 비밀번호를 확인해주세요.' }));
-      },
-    ),
+    new LocalStrategy(localStrategyInfo, (userId, password, done) => {
+      // BU.CLIS(userId, password);
+      const memberInfo = {
+        userId,
+        password,
+      };
+
+      biAuth
+        .getAuthMember(memberInfo)
+        .then(memberRow => done(null, memberRow))
+        .catch(err => {
+          const message =
+            err instanceof RangeError ? err.message : '아이디와 비밀번호를 확인해주세요.';
+          // 로그인 시도에 관한 오류일 경우
+          done(null, false, { message });
+        });
+    }),
   );
 
   // Strategy 성공 시 호출됨
