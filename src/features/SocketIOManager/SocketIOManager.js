@@ -18,7 +18,7 @@ const {
   },
   dccFlagModel: { definedCommandSetRank: cmdRank },
   dcmWsModel: { transmitToClientCommandType, transmitToServerCommandType: transmitToServerCT },
-} = require('../../../../default-intelligence');
+} = require('../../module').di;
 
 /** 무안 6kW TB */
 

@@ -1,4 +1,4 @@
-const { BaseModel } = require('../../../device-protocol-converter-jh');
+const { BaseModel } = require('../../src/module').dpc;
 
 const {
   FarmParallel: { BASE_KEY: BASE_FARM_KEY },

@@ -74,7 +74,7 @@ switch (projectMainId) {
     break;
 }
 
-app.use(favicon(path.resolve('public/image/icon', faviPath)));
+app.use(favicon(path.resolve(__dirname, 'public/image/icon', faviPath)));
 app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));

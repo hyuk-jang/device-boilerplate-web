@@ -140,8 +140,6 @@ router.get(
     /** @type {searchRange} */
     const searchRangeInfo = _.get(req, 'locals.searchRange');
 
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
       // BU.CLI('인버터 엑셀 출력 Next', searchRangeInfo);
@@ -207,7 +205,7 @@ router.get(
 router.get(
   ['/:siteId/inverter/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
-    // BU.CLI('인버터 엑셀 다운');
+    BU.CLI('인버터 엑셀 다운');
 
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');

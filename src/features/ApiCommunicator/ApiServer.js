@@ -8,7 +8,7 @@ const AbstApiServer = require('./AbstApiServer');
 
 const {
   dcmWsModel: { transmitToServerCommandType },
-} = require('../../../../default-intelligence');
+} = require('../../module').di;
 
 class ApiServer extends AbstApiServer {
   /**

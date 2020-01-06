@@ -13,6 +13,7 @@ const sensor = require('./sensor');
 const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
+const admin = require('./admin');
 
 const commonUtil = require('../../models/templates/common.util');
 
@@ -168,11 +169,11 @@ router.get(
       },
     ];
 
-    // admin 등급에선 제어 페이지 노출(무안)
+    // 관리자 모드 추가
     if (_.eq(grade, 'admin')) {
       naviList.push({
-        href: 'control',
-        name: '제어',
+        href: 'admin',
+        name: '관리',
       });
     }
 
@@ -205,6 +206,7 @@ router.use('/sensor', sensor);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/control', control);
+router.use('/admin', admin);
 
 // router.use('/users', users);
 

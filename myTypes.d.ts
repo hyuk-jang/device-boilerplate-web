@@ -10,7 +10,6 @@ import BlockModel from "./models/templates/BlockModel";
 import RefineModel from "./models/templates/RefineModel";
 
 import MainControl from "./src/Control";
-import "../default-intelligence";
 
 declare global {
   const BiAuth: BiAuth;

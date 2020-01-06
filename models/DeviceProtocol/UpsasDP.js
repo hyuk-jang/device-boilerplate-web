@@ -1,4 +1,4 @@
-const { BaseModel } = require('../../../device-protocol-converter-jh');
+const { BaseModel } = require('../../src/module').dpc;
 
 const { BASE_KEY } = BaseModel.FarmParallel;
 const { BASE_KEY: UPSAS_KEY } = BaseModel.UPSAS;

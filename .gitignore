@@ -11,6 +11,7 @@ package-lock.json
 **/out/
 **/docs/
 **/snapshot/
+**/dist/
 
 # 와일드카드도 사용가능
 # ignore-file*

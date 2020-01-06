@@ -10,7 +10,7 @@ const ApiServer = require('../../../features/ApiCommunicator/ApiServer');
 // const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
 const RtspManager = require('../../../features/RtspManager/ToIMG');
 
-const DBA = require('../../../../../device-boilerplate-abbreviation');
+const { Dba } = require('../../../module');
 
 class FpRndControl extends Control {
   bindingFeature() {
@@ -68,7 +68,7 @@ class FpRndControl extends Control {
    * 무안 CCTV를 제어하기 위한 임시 컨트롤러 생성
    */
   createMuanCCTV() {
-    this.muanDBA = new DBA({
+    this.muanDBA = new Dba({
       deviceInfo: {
         target_id: 'muanCCTV',
         logOption: {

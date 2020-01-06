@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { BU, DU } = require('base-util-jh');
 
-const { BaseModel } = require('../../../device-protocol-converter-jh');
+const { BaseModel } = require('../../src/module').dpc;
 
 // 가져올려는 Report Key로 필터링
 const { BASE_KEY } = BaseModel.FarmParallel;

@@ -11,8 +11,6 @@ const controlDom = require('../../models/domMaker/controlDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
-const { wsPlaceRelationPickKey } = require('../../../default-intelligence').dcmWsModel;
-
 const DEFAULT_CATEGORY = 'command';
 
 /** @type {setCategoryInfo[]} */

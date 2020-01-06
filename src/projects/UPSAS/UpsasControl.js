@@ -10,8 +10,6 @@ const ApiServer = require('../../features/ApiCommunicator/ApiServer');
 // const RtspManager = require('../../features/RtspManager/ToFFMPEG');
 const RtspManager = require('../../features/RtspManager/ToIMG');
 
-const DBA = require('../../../../device-boilerplate-abbreviation');
-
 class UpsasControl extends Control {
   bindingFeature() {
     // BU.CLI('bindingFeature');

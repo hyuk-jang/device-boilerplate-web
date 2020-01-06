@@ -3,8 +3,6 @@ const moment = require('moment');
 const { BM } = require('base-model-jh');
 const { BU } = require('base-util-jh');
 
-require('../../../default-intelligence');
-
 /**
  * @typedef {Object[]} weatherRowDataPacketList
  * @property {string} view_date 차트에 표현할 Date Format

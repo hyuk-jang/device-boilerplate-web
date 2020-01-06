@@ -1,5 +1,19 @@
 #!/usr/bin/env node
-require('dotenv').config();
+const dotenv = require('dotenv');
+
+let path;
+switch (process.env.NODE_ENV) {
+  case 'development':
+    path = `${process.cwd()}/.env.dev`;
+    break;
+  case 'production':
+    path = `${process.cwd()}/.env.production`;
+    break;
+  default:
+    path = `${process.cwd()}/.env`;
+    break;
+}
+dotenv.config({ path });
 /**
  * Module dependencies.
  */

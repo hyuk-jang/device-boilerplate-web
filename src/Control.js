@@ -9,10 +9,12 @@ const AbstSocketIOManager = require('./features/SocketIOManager/AbstSocketIOMana
 const AbstRtspManager = require('./features/RtspManager/AbstRtspManager');
 const AbstWeathercast = require('./features/Weathercast/AbstWeathercast');
 
-const { BaseModel } = require('../../../module/device-protocol-converter-jh');
 const {
-  dcmWsModel: { wsNodePickKey, wsPlaceRelationPickKey },
-} = require('../../../module/default-intelligence');
+  di: {
+    dcmWsModel: { wsNodePickKey, wsPlaceRelationPickKey },
+  },
+  dpc: { BaseModel },
+} = require('./module');
 
 // class Control extends EventEmitter {
 class Control {
