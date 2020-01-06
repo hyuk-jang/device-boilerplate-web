@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 let path;
 switch (process.env.NODE_ENV) {
   case 'development':
-    path = `${process.cwd()}/.env.dev`;
+    path = `${process.cwd()}/.env`;
     break;
   case 'production':
     path = `${process.cwd()}/.env.production`;

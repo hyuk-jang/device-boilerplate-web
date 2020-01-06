@@ -9,7 +9,87 @@
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="container_body"></div>
+      <div class="container_body">
+        <div class="container_row flex_jus_end default_search_area mt0">
+          <div class="search_area">
+            <div class="search_box search_category_box ml0">
+              <span class="search_title">회원권한</span>
+              <select id="accountGrade" class="form-control">
+                <option value="all">모두</option>
+                <option value="wait">승인대기</option>
+                <option value="guest">게스트</option>
+                <option value="owner">농장주</option>
+                <option value="manager">매니저</option>
+              </select>
+            </div>
+            <div class="search_box search_category_box">
+              <span class="search_title">탈퇴여부</span>
+              <select id="accountSecession" class="form-control">
+                <option value="all">모두</option>
+                <option value="ok">O</option>
+                <option value="no">X</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">계정잠김여부</span>
+              <select id="accountLock" class="form-control">
+                <option value="all">모두</option>
+                <option value="ok">O</option>
+                <option value="no">X</option>
+              </select>
+            </div>
+            <div class="submit_box">
+              <button type="button" class="btn btn-primary" onclick="searchReport()" id="search">
+                검색
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <colgroup>
+                <col width="5%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="20%" />
+                <col width="15%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+              </colgroup>
+              <thead id="tableHeaderDom">
+                <tr>
+                  <th>번호</th>
+                  <th>ID</th>
+                  <th>성명</th>
+                  <th>닉네임</th>
+                  <th>주소</th>
+                  <th>전화번호</th>
+                  <th>권한</th>
+                  <th>탈퇴여부</th>
+                  <th>계정잠김여부</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyDom">
+                <tr>
+                  <td class="text-center">1</td>
+                  <td class="text-center">tester</td>
+                  <td class="text-center">테스터</td>
+                  <td class="text-center">tester</td>
+                  <td>전라남도 나주시 중야 1길</td>
+                  <td class="text-center">010-8596-1852</td>
+                  <td class="text-center">manager</td>
+                  <td class="text-center">X</td>
+                  <td class="text-center">X</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="paginationDom" class="table_pagenation"></div>
+        </div>
+      </div>
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
