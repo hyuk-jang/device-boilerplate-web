@@ -69,7 +69,8 @@ function setDomElementValueWithJson(
     const attibuteValue = child.getAttribute(getAttrName);
     // 해당 Attribute Value와 Json Key가 일치하다면
     if (_.has(jsonData, attibuteValue)) {
-      const selectedValue = _.get(jsonData, attibuteValue, '');
+      let selectedValue = _.get(jsonData, attibuteValue, '');
+      selectedValue = selectedValue === null ? '' : selectedValue;
       switch (setAttrName) {
         case 'innerHTML':
           child.innerHTML = selectedValue;

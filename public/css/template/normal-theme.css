@@ -145,6 +145,10 @@ header {
   color: #fff;
 }
 
+.table-location-href tbody tr:hover {
+  background-color: #19462b;
+}
+
 /* 아래에 나오는 테이블을 설명하기 위한 Descrition 영역 */
 .table_desc_area {
   background: linear-gradient(#3baf69, #349059);

@@ -7,7 +7,8 @@ switch (process.env.NODE_ENV) {
     path = `${process.cwd()}/.env`;
     break;
   case 'production':
-    path = `${process.cwd()}/.env.production`;
+    path = `${process.cwd()}/.env`;
+    // path = `${process.cwd()}/.env.production`;
     break;
   default:
     path = `${process.cwd()}/.env`;
@@ -25,6 +26,8 @@ const http = require('http');
 const { BU } = require('base-util-jh');
 
 const app = require('../app');
+// 구동 모드 설정
+app.set('env', _.trim(process.env.NODE_ENV));
 
 global.app = app;
 

@@ -54,6 +54,10 @@ function applyHasNumbericReqToNumber(req) {
   _.forEach(req.query, (v, k) => {
     BU.isNumberic(v) && _.set(req.query, k, Number(v));
   });
+
+  _.forEach(req.body, (v, k) => {
+    BU.isNumberic(v) && _.set(req.body, k, Number(v));
+  });
 }
 exports.applyHasNumbericReqToNumber = applyHasNumbericReqToNumber;
 

@@ -26,17 +26,35 @@ class AdminModel extends BiModule {
    * @param {MEMBER} memberWhere
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
-  getMemberReport(pageInfo, memberWhere) {
+  async getMemberReport(pageInfo, memberWhere) {
     // const MAX
     const { page = 1, pageListCount = 10 } = pageInfo;
 
-    const { grade, is_account_lock } = memberWhere;
+    let sql = 'SELECT * FROM V_MEMBER';
+    const sqlWhereList = _.map(memberWhere, (value, key) => {
+      const realValue = _.isString(value) ? `'${value}'` : value;
+      return `${key} = ${realValue}`;
+    });
 
-    const where = {};
+    if (sqlWhereList.length) {
+      sql += ` WHERE ${sqlWhereList.join(' AND ')}`;
+    }
 
-    const accountStatusList = ['all', 'manager', 'owner', 'guest', ''];
+    sql += ' ORDER BY member_seq DESC';
 
-    const sql = 'SELEC';
+    // 총 갯수 구하는 Query 생성
+    const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
+    // Report 가져오는 Query 생성
+    const mainQuery = `${sql}\n LIMIT ${(page - 1) * pageListCount}, ${pageListCount}`;
+
+    const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
+    const totalCount = resTotalCountQuery[0].total_count;
+    const resMainQuery = await this.db.single(mainQuery, '', false);
+
+    return {
+      totalCount,
+      reportRows: resMainQuery,
+    };
   }
 }
 module.exports = AdminModel;

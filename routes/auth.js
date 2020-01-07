@@ -99,14 +99,24 @@ router.post(
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
-    const { password = '', userid = '', name = '', tel = '', place = '' } = _.pick(req.body, [
-      'userid',
-      'password',
-      'nickname',
-      'name',
-      'tel',
-      'place',
-    ]);
+    const {
+      userid = '',
+      password = '',
+      name = '',
+      nick_name = '',
+      tel = '',
+      place = '',
+    } = req.body;
+
+    const memberPickList = ['userid', 'password', 'name', 'nick_name', 'tel', 'place'];
+
+    const memberInfo = _.pick(req.body, memberPickList);
+    // 모든 데이터가 입력이 되었는지 확인
+    const isOk = _.every(memberInfo, value => _.isString(value) && value.length);
+    // 이상이 있을 경우 Back
+    if (!isOk) {
+      return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
+    }
 
     /** @type {MEMBER} */
     const whereInfo = {
@@ -115,9 +125,9 @@ router.post(
     };
 
     // 동일한 회원이 존재하는지 체크
-    const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
+    const memberRows = await biAuth.getTable('MEMBER', whereInfo);
 
-    if (!_.isEmpty(memberInfo)) {
+    if (!_.isEmpty(memberRows)) {
       // return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/join'));
       return res.send(DU.locationAlertGo('이미 사용중인 아이디입니다..', '/auth/join'));
     }
@@ -136,6 +146,7 @@ router.post(
     const newMemberInfo = {
       user_id: userid,
       name,
+      nick_name,
       tel,
       main_seq: place,
       is_deleted: 0,

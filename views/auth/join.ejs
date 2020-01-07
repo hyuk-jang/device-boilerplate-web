@@ -43,15 +43,16 @@
               placeholder="이름을 입력해 주세요"
             />
           </div>
-          <!-- <div class="form-group">
-            <label for="InputEmail">이메일 주소</label>
+          <div class="form-group">
+            <label for="inputNickName">닉네임</label>
             <input
-              type="email"
+              type="text"
               class="form-control"
-              id="InputEmail"
-              placeholder="이메일 주소를 입력해주세요"
+              id="inputNickName"
+              name="nick_name"
+              placeholder="닉네임을 입력해 주세요"
             />
-          </div> -->
+          </div>
           <div class="form-group">
             <label for="inputPassword">비밀번호</label>
             <input
@@ -84,13 +85,13 @@
           </div>
           <div class="form-group">
             <label for="selectPlace">장소</label>
-            <select class="form-control" id="selectPlace" name='place'></select>
+            <select class="form-control" id="selectPlace" name="place"></select>
           </div>
           <div class="form-group text-center">
             <button type="submit" id="join-submit" class="btn btn-primary">
               회원가입<i class="fa fa-check spaceLeft"></i>
             </button>
-            <button disabled type="submit" formmethod= class="btn btn-warning" onclick="location.href='/login'">
+            <button type="button" class="btn btn-danger" id="historyBack">
               가입취소<i class="fa fa-times spaceLeft"></i>
             </button>
           </div>
@@ -98,15 +99,20 @@
       </div>
     </div>
   </body>
-</html>
-<script>
-  $(function() {
 
-    var placeList =<%- JSON.stringify(placeList) %>;
+  <script>
+    var placeList = <%- JSON.stringify(placeList) %>;
+  </script>
 
-    placeList.forEach(function(place){
-      $('#selectPlace').append(`<option value=${place.mainSeq}>${place.name}</option>`)
-    })
+  <script>
+    // 사이트 목록 동적 생성
+    placeList.forEach(function(place) {
+      $('#selectPlace').append(`<option value=${place.mainSeq}>${place.name}</option>`);
+    });
+    // 가입 취소 시 로그인 창으로
+    $('#historyBack').on('click', function() {
+      location.href = window.location.origin + '/auth/login';
+    });
 
     // 회원 가입 처리
     $('#join-submit').click(function(e) {
@@ -120,7 +126,7 @@
         return false;
       }
 
-      if ($('#inputName').val() == '') {
+      if ($('#inputUserid').val() == '') {
         alert('아이디를 입력하세요');
         $('#inputUserid').focus();
 
@@ -134,10 +140,25 @@
         return false;
       }
 
+      if ($('#inputNickName').val() == '') {
+        alert('닉네임을 입력하세요');
+        $('#inputNickName').focus();
+
+        return false;
+      }
+
       if ($('#inputPassword').val() == '') {
         alert('비밀번호를 입력하세요');
         $('#inputPassword').focus();
 
+        return false;
+      }
+
+      if (!/^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/.test($('#inputPassword').val())) {
+        alert('숫자+영문자+특수문자 조합으로 8자리 이상 사용해야 합니다.');
+        $('#inputPassword')
+          .val('')
+          .focus();
         return false;
       }
 
@@ -162,5 +183,5 @@
       var form = document.querySelector('form');
       form.submit();
     });
-  });
-</script>
+  </script>
+</html>

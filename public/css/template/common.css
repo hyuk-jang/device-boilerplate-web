@@ -425,6 +425,10 @@ _:-ms-input-placeholder,
   overflow: hidden;
 }
 
+.table-location-href tbody tr {
+  cursor: pointer;
+}
+
 /* Numerical Talbe 수치 테이블   */
 .number_table {
   table-layout: fixed;

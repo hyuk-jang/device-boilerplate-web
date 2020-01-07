@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+  </head>
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row flex_jus_center">
+          <div class="col-sm-6 ">
+            <form role="form" id="memberEdit" action="" method="post">
+              <input type="hidden" name="_method" value="put" />
+              <div class="form-group">
+                <label>아이디</label>
+                <input type="text" readonly class="form-control" id="user_id" />
+              </div>
+              <div class="form-group">
+                <label>성명</label>
+                <input type="text" readonly class="form-control" id="name" />
+              </div>
+              <div class="form-group">
+                <label>닉네임</label>
+                <input type="text" readonly class="form-control" id="nick_name" />
+              </div>
+              <div class="form-group">
+                <label>휴대폰 번호</label>
+                <input type="tel" readonly class="form-control" id="tel" />
+              </div>
+              <div class="form-group">
+                <label>장소</label>
+                <input type="text" readonly class="form-control" id="main_name" />
+              </div>
+              <div class="form-group">
+                <label>회원권한</label>
+                <select class="form-control" id="grade" name="grade">
+                  <option value="awaiter">awaiter</option>
+                  <option value="guest">guest</option>
+                  <option value="owner">owner</option>
+                  <option value="manager">manager</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>회원탈퇴</label>
+                <select class="form-control" id="isDeleted" name="is_deleted">
+                  <option value="1">O</option>
+                  <option value="0">X</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>계정잠김상태</label>
+                <select class="form-control" id="isAccountLock" name="is_account_lock">
+                  <option value="1">O</option>
+                  <option value="0">X</option>
+                </select>
+              </div>
+              <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary">
+                  정보변경<i class="fa fa-check spaceLeft"></i>
+                </button>
+                <button type="button" class="btn btn-danger" id="historyBack">
+                  돌아가기<i class="fa fa-times spaceLeft"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </body>
+
+  <script>
+    var member = <%- JSON.stringify(member) %>;
+    var memberIdx = <%- JSON.stringify(memberIdx) %>;
+    // console.log(member)
+
+    setDomElementValueWithJson(document.getElementById('memberEdit'), member, 'value', 'id')
+  </script>
+
+  <!-- 관리 -->
+  <script>
+    console.log(naviId + '/' + siteId + '/member');
+    document.getElementById('memberEdit').action = memberIdx;
+    // document.getElementById('memberEdit').action = memberIdx;
+    // 가입 취소 시 로그인 창으로
+    $('#historyBack').on('click', function() {
+      location.href = window.location.origin + '/admin';
+    });
+
+    // $.ajax({
+    //   type: 'GET',
+    //   url: '/admin/' + siteId + '/member/' + memberIdx,
+    //   data: dataParam,
+    // })
+    //   .done(function(excelData) {})
+    //   .fail(function(req, sts, err) {
+    //     alert(err);
+    //   });
+
+    $('#grade')
+      .val(_.toString(member.grade))
+      .prop('selected', true);
+
+    $('#isDeleted')
+      .val(_.toString(member.is_deleted))
+      .prop('selected', true);
+
+    $('#isAccountLock')
+      .val(_.toString(member.is_account_lock))
+      .prop('selected', true);
+  </script>
+</html>

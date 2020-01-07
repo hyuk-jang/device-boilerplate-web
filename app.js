@@ -1,8 +1,3 @@
-// process.env.NODE_ENV = 'production';
-process.env.NODE_ENV = 'development';
-
-process.env.NODE_ENV === 'development' && require('dotenv').config();
-
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -37,6 +32,7 @@ const {
 const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
+const AdminModel = require('./models/templates/AdminModel');
 const PowerModel = require('./models/templates/PowerModel');
 const WeatherModel = require('./models/templates/WeatherModel');
 const BlockModel = require('./models/templates/BlockModel');
@@ -79,6 +75,7 @@ app.set('dbInfo', dbInfo);
 app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
+app.set('adminModel', new AdminModel(dbInfo));
 app.set('powerModel', new PowerModel(dbInfo));
 app.set('weatherModel', new WeatherModel(dbInfo));
 app.set('blockModel', new BlockModel(dbInfo));
@@ -154,9 +151,17 @@ app.use((req, res, next) => {
 
 // error handler
 app.use((err, req, res, next) => {
+  // BU.CLI('error handler');
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // FIXME: 정상 요청일 경우에도 로드됨. 문제인지 아닌지 파악 필요
+  if (app.get('env') === 'production') {
+    return res
+      .status(500)
+      .send('페이지 요청 중에 문제가 발생하였습니다.\n관리자에게 문의하시기 바랍니다.');
+  }
 
   // render the error page
   res.status(err.status || 500);

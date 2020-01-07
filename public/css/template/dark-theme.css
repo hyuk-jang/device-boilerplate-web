@@ -20,6 +20,10 @@ header {
   background: linear-gradient(#2c5364, #0f2027);
 }
 
+.table-location-href tbody tr:hover {
+  background-color: #19462b;
+}
+
 /***************************************/
 /************ Header Master ************/
 /***************************************/
@@ -216,6 +220,10 @@ footer {
 .form-control {
   color: #fff;
   background: #12222f;
+}
+
+input.form-control:read-only {
+  color: #000;
 }
 
 .input_tre {
