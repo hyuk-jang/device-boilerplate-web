@@ -14,6 +14,10 @@ const users = require('./users');
 const upsas = require('./upsas');
 const Ean = require('./Ean');
 
+const accountGradeList = ['admin', 'manager', 'owner', 'guest', 'awaiter'];
+const AWAITER = 'awaiter';
+// const accountGradeRange = ['manager', 'owner', 'guest', 'awaiter'];
+
 let selectedRouter;
 switch (process.env.PJ_MAIN_ID) {
   case 'UPSAS':
@@ -63,9 +67,21 @@ router.get('/intersection', (req, res) => {
   // BU.CLI(req.user);
   const grade = _.get(req, 'user.grade');
 
-  // 권한이 설정되어 있지 않고
-  if (_.isNil(grade) && process.env.IS_CHECK_USER_GRADE !== '0') {
-    return res.send(DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'));
+  // 사용자 권한 체크
+  if (process.env.IS_CHECK_USER_GRADE !== '0') {
+    // 승인 대기 시
+    if (grade === AWAITER) {
+      return res.send(DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'));
+    }
+    // 설정 외 권한 발생 시
+    if (!_.includes(accountGradeList, grade)) {
+      return res.send(
+        DU.locationAlertBack(
+          '사용자 권한에 문제가 발생하였습니다. 관리자에게 연락하시기 바랍니다.',
+          '/login',
+        ),
+      );
+    }
   }
 
   switch (grade) {

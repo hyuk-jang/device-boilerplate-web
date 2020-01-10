@@ -108,6 +108,17 @@ router.post(
       place = '',
     } = req.body;
 
+    const idReg = /^[A-Za-z0-9]{4,12}$/;
+    const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/;
+    const placeRows = await biAuth.getTable('place');
+
+    const palceSelList = _.map(placeRows, 'place_seq');
+
+    // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
+    if (!idReg.test(userid) || !pwReg.test(password) || !_.includes(palceSelList, place)) {
+      return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
+    }
+
     const memberPickList = ['userid', 'password', 'name', 'nick_name', 'tel', 'place'];
 
     const memberInfo = _.pick(req.body, memberPickList);

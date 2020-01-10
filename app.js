@@ -82,7 +82,8 @@ app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(helmet());
-const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+// const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
+// const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 app.use(
   session({
     secret: BU.GUID(),
@@ -90,9 +91,9 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      // maxAge: 1000 * 60 * 60 * 24, // 1일
+      maxAge: 1000 * 60 * 60 * 24, // 1일
       // expires - 지속적 쿠키에 대한 만기 날짜를 설정하는 데 사용됩니다.
-      expires: expiryDate,
+      // expires: expiryDate,
       // // secure - 브라우저가 HTTPS를 통해서만 쿠키를 전송하도록 합니다.
       // secure: true,
       // // httpOnly - 쿠키가 클라이언트 JavaScript가 아닌 HTTP(S)를 통해서만 전송되도록 하며, 이를 통해 XSS(Cross-site scripting) 공격으로부터 보호할 수 있습니다.
