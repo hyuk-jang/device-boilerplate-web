@@ -72,18 +72,27 @@
               data-cmd-strategy=""
             ></span>
 
-            <select class="form-control w_auto" id="operationModeSel">
-              <option selected value="DEFAULT">기본 모드</option>
-            </select>
-            <button id="changeOperationModeBtn" class="btn btn-success">
-              구동 모드 변경
-            </button>
             <template id="tempTest">
               <div>
                 <input type="text" name="" id="" value="{{ inputValue }}" />
               </div>
             </template>
           </p>
+        </div>
+        <!-- TODO: 구동 모드 -->
+        <div class="container_row flex_dir_col default_search_area">
+          <div class="search_area">
+            <div class="search_box search_range_box">
+              <select class="form-control w_auto" id="operationModeSel">
+                <option selected value="DEFAULT">기본 모드</option>
+              </select>
+            </div>
+            <div class="search_box search_range_box">
+              <button id="changeOperationModeBtn" class="btn btn-success">
+                구동 모드 변경
+              </button>
+            </div>
+          </div>
         </div>
         <%- include("./addCommand.ejs") %>
         <!-- Content -->
@@ -103,7 +112,7 @@
             value="Table"
           />
           <!-- Svg Map -->
-          <div class="default_area pt_1rem" id="svgMapArea" >
+          <div class="default_area pt_1rem" id="svgMapArea" hidden>
             <div id="zoom" class="zoom_box">
               <!-- panzoom, mode select -->
               <button id="zoom-in" class="btn btn-default btn-sm mr_1rem">
@@ -125,8 +134,7 @@
               <div id="canvas"></div>
             </div>
           </div>
-          <!-- tableContent -->
-          <div class="flex_jus_center rtsp_container" id="operStatusTableArea" hidden>
+          <div class="flex_jus_center rtsp_container" id="operStatusTableArea">
             <div id="contents" class="row_st_line min_h_780 command_status_view">
               <div class=" panel panel-default">
                 <!-- Default panel contents -->
@@ -144,6 +152,7 @@
                       <th data-field="wrapCmdStep">명령 단계</th>
                       <th data-field="wrapCmdId">명령 ID</th>
                       <th data-field="wrapCmdName">명령 이름</th>
+                      <!-- <th data-field="wrapCmdCancel">명령 취소</th> -->
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -320,6 +329,24 @@
 
         $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
           data: commandList,
+          columns: [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {
+              field: 'wrapCmdCancel',
+              title: '명령 취소',
+              align: 'center',
+              valign: 'middle',
+              clickToSelect: false,
+              formatter: function(value, row, index) {
+                //return '<input name="elementname"  value="'+value+'"/>';
+                return '<button class="btn btn-primary" id="testCancelBtn" onclick=testCancelBtn() name="reqCancelCmd">취소</button>';
+              },
+            },
+          ],
         });
         // 명령 갱신 시각 반영
         $cmdUpdateDom.html(new Date().toLocaleString());
@@ -336,6 +363,18 @@
           $('#cmdGoalArea').html('');
       });
 
+      //TODO: 서버로 명령 취소 요청
+      // $('button[name="reqCancelCmd"]').on('click', function(event) {
+      // $('#testCancelBtn').on('click', function(event) {
+      function testCancelBtn() {
+        // alert('hihi');
+        var reqCmdInfo = makeControlCommand(this);
+        reqCmdInfo.cmdType = 'CANCEL';
+
+        !_.isEmpty(reqCmdInfo) &&
+          socket.emit('executeCommand', reqCmdInfo) &&
+          $('#cmdGoalArea').html('');
+      }
       // FIXME: TEXT 종료 후 삭제
       $(document).ready(function() {
         // var thisSelectValue = CF_SINGLE;

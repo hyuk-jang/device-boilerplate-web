@@ -16,13 +16,6 @@
         <option value="SCENARIO">시나리오</option>
       </select>
     </div>
-    <!-- <div class="search_box search_interval_box">
-      <span class="search_title">명령 유형</span>
-      <select class="form-control" id="cmdTypeSel">
-        <option value="CONTROL">제어</option>
-        <option value="CANCEL">취소</option>
-      </select>
-    </div> -->
 
     <!-- 단일 제어 명령 -->
     <div name="cmdCore" data-cmd-core="SINGLE">
@@ -86,7 +79,7 @@
     </div>
 
     <div class="user_box report_category ml_2rem">
-      <button type="button" class="btn btn-success" id="testRequestCmdBtn">
+      <button type="button" class="btn btn-success" name="reqControlCmdid" id="testRequestCmdBtn">
         실행
       </button>
     </div>
@@ -167,7 +160,7 @@
     // console.log('makeControlCommand', reqCmdBtn);
     var reqCmdInfo = {
       cmdFormat: $('#cmdFormatSel').val(),
-      // cmdType: $('#cmdTypeSel').val(),
+      // cmdType: $('#cmdTypeSel').val(), //FIXME: 후에 주석처리
       cmdGoal: {
         goalDataList: [],
       },
