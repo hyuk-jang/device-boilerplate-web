@@ -64,9 +64,11 @@
 </header>
 
 <script>
-  var projectMainId = <%- JSON.stringify(mainInfo.projectMainId) %>;
-  var naviId = <%- JSON.stringify(mainInfo.naviId) %>;
-  var siteId = <%- JSON.stringify(mainInfo.siteId) %>;
+  var mainInfo = <%- JSON.stringify(mainInfo) %>;
+  var projectMainId = _.get(mainInfo, 'projectMainId', '')
+  var naviId = _.get(mainInfo, 'naviId', '')
+  var siteId = _.get(mainInfo, 'siteId', '')
+  var subCategory = _.get(mainInfo, 'subCategory', '')
 
   $('#projectTitle').html(projectMainId)
   $('#projectHome').html(<%- JSON.stringify(dom.projectHome) %>)

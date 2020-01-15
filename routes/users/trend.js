@@ -122,7 +122,7 @@ router.get(
     // _.set(req, 'locals.madeLineChartList', madeLineChartList);
     _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
 
-    // BU.CLIN(inverterTrendRows);
+    // BU.CLIN(req.locals);
 
     res.render('./trend/inverterTrend', req.locals);
   }),

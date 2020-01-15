@@ -109,14 +109,44 @@ class BiModule extends BM {
    * @return {searchRange} 검색 범위
    */
   createSearchRange(searchRangeConfig = {}) {
+    const BASE_SEARCH_TYPE = 'days';
+    const BASE_SEARCH_INTERVAL = 'hour';
+    // BU.CLI(searchRangeConfig);
+
     const {
-      searchType = 'days',
-      searchInterval = 'hour',
       searchOption = 'merge',
       strStartDate = moment().format('YYYY-MM-DD'),
       strEndDate = '',
     } = searchRangeConfig;
+
+    let {
+      searchType = BASE_SEARCH_TYPE,
+      searchInterval = BASE_SEARCH_INTERVAL,
+    } = searchRangeConfig;
     // commonUtil.applyHasNumbericReqToNumber(req)를 사용할 경우 2018 년도 경우 숫자형으로 반환되버리므로 string 형으로 변환
+
+    const allowSearchTypes = ['days', 'months', 'years', 'range'];
+
+    // 지정한 조회 조건에서 벗어날 경우 기본값 지정
+    if (!allowSearchTypes.includes(searchType)) {
+      searchType = BASE_SEARCH_TYPE;
+    }
+
+    const allowIntervalDays = ['min', 'min10', 'hour', 'day'];
+    const allowIntervalMonths = ['min', 'min10', 'hour', 'day', 'month'];
+    const allowIntervalYears = ['hour', 'day', 'month'];
+
+    const allowList = [
+      ['days', allowIntervalDays],
+      ['months', allowIntervalMonths],
+      ['years', allowIntervalYears],
+    ];
+    // 허용하는 조회 조건에서 허용하는 조회간격을 벗어날 경우 기본 값 지정
+    allowList.forEach(allows => {
+      if (allows[0] === searchType && !allows[1].includes(searchInterval)) {
+        searchInterval = BASE_SEARCH_TYPE;
+      }
+    });
 
     // 종료 날짜를 설정하기 위한 단위. 기본으로 1일을 더함
     let addUnit = 'days';
@@ -143,7 +173,7 @@ class BiModule extends BM {
         korViewDateFormat = 'YYYY년 MM월';
         break;
       case 'years':
-        initDateInfo = { month: 1, date: 1, hour: 0, minute: 0, second: 0 };
+        initDateInfo = { month: 0, date: 1, hour: 0, minute: 0, second: 0 };
         addUnit = 'years';
         baseViewDateFormat = 'YYYY';
         korViewDateFormat = 'YYYY년';
@@ -160,7 +190,7 @@ class BiModule extends BM {
         break;
     }
     // 날짜 형식 Format 지정
-    const mStartDate = moment(strStartDate.toString(), baseViewDateFormat).set(initDateInfo);
+    const mStartDate = moment(strStartDate, baseViewDateFormat).set(initDateInfo);
 
     let mEndDate;
     let realSearchType = '';
@@ -168,6 +198,20 @@ class BiModule extends BM {
     if (searchType === 'range') {
       realSearchType = this.convertSearchTypeWithCompareDate(strEndDate, strStartDate);
       mEndDate = moment(strEndDate, baseViewDateFormat);
+
+      const rangeDiffDay = mEndDate.diff(mStartDate, 'days');
+      // BU.CLI(rangeDiffDay);
+
+      // 기간 검색이 100일을 초과할 경우 10분 단위로 변경
+      if (rangeDiffDay > 100 && searchInterval === 'min') {
+        searchInterval = 'min10';
+      }
+
+      // 기간 검색이 300일을 초과할 경우 1시간 단위로 변경
+      if (rangeDiffDay > 300 && (searchInterval === 'min' || searchInterval === 'min10')) {
+        searchInterval = 'hour';
+      }
+      // BU.CLI(searchInterval);
     } else {
       // 기본 종료 기간은 검색일을 기준으로 함
       realSearchType = searchType;
@@ -247,7 +291,7 @@ class BiModule extends BM {
     searchRangeInfo.strBetweenStart = mStartDate.format(convertDateFormat);
     searchRangeInfo.strBetweenEnd = mAddEndDate.format(convertDateFormat);
 
-    // BU.CLI(returnValue);
+    // BU.CLI(searchRangeInfo);
     return searchRangeInfo;
   }
 
@@ -641,9 +685,6 @@ class BiModule extends BM {
         case 'month':
           viewFormat = viewFormat.slice(3, 5);
           break;
-        case 'year':
-          viewFormat = viewFormat.slice(0, 2);
-          break;
         default:
           break;
       }
@@ -815,7 +856,7 @@ class BiModule extends BM {
           AVG(grid_t_a) AS avg_grid_t_a,
           AVG(line_f) AS avg_line_f,
           AVG(CASE WHEN power_f > 0 THEN power_f END) AS avg_p_f,
-          AVG(CASE WHEN power_kw > 0 THEN power_kw END) AS avg_power_kw,
+          AVG(CASE WHEN power_kw >= 0 THEN power_kw END) AS avg_power_kw,
           MIN(power_cp_kwh) AS min_c_kwh,
           MAX(power_cp_kwh) AS max_c_kwh
         FROM pw_inverter_data id

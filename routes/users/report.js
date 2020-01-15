@@ -205,7 +205,7 @@ router.get(
 router.get(
   ['/:siteId/inverter/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
-    BU.CLI('인버터 엑셀 다운');
+    // BU.CLI('인버터 엑셀 다운');
 
     /** @type {PowerModel} */
     const powerModel = global.app.get('powerModel');
