@@ -23,6 +23,7 @@ const authRouter = require('./routes/auth');
 const appIndexRouter = require('./routes/app/index');
 const appAuthRouter = require('./routes/app/appAuth');
 
+// const listener = require('./bin/listener');
 const passport = require('./bin/passport');
 const {
   dbInfo,
@@ -83,24 +84,37 @@ app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(helmet());
 // const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
-// const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+const store = new MySQLStore(dbInfo);
+const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
+// BU.CLI(expiryDate);
 app.use(
   session({
-    secret: BU.GUID(),
-    store: new MySQLStore(dbInfo),
+    secret: 'secret',
+    // secret: BU.GUID(),
+    store,
+    // 세션에 수정 사항이 생기지 않더라도 세션을 다시 저장할지에 대한 여부
     resave: false,
+    // 세션에 저장할 내역이 없더라도 세션을 저장할지에 대한 설정 (방문자 추적에 사용)
     saveUninitialized: true,
     cookie: {
+      // maxAge: null, // 1일
       maxAge: 1000 * 60 * 60 * 24, // 1일
       // expires - 지속적 쿠키에 대한 만기 날짜를 설정하는 데 사용됩니다.
       // expires: expiryDate,
       // // secure - 브라우저가 HTTPS를 통해서만 쿠키를 전송하도록 합니다.
-      // secure: true,
-      // // httpOnly - 쿠키가 클라이언트 JavaScript가 아닌 HTTP(S)를 통해서만 전송되도록 하며, 이를 통해 XSS(Cross-site scripting) 공격으로부터 보호할 수 있습니다.
-      // httpOnly: true,
+      secure: false,
+      // httpOnly - 쿠키가 클라이언트 JavaScript가 아닌 HTTP(S)를 통해서만 전송되도록 하며, 이를 통해 XSS(Cross-site scripting) 공격으로부터 보호할 수 있습니다.
+      httpOnly: true,
     },
   }),
 );
+
+// if (app.get('env') === 'production') {
+//   app.set('trust proxy', 1) // trust first proxy
+//   sess.cookie.secure = true // serve secure cookies
+//  }
+
+// app.use(listener(store));
 
 app.set('passport', passport(app, dbInfo));
 
