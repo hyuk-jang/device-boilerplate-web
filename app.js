@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -39,6 +40,13 @@ const WeatherModel = require('./models/templates/WeatherModel');
 const BlockModel = require('./models/templates/BlockModel');
 const RefineModel = require('./models/templates/RefineModel');
 
+// CORS 적용
+app.use(
+  cors({
+    // 허용 HTTP Method 정의
+    methods: 'GET, POST',
+  }),
+);
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -89,8 +97,8 @@ const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
 // BU.CLI(expiryDate);
 app.use(
   session({
-    secret: 'secret',
-    // secret: BU.GUID(),
+    // secret: 'secret',
+    secret: BU.GUID(),
     store,
     // 세션에 수정 사항이 생기지 않더라도 세션을 다시 저장할지에 대한 여부
     resave: false,
@@ -98,7 +106,7 @@ app.use(
     saveUninitialized: true,
     cookie: {
       // maxAge: null, // 1일
-      maxAge: 1000 * 60 * 60 * 24, // 1일
+      // maxAge: 1000 * 60 * 60 * 24, // 1일
       // expires - 지속적 쿠키에 대한 만기 날짜를 설정하는 데 사용됩니다.
       // expires: expiryDate,
       // // secure - 브라우저가 HTTPS를 통해서만 쿠키를 전송하도록 합니다.
