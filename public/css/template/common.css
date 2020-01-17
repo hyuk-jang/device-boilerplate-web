@@ -244,6 +244,10 @@ _:-ms-input-placeholder,
   flex-direction: column;
 }
 
+.flex_jus_start {
+  justify-content: start;
+}
+
 .flex_jus_center {
   justify-content: center;
 }

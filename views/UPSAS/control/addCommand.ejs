@@ -18,7 +18,7 @@
     </div>
 
     <!-- 단일 제어 명령 -->
-    <div name="cmdCore" data-cmd-core="SINGLE">
+    <div class="search_area" name="cmdCore" data-cmd-core="SINGLE">
       <div class="search_box search_range_box">
         <span class="search_title">장치 타입</span>
         <select class="form-control" id="deviceCateSel"> </select>
@@ -37,7 +37,7 @@
     </div>
 
     <!-- 설정 제어 명령 -->
-    <div name="cmdCore" data-cmd-core="SET" hidden>
+    <div class="search_area" name="cmdCore" data-cmd-core="SET" hidden>
       <div class="search_box search_range_box">
         <span class="search_title">명령 종류</span>
         <select class="form-control" id="setCmdSelList"></select>
@@ -45,7 +45,7 @@
     </div>
 
     <!-- 흐름 제어 명령 -->
-    <div name="cmdCore" data-cmd-core="FLOW" hidden>
+    <div class="search_area" name="cmdCore" data-cmd-core="FLOW" hidden>
       <div class="search_box search_range_box">
         <span class="search_title">시작지</span>
         <select class="form-control" id="flowCmdSrcPlaceSel"> </select>
@@ -57,7 +57,7 @@
     </div>
 
     <!-- 시나리오 명령 -->
-    <div name="cmdCore" data-cmd-core="SCENARIO" hidden>
+    <div class="search_area" name="cmdCore" data-cmd-core="SCENARIO" hidden>
       <div class="search_box search_range_box">
         <span class="search_title">시나리오</span>
         <select class="form-control" id="scenarioCmdSelList"> </select>
@@ -72,13 +72,12 @@
     </div>
   </div>
   <div class="container_row">
-    <div class="user_box report_category ml_2rem">
-      <button type="button" class="btn btn-success" id="addCmdGoalBtn">
+    <div class="user_box report_category ml_2rem mb_50rem">
+      <button type="button" class="btn btn-success " id="addCmdGoalBtn">
         목표 추가
       </button>
     </div>
-
-    <div class="user_box report_category ml_2rem">
+    <div class="user_box report_category mr_2rem mb_50rem">
       <button type="button" class="btn btn-success" name="reqControlCmdid" id="testRequestCmdBtn">
         실행
       </button>
@@ -93,7 +92,7 @@
 <script type="text/template" id="cmdGoalTemplate">
   <div class="search_area">
     <div class="search_box ">
-      <button name="deleteCmdGoal">-</button>
+      <button name="deleteCmdGoal" class="btn btn-danger">×</button>
     </div>
     <div class="search_box mw_7rem">
       <span class="search_title">목표 종료</span>
