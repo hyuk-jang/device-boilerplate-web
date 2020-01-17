@@ -259,6 +259,13 @@ _:-ms-input-placeholder,
   flex: 1 0.5 348px;
   min-height: 348px;
 }
+.flex_jus_start {
+  justify-content: start;
+}
+
+.flex_jus_center {
+  justify-content: center;
+}
 
 .component_side_box {
   width: 250px;
