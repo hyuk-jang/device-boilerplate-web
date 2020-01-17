@@ -189,7 +189,10 @@ router.get(
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
+    let currWeatherCastInfo = {};
+    if (_.isNumber(mainRow.weather_location_seq)) {
+      currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
+    }
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
