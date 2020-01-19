@@ -6,6 +6,11 @@
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
   </head>
   <body>
+    <script>
+      var member = <%- JSON.stringify(member) %>;
+      var user = <%- JSON.stringify(user) %>;
+      var memberIdx = <%- JSON.stringify(memberIdx) %>;
+    </script>
     <div id="wrap" class="wrap hidden">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
@@ -35,6 +40,31 @@
                 <label>관리사이트</label>
                 <input type="text" readonly class="form-control" id="main_name" />
               </div>
+              <% if(user.user_id === member.user_id) { %>
+              <div class="form-group">
+                <label for="inputPassword">비밀번호</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  name="password"
+                  placeholder="비밀번호를 입력해주세요"
+                />
+                <span class="notice_next_box">
+                  * 8~16자 숫자+영문자+특수문자를 사용하세요.
+                </span>
+              </div>
+              <div class="form-group">
+                <label for="inputPasswordCheck">비밀번호 확인</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPasswordCheck"
+                  name="passwordCheck"
+                  placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요"
+                />
+              </div>
+              <% } %>
               <div class="form-group">
                 <label>회원권한</label>
                 <select class="form-control" id="grade" name="grade">
@@ -59,7 +89,7 @@
                 </select>
               </div>
               <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">
+                <button type="button" id="submitUpdate" class="btn btn-primary">
                   정보변경<i class="fa fa-check spaceLeft"></i>
                 </button>
                 <button type="button" class="btn btn-danger" id="historyBack">
@@ -73,46 +103,60 @@
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
+    <!-- 관리 -->
+    <script>
+      setDomElementValueWithJson(document.getElementById('memberEdit'), member, 'value', 'id');
+      // console.log(naviId + '/' + siteId + '/member');
+      document.getElementById('memberEdit').action = memberIdx;
+      // document.getElementById('memberEdit').action = memberIdx;
+      // 가입 취소 시 로그인 창으로
+      $('#historyBack').on('click', function() {
+        location.href = window.location.origin + '/admin';
+      });
+
+      $('#grade')
+        .val(_.toString(member.grade))
+        .prop('selected', true);
+
+      $('#isDeleted')
+        .val(_.toString(member.is_deleted))
+        .prop('selected', true);
+
+      $('#isAccountLock')
+        .val(_.toString(member.is_account_lock))
+        .prop('selected', true);
+
+      // 정보 수정 시
+      document.querySelector('#submitUpdate').addEventListener('click', function() {
+        // 관리자 비밀번호 수정 로직
+        var $inputPassword = $('#inputPassword');
+        // 비밀번호 돔이 존재하고 해당 비밀번호를 변경하고자 할 경우
+        if ($inputPassword !== undefined && $inputPassword.val() !== '') {
+          var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+          if (!pwReg.test($('#inputPassword').val())) {
+            alert('비밀번호는 8~16자 숫자+영문자+특수문자를 사용하세요.');
+            $('#inputPassword')
+              .val('')
+              .focus();
+            return false;
+          }
+
+          if ($('#inputPasswordCheck').val() === '') {
+            alert('비밀번호를 다시 한번 더 입력하세요');
+            $('#inputPasswordCheck').focus();
+
+            return false;
+          }
+
+          if ($('#inputPassword').val() !== $('#inputPasswordCheck').val()) {
+            alert('비밀번호를 둘다 동일하게 입력하세요');
+            return false;
+          }
+        }
+
+        var form = document.querySelector('form');
+        form.submit();
+      });
+    </script>
   </body>
-
-  <script>
-    var member = <%- JSON.stringify(member) %>;
-    var memberIdx = <%- JSON.stringify(memberIdx) %>;
-    // console.log(member)
-
-    setDomElementValueWithJson(document.getElementById('memberEdit'), member, 'value', 'id')
-  </script>
-
-  <!-- 관리 -->
-  <script>
-    console.log(naviId + '/' + siteId + '/member');
-    document.getElementById('memberEdit').action = memberIdx;
-    // document.getElementById('memberEdit').action = memberIdx;
-    // 가입 취소 시 로그인 창으로
-    $('#historyBack').on('click', function() {
-      location.href = window.location.origin + '/admin';
-    });
-
-    // $.ajax({
-    //   type: 'GET',
-    //   url: '/admin/' + siteId + '/member/' + memberIdx,
-    //   data: dataParam,
-    // })
-    //   .done(function(excelData) {})
-    //   .fail(function(req, sts, err) {
-    //     alert(err);
-    //   });
-
-    $('#grade')
-      .val(_.toString(member.grade))
-      .prop('selected', true);
-
-    $('#isDeleted')
-      .val(_.toString(member.is_deleted))
-      .prop('selected', true);
-
-    $('#isAccountLock')
-      .val(_.toString(member.is_account_lock))
-      .prop('selected', true);
-  </script>
 </html>

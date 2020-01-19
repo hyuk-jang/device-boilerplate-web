@@ -108,14 +108,22 @@ router.post(
       place = '',
     } = req.body;
 
+    // ID, 비밀번호, 닉네임, 휴대폰 정규식
     const idReg = /^[A-Za-z0-9]{4,12}$/;
-    const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/;
+    const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+    const nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
+    const cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
+    // 쓰이는 장소 목록
     const placeRows = await biAuth.getTable('place');
 
     const palceSelList = _.map(placeRows, 'place_seq');
 
     // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
-    if (!idReg.test(userid) || !pwReg.test(password) || !_.includes(palceSelList, place)) {
+    const idFlag = idReg.test(userid);
+    const pwFlag = pwReg.test(password);
+    const nickNameFlag = nickNameReg.test(nick_name);
+    const telFlag = cellPhoneReg.test(tel);
+    if (!(idFlag && pwFlag && nickNameFlag && telFlag) || !_.includes(palceSelList, place)) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
     }
 
@@ -141,15 +149,6 @@ router.post(
     if (!_.isEmpty(memberRows)) {
       // return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/join'));
       return res.send(DU.locationAlertGo('이미 사용중인 아이디입니다..', '/auth/join'));
-    }
-
-    const salt = BU.genCryptoRandomByte(16);
-
-    // const encryptPbkdf2 = Promise.promisify(BU.encryptPbkdf2);
-    const hashPw = await EU.encryptPbkdf2(password, salt);
-
-    if (hashPw instanceof Error) {
-      throw new Error('Password hash failed.');
     }
 
     // FIXME: 갱신일은 둘다 현 시점으로 처리함. 회원가입 갱신 기능이 추가될 경우 수정 필요

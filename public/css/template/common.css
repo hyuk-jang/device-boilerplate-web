@@ -617,6 +617,18 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /************ Common *************/
 /***************************************/
+.notice_next_box {
+  display: block;
+  font-size: 0.7em;
+  margin-top: 0.5em;
+  color: #343535;
+}
+.error_next_box {
+  display: block;
+  font-size: 0.7em;
+  margin-top: 0.5em;
+  color: red;
+}
 
 /***************************************/
 /************ Font-Size Rem ************/

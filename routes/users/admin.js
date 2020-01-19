@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-const { BU, DU } = require('base-util-jh');
+const { BU, DU, EU } = require('base-util-jh');
 
 const commonUtil = require('../../models/templates/common.util');
 const domMakerMain = require('../../models/domMaker/mainDom');
@@ -140,6 +140,7 @@ router.get(
     /** @type {V_MEMBER} */
     const memberRow = await adminModel.getTableRow('V_MEMBER', { member_seq: memberIdx });
 
+    _.set(req, 'locals.user', req.user);
     _.set(req, 'locals.member', memberRow);
     _.set(req, 'locals.memberIdx', memberIdx);
 
@@ -154,7 +155,13 @@ router.post(
   asyncHandler(async (req, res) => {
     commonUtil.applyHasNumbericReqToNumber(req);
     const { siteId, memberIdx } = req.params;
-    const { grade = 'awaiter', is_deleted = 0, is_account_lock = 0 } = req.body;
+    const {
+      user_id,
+      grade = 'awaiter',
+      is_deleted = 0,
+      is_account_lock = 0,
+      password = '',
+    } = req.body;
 
     const isValidMember = _.isNumber(memberIdx);
     const isValidGrade = _.includes(accountGradeRange, grade);
@@ -172,6 +179,25 @@ router.post(
       is_deleted,
       is_account_lock,
     };
+
+    // 로그인한 사용자와 수정할려는 ID가 동일하고 비밀번호를 변경하고자 할 경우
+    if (user_id === req.user.user_id && _.isString(password) && password.length) {
+      // 비밀번호 정규식
+      const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+      // 비밀번호 유효성 체크
+      if (!pwReg.test(password)) {
+        return res.send(DU.locationAlertBack('데이터에 이상이 있습니다.'));
+      }
+      const salt = BU.genCryptoRandomByte(16);
+      const hashPw = await EU.encryptPbkdf2(password, salt);
+
+      if (hashPw instanceof Error) {
+        throw new Error('Password hash failed.');
+      }
+      // 수정 비밀번호 입력
+      memberInfo.pw_salt = salt;
+      memberInfo.pw_hash = hashPw;
+    }
 
     // 계정 잠금 해제 일 경우
     is_account_lock === 0 && Object.assign(memberInfo, { login_fail_count: 0 });
