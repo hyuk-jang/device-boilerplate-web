@@ -20,6 +20,7 @@ function convertProjectSource(projectMainId) {
     case 'FP':
       projectImg = 'fp_logo.png';
       projectName = '농업병행 태양광발전 모니터링';
+      // projectName = '영농형 태양광 통합 관리 시스템 v1.0';
       loginBG = 'bg_fp.jpg';
       break;
     case 'HS':
