@@ -196,18 +196,13 @@ router.get(
       currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
     }
 
-    BU.CLI(req.user.grade);
-    BU.CLI(req.user.grade === 'admin');
     if (_.includes(accountUserGradeRange, req.user.grade)) {
-      BU.CLI('일반 사용자');
       _.set(req, 'locals.mainInfo.manualPath', 'userManual');
     } else if (req.user.grade === 'admin') {
       _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
     } else {
       _.set(req, 'locals.mainInfo.manualPath', '');
     }
-
-    BU.CLI(req.locals.mainInfo);
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
