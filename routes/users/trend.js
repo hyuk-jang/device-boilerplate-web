@@ -134,6 +134,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { siteId, mainWhere },
+      searchRange,
     } = req.locals;
 
     /** @type {BiDevice} */
@@ -155,14 +156,11 @@ router.get(
     // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
     // console.timeEnd('init');
-    /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
-    // BU.CLI(searchRangeInfo);
 
     // console.time('getSensorReport');
     /** @type {sensorReport[]} */
     const sensorReportRows = await biDevice.getSensorReport(
-      searchRangeInfo,
+      searchRange,
       _.map(placeRelationRows, 'node_seq'),
     );
     // console.timeEnd('getSensorReport');
@@ -170,9 +168,9 @@ router.get(
     // BU.CLIN(sensorReportRows);
 
     // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRange);
     // plotSeries 를 구하기 위한 객체
-    const momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    const momentFormat = sensorUtil.getMomentFormat(searchRange);
 
     // 하루 단위로 검색할 경우에만 시간 제한을 둠
     // if (searchRangeInfo.searchType === 'days') {

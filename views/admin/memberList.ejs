@@ -10,6 +10,9 @@
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
         <div class="container_row flex_jus_end default_search_area mt0">
           <div class="search_area">
             <div class="search_box search_category_box ml0">
@@ -20,6 +23,7 @@
                 <option value="guest">guest</option>
                 <option value="owner">owner</option>
                 <option value="manager">manager</option>
+                <option value="admin">admin</option>
               </select>
             </div>
             <div class="search_box search_category_box">
@@ -116,6 +120,10 @@
     var firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
 
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+
+    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+    console.log(subCategory)
   </script>
 
   <script>
@@ -152,6 +160,8 @@
       });
     }
   </script>
+
+  <script src="/js/contents/report/search.js"></script>
 
   <script>
     $('#tableBodyDom').on('click', 'tr', function(event) {

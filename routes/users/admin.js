@@ -7,26 +7,49 @@ const router = express.Router();
 const { BU, DU, EU } = require('base-util-jh');
 
 const commonUtil = require('../../models/templates/common.util');
-const domMakerMain = require('../../models/domMaker/mainDom');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
-const reportDom = require('../../models/domMaker/reportDom');
 
 require('../../models/jsdoc/domGuide');
 
-const accountGradeList = ['all', 'manager', 'owner', 'guest', 'awaiter'];
-const accountGradeRange = ['manager', 'owner', 'guest', 'awaiter'];
+const accountGradeList = ['all', 'admin', 'manager', 'owner', 'guest', 'awaiter'];
+const accountGradeRange = ['admin', 'manager', 'owner', 'guest', 'awaiter'];
 const accountSecessionList = ['all', 'ok', 'no'];
 const accountLockList = ['all', 'ok', 'no'];
 const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
 
-router.get(['/', '/:siteId', '/:siteId/member'], (req, res, next) => {
-  if (req.user.grade !== 'admin') {
-    return res.send(DU.locationAlertGo('잘못된 접근입니다.', '/main'));
-  }
-  next();
-});
+const DEFAULT_CATEGORY = 'member';
+/** @type {setCategoryInfo[]} */
+const subCategoryList = [
+  {
+    subCategory: 'member',
+    btnName: '회원관리',
+  },
+  {
+    subCategory: 'history',
+    btnName: '회원수정이력',
+  },
+];
 
+/** Middleware */
+router.get(
+  ['/', '/:siteId', '/:siteId/:subCategory', '/:siteId/:subCategory/:subCategoryId'],
+  (req, res, next) => {
+    if (req.user.grade !== 'admin') {
+      return res.send(DU.locationAlertGo('잘못된 접근입니다.', '/main'));
+    }
+
+    const { subCategory = DEFAULT_CATEGORY } = req.params;
+
+    // 선택된 subCategoryDom 정의
+    const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
+    _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
+
+    next();
+  },
+);
+
+/** 회원 정보 목록 */
 router.get(
   ['/', '/:siteId', '/:siteId/member'],
   asyncHandler(async (req, res) => {
@@ -34,7 +57,7 @@ router.get(
     commonUtil.applyHasNumbericReqToNumber(req);
 
     const {
-      mainInfo: { siteId, mainWhere },
+      mainInfo: { siteId },
     } = req.locals;
 
     // req.query 값 비구조화 할당
@@ -56,6 +79,7 @@ router.get(
     // 회원 권한이 목록에 있을 경우
     if (_.includes(accountGradeList, accountGrade)) {
       switch (accountGrade) {
+        case 'admin':
         case 'manager':
         case 'owner':
         case 'guest':
@@ -93,8 +117,6 @@ router.get(
       }
     }
 
-    // BU.CLI(memberWhere);
-
     // 레포트 데이터로 환산
     const { reportRows, totalCount } = await adminModel.getMemberReport(
       {
@@ -121,7 +143,6 @@ router.get(
     // 페이지 정보 추가
     paginationInfo = _.omit(paginationInfo, 'paginationDom');
     _.set(req, 'locals.paginationInfo', paginationInfo);
-    // console.log(paginationInfo);
 
     res.render('./admin/memberList', req.locals);
   }),
@@ -132,7 +153,6 @@ router.get(
   ['/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
     const { memberIdx } = req.params;
-    const { subCategory, subCategoryId } = req.locals.mainInfo;
 
     /** @type {AdminModel} */
     const adminModel = global.app.get('adminModel');
@@ -154,14 +174,12 @@ router.post(
   ['/:siteId/member', '/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
     commonUtil.applyHasNumbericReqToNumber(req);
+
+    /** @type {AdminModel} */
+    const adminModel = global.app.get('adminModel');
+
     const { siteId, memberIdx } = req.params;
-    const {
-      user_id,
-      grade = 'awaiter',
-      is_deleted = 0,
-      is_account_lock = 0,
-      password = '',
-    } = req.body;
+    const { grade = 'awaiter', is_deleted = 0, is_account_lock = 0, password = '' } = req.body;
 
     const isValidMember = _.isNumber(memberIdx);
     const isValidGrade = _.includes(accountGradeRange, grade);
@@ -180,8 +198,41 @@ router.post(
       is_account_lock,
     };
 
+    // 정보를 수정할 회원 정보를 불러옴
+    /** @type {MEMBER} */
+    const memberRow = await adminModel.getTableRow('MEMBER', { member_seq: memberIdx });
+    /** @type {MEMBER} */
+    const adminRow = await adminModel.getTableRow('MEMBER', { user_id: req.user.user_id });
+
+    // 회원 정보 수정 이력 테이블 스키마
+    const schemaRows = await adminModel.getTableSchema(process.env.PJ_DB_DB, 'MEMBER');
+
+    // 수정할려고 하는 회원이 없을 경우
+    if (memberRow === undefined || adminRow === undefined) {
+      return res.send(DU.locationAlertBack('데이터에 이상이 있습니다.'));
+    }
+
+    /** @type {MEMBER_EDIT_HISTORY[]} */
+    const memberEditHistorys = [];
+    // 회원 정보 수정 이력 Insert를 위함
+    _.forEach(memberInfo, (value, column) => {
+      // 데이터가 일치할 경우 업데이트 절 없음
+      if (!_.isEqual(value, memberRow[column])) {
+        const schemaRow = _.find(schemaRows, { COLUMN_NAME: column });
+
+        memberEditHistorys.push({
+          member_seq: memberRow.member_seq,
+          editor_seq: adminRow.member_seq,
+          edit_column_id: column,
+          edit_column_name: _.get(schemaRow, 'COLUMN_COMMENT', ''),
+          prev_value: memberRow[column],
+          curr_value: value,
+        });
+      }
+    });
+
     // 로그인한 사용자와 수정할려는 ID가 동일하고 비밀번호를 변경하고자 할 경우
-    if (user_id === req.user.user_id && _.isString(password) && password.length) {
+    if (memberRow.user_id === req.user.user_id && _.isString(password) && password.length) {
       // 비밀번호 정규식
       const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
       // 비밀번호 유효성 체크
@@ -194,6 +245,16 @@ router.post(
       if (hashPw instanceof Error) {
         throw new Error('Password hash failed.');
       }
+
+      const schemaRow = _.find(schemaRows, { COLUMN_NAME: 'pw_hash' });
+
+      // 회원 비밀번호가 변경되었다면 회원 정보 변경 이력에 추가
+      memberEditHistorys.push({
+        member_seq: memberRow.member_seq,
+        editor_seq: adminRow.member_seq,
+        edit_column_id: 'pw_hash',
+        edit_column_name: _.get(schemaRow, 'COLUMN_COMMENT', ''),
+      });
       // 수정 비밀번호 입력
       memberInfo.pw_salt = salt;
       memberInfo.pw_hash = hashPw;
@@ -202,13 +263,60 @@ router.post(
     // 계정 잠금 해제 일 경우
     is_account_lock === 0 && Object.assign(memberInfo, { login_fail_count: 0 });
 
-    /** @type {AdminModel} */
-    const adminModel = global.app.get('adminModel');
-
+    // 회원 정보 수정
     await adminModel.updateTable('MEMBER', { member_seq: memberIdx }, memberInfo);
+
+    // 회원 정보 변경 이력 입력
+    await adminModel.setTables('MEMBER_EDIT_HISTORY', memberEditHistorys, false);
 
     return res.send(DU.locationAlertGo('정상적으로 갱신되었습니다.', `/admin/${siteId}/member`));
   }),
 );
 
+/** 회원 이력 수정 목록 */
+router.get(
+  ['/:siteId/history', '/:siteId/history/:memberIdx'],
+  asyncHandler(async (req, res) => {
+    // BU.CLI(req.locals);
+    commonUtil.applyHasNumbericReqToNumber(req);
+
+    const {
+      mainInfo: { siteId },
+    } = req.locals;
+
+    // req.query 값 비구조화 할당
+    const { page = 1 } = req.query;
+
+    /** @type {AdminModel} */
+    const adminModel = global.app.get('adminModel');
+
+    // BU.CLI(req.query);
+
+    // 레포트 데이터로 환산
+    const { reportRows, totalCount } = await adminModel.getMemberEditHistoryReport({
+      page,
+      pageListCount: PAGE_LIST_COUNT,
+    });
+
+    _.set(req, 'locals.reportRows', reportRows);
+
+    // 페이지 네이션 생성
+    let paginationInfo = DU.makeBsPagination(
+      page,
+      totalCount,
+      `/admin/${siteId}/history`,
+      _.omit(req.query, 'page'),
+      PAGE_LIST_COUNT,
+    );
+
+    // 페이지네이션 돔 추가
+    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
+
+    // 페이지 정보 추가
+    paginationInfo = _.omit(paginationInfo, 'paginationDom');
+    _.set(req, 'locals.paginationInfo', paginationInfo);
+
+    res.render('./admin/memberHistory', req.locals);
+  }),
+);
 module.exports = router;

@@ -19,6 +19,21 @@ class BiModule extends BM {
   }
 
   /**
+   * DB Table 정보 조회
+   * @param {string} dbName DB
+   * @param {string} tableName TABLE
+   * @param {string=} schema 조회 타입 (tables, columns, ...)
+   */
+  getTableSchema(dbName, tableName, schema = 'columns') {
+    const sql = `
+      SELECT * FROM information_schema.${schema} 
+      WHERE table_schema = '${dbName}' 
+      AND table_name = '${tableName}'
+    `;
+    return this.db.single(sql, '', false);
+  }
+
+  /**
    * 접속반 기준 Module 최신 데이터 가져옴
    *
    * @param {number|Array} photovoltaic_seq Format => Number or Array or undefinded

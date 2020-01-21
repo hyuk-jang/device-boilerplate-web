@@ -278,14 +278,16 @@ router.get(
     '/:siteId/sensor/:subCategoryId/:finalCategory',
   ],
   asyncHandler(async (req, res, next) => {
-    const { siteId } = req.locals.mainInfo;
-    const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
+    const {
+      mainInfo: { siteId, mainWhere, subCategoryId = DEFAULT_SUB_SITE },
+      searchRange,
+    } = req.locals;
+    // const { subCategoryId = DEFAULT_SUB_SITE } = req.params;
 
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
 
     // 모든 노드를 조회하고자 할 경우 Id를 지정하지 않음
-    const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
     const sensorWhere = _.isNumber(subCategoryId) ? { place_seq: subCategoryId } : null;
 
     /** @type {BiDevice} */
@@ -297,32 +299,22 @@ router.get(
     // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
     _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
 
-    // BU.CLI(placeRows);
-    // BU.CLI(_.assign(mainWhere, sensorWhere));
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationRows = await biDevice.getTable(
       'v_dv_place_relation',
       _.assign(mainWhere, sensorWhere),
-      false,
     );
-
-    // BU.CLIN(placeRelationRows);
 
     // NOTE: IVT가 포함된 장소는 제거.
     _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
 
-    /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
-    // BU.CLI(searchRangeInfo);
-
     // console.time('getSensorReport');
     /** @type {sensorReport[]} */
     const sensorReportRows = await biDevice.getSensorReport(
-      searchRangeInfo,
+      searchRange,
       _.map(placeRelationRows, 'node_seq'),
     );
     // console.timeEnd('getSensorReport');
-    // BU.CLI(sensorReportRows);
 
     // 엑셀 다운로드 요청일 경우에는 현재까지 계산 처리한 Rows 반환
     if (_.get(req.params, 'finalCategory', '') === 'excel') {
@@ -336,10 +328,6 @@ router.get(
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
     // console.timeEnd('extPlaRelSensorRep');
-
-    // BU.CLIN(placeRelationRows, 2);
-
-    // BU.CLI(sensorGroupRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const deviceProtocol = new DeviceProtocol(siteId);
@@ -364,7 +352,7 @@ router.get(
     // console.time('calcMergedReportStorageList');
     // 데이터 그룹의 평균 값 산출
     // FIXME: 병합은 하지 않음. 이슈 생길 경우 대처
-    if (searchRangeInfo.searchOption === DEFAULT_SEARCH_OPTION) {
+    if (searchRange.searchOption === DEFAULT_SEARCH_OPTION) {
       // 동일 Node Def Id 를 사용하는 저장소 데이터를 GroupDate 별로 합산처리
       sensorUtil.calcMergedReportStorageList(nodeDefStorageList, sensorGroupDateInfo);
       const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
@@ -410,7 +398,7 @@ router.get(
   ['/:siteId/sensor/:subCategoryId/excel'],
   asyncHandler(async (req, res) => {
     /** @type {searchRange} */
-    const searchRangeInfo = _.get(req, 'locals.searchRange');
+    const searchRange = _.get(req, 'locals.searchRange');
     /** @type {V_DV_PLACE[]} */
     const placeRows = _.get(req, 'locals.placeRows', []);
     // /** @type {sensorAvgGroup[]} */
@@ -423,7 +411,7 @@ router.get(
     // BU.CLIN(sensorReportRows);
 
     // BU.CLIN(placeRelationRows);
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    const strGroupDateList = sensorUtil.getGroupDateList(searchRange);
 
     // Place Relation Rows 확장
     // console.time('extPlaRelPerfectSenRep');
@@ -447,7 +435,7 @@ router.get(
     // console.time('excelWorkSheetList');
     const excelWorkSheetList = finalPlaceRows.map(pRow =>
       excelUtil.makeEWSWithPlaceRow(pRow, {
-        searchRangeInfo,
+        searchRangeInfo: searchRange,
         strGroupDateList,
       }),
     );
@@ -467,7 +455,7 @@ router.get(
     // BU.CLIN(excelWorkBook);
 
     // res.send('hi');
-    const { rangeStart, rangeEnd } = searchRangeInfo;
+    const { rangeStart, rangeEnd } = searchRange;
     const fileName = `${rangeStart}${rangeEnd.length ? ` ~ ${rangeEnd}` : ''}`;
     res.send({ fileName, workBook: excelWorkBook });
   }),
