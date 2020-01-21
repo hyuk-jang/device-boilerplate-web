@@ -153,6 +153,13 @@ app.use(
     extensions: ['jpg'],
   }),
 );
+// 사용자 취급 설명서 저장 경로
+app.use(
+  '/docs',
+  express.static(path.join(process.cwd(), 'docs'), {
+    extensions: ['pptx', 'hwp', 'docx'],
+  }),
+);
 // 맵 이미지 저장 경로
 app.use(
   '/map',

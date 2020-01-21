@@ -4,8 +4,8 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const { BU } = require('base-util-jh');
 
+const PassportOneSession = require('./PassportOneSession');
 const BiAuth = require('../models/templates/auth/BiAuth');
-
 /**
  *
  * @param {expressApp} app
@@ -18,6 +18,9 @@ module.exports = (app, dbInfo) => {
   // passport 설정
   app.use(passport.initialize());
   app.use(passport.session());
+
+  passport.use(new PassportOneSession());
+  app.use(passport.authenticate('passport-one-session-per-user'));
 
   const localStrategyInfo = {
     usernameField: 'userid',

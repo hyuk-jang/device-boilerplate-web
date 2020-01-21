@@ -1,9 +1,23 @@
 <footer class="footer_area">
   <div>
-    <p class="footer_copyright">Copyright © 2018. 에스.엠.소프트웨어(주) All Rights Reserved.</p>
+    <p class="footer_copyright" id="footer_copyright">
+      <span>Copyright © 에스.엠.소프트웨어(주) All Rights Reserved.</span>
+      |
+      <a href="" id="downloadManual">사용자 취급 설명서</a>
+    </p>
     <p class="footer_logo">
       <img width="30" height="30" src="/image/common/sm_logo.png" />
       <span>에스.엠.소프트웨어(주)</span>
     </p>
   </div>
 </footer>
+
+<script>
+  // 매뉴얼 경로를 받아옴
+  var manualPath = <%- JSON.stringify(mainInfo.manualPath) %>
+  // 매뉴얼 경로가 정상적일 경우 경로 지정
+  if(typeof manualPath === 'string' && manualPath.length) {
+    var manualLink = '/docs/' + manualPath;
+    document.querySelector('#downloadManual').setAttribute('href', manualLink)
+  }
+</script>

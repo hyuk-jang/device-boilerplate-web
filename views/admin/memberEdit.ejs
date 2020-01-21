@@ -107,7 +107,7 @@
     <!-- 관리 -->
     <script>
       setDomElementValueWithJson(document.getElementById('memberEdit'), member, 'value', 'id');
-      // console.log(naviId + '/' + siteId + '/member');
+
       document.getElementById('memberEdit').action = memberIdx;
       // document.getElementById('memberEdit').action = memberIdx;
       // 가입 취소 시 로그인 창으로
@@ -131,7 +131,7 @@
       document.querySelector('#submitUpdate').addEventListener('click', function() {
         // 관리자 비밀번호 수정 로직
         var $inputPassword = $('#inputPassword');
-        console.log($inputPassword);
+
         // 비밀번호 돔이 존재하고 해당 비밀번호를 변경하고자 할 경우
         if (!_.isEmpty($inputPassword) && $inputPassword.val() !== '') {
           var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
