@@ -255,7 +255,9 @@ router.get(
       });
     });
 
-    // BU.CLI(excelWorkSheetList);
+    if (excelWorkSheetList.length === 0) {
+      return res.status(500).send('데이터가 존재하지 않습니다.');
+    }
 
     // console.time('makeExcelWorkBook');
     const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);
@@ -447,6 +449,10 @@ router.get(
     //   searchRangeInfo,
     //   strGroupDateList,
     // });
+
+    if (excelWorkSheetList.length === 0) {
+      return res.status(500).send('데이터가 존재하지 않습니다.');
+    }
 
     // console.time('makeExcelWorkBook');
     const excelWorkBook = excelUtil.makeExcelWorkBook('test', excelWorkSheetList);

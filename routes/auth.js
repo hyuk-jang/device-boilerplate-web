@@ -10,6 +10,21 @@ const commonUtil = require('../models/templates/common.util');
 // const SITE_HEADER = '';
 const SITE_HEADER = 'auth/';
 
+router.get(
+  [
+    '/',
+    '/:naviMenu',
+    '/:naviMenu/:siteId',
+    '/:naviMenu/:siteId/:subCategory',
+    '/:naviMenu/:siteId/:subCategory/:subCategoryId',
+    '/:naviMenu/:siteId/:subCategory/:subCategoryId/:finalCategory',
+  ],
+  (req, res, next) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
+    next();
+  },
+);
+
 router.get('/', (req, res) => {
   res.send('default main');
 });
@@ -96,6 +111,7 @@ router.post(
   '/join',
   asyncHandler(async (req, res) => {
     // BU.CLIS('tempJoin', req.body, req.query, req.params);
+    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
@@ -105,7 +121,7 @@ router.post(
       name = '',
       nick_name = '',
       tel = '',
-      place = '',
+      place_seq = '',
     } = req.body;
 
     // ID, 비밀번호, 닉네임, 휴대폰 정규식
@@ -114,16 +130,20 @@ router.post(
     const nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
     const cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
     // 쓰이는 장소 목록
-    const placeRows = await biAuth.getTable('place');
+    const placeRows = await biAuth.getTable('V_DV_PLACE');
 
-    const palceSelList = _.map(placeRows, 'place_seq');
+    const placeSelList = _.map(placeRows, 'place_seq');
+
+    // BU.CLI(placeSelList);
+    // BU.CLI(place_seq);
 
     // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
     const idFlag = idReg.test(userid);
     const pwFlag = pwReg.test(password);
     const nickNameFlag = nickNameReg.test(nick_name);
     const telFlag = cellPhoneReg.test(tel);
-    if (!(idFlag && pwFlag && nickNameFlag && telFlag) || !_.includes(palceSelList, place)) {
+    // BU.CLIS(idFlag, pwFlag, nickNameFlag, telFlag);
+    if (!(idFlag && pwFlag && nickNameFlag && telFlag) || !_.includes(placeSelList, place_seq)) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
     }
 
@@ -134,7 +154,7 @@ router.post(
     const isOk = _.every(memberInfo, value => _.isString(value) && value.length);
     // 이상이 있을 경우 Back
     if (!isOk) {
-      return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
+      return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다!'));
     }
 
     /** @type {MEMBER} */
@@ -158,7 +178,7 @@ router.post(
       name,
       nick_name,
       tel,
-      main_seq: place,
+      main_seq: place_seq,
       is_deleted: 0,
       writedate: new Date(),
       updatedate: new Date(),

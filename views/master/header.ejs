@@ -56,6 +56,12 @@
   </div>
   <!-- <div class="col-md-12" style="padding:0;     background-image: linear-gradient(#393939, #222222);"> -->
 </header>
+<!-- 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-xss/0.3.3/xss.min.js"></script>
+<script>
+  var html = filterXSS('<script>alert("xss");</scr' + 'ipt>');
+  alert(html);
+</script> -->
 
 <script>
   var mainInfo = <%- JSON.stringify(mainInfo) %>;

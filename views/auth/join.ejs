@@ -30,6 +30,7 @@
               class="form-control"
               id="inputUserid"
               name="userid"
+              autocomplete="off"
               placeholder="아이디를 입력해 주세요"
             />
             <span class="notice_next_box">
@@ -43,6 +44,7 @@
               class="form-control"
               id="inputName"
               name="name"
+              autocomplete="off"
               placeholder="이름을 입력해 주세요"
             />
           </div>
@@ -53,6 +55,7 @@
               class="form-control"
               id="inputNickName"
               name="nick_name"
+              autocomplete="off"
               placeholder="닉네임을 입력해 주세요"
             />
             <span class="notice_next_box">
@@ -66,6 +69,7 @@
               class="form-control"
               id="inputPassword"
               name="password"
+              autocomplete="off"
               placeholder="비밀번호를 입력해주세요"
             />
             <span class="notice_next_box">
@@ -79,6 +83,7 @@
               class="form-control"
               id="inputPasswordCheck"
               name="passwordCheck"
+              autocomplete="off"
               placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요"
             />
           </div>
@@ -157,7 +162,7 @@
       }
 
       var nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
-      if (!idReg.test($('#inputNickName').val())) {
+      if (!nickNameReg.test($('#inputNickName').val())) {
         alert('닉네임은 2~20자의 모든 문자열 사용 가능합니다.');
         $('#inputNickName').focus();
 
@@ -205,8 +210,6 @@
           .focus();
         return false;
       }
-
-      return false;
 
       var form = document.querySelector('form');
       form.submit();

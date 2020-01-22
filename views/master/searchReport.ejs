@@ -82,11 +82,12 @@
       .done(excelData => {
         $('#loader').addClass('hidden');
         $('#loader-ground').addClass('hidden');
-        // console.log(excelData);
         XLSX.writeFile(excelData.workBook, `${excelData.fileName}.xlsx`);
       })
       .fail((req, sts, err) => {
-        alert(err);
+        $('#loader').addClass('hidden');
+        $('#loader-ground').addClass('hidden');
+        alert(req.responseText);
       });
   });
 </script>

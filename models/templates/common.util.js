@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const moment = require('moment');
+const xss = require('xss');
 
 const BU = require('base-util-jh').baseUtil;
 
@@ -19,8 +20,8 @@ function convertProjectSource(projectMainId) {
       break;
     case 'FP':
       projectImg = 'fp_logo.png';
-      projectName = '농업병행 태양광발전 모니터링';
-      // projectName = '영농형 태양광 통합 관리 시스템 v1.0';
+      // projectName = '농업병행 태양광발전 모니터링';
+      projectName = '영농형 태양광 통합 관리 시스템 v1.0';
       loginBG = 'bg_fp.jpg';
       break;
     case 'HS':
@@ -48,17 +49,27 @@ exports.convertProjectSource = convertProjectSource;
 function applyHasNumbericReqToNumber(req) {
   // req.params 데이터 중 숫자형으로 변환될 수 있는 데이터는 숫자형으로 삽입
   _.forEach(req.params, (v, k) => {
-    BU.isNumberic(v) && _.set(req.params, k, Number(v));
+    let convertValue = xss(v) === '' ? undefined : xss(v);
+    convertValue = BU.isNumberic(convertValue) ? Number(convertValue) : convertValue;
+    _.set(req.params, k, convertValue);
   });
 
   // req.query 데이터 중 숫자형으로 변환될 수 있는 데이터는 숫자형으로 삽입
   _.forEach(req.query, (v, k) => {
-    BU.isNumberic(v) && _.set(req.query, k, Number(v));
+    let convertValue = xss(v) === '' ? undefined : xss(v);
+    convertValue = BU.isNumberic(convertValue) ? Number(convertValue) : convertValue;
+    _.set(req.query, k, convertValue);
   });
 
   _.forEach(req.body, (v, k) => {
-    BU.isNumberic(v) && _.set(req.body, k, Number(v));
+    let convertValue = xss(v) === '' ? undefined : xss(v);
+    convertValue = BU.isNumberic(convertValue) ? Number(convertValue) : convertValue;
+    _.set(req.body, k, convertValue);
   });
+
+  // _.forEach(req.body, (v, k) => {
+  //   BU.isNumberic(req.params[k]) && _.set(req.body, k, Number(v));
+  // });
 }
 exports.applyHasNumbericReqToNumber = applyHasNumbericReqToNumber;
 

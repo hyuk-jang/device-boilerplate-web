@@ -91,6 +91,50 @@ app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(helmet());
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: [
+//         "'self'",
+//         "'unsafe-inline'",
+//         'maxcdn.bootstrapcdn.com',
+//         'stackpath.bootstrapcdn.com',
+//       ],
+//       styleSrc: [
+//         "'self'",
+//         'use.fontawesome.com',
+//         'fonts.googleapis.com',
+//         'stackpath.bootstrapcdn.com',
+//       ],
+//       fontSrc: ["'self'", 'fonts.com'],
+//       // imgSrc: ['img.com', 'data:'],
+//       // sandbox: ['allow-forms', 'allow-scripts'],
+//       // reportUri: '/report-violation',
+//       // objectSrc: ["'none'"],
+//       upgradeInsecureRequests: false,
+//       // workerSrc: false, // This is not set.
+//       // defaultSrc: ["'self'"],
+//       // fontSrc: ["'self'"],
+//       // styleSrc: [
+//       //   "'self'",
+//       //   'use.fontawesome.com',
+//       //   'fonts.googleapis.com',
+//       //   'stackpath.bootstrapcdn.com',
+//       // ],
+
+//       // scriptSrc: [
+//       //   "'self'",
+//       //   "'unsafe-inline'",
+//       //   'maxcdn.bootstrapcdn.com',
+//       //   'stackpath.bootstrapcdn.com',
+//       // ],
+//     },
+//   }),
+// );
+
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
 // const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
 const store = new MySQLStore(dbInfo);
 const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
