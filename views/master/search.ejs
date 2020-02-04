@@ -17,7 +17,6 @@
         <option value="hour">1시간</option>
         <option value="day">1일</option>
         <option value="month">1달</option>
-        <option value="year">1년</option>
       </select>
     </div>
     <div class="search_box">
@@ -29,9 +28,28 @@
       </div>
     </div>
     <div class="submit_box">
-      <button type="button" class="btn btn-primary" onclick="searchTrend()" id="search">
+      <button type="button" class="btn btn-primary" id="searchBtn">
         검색
       </button>
     </div>
   </div>
 </div>
+
+<script>
+  // 검색 클릭 시
+  document.querySelector('#searchBtn').addEventListener('click', function(event) {
+    // searchRange 형태 만듬
+    var searchValue = getSearchValue();
+    // 생성된 searchRange로 쿼리스트링 생성
+    var queryString = makeSearchQueryString(searchValue);
+    // 쿼리스트링이 정상적으로 만들어 질 경우
+
+    if (queryString.length) {
+      $('#loader').removeClass('hidden');
+      $('#loader-ground').removeClass('hidden');
+
+      // 사이트 변경 시
+      location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}?${queryString}`;
+    }
+  });
+</script>

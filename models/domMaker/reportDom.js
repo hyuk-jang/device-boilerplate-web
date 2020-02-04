@@ -260,7 +260,12 @@ module.exports = {
       // 번호
       _.set(dataRow, 'num', firstRowNum + index + 1);
       // 발전 효율 (계산하여 재정의 함)
-      _.set(dataRow, 'avg_p_f', _.round(_.divide(powerKw, pvKw) * 100, 1));
+      const avgPF = _.divide(powerKw, pvKw);
+      _.set(
+        dataRow,
+        'avg_p_f',
+        Number.isNaN(avgPF) || avgPF === Infinity ? '-' : _.round(avgPF * 100, 1),
+      );
 
       // BU.toLocaleString(dataRow);
 

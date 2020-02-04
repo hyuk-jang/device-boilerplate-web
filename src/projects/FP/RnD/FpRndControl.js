@@ -10,7 +10,7 @@ const ApiServer = require('../../../features/ApiCommunicator/ApiServer');
 // const RtspManager = require('../../../features/RtspManager/ToFFMPEG');
 const RtspManager = require('../../../features/RtspManager/ToIMG');
 
-const { Dba } = require('../../../module');
+// const { Dba } = require('../../../module');
 
 class FpRndControl extends Control {
   bindingFeature() {
@@ -68,36 +68,36 @@ class FpRndControl extends Control {
    * 무안 CCTV를 제어하기 위한 임시 컨트롤러 생성
    */
   createMuanCCTV() {
-    this.muanDBA = new Dba({
-      deviceInfo: {
-        target_id: 'muanCCTV',
-        logOption: {
-          hasCommanderResponse: true,
-          hasDcError: true,
-          hasDcEvent: true,
-          hasReceiveData: true,
-          hasDcMessage: true,
-          hasTransferCommand: true,
-        },
-        controlInfo: {
-          hasErrorHandling: false,
-          hasOneAndOne: false,
-          hasReconnect: false,
-        },
-        connect_info: {
-          type: 'udp',
-          subType: 'parser',
-          addConfigInfo: {
-            parser: 'readLineParser',
-            // parser: 'delimiterParser',
-            option: '\u000d\u000a',
-            // option: '\r\n',
-          },
-          host: 'smsoft.iptime.org',
-          port: 4210,
-        },
-      },
-    });
+    // this.muanDBA = new Dba({
+    //   deviceInfo: {
+    //     target_id: 'muanCCTV',
+    //     logOption: {
+    //       hasCommanderResponse: true,
+    //       hasDcError: true,
+    //       hasDcEvent: true,
+    //       hasReceiveData: true,
+    //       hasDcMessage: true,
+    //       hasTransferCommand: true,
+    //     },
+    //     controlInfo: {
+    //       hasErrorHandling: false,
+    //       hasOneAndOne: false,
+    //       hasReconnect: false,
+    //     },
+    //     connect_info: {
+    //       type: 'udp',
+    //       subType: 'parser',
+    //       addConfigInfo: {
+    //         parser: 'readLineParser',
+    //         // parser: 'delimiterParser',
+    //         option: '\u000d\u000a',
+    //         // option: '\r\n',
+    //       },
+    //       host: 'smsoft.iptime.org',
+    //       port: 4210,
+    //     },
+    //   },
+    // });
 
     this.socketIoManager.io.on('connection', socket => {
       // 사용자 브라우저에서 명령 요청이 발생할 경우 처리

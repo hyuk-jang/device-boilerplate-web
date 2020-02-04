@@ -32,6 +32,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { mainWhere },
+      searchRange,
       viewPowerProfileRows,
     } = req.locals;
 
@@ -52,10 +53,8 @@ router.get(
 
     _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 
-    const searchRange = refineModel.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'min10',
-    });
+    // 10분 간격
+    searchRange.searchInterval = 'min10';
 
     // BU.CLI(momentFormat);
     /** @type {lineChartConfig} */

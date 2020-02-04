@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -23,6 +24,7 @@ const authRouter = require('./routes/auth');
 const appIndexRouter = require('./routes/app/index');
 const appAuthRouter = require('./routes/app/appAuth');
 
+// const listener = require('./bin/listener');
 const passport = require('./bin/passport');
 const {
   dbInfo,
@@ -38,6 +40,13 @@ const WeatherModel = require('./models/templates/WeatherModel');
 const BlockModel = require('./models/templates/BlockModel');
 const RefineModel = require('./models/templates/RefineModel');
 
+// CORS 적용
+app.use(
+  cors({
+    // 허용 HTTP Method 정의
+    methods: 'GET, POST',
+  }),
+);
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -82,24 +91,82 @@ app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(helmet());
-const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: [
+//         "'self'",
+//         "'unsafe-inline'",
+//         'maxcdn.bootstrapcdn.com',
+//         'stackpath.bootstrapcdn.com',
+//       ],
+//       styleSrc: [
+//         "'self'",
+//         'use.fontawesome.com',
+//         'fonts.googleapis.com',
+//         'stackpath.bootstrapcdn.com',
+//       ],
+//       fontSrc: ["'self'", 'fonts.com'],
+//       // imgSrc: ['img.com', 'data:'],
+//       // sandbox: ['allow-forms', 'allow-scripts'],
+//       // reportUri: '/report-violation',
+//       // objectSrc: ["'none'"],
+//       upgradeInsecureRequests: false,
+//       // workerSrc: false, // This is not set.
+//       // defaultSrc: ["'self'"],
+//       // fontSrc: ["'self'"],
+//       // styleSrc: [
+//       //   "'self'",
+//       //   'use.fontawesome.com',
+//       //   'fonts.googleapis.com',
+//       //   'stackpath.bootstrapcdn.com',
+//       // ],
+
+//       // scriptSrc: [
+//       //   "'self'",
+//       //   "'unsafe-inline'",
+//       //   'maxcdn.bootstrapcdn.com',
+//       //   'stackpath.bootstrapcdn.com',
+//       // ],
+//     },
+//   }),
+// );
+
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
+// const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
+const store = new MySQLStore(dbInfo);
+const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
+// BU.CLI(expiryDate);
 app.use(
   session({
+    // secret: 'secret',
     secret: BU.GUID(),
-    store: new MySQLStore(dbInfo),
+    store,
+    // 세션에 수정 사항이 생기지 않더라도 세션을 다시 저장할지에 대한 여부
     resave: false,
+    // 세션에 저장할 내역이 없더라도 세션을 저장할지에 대한 설정 (방문자 추적에 사용)
     saveUninitialized: true,
     cookie: {
+      // maxAge: null, // 1일
       // maxAge: 1000 * 60 * 60 * 24, // 1일
       // expires - 지속적 쿠키에 대한 만기 날짜를 설정하는 데 사용됩니다.
-      expires: expiryDate,
+      // expires: expiryDate,
       // // secure - 브라우저가 HTTPS를 통해서만 쿠키를 전송하도록 합니다.
-      // secure: true,
-      // // httpOnly - 쿠키가 클라이언트 JavaScript가 아닌 HTTP(S)를 통해서만 전송되도록 하며, 이를 통해 XSS(Cross-site scripting) 공격으로부터 보호할 수 있습니다.
-      // httpOnly: true,
+      secure: false,
+      // httpOnly - 쿠키가 클라이언트 JavaScript가 아닌 HTTP(S)를 통해서만 전송되도록 하며, 이를 통해 XSS(Cross-site scripting) 공격으로부터 보호할 수 있습니다.
+      httpOnly: true,
     },
   }),
 );
+
+// if (app.get('env') === 'production') {
+//   app.set('trust proxy', 1) // trust first proxy
+//   sess.cookie.secure = true // serve secure cookies
+//  }
+
+// app.use(listener(store));
 
 app.set('passport', passport(app, dbInfo));
 
@@ -128,6 +195,13 @@ app.use(
   '/snapshot',
   express.static(path.join(__dirname, 'snapshot'), {
     extensions: ['jpg'],
+  }),
+);
+// 사용자 취급 설명서 저장 경로
+app.use(
+  '/docs',
+  express.static(path.join(process.cwd(), 'docs'), {
+    extensions: ['pptx', 'hwp', 'docx'],
   }),
 );
 // 맵 이미지 저장 경로

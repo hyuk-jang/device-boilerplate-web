@@ -428,12 +428,24 @@ function refineSelectedInverterStatus(validInverterStatus) {
   _.forEach(validInverterStatus, info => {
     // BU.CLI(info)
 
-    const { hasValidData, data } = info;
+    const {
+      hasValidData,
+      data,
+      data: { power_f: powerF, pv_kw: pvKw },
+    } = info;
 
     // if (true) {
     if (hasValidData) {
       data.isOperation = true;
-      data.power_f = _.round(_.divide(data.power_kw, data.pv_kw) * 100, 1);
+      data.power_f === null &&
+        _.set(
+          data,
+          'power_f',
+          Number.isNaN(powerF) || powerF === Infinity
+            ? '-'
+            : _.round(_.divide(powerF, pvKw) * 100, 1),
+        );
+
       _.set(data, INCLINED_SOLAR, _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '');
     } else {
       data.pv_a = '';

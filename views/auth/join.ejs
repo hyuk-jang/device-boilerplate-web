@@ -15,7 +15,7 @@
       href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"
       rel="stylesheet"
     />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/template/common.css" />
     <link rel="stylesheet" type="text/css" href="/css/template/join.css" />
   </head>
@@ -30,8 +30,12 @@
               class="form-control"
               id="inputUserid"
               name="userid"
+              autocomplete="off"
               placeholder="아이디를 입력해 주세요"
             />
+            <span class="notice_next_box">
+              * 4~12자의 영문, 숫자로만 사용 가능합니다
+            </span>
           </div>
           <div class="form-group">
             <label for="inputName">성명</label>
@@ -40,6 +44,7 @@
               class="form-control"
               id="inputName"
               name="name"
+              autocomplete="off"
               placeholder="이름을 입력해 주세요"
             />
           </div>
@@ -50,8 +55,12 @@
               class="form-control"
               id="inputNickName"
               name="nick_name"
+              autocomplete="off"
               placeholder="닉네임을 입력해 주세요"
             />
+            <span class="notice_next_box">
+              * 2~20자의 모든 문자열 사용 가능합니다.
+            </span>
           </div>
           <div class="form-group">
             <label for="inputPassword">비밀번호</label>
@@ -60,8 +69,12 @@
               class="form-control"
               id="inputPassword"
               name="password"
+              autocomplete="off"
               placeholder="비밀번호를 입력해주세요"
             />
+            <span class="notice_next_box">
+              * 8~16자 숫자+영문자+특수문자를 사용하세요.
+            </span>
           </div>
           <div class="form-group">
             <label for="inputPasswordCheck">비밀번호 확인</label>
@@ -70,6 +83,7 @@
               class="form-control"
               id="inputPasswordCheck"
               name="passwordCheck"
+              autocomplete="off"
               placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요"
             />
           </div>
@@ -84,8 +98,8 @@
             />
           </div>
           <div class="form-group">
-            <label for="selectPlace">장소</label>
-            <select class="form-control" id="selectPlace" name="place"></select>
+            <label for="selectPlace">관리사이트</label>
+            <select class="form-control" id="selectPlace" name="place_seq"></select>
           </div>
           <div class="form-group text-center">
             <button type="submit" id="join-submit" class="btn btn-primary">
@@ -118,51 +132,60 @@
     $('#join-submit').click(function(e) {
       e.preventDefault();
 
-      var idReg = /^[A-Za-z0-9]{4,12}$/;
-      if (!idReg.test($('#inputUserid').val())) {
-        alert('4~12자의 영문, 숫자로만 사용 가능합니다.');
-        $('#inputUserid').focus();
-
-        return false;
-      }
-
-      if ($('#inputUserid').val() == '') {
+      if ($('#inputUserid').val() === '') {
         alert('아이디를 입력하세요');
         $('#inputUserid').focus();
 
         return false;
       }
 
-      if ($('#inputName').val() == '') {
-        alert('이름을 입력하세요');
+      var idReg = /^[A-Za-z0-9]{4,12}$/;
+      if (!idReg.test($('#inputUserid').val())) {
+        alert('아이디는 4~12자의 영문, 숫자로만 사용 가능합니다.');
+        $('#inputUserid').focus();
+
+        return false;
+      }
+
+      if ($('#inputName').val() === '') {
+        alert('성명을 입력하세요');
         $('#inputName').focus();
 
         return false;
       }
 
-      if ($('#inputNickName').val() == '') {
+      if ($('#inputNickName').val() === '') {
         alert('닉네임을 입력하세요');
         $('#inputNickName').focus();
 
         return false;
       }
 
-      if ($('#inputPassword').val() == '') {
+      var nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
+      if (!nickNameReg.test($('#inputNickName').val())) {
+        alert('닉네임은 2~20자의 모든 문자열 사용 가능합니다.');
+        $('#inputNickName').focus();
+
+        return false;
+      }
+
+      if ($('#inputPassword').val() === '') {
         alert('비밀번호를 입력하세요');
         $('#inputPassword').focus();
 
         return false;
       }
 
-      if (!/^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/.test($('#inputPassword').val())) {
-        alert('숫자+영문자+특수문자 조합으로 8자리 이상 사용해야 합니다.');
+      var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+      if (!pwReg.test($('#inputPassword').val())) {
+        alert('비밀번호는 8~16자 숫자+영문자+특수문자를 사용하세요.');
         $('#inputPassword')
           .val('')
           .focus();
         return false;
       }
 
-      if ($('#inputPasswordCheck').val() == '') {
+      if ($('#inputPasswordCheck').val() === '') {
         alert('비밀번호를 다시 한번 더 입력하세요');
         $('#inputPasswordCheck').focus();
 
@@ -174,14 +197,79 @@
         return false;
       }
 
-      if ($('#inputTel').val() == '') {
+      if ($('#inputTel').val() === '') {
         alert('휴대폰 번호를 입력하세요');
         $('#inputTel').focus();
         return false;
       }
 
+      if (!/^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/.test($('#inputTel').val())) {
+        alert('휴대폰 형식에 맞지 않습니다.');
+        $('#inputTel')
+          .val('')
+          .focus();
+        return false;
+      }
+
       var form = document.querySelector('form');
       form.submit();
+    });
+  </script>
+
+  <!-- 휴대폰 번호 - 기호 자동 삽입 및 유효성 체크 정규식 -->
+  <script type="text/javascript">
+    $(function() {
+      $('#inputTel')
+        .on('keydown', function(e) {
+          // 숫자만 입력받기
+          var trans_num = $(this)
+            .val()
+            .replace(/-/gi, '');
+          var k = e.keyCode;
+
+          // 휴대폰 번호 자릿수를 넘어서는 입력 불가
+          if (
+            trans_num.length >= 11 &&
+            ((k >= 48 && k <= 126) ||
+              ((k >= 12592 && k <= 12687) || k === 32 || k === 229 || (k >= 45032 && k <= 55203)))
+          ) {
+            e.preventDefault();
+          }
+        })
+        .on('blur', function() {
+          // 포커스를 잃었을때 실행합니다.
+          if ($(this).val() === '') return;
+
+          // 기존 번호에서 - 를 삭제합니다.
+          var trans_num = $(this)
+            .val()
+            .replace(/-/gi, '');
+
+          // 입력값이 있을때만 실행합니다.
+          if (trans_num != null && trans_num != '') {
+            // 총 핸드폰 자리수는 11글자이거나, 10자여야 합니다.
+            if (trans_num.length === 11 || trans_num.length === 10) {
+              // 유효성 체크
+              var regExp_ctn = /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})([0-9]{3,4})([0-9]{4})$/;
+              if (regExp_ctn.test(trans_num)) {
+                // 유효성 체크에 성공하면 하이픈을 넣고 값을 바꿔줍니다.
+                trans_num = trans_num.replace(
+                  /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})-?([0-9]{3,4})-?([0-9]{4})$/,
+                  '$1-$2-$3',
+                );
+                $(this).val(trans_num);
+              } else {
+                alert('유효하지 않은 전화번호 입니다.');
+                $(this).val('');
+                $(this).focus();
+              }
+            } else {
+              alert('유효하지 않은 전화번호 입니다.');
+              $(this).val('');
+              $(this).focus();
+            }
+          }
+        });
     });
   </script>
 </html>

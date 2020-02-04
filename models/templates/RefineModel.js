@@ -310,8 +310,8 @@ class RefineModel extends BiModule {
 
             // 존재하지 않을경우 throw
             if (_.isEmpty(placeRelationInfo)) {
+              // throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
               return false;
-              throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
             }
 
             // Place Relation 에 있는 속성 선언
@@ -430,13 +430,15 @@ class RefineModel extends BiModule {
         }
 
         if (_.isNumber(calculate) && calculate !== 1) {
-          dynamicSql = ` ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
+          dynamicSql = `ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
         } else {
-          dynamicSql = ` ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
+          dynamicSql = `ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
         }
         return dynamicSql;
       })
       .value();
+
+    // BU.CLI(dynamicSelectQuery);
 
     // Make Dynamic Query
     const {
@@ -450,7 +452,7 @@ class RefineModel extends BiModule {
                 ${mainSelectQuery},
                 ${selectViewDate},
                 ${selectGroupDate},
-                ${dynamicSelectQuery.toString()},
+                ${dynamicSelectQuery.join(',\n\t\t')},
                 COUNT(*) AS row_count
         FROM ${blockTableName}
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"

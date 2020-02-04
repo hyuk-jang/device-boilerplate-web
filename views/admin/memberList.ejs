@@ -10,16 +10,20 @@
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
         <div class="container_row flex_jus_end default_search_area mt0">
           <div class="search_area">
             <div class="search_box search_category_box ml0">
               <span class="search_title">회원권한</span>
               <select id="accountGrade" class="form-control">
                 <option value="all">모두</option>
-                <option value="awaiter">승인대기</option>
-                <option value="guest">방문객</option>
-                <option value="owner">농장주</option>
-                <option value="manager">매니저</option>
+                <option value="awaiter">awaiter</option>
+                <option value="guest">guest</option>
+                <option value="owner">owner</option>
+                <option value="manager">manager</option>
+                <option value="admin">admin</option>
               </select>
             </div>
             <div class="search_box search_category_box">
@@ -54,7 +58,6 @@
                 <col width="8%" />
                 <col width="8%" />
                 <col width="15%" />
-                <col width="20%" />
                 <col width="15%" />
                 <col width="10%" />
                 <col width="10%" />
@@ -67,7 +70,6 @@
                   <th>성명</th>
                   <th>닉네임</th>
                   <th>관리사이트</th>
-                  <th>주소</th>
                   <th>전화번호</th>
                   <th>회원등급</th>
                   <th>탈퇴여부</th>
@@ -82,7 +84,6 @@
                   <td class="text-center">테스터</td>
                   <td class="text-center">tester</td>
                   <td class="text-center">나주</td>
-                  <td>전라남도 나주시 중야 1길</td>
                   <td class="text-center">010-8596-1852</td>
                   <td class="text-center">manager</td>
                   <td class="text-center">X</td>
@@ -95,7 +96,6 @@
                     <td class="text-center">{{ name }}</td>
                     <td class="text-center">{{ nick_name }}</td>
                     <td class="text-center">{{ main_name }}</td>
-                    <td>{{ address }}</td>
                     <td class="text-center">{{ tel }}</td>
                     <td class="text-center">{{ grade }}</td>
                     <td class="text-center">{{ is_deleted }}</td>
@@ -120,6 +120,8 @@
     var firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
 
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+
+    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
   </script>
 
   <script>
@@ -156,6 +158,8 @@
       });
     }
   </script>
+
+  <script src="/js/contents/report/search.js"></script>
 
   <script>
     $('#tableBodyDom').on('click', 'tr', function(event) {

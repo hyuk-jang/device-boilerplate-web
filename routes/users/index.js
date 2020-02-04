@@ -21,6 +21,8 @@ const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
 
+const accountUserGradeRange = ['manager', 'owner', 'guest'];
+
 // server middleware
 // router.use((req, res, next) => {
 //   BU.CLI('Main Middile Ware', req.user);
@@ -189,7 +191,18 @@ router.get(
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
+    let currWeatherCastInfo = {};
+    if (_.isNumber(mainRow.weather_location_seq)) {
+      currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
+    }
+
+    if (_.includes(accountUserGradeRange, req.user.grade)) {
+      _.set(req, 'locals.mainInfo.manualPath', 'userManual');
+    } else if (req.user.grade === 'admin') {
+      _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
+    } else {
+      _.set(req, 'locals.mainInfo.manualPath', '');
+    }
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
