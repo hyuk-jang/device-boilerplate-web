@@ -7,6 +7,7 @@ const net = require('net');
 const AbstApiServer = require('./AbstApiServer');
 
 const {
+  dcmConfigModel: { reqWrapCmdFormat: reqWCF },
   dcmWsModel: { transmitToServerCommandType },
 } = require('../../module').di;
 
@@ -59,18 +60,20 @@ class ApiServer extends AbstApiServer {
             const fieldMessage = JSON.parse(strData);
             // BU.CLI(fieldMessage);
 
-            // isError Key가 존재하고 Number 형태라면 요청에 대한 응답이라고 판단하고 이벤트 발생
-            if (_.isNumber(_.get(fieldMessage, 'isError'))) {
-              const msInfo = this.findMainStorage(socket);
-              return this.observers.forEach(observer => {
-                if (_.get(observer, 'responseFieldMessage')) {
-                  observer.responseFieldMessage(msInfo, fieldMessage);
-                }
-              });
-            }
+            // // isError Key가 존재하고 Number 형태라면 요청에 대한 응답이라고 판단하고 이벤트 발생
+            // if (_.isNumber(_.get(fieldMessage, 'isError'))) {
+            //   const msInfo = this.findMainStorage(socket);
+            //   return this.observers.forEach(observer => {
+            //     if (_.get(observer, 'responseFieldMessage')) {
+            //       observer.responseFieldMessage(msInfo, fieldMessage);
+            //     }
+            //   });
+            // }
+
+            const responseDataByServer = this.interpretData(socket, fieldMessage);
 
             // JSON 객체 분석 메소드 호출
-            const responseDataByServer = this.interpretCommand(socket, fieldMessage);
+            // const responseDataByServer = this.interpretCommand(socket, fieldMessage);
 
             // 응답할 데이터가 존재하지 않을 경우 무시
             if (_.isEmpty(responseDataByServer)) return false;
@@ -168,7 +171,129 @@ class ApiServer extends AbstApiServer {
   }
 
   /**
-   * Site에서 보내온 데이터를 해석
+   * 보내온 명령 성격에 따라 해석
+   * @param {net.Socket} fieldSocket 필드 TCP/IP Socket
+   * @param {defaultFormatToResponse} fieldData 필드에서 보내온 데이터
+   */
+  interpretData(fieldSocket, fieldData) {
+    const { isError } = fieldData;
+
+    // isError Key가 존재하지 않을 경우 요청한 명령에 대한 응답이 아님
+    if (isError === undefined) {
+      return this.interpretCommand(fieldSocket, fieldData);
+    }
+    this.interpertResponse(fieldSocket, fieldData);
+  }
+
+  /**
+   * 웹에서 보낸 명령에 대한 응답 결과 해석
+   * @param {net.Socket} fieldSocket 필드 TCP/IP Socket
+   * @param {defaultFormatToResponse} fieldData 필드에서 보내온 데이터
+   */
+  async interpertResponse(fieldClient, fieldData) {
+    const { commandId, isError, uuid, contents, message } = fieldData;
+
+    try {
+      const { COMMAND, MODE } = transmitToServerCommandType;
+
+      const msInfo = this.findMainStorage(fieldClient);
+
+      const {
+        msFieldInfo,
+        msDataInfo,
+        msDataInfo: { reqCmdList },
+      } = msInfo;
+
+      if (commandId === COMMAND) {
+        BU.CLIN(contents, 1);
+
+        const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+          main_seq: msFieldInfo.main_seq,
+          end_date: null,
+        });
+
+        // 사용자가 요청한 목록 찾음
+        const foundIndex = _.findIndex(reqCmdList, reqCmd => reqCmd.reqCmdInfo.uuid === uuid);
+
+        const { user } = reqCmdList[foundIndex];
+
+        // 명령 실패 알림 타이머 해제
+        clearTimeout(reqCmdList[foundIndex].timer);
+        // 사용자에게 응답
+        reqCmdList[foundIndex].socket.emit(
+          'updateAlert',
+          `${contents.wrapCmdName} 명령 수행을 요청하였습니다.`,
+        );
+
+        // 사용자 요청 명령 목록에서 제거
+        _.pullAt(reqCmdList, [foundIndex]);
+
+        // 수행 중인 명령 가져옴
+        const eventHistoryRow = _.find(controlEventHistoryRows, { cmd_uuid: contents.wrapCmdUUID });
+        eventHistoryRow.member_seq = user.main_seq;
+
+        contents.this.updateCmdEventHistory(msInfo, [contents]);
+
+        // 요청한 사용자 정보 Update
+        // await this.controlModel.completeCmdHistory([eventHistoryRow]);
+      } else if (commandId === MODE) {
+        console.log(fieldData);
+      }
+    } catch (error) {
+      BU.CLI(error);
+    }
+  }
+
+  // async updateCmdEventHistory(msInfo, updatedFieldContractCmdList = [], userInfo) {
+  //   const {
+  //     msFieldInfo,
+  //     msDataInfo,
+  //     msDataInfo: { reqCmdList },
+  //   } = msInfo;
+
+  //   const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+  //     main_seq: msFieldInfo.main_seq,
+  //     end_date: null,
+  //   });
+
+  //   // insertCmdEventList 정제
+  //   const controlEventHistoryUUIDs = _.map(controlEventHistoryRows, 'cmd_uuid');
+  //   const contractCmdUUIDs = _.map(updatedFieldContractCmdList, 'wrapCmdUUID');
+
+  //   /** @type {contractCmdInfo[]} */
+  //   const startCmdEventList = _.filter(updatedFieldContractCmdList, contractCmdInfo => {
+  //     const { wrapCmdFormat, wrapCmdUUID } = contractCmdInfo;
+
+  //     // 계측 명령은 취급 X
+  //     if (reqWCF.MEASURE === wrapCmdFormat) return false;
+
+  //     // 존재하는 명령이라면 X
+  //     if (_.includes(controlEventHistoryUUIDs, wrapCmdUUID)) return false;
+
+  //     return true;
+  //   });
+  //   // 신규 명령 반영
+  //   await this.controlModel.insertCmdHistory(msFieldInfo, startCmdEventList);
+
+  //   // 현재 수행중인 명령 목록에 EventHistory가 없다면 종료된 명령이라고 해석
+  //   const completeCmdEventList = _.reject(controlEventHistoryRows, historyRow => {
+  //     return _.includes(contractCmdUUIDs, historyRow.cmd_uuid);
+  //   });
+  //   // 제어 종료 업데이트
+  //   await this.controlModel.completeCmdHistory(completeCmdEventList);
+
+  //   // DB 제어 이력 정보 재설정
+  //   msDataInfo.controlEventHistoryRows = await this.controlModel.getTable(
+  //     'dv_control_cmd_history',
+  //     {
+  //       main_seq: msFieldInfo.main_seq,
+  //       end_date: null,
+  //     },
+  //   );
+  // }
+
+  /**
+   * DBS 에서 보내온 데이터를 해석
    * @param {net.Socket} fieldClient
    * @param {defaultFormatToRequest} fieldMessage 사이트에서 보내온 메시지
    * @return {defaultFormatToResponse} 정상적인 명령 해석이라면 true, 아니라면 throw
@@ -194,14 +319,11 @@ class ApiServer extends AbstApiServer {
 
       const msInfo = this.findMainStorage(fieldClient);
 
-      // const msInfo = this.findMainStorage(fieldClient);
       switch (commandId) {
         case MODE: // 제어 모드가 업데이트 되었을 경우
-          // BU.CLI(fieldMessage);
           this.updateOperationMode(msInfo, contents);
           break;
         case NODE: // 노드 정보가 업데이트 되었을 경우
-          // BU.log(contents.length);
           this.compareNodeList(msInfo, contents);
           break;
         case COMMAND: // 명령 정보가 업데이트 되었을 경우
@@ -209,7 +331,6 @@ class ApiServer extends AbstApiServer {
           break;
         case POWER_BOARD: // 현황판 데이터를 요청할 경우
           responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
-          // BU.CLI(responseDataByServer)
           break;
         default:
           throw new Error(`${commandId}은 등록되지 않은 명령입니다.`);
@@ -251,7 +372,6 @@ class ApiServer extends AbstApiServer {
    * @param {wsModeInfo} updatedModeInfo
    */
   updateOperationMode(msInfo, updatedModeInfo) {
-    // BU.CLIN(updatedModeInfo);
     const { algorithmId, operationConfigList = [] } = updatedModeInfo;
 
     const { modeInfo } = msInfo.msDataInfo;
@@ -282,7 +402,6 @@ class ApiServer extends AbstApiServer {
    * @param {wsNodeInfo[]} updatedFieldNodeList
    */
   compareNodeList(msInfo, updatedFieldNodeList) {
-    // BU.CLIN(updatedFieldNodeList);
     try {
       /** @type {nodeInfo[]} */
       const renewalList = [];
@@ -293,42 +412,24 @@ class ApiServer extends AbstApiServer {
           node_real_id: nodeRealId,
         });
 
-        // BU.CLIS(wsNodeInfo);
-        // BU.CLIN(msNodeInfo, 2);
-
         // 데이터가 없는 객체이거나 동일 데이터일 경우 중지
         if (_.isEmpty(msNodeInfo) || _.isEqual(data, msNodeInfo.data)) return false;
-
-        // if (_.includes(nodeRealId, 'WD_1_001') || _.includes(nodeRealId, 'WD_1_004')) {
-        //   BU.CLIN(wsNodeInfo);
-        //   BU.CLIN(msNodeInfo);
-        // }
 
         // 데이터가 서로 다르다면 갱신된 데이터
         msNodeInfo.data = data;
         renewalList.push(msNodeInfo);
-
-        // if (_.includes(nodeRealId, 'WD_1_001') || _.includes(nodeRealId, 'WD_1_004')) {
-        //   BU.CLIN(renewalList);
-        // }
-
-        // if (_.includes(nodeRealId, 'WD_1')) {
-        //   BU.CLIN(msNodeInfo);
-        // }
       });
 
       // 업데이트 내역이 있다면 전송
       if (renewalList.length) {
-        // BU.CLIN(renewalList);
         // Observer가 해당 메소드를 가지고 있다면 전송
         this.observers.forEach(observer => {
           if (_.get(observer, 'updateNodeList')) {
-            // BU.log(renewalList.length);
             observer.updateNodeList(msInfo, renewalList);
           }
         });
       }
-      // BU.CLIN(renewalList);
+
       return renewalList;
     } catch (error) {
       BU.CLI(error);
@@ -337,32 +438,63 @@ class ApiServer extends AbstApiServer {
   }
 
   /**
-   * FIXME: 명령은 전체 갱신 처리해버림.
    * @description dcmWsModel.transmitToServerCommandType.COMMAND 명렁 처리 메소드
    * @param {msInfo} msInfo
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
-  compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
+  async compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
+    // BU.CLIN(updatedFieldContractCmdList, 1);
     // BU.CLI(updatedFieldContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
+
+      const {
+        msFieldInfo,
+        msDataInfo,
+        // msDataInfo: { controlEventHistoryRows },
+      } = msInfo;
+      const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+        main_seq: msFieldInfo.main_seq,
+        end_date: null,
+      });
+
+      // insertCmdEventList 정제
+      const controlEventHistoryUUIDs = _.map(controlEventHistoryRows, 'cmd_uuid');
+      const contractCmdUUIDs = _.map(updatedFieldContractCmdList, 'wrapCmdUUID');
+
+      /** @type {contractCmdInfo[]} */
+      const startCmdEventList = _.filter(updatedFieldContractCmdList, contractCmdInfo => {
+        const { wrapCmdFormat, wrapCmdUUID } = contractCmdInfo;
+
+        // 계측 명령은 취급 X
+        if (reqWCF.MEASURE === wrapCmdFormat) return false;
+
+        // 존재하는 명령이라면 X
+        if (_.includes(controlEventHistoryUUIDs, wrapCmdUUID)) return false;
+
+        return true;
+      });
+      // 신규 명령 반영
+      await this.controlModel.insertCmdHistory(msFieldInfo, startCmdEventList);
+
+      // 현재 수행중인 명령 목록에 EventHistory가 없다면 종료된 명령이라고 해석
+      const completeCmdEventList = _.reject(controlEventHistoryRows, historyRow => {
+        return _.includes(contractCmdUUIDs, historyRow.cmd_uuid);
+      });
+      // 제어 종료 업데이트
+      await this.controlModel.completeCmdHistory(completeCmdEventList);
+
+      // DB 제어 이력 정보 재설정
+      msDataInfo.controlEventHistoryRows = await this.controlModel.getTable(
+        'dv_control_cmd_history',
+        {
+          main_seq: msFieldInfo.main_seq,
+          end_date: null,
+        },
+      );
+
+      //  현재 수행 중인 명령 갱신
       msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;
-
-      // // 수신 받은 노드 리스트를 순회
-      // _.forEach(receiveContractCmdList, contractCmdInfo => {
-      //   const foundIndex = _.findIndex(msInfo.msDataInfo.contractCmdList, {
-      //     uuid: contractCmdInfo.uuid,
-      //   });
-
-      //   // 데이터가 존재한다면 해당 명령의 변화가 생긴 것
-      //   if (foundIndex !== -1) {
-      //     // BU.CLI('변화가 생겼네요')
-      //     _.pullAt(msInfo.msDataInfo.contractCmdList, foundIndex);
-      //   }
-      //   // 신규 데이터는 삽입
-      //   msInfo.msDataInfo.contractCmdList.push(contractCmdInfo);
-      // });
-      // BU.CLI(msInfo.msDataInfo.contractCmdList);
 
       // Observer가 해당 메소드를 가지고 있다면 전송
       this.observers.forEach(observer => {

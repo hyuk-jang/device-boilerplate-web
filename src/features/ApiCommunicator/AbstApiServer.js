@@ -8,6 +8,7 @@ class AbstApiServer {
   constructor(controller) {
     // controller에서 받아옴
     this.controller = controller;
+    this.controlModel = controller.controlModel;
     this.defaultConverter = controller.defaultConverter;
     this.mainStorageList = controller.mainStorageList;
 

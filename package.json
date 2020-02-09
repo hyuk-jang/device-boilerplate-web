@@ -35,7 +35,7 @@
     "prettier": "^1.18.2"
   },
   "dependencies": {
-    "base-model-jh": "^1.2.8",
+    "base-model-jh": "^1.2.9",
     "base-util-jh": "^1.2.5",
     "base64-img": "^1.0.4",
     "body-parser": "^1.19.0",

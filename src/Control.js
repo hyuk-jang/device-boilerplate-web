@@ -3,6 +3,7 @@ const _ = require('lodash');
 const { BU } = require('base-util-jh');
 
 const { BM } = require('base-model-jh');
+const ControlModel = require('../models/templates/ControlModel');
 
 const AbstApiServer = require('./features/ApiCommunicator/AbstApiServer');
 const AbstSocketIOManager = require('./features/SocketIOManager/AbstSocketIOManager');
@@ -82,23 +83,28 @@ class Control {
     dbInfo = dbInfo || this.dbInfo;
 
     // BU.CLI(dbInfo)
-    this.biModule = new BM(dbInfo);
+    this.controlModel = new ControlModel(dbInfo);
 
     // DB에서 main 정보를 가져옴
     /** @type {MAIN[]} */
-    let mainList = await this.biModule.getTable('main', { is_deleted: 0 });
+    let mainList = await this.controlModel.getTable('main', { is_deleted: 0 });
 
     /** @type {dataLoggerInfo[]} */
-    const dataLoggerList = await this.biModule.getTable('v_dv_data_logger');
+    const dataLoggerList = await this.controlModel.getTable('v_dv_data_logger');
     /** @type {nodeInfo[]} */
-    const nodeList = await this.biModule.getTable('v_dv_node');
+    const nodeList = await this.controlModel.getTable('v_dv_node');
 
-    // 장소 단위로 묶을 장소 목록을 가져옴
-    /** @type {V_DV_PLACE[]} */
-    const placeList = await this.biModule.getTable('v_dv_place');
+    // // 장소 단위로 묶을 장소 목록을 가져옴
+    // /** @type {V_DV_PLACE[]} */
+    // const placeList = await this.controlModel.getTable('v_dv_place');
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationList = await this.biModule.getTable('v_dv_place_relation');
+    const placeRelationList = await this.controlModel.getTable('v_dv_place_relation');
+
+    /** @type {DV_CONTROL_CMD_HISTORY[]} */
+    const controlCmdHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+      end_date: null,
+    });
 
     mainList = _.sortBy(mainList, 'main_seq');
     // Main 정보 만큼 List 생성
@@ -127,12 +133,10 @@ class Control {
       /** @type {nodeInfo[]} */
       const filteredNodeList = [];
 
-      /** @type {wsPlaceRelInfo[]} */
-      const simplePlaceRelationList = filteredPlaceRelList.map(plaRelRow => {
+      filteredPlaceRelList.forEach(plaRelRow => {
         // 장소 시퀀스와 노드 시퀀스를 불러옴
         const { node_seq: nodeSeq, node_id: nodeId } = plaRelRow;
-        // 장소 시퀀스를 가진 객체 검색
-        // const placeInfo = _.find(placeList, { place_seq: placeSeq });
+
         // 노드 시퀀스를 가진 객체 검색
         const nodeInfo = _.find(nodeList, { node_seq: nodeSeq });
 
@@ -151,6 +155,8 @@ class Control {
           {},
         );
 
+        // 장소 시퀀스를 가진 객체 검색
+        // const placeInfo = _.find(placeList, { place_seq: placeSeq });
         // // 장소에 해당 노드가 있다면 자식으로 설정. nodeList 키가 없을 경우 생성
         // if (_.isObject(placeInfo) && _.isObject(nodeInfo)) {
         //   // 해당 svg 노드 목록 중에 id와 매칭되는 Node Id 객체가 존재할 경우 API Client 전송 flag 설정
@@ -172,7 +178,9 @@ class Control {
           dataLoggerList: _.filter(dataLoggerList, where),
           nodeList: filteredNodeList,
           placeRelList: filteredPlaceRelList,
-          contractCmdList: [],
+          contractCmdList: _.filter(controlCmdHistoryRows, where),
+          controlEventHistoryRows: [],
+          reqCmdList: [],
         },
         msUserList: [],
       };
