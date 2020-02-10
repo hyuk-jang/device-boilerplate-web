@@ -204,93 +204,56 @@ class ApiServer extends AbstApiServer {
         msDataInfo: { reqCmdList },
       } = msInfo;
 
+      // 사용자가 요청한 목록 찾음
+      const foundIndex = _.findIndex(reqCmdList, reqCmd => reqCmd.reqCmdInfo.uuid === uuid);
+      const reqCmd = reqCmdList[foundIndex];
+
+      const { user, socket, timer } = reqCmd;
+      // 타이머 삭제
+      clearTimeout(timer);
+
+      // 요청한 명령에 문제가 있을 경우
+      if (isError === 1) {
+        return socket.emit('updateAlert', message);
+      }
+
       if (commandId === COMMAND) {
-        BU.CLIN(contents, 1);
+        // BU.CLIN(contents, 1);
 
-        const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
-          main_seq: msFieldInfo.main_seq,
-          end_date: null,
-        });
-
-        // 사용자가 요청한 목록 찾음
-        const foundIndex = _.findIndex(reqCmdList, reqCmd => reqCmd.reqCmdInfo.uuid === uuid);
-
-        const { user } = reqCmdList[foundIndex];
+        // const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+        //   main_seq: msFieldInfo.main_seq,
+        //   end_date: null,
+        // });
 
         // 명령 실패 알림 타이머 해제
-        clearTimeout(reqCmdList[foundIndex].timer);
+
         // 사용자에게 응답
-        reqCmdList[foundIndex].socket.emit(
-          'updateAlert',
-          `${contents.wrapCmdName} 명령 수행을 요청하였습니다.`,
-        );
+        socket.emit('updateAlert', `${contents.wrapCmdName} 명령 수행을 요청하였습니다.`);
 
         // 사용자 요청 명령 목록에서 제거
         _.pullAt(reqCmdList, [foundIndex]);
 
         // 수행 중인 명령 가져옴
-        const eventHistoryRow = _.find(controlEventHistoryRows, { cmd_uuid: contents.wrapCmdUUID });
-        eventHistoryRow.member_seq = user.main_seq;
+        // const eventHistoryRow = _.find(controlEventHistoryRows, { cmd_uuid: contents.wrapCmdUUID });
+        // eventHistoryRow.member_seq = user.main_seq;
 
-        contents.this.updateCmdEventHistory(msInfo, [contents]);
+        // 사용자 메시지 응답과 명령 상태 정보가 동시에 들어올 경우 Row가 생성되지 않은 상태가 될 수 있으므로 지연 시킨 후 반영
+        setTimeout(() => {
+          this.controlModel.updateCmdHistoryUser(contents, user.main_seq);
+        }, 1000);
+
+        // this.updateCmdEventHistory(msInfo, [contents]);
 
         // 요청한 사용자 정보 Update
         // await this.controlModel.completeCmdHistory([eventHistoryRow]);
       } else if (commandId === MODE) {
         console.log(fieldData);
+        socket.emit('updateAlert', '제어모드를 변경하였습니다.');
       }
     } catch (error) {
       BU.CLI(error);
     }
   }
-
-  // async updateCmdEventHistory(msInfo, updatedFieldContractCmdList = [], userInfo) {
-  //   const {
-  //     msFieldInfo,
-  //     msDataInfo,
-  //     msDataInfo: { reqCmdList },
-  //   } = msInfo;
-
-  //   const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
-  //     main_seq: msFieldInfo.main_seq,
-  //     end_date: null,
-  //   });
-
-  //   // insertCmdEventList 정제
-  //   const controlEventHistoryUUIDs = _.map(controlEventHistoryRows, 'cmd_uuid');
-  //   const contractCmdUUIDs = _.map(updatedFieldContractCmdList, 'wrapCmdUUID');
-
-  //   /** @type {contractCmdInfo[]} */
-  //   const startCmdEventList = _.filter(updatedFieldContractCmdList, contractCmdInfo => {
-  //     const { wrapCmdFormat, wrapCmdUUID } = contractCmdInfo;
-
-  //     // 계측 명령은 취급 X
-  //     if (reqWCF.MEASURE === wrapCmdFormat) return false;
-
-  //     // 존재하는 명령이라면 X
-  //     if (_.includes(controlEventHistoryUUIDs, wrapCmdUUID)) return false;
-
-  //     return true;
-  //   });
-  //   // 신규 명령 반영
-  //   await this.controlModel.insertCmdHistory(msFieldInfo, startCmdEventList);
-
-  //   // 현재 수행중인 명령 목록에 EventHistory가 없다면 종료된 명령이라고 해석
-  //   const completeCmdEventList = _.reject(controlEventHistoryRows, historyRow => {
-  //     return _.includes(contractCmdUUIDs, historyRow.cmd_uuid);
-  //   });
-  //   // 제어 종료 업데이트
-  //   await this.controlModel.completeCmdHistory(completeCmdEventList);
-
-  //   // DB 제어 이력 정보 재설정
-  //   msDataInfo.controlEventHistoryRows = await this.controlModel.getTable(
-  //     'dv_control_cmd_history',
-  //     {
-  //       main_seq: msFieldInfo.main_seq,
-  //       end_date: null,
-  //     },
-  //   );
-  // }
 
   /**
    * DBS 에서 보내온 데이터를 해석
@@ -443,7 +406,7 @@ class ApiServer extends AbstApiServer {
    * @param {contractCmdInfo[]} updatedFieldContractCmdList
    */
   async compareContractCmdList(msInfo, updatedFieldContractCmdList = []) {
-    // BU.CLIN(updatedFieldContractCmdList, 1);
+    BU.CLIN(updatedFieldContractCmdList, 1);
     // BU.CLI(updatedFieldContractCmdList);
     try {
       // Data Logger에서 보내온 List를 전부 적용해버림
@@ -453,10 +416,14 @@ class ApiServer extends AbstApiServer {
         msDataInfo,
         // msDataInfo: { controlEventHistoryRows },
       } = msInfo;
-      const controlEventHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
-        main_seq: msFieldInfo.main_seq,
-        end_date: null,
-      });
+      const controlEventHistoryRows = await this.controlModel.getTable(
+        'dv_control_cmd_history',
+        {
+          main_seq: msFieldInfo.main_seq,
+          end_date: null,
+        },
+        true,
+      );
 
       // insertCmdEventList 정제
       const controlEventHistoryUUIDs = _.map(controlEventHistoryRows, 'cmd_uuid');
@@ -485,13 +452,13 @@ class ApiServer extends AbstApiServer {
       await this.controlModel.completeCmdHistory(completeCmdEventList);
 
       // DB 제어 이력 정보 재설정
-      msDataInfo.controlEventHistoryRows = await this.controlModel.getTable(
-        'dv_control_cmd_history',
-        {
-          main_seq: msFieldInfo.main_seq,
-          end_date: null,
-        },
-      );
+      // msDataInfo.controlEventHistoryRows = await this.controlModel.getTable(
+      //   'dv_control_cmd_history',
+      //   {
+      //     main_seq: msFieldInfo.main_seq,
+      //     end_date: null,
+      //   },
+      // );
 
       //  현재 수행 중인 명령 갱신
       msInfo.msDataInfo.contractCmdList = updatedFieldContractCmdList;

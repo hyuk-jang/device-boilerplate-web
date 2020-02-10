@@ -231,14 +231,14 @@ class SocketIOManager extends AbstSocketIOManager {
             throw new Error('장치와 연결이 되어있지 않습니다.');
           }
 
-          // // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
+          // // // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
           // const foundReqCmd = _.find(reqCmdList, reqCmd => {
           //   return _.isEqual(reqCmd.reqCmdInfo.contents, controlCmdInfo);
           // });
 
-          if (foundReqCmd) {
-            throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
-          }
+          // if (foundReqCmd) {
+          //   throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
+          // }
 
           // Data Logger와 연결이 되어야만 명령 요청 가능
           msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));

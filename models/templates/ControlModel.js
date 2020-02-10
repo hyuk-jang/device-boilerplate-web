@@ -1,5 +1,7 @@
 const _ = require('lodash');
 const moment = require('moment');
+const mysql = require('mysql');
+
 const { BM } = require('base-model-jh');
 const { BU } = require('base-util-jh');
 
@@ -19,7 +21,7 @@ class ControlModel extends BM {
   }
 
   /**
-   * 새로 생성한 명령 생성
+   * DBS에서 새로이 수행한 명령을 제어 이력 관리 테이블에 반영
    * @param {msFieldInfo} msFieldInfo
    * @param {contractCmdInfo[]} contractCmdList
    */
@@ -44,7 +46,7 @@ class ControlModel extends BM {
   }
 
   /**
-   * 완료한 명령 반영
+   * DBS에서 완료한 명령 시각을 제어 이력 관리 테이블에 반영
    * @param {DV_CONTROL_CMD_HISTORY[]} cmdHistoryRows
    */
   completeCmdHistory(cmdHistoryRows) {
@@ -62,6 +64,25 @@ class ControlModel extends BM {
       cmdHistoryRows,
       true,
     );
+  }
+
+  /**
+   * 사용자가 요청한 명령에 대한 사용자의 정보를 제어 이력 테이블에 반영
+   * @param {contractCmdInfo} contractCmdInfo
+   * @param {number} memberSeq
+   */
+  async updateCmdHistoryUser(contractCmdInfo, memberSeq) {
+    const { wrapCmdUUID } = contractCmdInfo;
+    // 사용자가 응답 명령을 처리하는 것은 현재시간을 기준으로 1분 전까지의 명령만 유효
+    const sql = `
+      UPDATE dv_control_cmd_history
+      SET
+            member_seq = ${mysql.escape(memberSeq)}
+      WHERE 
+            cmd_uuid = ${mysql.escape(wrapCmdUUID)}
+        AND start_date >= DATE_ADD(NOW(), INTERVAL -1 MINUTE)
+    `;
+    return this.db.single(sql, null, true);
   }
 }
 module.exports = ControlModel;

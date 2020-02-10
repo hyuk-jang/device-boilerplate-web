@@ -179,7 +179,7 @@ class Control {
           nodeList: filteredNodeList,
           placeRelList: filteredPlaceRelList,
           contractCmdList: _.filter(controlCmdHistoryRows, where),
-          controlEventHistoryRows: [],
+          // controlEventHistoryRows: [],
           reqCmdList: [],
         },
         msUserList: [],
