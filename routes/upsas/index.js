@@ -152,6 +152,10 @@ router.get(
         name: '메인',
       },
       {
+        href: 'control',
+        name: '제어',
+      },
+      {
         href: 'status',
         name: '계측현황',
       },
@@ -178,12 +182,12 @@ router.get(
     ];
 
     // admin 등급에선 제어 페이지 노출(무안)
-    if (_.eq(grade, 'admin')) {
-      naviList.push({
-        href: 'control',
-        name: '제어',
-      });
-    }
+    // if (_.eq(grade, 'admin')) {
+    //   naviList.push({
+    //     href: 'control',
+    //     name: '제어',
+    //   });
+    // }
 
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);

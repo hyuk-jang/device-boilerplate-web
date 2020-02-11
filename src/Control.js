@@ -269,7 +269,7 @@ class Control {
    * @param {defaultFormatToResponse} fieldMessage field 에서 요청한 명령에 대한 응답
    */
   responseFieldMessage(msInfo, fieldMessage) {
-    BU.CLI('responseFieldMessage', fieldMessage);
+    // BU.CLI('responseFieldMessage', fieldMessage);
   }
 
   /**

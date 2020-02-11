@@ -100,7 +100,7 @@ class SocketIOManager extends AbstSocketIOManager {
           DPI,
         } = generateControlCmdInfo;
 
-        BU.CLI(generateControlCmdInfo);
+        // BU.CLI(generateControlCmdInfo);
 
         /** @type {wsControlCmdAPI} */
         const controlCmdInfo = {
