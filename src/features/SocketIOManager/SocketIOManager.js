@@ -112,7 +112,7 @@ class SocketIOManager extends AbstSocketIOManager {
             rank: cmdRank.SECOND,
           };
 
-          let isError = 1;
+          let isCommandError = 0;
 
           // 명령 형식에 따라 데이터 가공
           switch (WCF) {
@@ -120,11 +120,11 @@ class SocketIOManager extends AbstSocketIOManager {
               controlCmdInfo.NI = NI;
               controlCmdInfo.SCT = _.isString(SCT) ? Number(SCT) : SCT;
               controlCmdInfo.CSV = _.isString(CSV) ? Number(CSV) : CSV;
-              isError = _.includes(reqDCT, SCT) ? 0 : 1;
+              isCommandError = _.includes(reqDCT, SCT) ? 0 : 1;
               break;
             case reqWCF.FLOW:
               // 출발지와 도착지가 있을 경우 에러 해제
-              isError = SPI.length && DPI.length ? 0 : 1;
+              isCommandError = SPI.length && DPI.length ? 0 : 1;
               controlCmdInfo.SPI = SPI;
               controlCmdInfo.DPI = DPI;
               break;
@@ -132,17 +132,17 @@ class SocketIOManager extends AbstSocketIOManager {
               break;
           }
 
-          // TODO: isError 가 1일 경우 명령 실패 처리
+          // isError 가 1일 경우 명령 실패 처리
+          if (isCommandError) {
+            throw new Error('요청한 명령 형식이 맞지 않습니다. 관리자에게 문의하십시오.');
+          }
 
-          // BU.CLI(msg)
           /** @type {defaultFormatToRequest} */
           const defaultFormatToRequestInfo = {
             commandId: transmitToServerCT.COMMAND,
             uuid: uuidv4(),
             contents: controlCmdInfo,
           };
-
-          // BU.CLI(defaultFormatToRequestInfo);
 
           // Main Storage 찾음.
           const msInfo = this.findMainStorage(socket);
@@ -190,7 +190,7 @@ class SocketIOManager extends AbstSocketIOManager {
               // 요청한 사용자 목록에서 삭제
               _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
               socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
-            }, 1000),
+            }, 3000),
           });
 
           // Socket Client로 명령 전송
@@ -218,12 +218,13 @@ class SocketIOManager extends AbstSocketIOManager {
 
           // 변경할려고 하는 알고리즘이 현재와 같을 경우 실행하지 않음
           if (msInfo.msDataInfo.modeInfo.algorithmId === algorithmId) {
-            throw new Error('변경하고자 하는 알고리즘이 현재와 동일합니다.');
+            throw new Error('변경하고자 하는 시스템 구동 모드가 현재와 동일합니다.');
           }
 
           const {
             msClient,
             msDataInfo: { reqCmdList },
+            msUserList,
           } = msInfo;
 
           // DBS와 접속이 되어 있는지 체크
@@ -231,14 +232,35 @@ class SocketIOManager extends AbstSocketIOManager {
             throw new Error('장치와 연결이 되어있지 않습니다.');
           }
 
-          // // // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
-          // const foundReqCmd = _.find(reqCmdList, reqCmd => {
-          //   return _.isEqual(reqCmd.reqCmdInfo.contents, controlCmdInfo);
-          // });
+          // // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
+          const foundReqCmd = _.find(reqCmdList, reqCmd => {
+            return _.isEqual(reqCmd.reqCmdInfo.contents, algorithmId);
+          });
 
-          // if (foundReqCmd) {
-          //   throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
-          // }
+          if (foundReqCmd) {
+            throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
+          }
+
+          // 요청한 사용자 정보 추출
+          const userInfo = _.find(msUserList, msUserInfo => {
+            return msUserInfo.socketClient === socket;
+          });
+
+          if (userInfo === undefined) {
+            throw new Error('사용자 정보를 찾을 수 없습니다. 관리자에게 문의해주십시오.');
+          }
+
+          reqCmdList.push({
+            user: userInfo.sessionUserInfo,
+            socket,
+            reqCmdInfo: defaultFormatToRequestInfo,
+            // 1초내에 DBS에서 명령 수행한 결과를 보내주지 않을 경우 에러로 판단
+            timer: setTimeout(() => {
+              // 요청한 사용자 목록에서 삭제
+              _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
+              socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
+            }, 3000),
+          });
 
           // Data Logger와 연결이 되어야만 명령 요청 가능
           msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));

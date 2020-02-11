@@ -29,10 +29,18 @@ class ControlModel extends BM {
     if (!contractCmdList.length) return false;
 
     const insertRows = _.map(contractCmdList, cmdInfo => {
-      const { wrapCmdFormat, wrapCmdId, wrapCmdName, wrapCmdType, wrapCmdUUID } = cmdInfo;
+      const {
+        wrapCmdFormat,
+        wrapCmdId,
+        wrapCmdName,
+        wrapCmdType,
+        wrapCmdUUID,
+        member_seq = null,
+      } = cmdInfo;
 
       return {
         main_seq: msFieldInfo.main_seq,
+        member_seq,
         cmd_uuid: wrapCmdUUID,
         cmd_format: wrapCmdFormat,
         cmd_id: wrapCmdId,
@@ -42,7 +50,7 @@ class ControlModel extends BM {
       };
     });
 
-    return this.setTables('dv_control_cmd_history', insertRows, true);
+    return this.setTables('dv_control_cmd_history', insertRows, false);
   }
 
   /**
@@ -62,7 +70,7 @@ class ControlModel extends BM {
       'dv_control_cmd_history',
       ['control_cmd_history_seq'],
       cmdHistoryRows,
-      true,
+      false,
     );
   }
 
@@ -82,7 +90,7 @@ class ControlModel extends BM {
             cmd_uuid = ${mysql.escape(wrapCmdUUID)}
         AND start_date >= DATE_ADD(NOW(), INTERVAL -1 MINUTE)
     `;
-    return this.db.single(sql, null, true);
+    return this.db.single(sql, null, false);
   }
 }
 module.exports = ControlModel;
