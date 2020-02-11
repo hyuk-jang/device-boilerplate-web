@@ -465,6 +465,7 @@
     <script>
       drawSvgBasePlace('canvas'); // 멥 그리기
       setPanzoom(); // 줌 기능 세팅
+      bindingClickNodeEvent(socket, 'control');
 
       // jquery panzoom 옵션 세팅
       function setPanzoom() {
