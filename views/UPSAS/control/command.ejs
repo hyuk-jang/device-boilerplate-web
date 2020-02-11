@@ -103,7 +103,7 @@
             value="Table"
           />
           <!-- Svg Map -->
-          <div class="default_area pt_1rem" id="svgMapArea" >
+          <div class="default_area pt_1rem" id="svgMapArea">
             <div id="zoom" class="zoom_box">
               <!-- panzoom, mode select -->
               <button id="zoom-in" class="btn btn-default btn-sm mr_1rem">
@@ -334,6 +334,11 @@
         !_.isEmpty(reqCmdInfo) &&
           socket.emit('executeCommand', reqCmdInfo) &&
           $('#cmdGoalArea').html('');
+      });
+
+      // 서버로 명령 실행 요청한 결과 알림
+      socket.on('updateAlert', function(message) {
+        alert(message);
       });
 
       // FIXME: TEXT 종료 후 삭제
