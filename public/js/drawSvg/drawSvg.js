@@ -199,7 +199,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isChangedPlaceNodeName =
     textColor = 'black';
     anchor = 'middle';
     textSize = 25;
-    leading = '0.8em';
+    leading = '1.1em';
   }
 
   // 사각형, 패턴 형식일 때 위치값 조정
