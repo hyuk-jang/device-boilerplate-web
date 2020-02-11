@@ -1,6 +1,9 @@
 <footer class="footer_area">
   <div>
-    <img height="30" src="/image/icon/kepco_f_logo.png" />
+    <p>
+      <img height="30" src="/image/icon/kepco_f_logo.png" />
+      <a href="" id="downloadManual">사용자 취급 설명서</a>
+    </p>
     <address class="footer_logo">
       (우) 58217 전라남도 나주시 전력로 55 (빛가람동 120) Copyright@2017 KEPCO. All Rights Reserved.
     </address>
@@ -11,3 +14,13 @@
     </p> -->
   </div>
 </footer>
+
+<!-- <script>
+  // 매뉴얼 경로를 받아옴
+  var manualPath = <%- JSON.stringify(mainInfo.manualPath) %>
+  // 매뉴얼 경로가 정상적일 경우 경로 지정
+  // if(typeof manualPath === 'string' && manualPath.length) {
+  //   var manualLink = '/docs/' + manualPath;
+  //   document.querySelector('#downloadManual').setAttribute('href', manualLink)
+  // }
+</!-->
