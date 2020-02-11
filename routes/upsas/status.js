@@ -249,9 +249,7 @@ router.get(
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    const { subCategory } = req.locals.measureInfo;
-
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { siteId, mainWhere, subCategory } = req.locals.mainInfo;
 
     const deviceProtocol = new DeviceProtocol();
     // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴
@@ -297,7 +295,10 @@ router.get(
           .round(1);
 
         // 접속반 채널별 데이터 및 전류 총합, 평균 전류를 포함한 객체 확장
-        _.assign(cntRow, _.pick(statusRow, _.map(blockStatusTable, 'dataKey')), { sumAmp, avgVol });
+        _.assign(cntRow, _.pick(statusRow, _.map(blockStatusTable, 'dataKey')), {
+          sumAmp,
+          avgVol,
+        });
       }
     });
 
@@ -409,9 +410,7 @@ router.get(
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    const { subCategory } = req.locals.measureInfo;
-
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { siteId, mainWhere, subCategory } = req.locals.mainInfo;
 
     const deviceProtocol = new DeviceProtocol();
     // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴

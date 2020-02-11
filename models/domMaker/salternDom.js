@@ -55,25 +55,24 @@ module.exports = {
       // 온전한 바디 템플릿 돔 생성
       const bodyTemplate = _.template(`<tr>${contentsTemplate}</tr>`);
 
-      const pvKw = _.get(dataRow, 'pvKw', '');
-      const powerKw = _.get(dataRow, 'gridKw', '');
+      const { pvKw = '', gridKw = '', gridPf } = dataRow;
 
+      // 발전 효율
+      if (!_.isNumber(gridPf)) {
+        dataRow.gridPf = _.round(_.divide(gridKw, pvKw) * 100, 1);
+      }
+      if (!Number.isFinite(dataRow.gridPf)) {
+        dataRow.gridPf = '-';
+      }
       // 번호
       // _.set(dataRow, 'num', index + 1);
       // 발전 효율 (계산하여 재정의 함)
 
-      // 발전 효율
-      const gridPf =
-        _.isNumber(powerKw) && _.isNumber(pvKw) ? _.round(_.divide(powerKw, pvKw) * 100, 1) : '';
-
-      _.set(dataRow, 'gridPf', gridPf);
       // 계산식 반영 및 천단위 기호 추가
       defaultDom.applyCalcDataRow({
         dataRow,
         bodyConfigList: blockViewList,
       });
-
-      // BU.toLocaleString(dataRow);
 
       return bodyTemplate(dataRow);
     });

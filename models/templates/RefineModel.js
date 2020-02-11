@@ -320,18 +320,27 @@ class RefineModel extends BiModule {
               node_name: nName,
               nd_target_name: ndName,
               place_name: pName,
+              place_node_name: pNodeName,
               p_target_name: pTargetName,
               p_target_code: pTargetCode,
               chart_sort_rank: chartSortRank,
             } = placeRelationInfo;
 
+            // x 요소 이름 지정
+            let xAxisElementName = '';
+            if (_.isString(convertName)) {
+              xAxisElementName = `${pTargetName} ${convertName}`;
+            } else if (pTargetName) {
+              xAxisElementName = `${pTargetName} ${ndName}`;
+            } else {
+              xAxisElementName = pNodeName;
+            }
+
             // BU.CLI(chartSortRank);
 
             /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
             const chartSeries = {
-              name: _.isString(convertName)
-                ? `${pTargetName} ${convertName}`
-                : `${pTargetName} ${ndName}`,
+              name: xAxisElementName,
               color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
               tooltip: {
                 valueSuffix: dataUnit,

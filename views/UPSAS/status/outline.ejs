@@ -45,8 +45,6 @@
 
       var measureInfo = <%- JSON.stringify(measureInfo) %>;
       document.getElementById('measureTime').innerHTML = measureInfo.measureTime;
-      var siteId = _.get(measureInfo, 'siteId');
-      var subCategory = _.get(measureInfo, 'subCategory');
 
       // 컬럼 차트를 표현하기 위함
       var sebRelationRows = <%- JSON.stringify(sebRelationRows) %>;

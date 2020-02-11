@@ -65,6 +65,10 @@ module.exports = {
       BU.toLocaleString(inverterStatusInfo);
       const operImgName = inverterStatusInfo.isOperation ? 'green.png' : 'red.png';
       inverterStatusInfo.operImgName = operImgName;
+      // 데이터 중 이상 데이터일 경우 - 변환
+      _.forEach(inverterStatusInfo, (v, k) => {
+        _.isNumber(v) && !Number.isFinite(v) && _.set(inverterStatusInfo, [k], '-');
+      });
 
       return inverterStatusTemplate(inverterStatusInfo);
     });

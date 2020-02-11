@@ -172,7 +172,7 @@ class ApiServer extends AbstApiServer {
       responseFieldMessage.message = '등록되지 않은 거점입니다.';
     }
 
-    BU.CLIN(responseFieldMessage);
+    // BU.CLIN(responseFieldMessage);
     return responseFieldMessage;
   }
 
