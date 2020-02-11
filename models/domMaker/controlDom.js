@@ -194,4 +194,14 @@ module.exports = {
       });
     });
   },
+
+  /**
+   * TODO:
+   * @param {*} cmdHistoryList
+   */
+  makeCmdHistoryDom(cmdHistoryList) {
+    _.forEach(cmdHistoryList, cmdHistoryInfo => {
+      const {} = cmdHistoryInfo;
+    });
+  },
 };

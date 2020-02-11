@@ -12,6 +12,7 @@ const controlDom = require('../../models/domMaker/controlDom');
 const commonUtil = require('../../models/templates/common.util');
 
 const DEFAULT_CATEGORY = 'command';
+const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
 
 /** @type {setCategoryInfo[]} */
 const subCategoryList = [
@@ -20,13 +21,17 @@ const subCategoryList = [
     btnName: '제어관리',
   },
   {
-    subCategory: 'event',
-    btnName: '이벤트관리',
+    subCategory: 'history',
+    btnName: '제어이력',
   },
-  {
-    subCategory: 'threshold',
-    btnName: '임계치관리',
-  },
+  // {
+  //   subCategory: 'event',
+  //   btnName: '이벤트관리',
+  // },
+  // {
+  //   subCategory: 'threshold',
+  //   btnName: '임계치관리',
+  // },
 ];
 
 /* middleware. */
@@ -130,17 +135,73 @@ router.get(
   }),
 );
 
-/* GET 제어 현황. */
+/* TODO: GET */
 router.get(
-  ['/:siteId', '/:siteId/:feature'],
+  ['/', '/:siteId', '/:siteId/history'],
   asyncHandler(async (req, res) => {
-    // BU.CLI(req.locals);
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
 
-    res.send(DU.locationAlertBack(`${req.params.feature} 은 준비 중입니다.`));
+    const {
+      mainInfo: { siteId },
+    } = req.locals;
 
-    // res.send('');
-    // res.render('./UPSAS/control/status', req.locals);
+    const { page = 1 } = req.query;
+
+    /** @type {} */
+    const controlModel = global.app.get('controlModel');
+
+    // 레포트 데이터로 환산
+    const { reportRows, totalCount } = await controlModel.getCommandHistoryReport({
+      page,
+      pageListCount: PAGE_LIST_COUNT,
+    });
+
+    // TODO: 회원 정보
+    const memberRows = await biModule.getTable('MEMBER');
+
+    // TODO: 명령 목록의 member_seq에 맞게 memberName 추가
+    _.forEach(reportRows, cmdHistoryInfo => {
+      /** @type{MEMBER} */
+      const memberInfo = _.find(memberRows, { member_seq: cmdHistoryInfo.member_seq });
+      const memberName = memberInfo.name;
+
+      cmdHistoryInfo.memberName = memberName;
+    });
+
+    _.set(req, 'locals.reportRows', reportRows);
+
+    // 페이지 네이션 생성
+    let paginationInfo = DU.makeBsPagination(
+      page,
+      totalCount,
+      `/control/${siteId}/history`,
+      _.omit(req.query, 'page'),
+      PAGE_LIST_COUNT,
+    );
+
+    // 페이지네이션 돔 추가
+    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
+
+    // 페이지 정보 추가
+    paginationInfo = _.omit(paginationInfo, 'paginationDom');
+    _.set(req, 'locals.paginationInfo', paginationInfo);
+
+    res.render('./UPSAS/control/history', req.locals);
   }),
 );
+
+/* GET 제어 현황. */
+// router.get(
+//   ['/:siteId', '/:siteId/:feature'],
+//   asyncHandler(async (req, res) => {
+//     // BU.CLI(req.locals);
+
+//     res.send(DU.locationAlertBack(`${req.params.feature} 은 준비 중입니다.`));
+
+//     // res.send('');
+//     // res.render('./UPSAS/control/status', req.locals);
+//   }),
+// );
 
 module.exports = router;

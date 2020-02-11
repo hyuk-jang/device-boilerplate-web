@@ -3,7 +3,7 @@
   <head>
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
-    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/js/handlebars.min.js"></script>
 
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
     <script src="/js/svg/svg.js"></script>
@@ -20,11 +20,8 @@
     <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
 
     <script src="/socket.io/socket.io.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap-table.min.css" />
+    <script src="/js/bootstrap-table.min.js"></script>
   </head>
 
   <!-- 서버사이드 데이터 정의 -->
@@ -45,7 +42,7 @@
   </script>
 
   <body>
-    <div id="wrap" class="wrap hidden">
+    <div id="wrap" class="wrap">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
@@ -69,8 +66,9 @@
             />
           </div>
         </div>
+        <div></div>
         <!-- 명령 상태, 결과 -->
-        <div class="container-fluid_st">
+        <div class="container-fluid_st default_search_area">
           <h2>
             장치 연결 상태:
             <span id="updateIsApiClientConn"></span>
@@ -79,7 +77,7 @@
             <span>명령 처리 결과:</span>
             <span id="resultExecCommand" class="color_red"></span>
           </p>
-          <p>
+          <p class="hidden">
             시스템 구동 모드:
             <span
               id="operationSystem"
@@ -90,7 +88,7 @@
           </p>
         </div>
         <!-- 구동 모드 -->
-        <div class="container_row default_search_area">
+        <div class="container_row default_search_area hidden">
           <div class=""></div>
           <div class="search_area">
             <select class="form-control w_auto mr_2rem" id="operationModeSel">
@@ -101,8 +99,9 @@
             </button>
           </div>
         </div>
-
-        <%- include("./addCommand.ejs") %>
+        <div class="hidden">
+          <%- include("./addCommand.ejs") %>
+        </div>
         <!-- Content -->
         <div class="container_row flex_dir_col" id="dataViewArea">
           <!-- Svg Map -->
@@ -118,60 +117,59 @@
               <button id="reset" class="btn btn-default btn-sm mr_1rem">
                 <span class="glyphicon glyphicon-refresh"></span> Reset
               </button>
-              <select class="form-control w_auto ml_1rem" id="controlMode">
-                <option value="view">뷰 모드</option>
-                <option selected value="control">제어 모드</option>
-              </select>
             </div>
             <!-- canvas -->
             <div>
               <div id="canvas"></div>
             </div>
           </div>
-          <div class="flex_jus_center rtsp_container" id="operStatusTableArea" hidden>
-            <div id="contents" class="row_st_line min_h_780 command_status_view">
-              <div class=" panel panel-default">
-                <!-- Default panel contents -->
-                <div class="panel-heading">명령 목록</div>
-                <div class="panel-body">
-                  갱신 시간:
-                  <span id="cmdUpdateDate"></span>
+          <div id="operStatusTableArea" hidden>
+            <div class="flex_jus_center rtsp_container">
+              <div id="contents" class="row_st_line min_h_780 command_status_view">
+                <div class=" panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">명령 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="cmdUpdateDate"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="cmdTableBody" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="wrapCmdFormat">명령 형식</th>
+                        <th data-field="wrapCmdType">명령 타입</th>
+                        <th data-field="wrapCmdStep">명령 단계</th>
+                        <th data-field="wrapCmdId">명령 ID</th>
+                        <th data-field="wrapCmdName">명령 이름</th>
+                        <th data-field="wrapCmdCancel">명령 취소</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
                 </div>
-                <!-- Table -->
-                <table id="cmdTableBody" class="table">
-                  <thead>
-                    <tr>
-                      <th data-field="wrapCmdFormat">명령 형식</th>
-                      <th data-field="wrapCmdType">명령 타입</th>
-                      <th data-field="wrapCmdStep">명령 단계</th>
-                      <th data-field="wrapCmdId">명령 ID</th>
-                      <th data-field="wrapCmdName">명령 이름</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
               </div>
-            </div>
-            <div id="contents" class="row_st_line min_h_780 command_status_view">
-              <div class="panel panel-default">
-                <!-- Default panel contents -->
-                <div class="panel-heading">장치 상태 정보 목록</div>
-                <div class="panel-body">
-                  갱신 시간:
-                  <span id="nodeUpdateDate"></span>
+              <div id="contents" class="row_st_line min_h_780 command_status_view">
+                <div class="panel panel-default">
+                  <!-- Default panel contents -->
+                  <div class="panel-heading">장치 상태 정보 목록</div>
+                  <div class="panel-body">
+                    갱신 시간:
+                    <span id="nodeUpdateDate"></span>
+                  </div>
+                  <!-- Table -->
+                  <table id="nodeTableBody" class="table">
+                    <thead>
+                      <tr>
+                        <th data-field="ntn">장치 명</th>
+                        <th data-field="ni">장치 ID</th>
+                        <th data-field="pnl">관련 장소</th>
+                        <th data-field="d">데이터</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
                 </div>
-                <!-- Table -->
-                <table id="nodeTableBody" class="table">
-                  <thead>
-                    <tr>
-                      <th data-field="ntn">장치 명</th>
-                      <th data-field="ni">장치 ID</th>
-                      <th data-field="pnl">관련 장소</th>
-                      <th data-field="d">데이터</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
               </div>
             </div>
           </div>
@@ -315,11 +313,13 @@
         $nodeUpdateDom.html(new Date().toLocaleString());
       });
 
+      //TODO: 명령 테이블의 row 마지막 컬럼에 취소 버튼 추가
+      var columns = _.fill($cmdTableDom.find('th'), {});
+
       // 명령 관련 갱신 반영
       socket.on('updateCommand', function(commandList) {
-        // console.log('updateCommand', commandList);
         var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
-        console.log(commandList);
+
         $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
           data: commandList,
           columns: [
@@ -330,7 +330,6 @@
             {},
             {
               field: 'wrapCmdCancel',
-              title: '명령 취소',
               align: 'center',
               valign: 'middle',
               clickToSelect: false,
@@ -338,7 +337,7 @@
                 if (commandInfo.wrapCmdFormat == 'MEASURE') {
                   return;
                 }
-                return '<button class="btn btn-primary" id="reqCancelBtn" onclick=reqCancelCmd() name="reqCancelCmd">취소</button>';
+                return '<button class="btn btn-primary" name="reqCancelCmd">취소</button>';
               },
             },
           ],
@@ -359,14 +358,15 @@
       });
 
       //TODO: 서버로 명령 취소 요청
-      function reqCancelCmd() {
+      $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', function() {
         var reqCmdInfo = makeControlCommand(this);
         reqCmdInfo.cmdType = 'CANCEL';
 
         !_.isEmpty(reqCmdInfo) &&
           socket.emit('executeCommand', reqCmdInfo) &&
           $('#cmdGoalArea').html('');
-      }
+      });
+
       // FIXME: TEXT 종료 후 삭제
       $(document).ready(function() {
         var thisSelectValue = CF_SINGLE;
@@ -388,8 +388,6 @@
     <script>
       $('#changeOperationModeBtn').on('click', function() {
         var selectedAlgorithmId = $('#operationModeSel option:selected').val();
-
-        // console.log('test', currModeInfo);
 
         // 현재 수행 중인 구동 모드와 같을 경우 처리하지 않음
         // if (currModeInfo.algorithmId === selectedAlgorithmId) {
@@ -425,9 +423,9 @@
           .children('div')
           .each(function(index, domElement) {
             if (domElement.id === viewType) {
-              domElement.hidden = false;
+              $(`#${domElement.id}`).show();
             } else {
-              domElement.hidden = true;
+              $(`#${domElement.id}`).hide();
             }
           });
       });
@@ -437,20 +435,6 @@
     <script>
       drawSvgBasePlace('canvas'); // 멥 그리기
       setPanzoom(); // 줌 기능 세팅
-
-      //모드 선택 설렉트 박스 and 한/영 토글 버튼
-      $('#controlMode').change(function() {
-        var selectedMode = this.value;
-        // console.log(selectedMode);
-
-        // $(`#canvas`).empty(); // svg가 그려진 공간 초기화
-        // drawSvgBasePlace('canvas'); // 초기화 후 다시 그리기 (체크 상태 포함)
-        bindingClickNodeEvent(socket, selectedMode); // 장치, 센서 클릭 이벤트 다시 바인딩
-
-        // ↓ 다시 그려진 map에 데이터를 다시 뿌려준다.
-      });
-      // 노드 클릭 이벤트가 발생할 경우 Socket.IO로 메시지를 전송할 객체 바인딩????
-      $('#controlMode').trigger('change');
 
       // jquery panzoom 옵션 세팅
       function setPanzoom() {

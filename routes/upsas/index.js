@@ -152,10 +152,6 @@ router.get(
         name: '메인',
       },
       {
-        href: 'control',
-        name: '제어',
-      },
-      {
         href: 'status',
         name: '계측현황',
       },

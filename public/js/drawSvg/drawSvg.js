@@ -101,7 +101,7 @@ function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
   // 데이터, 속성, 스타일 등을 적용해 tspan 다시 그리기
   foundNodeTextChild.get(
     0,
-  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}"> ${nodeName}</tspan>`;
+  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}" dy="8"> ${nodeName}</tspan>`;
   foundNodeTextChild.get(
     0,
   ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${foundSvgTextInfo.textX}" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
@@ -199,7 +199,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isChangedPlaceNodeName =
     textColor = 'black';
     anchor = 'middle';
     textSize = 25;
-    leading = '0.8em';
+    leading = '1.1em';
   }
 
   // 사각형, 패턴 형식일 때 위치값 조정
