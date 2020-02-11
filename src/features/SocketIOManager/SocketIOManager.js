@@ -120,7 +120,7 @@ class SocketIOManager extends AbstSocketIOManager {
               controlCmdInfo.NI = NI;
               controlCmdInfo.SCT = _.isString(SCT) ? Number(SCT) : SCT;
               controlCmdInfo.CSV = _.isString(CSV) ? Number(CSV) : CSV;
-              isCommandError = _.includes(reqDCT, SCT) ? 0 : 1;
+              isCommandError = _.includes(reqDCT, controlCmdInfo.SCT) ? 0 : 1;
               break;
             case reqWCF.FLOW:
               // 출발지와 도착지가 있을 경우 에러 해제

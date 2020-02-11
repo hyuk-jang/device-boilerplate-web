@@ -175,19 +175,11 @@ router.get(
         href: 'report',
         name: '보고서',
       },
-      {
-        href: 'cctv',
-        name: 'CCTV',
-      },
+      // {
+      //   href: 'cctv',
+      //   name: 'CCTV',
+      // },
     ];
-
-    // admin 등급에선 제어 페이지 노출(무안)
-    if (_.eq(grade, 'admin')) {
-      naviList.push({
-        href: 'control',
-        name: '제어',
-      });
-    }
 
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
