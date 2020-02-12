@@ -433,7 +433,7 @@ Highcharts.setOptions({
       '11월',
       '12월',
     ],
-    weekdays: ['일', '월', '화', '수', '목', '금', '토'],
+    weekdays: ['월', '화', '수', '목', '금', '토', '일'],
   },
 });
 
@@ -464,6 +464,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       chart: {
         type: 'spline',
         zoomType: 'xy',
+        spacingRight: 25,
       },
       title: {
         text: _.get(chartInfo, 'title', ''),
@@ -531,7 +532,26 @@ function makeLineChart(chartInfo, isAreaChart = false) {
         shared: true,
         // crosshairs: true
       },
-
+      exporting: {
+        buttons: {
+          contextButton: {
+            // viewFullscreen, printChart, downloadPNG, downloadJPEG, downloadSVG, downloadPDF, downloadCSV, downloadXLS, viewData, openInCloud, separator(경계선)
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadSVG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS',
+              'viewData',
+            ],
+          },
+        },
+      },
       plotOptions: {
         spline: {
           marker: {

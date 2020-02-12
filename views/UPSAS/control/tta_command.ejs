@@ -48,7 +48,11 @@
       <!--메인-->
       <div class="container_body ">
         <div class="container_row mb_50rem">
-          <div id="subCategoryDom" class="report_category"></div>
+            <div id="subCategoryDom" class="report_category"></div>
+            <p class="">
+              장치 연결 상태
+              <img id="udivdateIsApiClientConn"></img>
+            </p>
           <div id="viewTypeCategory" class="row_st_line">
             <input
               type="button"
@@ -68,15 +72,7 @@
         </div>
         <div></div>
         <!-- 명령 상태, 결과 -->
-        <div class="container-fluid_st default_search_area">
-          <p>
-            장치 연결 상태:
-            <span id="updateIsApiClientConn"></span>
-          </p>
-          <h2>
-            <span>명령 처리 결과:</span>
-            <span id="resultExecCommand" class="color_red"></span>
-          </h2>
+        <div class="container-fluid_st">
           <p class="hidden">
             시스템 구동 모드:
             <span
@@ -222,8 +218,10 @@
       socket.on('updateIsApiClientConn', function(isConn) {
         // console.log(isConn);
         isApiClientConn = isConn;
-        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
-        document.getElementById('updateIsApiClientConn').innerText = connStatus;
+        var connStatus = isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
+
+        document.getElementById('updateIsApiClientConn').setAttribute('src', connStatus)
+        // document.getElementById('updateIsApiClientConn').src=connStatus
       });
 
       // 제어 모드 정보
