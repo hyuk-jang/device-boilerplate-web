@@ -42,35 +42,34 @@
   </script>
 
   <body>
-    <div id="wrap" class="wrap">
+    <div id="wrap" class="wrap" >
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body ">
         <div class="container_row mb_50rem">
             <div id="subCategoryDom" class="report_category"></div>
-            <p class="">
-              장치 연결 상태
-              <img id="udivdateIsApiClientConn"></img>
-            </p>
-          <div id="viewTypeCategory" class="row_st_line">
-            <input
-              type="button"
-              name="viewTypeBtn"
-              class="btn btn-danger"
-              data-view="svgMapArea"
-              value="Map"
-            />
-            <input
-              type="button"
-              name="viewTypeBtn"
-              class="btn btn-default"
-              data-view="operStatusTableArea"
-              value="Table"
-            />
+              <div class="command_status">
+                <img id="updateIsApiClientConnImg" src=""></img>
+                <div id="updateIsApiClientConnDiv"></div>
+                <div id="viewTypeCategory" class='ml_2rem'>
+                  <input
+                  type="button"
+                  name="viewTypeBtn"
+                  class="btn btn-danger"
+                  data-view="svgMapArea"
+                  value="구성도"
+                  />
+                  <input
+                  type="button"
+                  name="viewTypeBtn"
+                  class="btn btn-default"
+                  data-view="operStatusTableArea"
+                  value="표"
+                  />
+                </div>
+              </div>
           </div>
-        </div>
-        <div></div>
         <!-- 명령 상태, 결과 -->
         <div class="container-fluid_st">
           <p class="hidden">
@@ -120,9 +119,9 @@
             </div>
           </div>
           <div id="operStatusTableArea" hidden>
-            <div class="flex_jus_center rtsp_container">
+            <div class="table_pagenation rtsp_container ">
               <div id="contents" class="row_st_line min_h_780 command_status_view">
-                <div class=" panel panel-default">
+                <div class=" panel panel-default table-responsive default_area">
                   <!-- Default panel contents -->
                   <div class="panel-heading">명령 목록</div>
                   <div class="panel-body">
@@ -130,7 +129,7 @@
                     <span id="cmdUpdateDate"></span>
                   </div>
                   <!-- Table -->
-                  <table id="cmdTableBody" class="table">
+                  <table id="cmdTableBody" class="table table-bordered number_table">
                     <thead>
                       <tr>
                         <th data-field="wrapCmdFormat">명령 형식</th>
@@ -146,25 +145,27 @@
                 </div>
               </div>
               <div id="contents" class="row_st_line min_h_780 command_status_view">
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive default_area">
                   <!-- Default panel contents -->
-                  <div class="panel-heading">장치 상태 정보 목록</div>
+                  <div class="panel-heading ">장치 상태 정보 목록</div>
                   <div class="panel-body">
                     갱신 시간:
                     <span id="nodeUpdateDate"></span>
                   </div>
                   <!-- Table -->
-                  <table id="nodeTableBody" class="table">
-                    <thead>
-                      <tr>
-                        <th data-field="ntn">장치 명</th>
-                        <th data-field="ni">장치 ID</th>
-                        <th data-field="pnl">관련 장소</th>
-                        <th data-field="d">데이터</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
+                  <div class="table-responsive default_area">
+                    <table id="nodeTableBody" class="table table-bordered number_table">
+                      <thead>
+                        <tr>
+                          <th data-field="ntn">장치 명</th>
+                          <th data-field="ni">장치 ID</th>
+                          <th data-field="pnl">관련 장소</th>
+                          <th data-field="d">데이터</th>
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -216,12 +217,13 @@
       // 장치 연결 상태 반영
       var isApiClientConn = false;
       socket.on('updateIsApiClientConn', function(isConn) {
-        // console.log(isConn);
         isApiClientConn = isConn;
-        var connStatus = isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
+        
+        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
+        var connStatusImg = isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
 
-        document.getElementById('updateIsApiClientConn').setAttribute('src', connStatus)
-        // document.getElementById('updateIsApiClientConn').src=connStatus
+        document.getElementById('updateIsApiClientConnDiv').innerText= connStatus
+        document.getElementById('updateIsApiClientConnImg').setAttribute('src', connStatusImg)
       });
 
       // 제어 모드 정보

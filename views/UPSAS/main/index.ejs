@@ -7,7 +7,7 @@
     <!-- 발전량 예측 관련 -->
     <script src="/js/contents/main/powerPredictor.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
-    <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
+    <script src="/js/hichart/dark-unica.theme.js"></script>
   </head>
 
   <body>
@@ -51,14 +51,14 @@
                 </article>
                 <!-- TODO: -->
                 <article class="sensor_data_view sdv_w_side">
-                  <p>명일발전량</p>
+                  <!-- <p>명일발전량</p> -->
                   <!-- <select class="form-control">
                       <option>1</option>
                       <option>2</option>
                       <option>3</option>
                     </select> -->
-                  <p id="tomorrowPower">-</p>
-                  <p>kWh</p>
+                  <!-- <p id="tomorrowPower">-</p> -->
+                  <!-- <p>kWh</p> -->
                 </article>
               </section>
             </article>
@@ -270,7 +270,7 @@
         },
       });
       // predictPower(document.getElementById('tomorrowPower'), {});
-      predictPower('tomorrowPower', powerPredictionInfo);
+      // predictPower('tomorrowPower', powerPredictionInfo);
     </script>
   </body>
 </html>

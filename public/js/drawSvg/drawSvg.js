@@ -144,7 +144,7 @@ function changeNodeStatusColor(nDefId, data) {
 
     // 데이터 상태에 따른 색상 변경
     if (checkDataStatus === FALSE_DATA) {
-      drawedSvgElement.attr({ fill: getNodeBgColor[0], opacity: 0.8 });
+      drawedSvgElement.attr({ fill: getNodeBgColor[0] });
     } else if (checkDataStatus === TRUE_DATA) {
       drawedSvgElement.attr({ fill: getNodeBgColor[1] });
     } else {

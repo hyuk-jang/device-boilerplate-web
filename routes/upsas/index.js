@@ -13,12 +13,15 @@ const status = require('./status');
 const trend = require('./trend');
 const report = require('./report');
 const cctv = require('./cctv');
+const admin = require('../users/admin');
 
 const commonUtil = require('../../models/templates/common.util');
 
 const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
+
+const accountUserGradeRange = ['manager', 'owner', 'guest'];
 
 // server middleware
 // router.use((req, res, next) => {
@@ -181,6 +184,13 @@ router.get(
       // },
     ];
 
+    if (_.eq(grade, 'admin')) {
+      naviList.push({
+        href: 'admin',
+        name: '관리',
+      });
+    }
+
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
 
@@ -202,6 +212,14 @@ router.get(
     const weatherCastRows = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
     _.set(req, 'locals.weatherCastList', weatherCastRows);
 
+    if (_.includes(accountUserGradeRange, req.user.grade)) {
+      _.set(req, 'locals.mainInfo.manualPath', 'userManual');
+    } else if (req.user.grade === 'admin') {
+      _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
+    } else {
+      _.set(req, 'locals.mainInfo.manualPath', '');
+    }
+
     // 해당 지역 위치값 정보 TODO:
     const powerPredictionInfo = await powerModel.getPowerPrediction(
       moment()
@@ -219,10 +237,12 @@ router.get(
 // Router 추가
 router.use('/', main);
 router.use('/control', control);
+router.use('/tta_status', status);
 router.use('/status', status);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/cctv', cctv);
+router.use('/admin', admin);
 
 // router.use('/users', users);
 

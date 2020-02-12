@@ -233,3 +233,8 @@ input.form-control:read-only {
 .input_tre {
   color: #333;
 }
+
+.panel-heading {
+  color: #fff !important;
+  background: linear-gradient(#2c5364, #0f2027);
+}
