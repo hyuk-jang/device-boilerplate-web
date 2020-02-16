@@ -83,7 +83,7 @@ router.get(
       .union()
       .value();
 
-    /** @type {SEB_RELATION[]}  */
+    /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
     const sebRelationRows = await powerModel.getTable('SEB_RELATION', {
       place_seq: sebPlaceSeqList,
     });
