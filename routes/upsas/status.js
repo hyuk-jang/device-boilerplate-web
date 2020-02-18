@@ -74,10 +74,10 @@ router.get(
     const { mainWhere } = req.locals.mainInfo;
 
     // Step1: SEB_RELATION에서 main_seq를 충족하는 rows 추출
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await powerModel.getTable('V_DV_PLACE_RELATION', mainWhere);
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await powerModel.getTable('V_DV_PLACE', mainWhere);
 
-    const sebPlaceSeqList = _(placeRelationRows)
+    const sebPlaceSeqList = _(placeRows)
       .filter({ pd_target_id: 'solarEvaporationBlock' })
       .map('place_seq')
       .union()

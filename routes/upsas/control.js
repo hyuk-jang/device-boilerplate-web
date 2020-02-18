@@ -148,7 +148,7 @@ router.get(
     } = req.locals;
     const { page = 1 } = req.query;
 
-    /** @type {} */
+    /** @type {ControlModel} */
     const controlModel = global.app.get('controlModel');
 
     // FIXME: 임시 나중에 삭제 또는 수정
@@ -192,22 +192,17 @@ router.get(
       // /** @type{DV_CONTROL_CMD_HISTORY} */
       const { member_seq: ms, cmd_format: cf, start_date: sd, end_date: ed } = cmdHistoryInfo;
 
-      // const {member_seq, } = cmdHistoryInfo;
-
       // 회원 이름 추가
       const memberInfo = _.find(memberRows, { member_seq: ms });
-      const memberName = memberInfo.name;
-      cmdHistoryInfo.memberName = memberName;
+      cmdHistoryInfo.memberName = _.get(memberInfo, 'name', '');
 
       // 사이트 이름 추가
       const mainInfo = _.find(mainRows, { main_seq: cmdHistoryInfo.main_seq });
-      const siteName = mainInfo.name;
-      cmdHistoryInfo.siteName = siteName;
+      cmdHistoryInfo.siteName = _.get(mainInfo, 'name', '');
 
       // 명령 타입 한글 표시
       const cmdFormat = _.find(cmdFormatBase, { key: cmdHistoryInfo.cmd_format });
-
-      cmdHistoryInfo.cmd_format = cmdFormat.value;
+      cmdHistoryInfo.cmd_format = _.get(cmdFormat, 'value', '');
 
       // 명령 시각 포멧 처리
       cmdHistoryInfo.start_date = moment(cmdHistoryInfo.start_date).format('YYYY-MM-DD HH:mm:ss');

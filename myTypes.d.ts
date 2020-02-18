@@ -1,16 +1,17 @@
-import { Server } from "http";
-import express from "express";
+import { Server } from 'http';
+import express from 'express';
 
-import BiModule from "./models/templates/BiModule";
-import BiAuth from "./models/templates/auth/BiAuth";
-import BiDevice from "./models/templates/BiDevice";
-import AdminModel from "./models/templates/AdminModel";
-import PowerModel from "./models/templates/PowerModel";
-import WeatherModel from "./models/templates/WeatherModel";
-import BlockModel from "./models/templates/BlockModel";
-import RefineModel from "./models/templates/RefineModel";
+import AdminModel from './models/templates/AdminModel';
+import BiAuth from './models/templates/auth/BiAuth';
+import BiDevice from './models/templates/BiDevice';
+import BiModule from './models/templates/BiModule';
+import BlockModel from './models/templates/BlockModel';
+import ControlModel from './models/templates/ControlModel';
+import PowerModel from './models/templates/PowerModel';
+import RefineModel from './models/templates/RefineModel';
+import WeatherModel from './models/templates/WeatherModel';
 
-import MainControl from "./src/Control";
+import MainControl from './src/Control';
 
 declare global {
   const BiAuth: BiAuth;
@@ -20,6 +21,7 @@ declare global {
   const PowerModel: PowerModel;
   const WeatherModel: WeatherModel;
   const BlockModel: BlockModel;
+  const ControlModel: ControlModel;
   const RefineModel: RefineModel;
   const MainControl: MainControl;
   const httpServer: Server;

@@ -97,7 +97,7 @@ class ControlModel extends BM {
    * 제어 이력 추출
    * @param {{page: number, pageListCount: number}} pageInfo
    * @param {MAIN} mainWhere
-   * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
+   * @return {{totalCount: number, reportRows: DV_CONTROL_CMD_HISTORY[]}} 총 갯수, 검색 결과 목록
    */
   async getCmdHistoryReport(pageInfo, mainWhere) {
     const { page = 1, pageListCount = 10 } = pageInfo;

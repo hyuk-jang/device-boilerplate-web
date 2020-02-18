@@ -73,7 +73,8 @@ switch (projectMainId) {
     faviPath = 's2w.ico';
     break;
   case 'UPSAS':
-    faviPath = 'kepco.ico';
+    // faviPath = 'kepco.ico';
+    faviPath = 'sm.ico';
     break;
   default:
     faviPath = 'favicon.ico';
