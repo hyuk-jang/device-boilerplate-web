@@ -137,7 +137,7 @@
                         <th data-field="wrapCmdStep">명령 단계</th>
                         <th data-field="wrapCmdId">명령 ID</th>
                         <th data-field="wrapCmdName">명령 이름</th>
-                        <th data-field="wrapCmdCancel">명령 취소</th>
+                        <!-- <th data-field="wrapCmdCancel">명령 취소</th> -->
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -327,18 +327,18 @@
             {},
             {},
             {},
-            {
-              field: 'wrapCmdCancel',
-              align: 'center',
-              valign: 'middle',
-              clickToSelect: false,
-              formatter: function(commandList, commandInfo, index) {
-                if (commandInfo.wrapCmdFormat == 'MEASURE') {
-                  return;
-                }
-                return '<button class="btn btn-primary" name="reqCancelCmd">취소</button>';
-              },
-            },
+            // {
+            //   field: 'wrapCmdCancel',
+            //   align: 'center',
+            //   valign: 'middle',
+            //   clickToSelect: false,
+            //   formatter: function(commandList, commandInfo, index) {
+            //     if (commandInfo.wrapCmdFormat == 'MEASURE') {
+            //       return;
+            //     }
+            //     return '<button class="btn btn-primary" name="reqCancelCmd">취소</button>';
+            //   },
+            // },
           ],
         });
         // 명령 갱신 시각 반영
