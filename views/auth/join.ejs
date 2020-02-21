@@ -27,6 +27,7 @@
             <label for="inputUserid">아이디</label>
             <input
               type="text"
+              maxlength="12"
               class="form-control"
               id="inputUserid"
               name="userid"
@@ -41,17 +42,22 @@
             <label for="inputName">성명</label>
             <input
               type="text"
+              maxlength="20"
               class="form-control"
               id="inputName"
               name="name"
               autocomplete="off"
               placeholder="이름을 입력해 주세요"
             />
+            <span class="notice_next_box">
+              * 2~20자의 한글만 사용 가능합니다
+            </span>
           </div>
           <div class="form-group">
             <label for="inputNickName">닉네임</label>
             <input
               type="text"
+              maxlength="20"
               class="form-control"
               id="inputNickName"
               name="nick_name"
@@ -66,6 +72,7 @@
             <label for="inputPassword">비밀번호</label>
             <input
               type="password"
+              maxlength="16"
               class="form-control"
               id="inputPassword"
               name="password"
@@ -96,6 +103,9 @@
               name="tel"
               placeholder="휴대폰번호를 입력해 주세요"
             />
+            <span class="notice_next_box">
+              * 휴대폰 번호 형식에 맞추어 작성하세요. '-' 기호는 안넣으셔도 됩니다.
+            </span>
           </div>
           <div class="form-group">
             <label for="selectPlace">관리사이트</label>
@@ -139,9 +149,9 @@
         return false;
       }
 
-      var idReg = /^[A-Za-z0-9]{4,12}$/;
+      var idReg = /^[a-z0-9]{4,12}$/;
       if (!idReg.test($('#inputUserid').val())) {
-        alert('아이디는 4~12자의 영문, 숫자로만 사용 가능합니다.');
+        alert('아이디는 4~12자의 영문 소문자, 숫자로만 사용 가능합니다.');
         $('#inputUserid').focus();
 
         return false;
@@ -154,6 +164,14 @@
         return false;
       }
 
+      var inputNameReg = /^[가-힣]{2,20}$/;
+      if (!inputNameReg.test($('#inputName').val())) {
+        alert('성명은 2~20자의 한글1만 사용 가능합니다.');
+        $('#inputName').focus();
+
+        return false;
+      }
+
       if ($('#inputNickName').val() === '') {
         alert('닉네임을 입력하세요');
         $('#inputNickName').focus();
@@ -161,9 +179,9 @@
         return false;
       }
 
-      var nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
+      var nickNameReg = /^[a-zA-Z가-힣0-9]{2,20}$/;
       if (!nickNameReg.test($('#inputNickName').val())) {
-        alert('닉네임은 2~20자의 모든 문자열 사용 가능합니다.');
+        alert('닉네임은 2~20자의 영문, 한글, 숫자로만 사용 가능합니다.');
         $('#inputNickName').focus();
 
         return false;
@@ -203,7 +221,8 @@
         return false;
       }
 
-      if (!/^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/.test($('#inputTel').val())) {
+      var cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
+      if (!cellPhoneReg.test($('#inputTel').val())) {
         alert('휴대폰 형식에 맞지 않습니다.');
         $('#inputTel')
           .val('')

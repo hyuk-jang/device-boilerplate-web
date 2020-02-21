@@ -5,8 +5,8 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '85%'],
-    size: '135%',
+    center: ['50%', '67%'],
+    size: '100%',
     startAngle: -90,
     endAngle: 90,
     background: {
@@ -42,7 +42,7 @@ const gaugeOptions = {
   plotOptions: {
     solidgauge: {
       dataLabels: {
-        y: 10,
+        y: -50,
         borderWidth: 0,
         useHTML: true,
       },
