@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <!-- 발전량 예측 관련 -->
+    <script src="/js/contents/main/powerPredictor.js"></script>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/hichart/dark-unica.theme.js"></script>
+
+    <style>
+      .highcharts-figure,
+      .highcharts-data-table table {
+        min-width: 310px;
+        max-width: 800px;
+        margin: 1em auto;
+      }
+
+      .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+      }
+      .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+      }
+      .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+      }
+      .highcharts-data-table td,
+      .highcharts-data-table th,
+      .highcharts-data-table caption {
+        padding: 0.5em;
+      }
+      .highcharts-data-table thead tr,
+      .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+      }
+      .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <%- include("../../master/search.ejs") %>
+        <div class="container_row">
+          <div class="component_side_box">
+            <article class="component_side_area side_section_power">
+              <div class="data_title_section">
+                <h4>발전 현황</h4>
+                <h5>Power Status</h5>
+              </div>
+              <section id="powerStatus" class="data_view_section fs_150rem">
+                <article class="sensor_data_view sdv_w_side">
+                  <p>현재 출력</p>
+                  <p id="currKw">-</p>
+                  <p>kW</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>금일발전량</p>
+                  <p id="dailyPower">-</p>
+                  <p>kWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>당월발전량</p>
+                  <p id="monthPower">-</p>
+                  <p>kWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>누적발전량</p>
+                  <p id="cumulativePower">-</p>
+                  <p>MWh</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>CO2저감량</p>
+                  <p id="co2">123.2</p>
+                  <p>Ton</p>
+                </article>
+              </section>
+            </article>
+          </div>
+          <div class="component_contents_area">
+            <div class="component_piece_box">
+              <article class="component_piece_area">
+                <header>
+                  육상 30˚ 발전현황
+                </header>
+                <div class="component_piece_body overY_h">
+                  <div id="gauge_chart_1" class="gauge_chart">Graph</div>
+                  <section id="current_power_data" class="gauge_contents">
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>금일 발전량 효율</p>
+                      <p class="fs_150em" data-id="">215.2</p>
+                      <p>%</p>
+                    </article>
+                  </section>
+                </div>
+              </article>
+            </div>
+            <div class="component_piece_box">
+              <article class="component_piece_area">
+                <header>
+                  육상 0˚ 발전현황
+                </header>
+                <div class="component_piece_body overY_h">
+                  <div id="gauge_chart_2" class="gauge_chart">Graph</div>
+                  <section id="" class="gauge_contents">
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>금일 발전량 효율</p>
+                      <p class="fs_150em" data-id="">175.7</p>
+                      <p>%</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>육상 30˚ 대비 출력 효율</p>
+                      <p class="fs_150em" data-id="">87.5</p>
+                      <p>%</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>육상 30˚ 대비 금일 발전량 효율</p>
+                      <p class="fs_150em" data-id="">88.7</p>
+                      <p>%</p>
+                    </article>
+                  </section>
+                </div>
+              </article>
+            </div>
+            <div class="component_piece_box">
+              <article class="component_piece_area">
+                <header>수중 0˚ 발전현황</header>
+                <div class="component_piece_body overY_h">
+                  <div id="gauge_chart_3" class="gauge_chart">Graph</div>
+                  <section id="" class="gauge_contents">
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>금일 발전량 효율</p>
+                      <p class="fs_150em" data-id="">223.5</p>
+                      <p>%</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>육상 30˚ 대비 출력 효율</p>
+                      <p class="fs_150em" data-id="">103.5</p>
+                      <p>%</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_170rem">
+                      <p>육상 30˚ 대비 금일 발전량 효율</p>
+                      <p class="fs_150em" data-id="">97.1</p>
+                      <p>%</p>
+                    </article>
+                  </section>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="container_row">
+          <div class="component_side_box">
+            <div class="component_side_area side_section_growth">
+              <div class="data_title_section">
+                <h4>염전 환경</h4>
+                <h5>Saltern Environment</h5>
+              </div>
+              <section id="salternEnv" class="data_view_section fs_150rem">
+                <article class="sensor_data_view sdv_w_side">
+                  <p>일사량</p>
+                  <p id="solar">-</p>
+                  <p>W/m²</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>온도</p>
+                  <p id="temp">-</p>
+                  <p>℃</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>습도</p>
+                  <p id="reh">-</p>
+                  <p>%</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>풍속</p>
+                  <p id="ws">-</p>
+                  <p>m/s</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>1시간 강수량</p>
+                  <p id="rain_h">-</p>
+                  <p>mm</p>
+                </article>
+                <article class="sensor_data_view sdv_w_side">
+                  <p>금일 강수량</p>
+                  <p id="rain_d">-</p>
+                  <p>mm</p>
+                </article>
+              </section>
+            </div>
+          </div>
+          <div class="component_contents_area">
+            <div class="component_piece_box ">
+              <article class="component_piece_area">
+                <header>인버터 전압/전류(AC)</header>
+                <section id="inverterStatus" class="component_piece_body">
+                  <article class="component_ele_status">
+                    <header>나주 고정식 33 kW급 쏠라테크</header>
+                    <section class="sensor_data_view sddv_w35">
+                      <article class="sensor_data_view sdv_w541 fs_150rem">
+                        <p>전압</p>
+                        <p>243.3</p>
+                        <p>V</p>
+                      </article>
+                      <article class="sensor_data_view sdv_w541 fs_150rem">
+                        <p>전류</p>
+                        <p>43.3</p>
+                        <p>A</p>
+                      </article>
+                    </section>
+                  </article>
+                </section>
+              </article>
+            </div>
+            <div class="component_piece_box">
+              <article class="component_piece_area">
+                <header>금일 발전 현황</header>
+                <div id="daily_kw_graph" class="component_piece_body p_column_rem"></div>
+              </article>
+            </div>
+            <div class="component_piece_box">
+              <article class="component_piece_area">
+                <header>발전 효율 트렌드</header>
+                <div id="efficiency_trend" class="component_piece_body p_column_rem"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      // 금일 발전량 차트
+      makeGaugeChart({
+        domId: 'gauge_chart_1',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 76.6,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+
+      makeGaugeChart({
+        domId: 'gauge_chart_2',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 73.1,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+
+      makeGaugeChart({
+        domId: 'gauge_chart_3',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 80.1,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+    </script>
+
+    <script>
+      Highcharts.chart('efficiency_trend', {
+        chart: {
+          type: 'column',
+        },
+        title: {
+          text: '육상 30˚ 대비',
+        },
+        xAxis: {
+          categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas'],
+        },
+        credits: {
+          enabled: false,
+        },
+        series: [
+          {
+            name: '육상 0˚',
+            data: [-3.6, -5.6, -5.2, 7, 2],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚',
+            data: [2, -2, -3, 2, 1, 6],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+        ],
+      });
+    </script>
+  </body>
+</html>

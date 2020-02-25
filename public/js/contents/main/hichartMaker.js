@@ -5,7 +5,7 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '67%'],
+    center: ['50%', '60%'],
     size: '100%',
     startAngle: -90,
     endAngle: 90,
@@ -30,7 +30,10 @@ const gaugeOptions = {
     minorTickInterval: null,
     tickAmount: 2,
     title: {
-      y: -70,
+      y: -85,
+      style: {
+        fontSize: 20,
+      },
     },
     labels: {
       y: 16,

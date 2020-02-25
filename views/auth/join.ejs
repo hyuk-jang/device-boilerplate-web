@@ -15,7 +15,7 @@
       href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"
       rel="stylesheet"
     />
-    <script src="/js/jquery-3.1.1.min.js"></script>
+    <script src="/js/jquery-3.4.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/template/common.css" />
     <link rel="stylesheet" type="text/css" href="/css/template/join.css" />
   </head>
@@ -35,7 +35,7 @@
               placeholder="아이디를 입력해 주세요"
             />
             <span class="notice_next_box">
-              * 4~12자의 영문, 숫자로만 사용 가능합니다
+              * 4~12자의 영문 소문자, 숫자만 사용 가능합니다
             </span>
           </div>
           <div class="form-group">
@@ -65,7 +65,7 @@
               placeholder="닉네임을 입력해 주세요"
             />
             <span class="notice_next_box">
-              * 2~20자의 모든 문자열 사용 가능합니다.
+              * 2~20자의 영문, 한글, 숫자만 사용 가능합니다.
             </span>
           </div>
           <div class="form-group">
@@ -80,7 +80,7 @@
               placeholder="비밀번호를 입력해주세요"
             />
             <span class="notice_next_box">
-              * 8~16자 숫자+영문자+특수문자를 사용하세요.
+              * 8~16자 영문+숫자+특수문자를 사용하세요.
             </span>
           </div>
           <div class="form-group">
@@ -151,7 +151,7 @@
 
       var idReg = /^[a-z0-9]{4,12}$/;
       if (!idReg.test($('#inputUserid').val())) {
-        alert('아이디는 4~12자의 영문 소문자, 숫자로만 사용 가능합니다.');
+        alert('아이디는 4~12자의 영문 소문자, 숫자만 사용 가능합니다.');
         $('#inputUserid').focus();
 
         return false;
@@ -166,7 +166,7 @@
 
       var inputNameReg = /^[가-힣]{2,20}$/;
       if (!inputNameReg.test($('#inputName').val())) {
-        alert('성명은 2~20자의 한글1만 사용 가능합니다.');
+        alert('성명은 2~20자의 한글만 사용 가능합니다.');
         $('#inputName').focus();
 
         return false;
@@ -181,7 +181,7 @@
 
       var nickNameReg = /^[a-zA-Z가-힣0-9]{2,20}$/;
       if (!nickNameReg.test($('#inputNickName').val())) {
-        alert('닉네임은 2~20자의 영문, 한글, 숫자로만 사용 가능합니다.');
+        alert('닉네임은 2~20자의 영문, 한글, 숫자만 사용 가능합니다.');
         $('#inputNickName').focus();
 
         return false;
@@ -196,7 +196,7 @@
 
       var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
       if (!pwReg.test($('#inputPassword').val())) {
-        alert('비밀번호는 8~16자 숫자+영문자+특수문자를 사용하세요.');
+        alert('비밀번호는 8~16자 영문+숫자+특수문자를 사용하세요.');
         $('#inputPassword')
           .val('')
           .focus();

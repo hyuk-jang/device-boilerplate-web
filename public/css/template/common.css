@@ -332,11 +332,13 @@ _:-ms-input-placeholder,
 
 .component_piece_body > .gauge_contents {
   padding: 0 2rem;
-  /* position: absolute; */
-  bottom: 27%;
-  height: 25%;
+  bottom: 35%;
+  /* height: 25%; */
   position: relative;
-  /* bottom: 2.2rem; */
+
+  /* display: flex;
+  flex-direction: column;
+  justify-content: space-between; */
 }
 
 .component_piece_body input {
@@ -490,13 +492,17 @@ _:-ms-input-placeholder,
   width: -o-max-content;
 }
 
-/* 센서 데이터 뷰 50% 40% 10% */
+.noHover {
+  pointer-events: none;
+}
+
+/* 센서 데이터 뷰 60% 30% 10% */
 article.sdv_w541 > p:first-child {
-  width: 50%;
+  width: 60%;
 }
 
 article.sdv_w541 > p:nth-child(2) {
-  width: 40%;
+  width: 30%;
 }
 
 article.sdv_w541 > p:last-child {
@@ -628,10 +634,10 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /************ Common *************/
 /***************************************/
-.overX-h {
+.overX_h {
   overflow-x: hidden;
 }
-.overY-h {
+.overY_h {
   overflow-y: hidden;
 }
 

@@ -10,6 +10,7 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const control = require('./control');
 const status = require('./status');
+const analysis = require('./analysis');
 const trend = require('./trend');
 const report = require('./report');
 const cctv = require('./cctv');
@@ -162,14 +163,10 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      // {
-      //   href: 'connector',
-      //   name: '접속반',
-      // },
-      // {
-      //   href: 'inverter',
-      //   name: '인버터',
-      // },
+      {
+        href: 'analysis',
+        name: '데이터분석',
+      },
       {
         href: 'trend',
         name: '트렌드',
@@ -239,6 +236,7 @@ router.use('/', main);
 router.use('/control', control);
 router.use('/tta_status', status);
 router.use('/status', status);
+router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/cctv', cctv);
