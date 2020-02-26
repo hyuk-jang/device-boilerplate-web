@@ -27,11 +27,6 @@
 </footer>
 
 <script>
-  // 매뉴얼 경로를 받아옴
-  var manualPath = <%- JSON.stringify(mainInfo.manualPath) %>
-  // 매뉴얼 경로가 정상적일 경우 경로 지정
-  if(typeof manualPath === 'string' && manualPath.length) {
-    var manualLink = '/docs/' + manualPath;
-    document.querySelector('#downloadManual').setAttribute('href', manualLink)
-  }
+  // 매뉴얼 다운
+  document.querySelector('#downloadManual').setAttribute('href', '/docs/manual.pptx');
 </script>

@@ -22,8 +22,6 @@ const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
 
-const accountUserGradeRange = ['manager', 'owner', 'guest'];
-
 // server middleware
 // router.use((req, res, next) => {
 //   BU.CLI('Main Middile Ware', req.user);
@@ -208,14 +206,6 @@ router.get(
     // 현재 시간 기준 오늘, 내일, 모레 날씨 정보 FIXME: Row? Info?
     const weatherCastRows = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
     _.set(req, 'locals.weatherCastList', weatherCastRows);
-
-    if (_.includes(accountUserGradeRange, req.user.grade)) {
-      _.set(req, 'locals.mainInfo.manualPath', 'userManual');
-    } else if (req.user.grade === 'admin') {
-      _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
-    } else {
-      _.set(req, 'locals.mainInfo.manualPath', '');
-    }
 
     // 해당 지역 위치값 정보 TODO:
     const powerPredictionInfo = await powerModel.getPowerPrediction(
