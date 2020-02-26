@@ -134,7 +134,11 @@ module.exports = {
       return `
         <tr>
         <th nowrap>${mainTitle} ${dataUnit}</th>
-        ${_.map(madeBody, data => `<td>${data} </td>`)}
+        ${_.map(madeBody, data => {
+          return _.includes(data, 'img')
+            ? `<td class="txt_align_c">${data} </td>`
+            : `<td>${data} </td>`;
+        })}
         </tr>
       `;
     }).toString();
@@ -145,7 +149,7 @@ module.exports = {
     const madeDom = `
     <table class="table table-bordered number_table weather_forecast_table" cellspacing='0'>
     <colgroup>
-      <col class="w_7rem" > 
+      <col class="w_7rem"> 
       ${dynamicColgroup}
     </colgroup>
     <thead>
