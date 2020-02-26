@@ -308,6 +308,16 @@ _:-ms-input-placeholder,
   width: 96%;
 }
 
+.component_piece_box:first-child > .component_piece_area {
+  margin-right: auto;
+  width: 98%;
+}
+
+.component_piece_box:last-child > .component_piece_area {
+  margin-left: auto;
+  width: 98%;
+}
+
 .component_piece_area > header {
   margin: 0;
   height: 13%;

@@ -169,81 +169,31 @@
           </div>
         </div>
         <div class="container_row">
-          <div class="component_side_box">
-            <div class="component_side_area side_section_growth">
-              <div class="data_title_section">
-                <h4>염전 환경</h4>
-                <h5>Saltern Environment</h5>
-              </div>
-              <section id="salternEnv" class="data_view_section fs_150rem">
-                <article class="sensor_data_view sdv_w_side">
-                  <p>일사량</p>
-                  <p id="solar">-</p>
-                  <p>W/m²</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>온도</p>
-                  <p id="temp">-</p>
-                  <p>℃</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>습도</p>
-                  <p id="reh">-</p>
-                  <p>%</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>풍속</p>
-                  <p id="ws">-</p>
-                  <p>m/s</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>1시간 강수량</p>
-                  <p id="rain_h">-</p>
-                  <p>mm</p>
-                </article>
-                <article class="sensor_data_view sdv_w_side">
-                  <p>금일 강수량</p>
-                  <p id="rain_d">-</p>
-                  <p>mm</p>
-                </article>
-              </section>
-            </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>모듈 출력 트렌드</header>
+              <div id="module_efficiency_trend" class="component_piece_body p_column_rem"></div>
+            </article>
           </div>
-          <div class="component_contents_area">
-            <div class="component_piece_box ">
-              <article class="component_piece_area">
-                <header>인버터 전압/전류(AC)</header>
-                <section id="inverterStatus" class="component_piece_body">
-                  <article class="component_ele_status">
-                    <header>나주 고정식 33 kW급 쏠라테크</header>
-                    <section class="sensor_data_view sddv_w35">
-                      <article class="sensor_data_view sdv_w541 fs_150rem">
-                        <p>전압</p>
-                        <p>243.3</p>
-                        <p>V</p>
-                      </article>
-                      <article class="sensor_data_view sdv_w541 fs_150rem">
-                        <p>전류</p>
-                        <p>43.3</p>
-                        <p>A</p>
-                      </article>
-                    </section>
-                  </article>
-                </section>
-              </article>
-            </div>
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>금일 발전 현황</header>
-                <div id="daily_kw_graph" class="component_piece_body p_column_rem"></div>
-              </article>
-            </div>
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>발전 효율 트렌드</header>
-                <div id="efficiency_trend" class="component_piece_body p_column_rem"></div>
-              </article>
-            </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>모듈 온도 트렌드</header>
+              <div id="env_analysis" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>육상 30˚ 대비 발전 효율</header>
+              <div id="efficiency" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>모듈 온도 트렌드</header>
+              <div id="module_temp_trend" class="component_piece_body p_column_rem"></div>
+            </article>
           </div>
         </div>
       </div>
@@ -302,36 +252,744 @@
       });
     </script>
 
+    <!-- Negative Area Chart -->
     <script>
-      Highcharts.chart('efficiency_trend', {
+      Highcharts.chart('module_efficiency_trend', {
         chart: {
-          type: 'column',
+          type: 'line',
         },
         title: {
-          text: '육상 30˚ 대비',
+          text: '',
+        },
+        subtitle: {
+          text: '',
         },
         xAxis: {
-          categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas'],
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: {
+          title: {
+            text: '모듈 발전 효율 %',
+          },
+          // labels: {
+          //   formatter: function() {
+          //     return this.value / 1000;
+          //   },
+          // },
         },
         credits: {
           enabled: false,
         },
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          split: true,
+          valueSuffix: ' %',
+        },
         series: [
           {
+            name: '육상 30˚',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
             name: '육상 0˚',
-            data: [-3.6, -5.6, -5.2, 7, 2],
-            tooltip: {
-              valueSuffix: ' %',
-            },
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
           },
           {
             name: '수중 0˚',
-            data: [2, -2, -3, 2, 1, 6],
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+        ],
+      });
+    </script>
+
+    <!-- Area Chart -->
+    <script>
+      Highcharts.chart('test', {
+        chart: {
+          type: 'area',
+        },
+        title: {
+          text: 'Historic and Estimated Worldwide Population Growth by Region',
+        },
+        subtitle: {
+          text: 'Source: Wikipedia.org',
+        },
+        xAxis: {
+          categories: ['1750', '1800', '1850', '1900', '1950', '1999', '2050'],
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+        },
+        yAxis: {
+          title: {
+            text: 'Billions',
+          },
+          labels: {
+            formatter: function() {
+              return this.value / 1000;
+            },
+          },
+        },
+        tooltip: {
+          split: true,
+          valueSuffix: ' millions',
+        },
+        plotOptions: {
+          area: {
+            // stacking: 'normal',
+            lineColor: '#666666',
+            lineWidth: 1,
+            marker: {
+              lineWidth: 1,
+              lineColor: '#666666',
+            },
+          },
+        },
+        series: [
+          {
+            name: 'Asia',
+            data: [502, 635, 809, 947, 1402, 3634, 5268],
+          },
+          {
+            name: 'Africa',
+            data: [106, 107, 111, 133, 221, 767, 1766],
+          },
+          {
+            name: 'Europe',
+            data: [163, 203, 276, 408, 547, 729, 628],
+          },
+          {
+            name: 'America',
+            data: [18, 31, 54, 156, 339, 818, 1201],
+          },
+          {
+            name: 'Oceania',
+            data: [2, 2, 2, 6, 13, 30, 46],
+          },
+        ],
+      });
+    </script>
+
+    <!-- 컬럼 차트 -->
+    <script>
+      Highcharts.chart('module_temp_trend', {
+        title: {
+          text: '',
+        },
+        xAxis: {
+          categories: [
+            '07:00',
+            '08:00',
+            '09:00',
+            '10:00',
+            '11:00',
+            '12:00',
+            '13:00',
+            '14:00',
+            '15:00',
+            '16:00',
+            '17:00',
+          ],
+        },
+        yAxis: [
+          {
+            // Primary yAxis
+            labels: {
+              format: '{value}˚C',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '모듈 온도',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            title: {
+              text: '모듈 효율',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            opposite: true,
+          },
+        ],
+
+        labels: {
+          items: [
+            {
+              html: '평균 모듈 온도',
+              style: {
+                left: '30px',
+                top: '0px',
+                color:
+                  // theme
+                  (Highcharts.defaultOptions.title.style &&
+                    Highcharts.defaultOptions.title.style.color) ||
+                  'black',
+              },
+            },
+          ],
+        },
+        series: [
+          {
+            type: 'column',
+            name: '육상 30˚',
+            data: [15.6, 16.8, 18.3, 21.2, 30.1, 35.7, 41.6, 38.5, 22.4, 27.8],
+          },
+          {
+            type: 'column',
+            name: '육상 0˚',
+            data: [15.6, 17.8, 19.3, 20.5, 33.1, 37.7, 44.6, 32.5, 21.2, 26.9],
+          },
+          {
+            type: 'column',
+            name: '수중 0˚',
+            data: [15.2, 16.8, 18.3, 19.5, 29.1, 32.7, 35.1, 34.5, 20.2, 24.9],
+          },
+          {
+            type: 'pie',
+            name: 'Total consumption',
+            data: [
+              {
+                name: '육상 30˚',
+                y: 23,
+                color: Highcharts.getOptions().colors[0], // Jane's color
+              },
+              {
+                name: '육상 0˚',
+                y: 20,
+                color: Highcharts.getOptions().colors[1], // John's color
+              },
+              {
+                name: '수중 0˚',
+                y: 15,
+                color: Highcharts.getOptions().colors[2], // Joe's color
+              },
+            ],
+            center: [50, 50],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+              enabled: false,
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 육상 대비 환경 분석 -->
+    <script>
+      Highcharts.chart('env_analysis', {
+        chart: {
+          zoomType: 'xy',
+        },
+        title: {
+          text: '',
+        },
+        subtitle: {
+          text: '',
+        },
+        xAxis: [
+          {
+            categories: [
+              '07:00',
+              '08:00',
+              '09:00',
+              '10:00',
+              '11:00',
+              '12:00',
+              '13:00',
+              '14:00',
+              '15:00',
+              '16:00',
+              '17:00',
+            ],
+            crosshair: true,
+          },
+        ],
+        yAxis: [
+          {
+            // Primary yAxis
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            title: {
+              text: '누적 발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        tooltip: {
+          shared: true,
+        },
+        legend: {
+          layout: 'vertical',
+          align: 'left',
+          x: 70,
+          verticalAlign: 'top',
+          y: 10,
+          floating: true,
+          backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
+        },
+        plotOptions: {
+          column: {
+            grouping: false,
+            shadow: false,
+            borderWidth: 0,
+          },
+        },
+        series: [
+          {
+            name: '육상 0˚ 일사량',
+            type: 'column',
+            color: 'gold',
+            data: [-3.6, -5.6, -5.2, -3.2, -1.8, -1.5, -0.6, -3.2, -1.8, -1.5, -0.6],
+            pointPadding: 0.3,
+            pointPlacement: -0.2,
             tooltip: {
               valueSuffix: ' %',
             },
           },
+          {
+            name: '육상 0˚ 모듈 온도',
+            type: 'column',
+            color: 'red',
+            data: [-3.6, -5.6, -5.2, -3.2, -1.8, -1.5, -0.6, -3.2, -1.8, -1.5, -0.6],
+            pointPadding: 0.4,
+            pointPlacement: -0.2,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚ 발전 효율',
+            type: 'column',
+            color: 'blue',
+            data: [2, -2, -3, 2, 1, 6, 8.2, 2, 1, 6, 8.2],
+            pointPadding: 0.3,
+            pointPlacement: 0.2,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚ 발전 효율',
+            type: 'column',
+            color: 'white',
+            data: [2, -2, -3, 2, 1, 6, 8.2, 2, 1, 6, 8.2],
+            pointPadding: 0.4,
+            pointPlacement: 0.2,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          // {
+          //   name: '육상 0˚ 누적 효율',
+          //   type: 'spline',
+          //   color: 'orange',
+          //   yAxis: 1,
+          //   data: [0, -3.9, -6.5, -14.5, -18.2, -21.5, -26.2, -36.5, -43.3, -58.3, -63.9],
+          //   tooltip: {
+          //     valueSuffix: '%',
+          //   },
+          // },
+          // {
+          //   name: '수중 0˚ 누적 효율',
+          //   type: 'spline',
+          //   color: 'aqua',
+          //   yAxis: 1,
+          //   data: [0, -4.9, -10.5, -3.5, 4.2, 11.5, 26.2, 36.5, 43.3, 58.3, 63.9],
+          //   tooltip: {
+          //     valueSuffix: '%',
+          //   },
+          // },
         ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 육상 대비 발전 효율 -->
+    <script>
+      Highcharts.chart('efficiency', {
+        chart: {
+          zoomType: 'xy',
+        },
+        title: {
+          text: '',
+        },
+        subtitle: {
+          text: '',
+        },
+        xAxis: [
+          {
+            categories: [
+              '07:00',
+              '08:00',
+              '09:00',
+              '10:00',
+              '11:00',
+              '12:00',
+              '13:00',
+              '14:00',
+              '15:00',
+              '16:00',
+              '17:00',
+            ],
+            crosshair: true,
+          },
+        ],
+        yAxis: [
+          {
+            // Primary yAxis
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            title: {
+              text: '누적 발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        tooltip: {
+          shared: true,
+        },
+        legend: {
+          layout: 'vertical',
+          align: 'left',
+          x: 70,
+          verticalAlign: 'top',
+          y: 10,
+          floating: true,
+          backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
+        },
+        series: [
+          {
+            name: '육상 0˚ 발전 효율',
+            type: 'column',
+            color: 'gold',
+            data: [-3.6, -5.6, -5.2, -3.2, -1.8, -1.5, -0.6, -3.2, -1.8, -1.5, -0.6],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚ 발전 효율',
+            type: 'column',
+            color: 'blue',
+            data: [2, -2, -3, 2, 1, 6, 8.2, 2, 1, 6, 8.2],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '육상 0˚ 누적 효율',
+            type: 'spline',
+            color: 'orange',
+            yAxis: 1,
+            data: [0, -3.9, -6.5, -14.5, -18.2, -21.5, -26.2, -36.5, -43.3, -58.3, -63.9],
+            tooltip: {
+              valueSuffix: '%',
+            },
+          },
+          {
+            name: '수중 0˚ 누적 효율',
+            type: 'spline',
+            color: 'aqua',
+            yAxis: 1,
+            data: [0, -4.9, -10.5, -3.5, 4.2, 11.5, 26.2, 36.5, 43.3, 58.3, 63.9],
+            tooltip: {
+              valueSuffix: '%',
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
       });
     </script>
   </body>
