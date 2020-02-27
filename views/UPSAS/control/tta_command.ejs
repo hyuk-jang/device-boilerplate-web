@@ -421,7 +421,9 @@
       var filter = "win16|win32|win64|mac";
       var canvas = document.getElementById('canvas');
 
-        var canvasPanzoom = Panzoom(canvas, {});
+        var canvasPanzoom = Panzoom(canvas, {
+          cursor: 'default'
+        });
      
         $('#zoomIn').on('click', canvasPanzoom.zoomIn); //확대 버튼 이벤트 
         $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
