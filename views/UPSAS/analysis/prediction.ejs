@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <!-- 발전량 예측 관련 -->
+    <script src="/js/contents/main/powerPredictor.js"></script>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/hichart/dark-unica.theme.js"></script>
+
+    <style>
+      .highcharts-figure,
+      .highcharts-data-table table {
+        min-width: 310px;
+        max-width: 800px;
+        margin: 1em auto;
+      }
+
+      .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+      }
+      .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+      }
+      .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+      }
+      .highcharts-data-table td,
+      .highcharts-data-table th,
+      .highcharts-data-table caption {
+        padding: 0.5em;
+      }
+      .highcharts-data-table thead tr,
+      .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+      }
+      .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row mb_50rem">
+          <div id="subCategoryDom" class="report_category"></div>
+          <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
+        </div>
+        <div class="container_row">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>수중태양광 1, 2 발전</header>
+              <div id="inverter_trend_1" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>수중태양광 3, 4 발전</header>
+              <div id="inverter_trend_2" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>수중태양광 5, 6 발전</header>
+              <div id="inverter_trend_3" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>수중태양광 7, 8 발전</header>
+              <div id="inverter_trend_4" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+    </script>
+
+    <!-- 모니터링 모드 동작 -->
+    <script>
+      document.querySelector('#monitoring_mode').addEventListener('click', function() {
+        $('#wrap > header').addClass('hidden');
+        $('#wrap > footer').addClass('hidden');
+        $('#subCategoryDom')
+          .parent()
+          .addClass('hidden');
+
+        // TODO: 데이터 자동 갱신 시작
+      });
+
+      document.addEventListener('keyup', function(e) {
+        if (e.keyCode === 27) {
+          $('#wrap > header').removeClass('hidden');
+          $('#wrap > footer').removeClass('hidden');
+          $('#subCategoryDom')
+            .parent()
+            .removeClass('hidden');
+
+          // TODO: 데이터 자동 갱신 정지
+        }
+      });
+    </script>
+
+    <script src="/js/contents/report/search.js"></script>
+
+    <!-- 모듈 출력 트렌드 1 Negative Area Chart -->
+    <script>
+      Highcharts.chart('inverter_trend_1', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 출력',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            title: {
+              text: '모듈온도',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} ˚C',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+          {
+            title: {
+              text: '일사량',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        series: [
+          {
+            name: '실측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '예측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '모듈 온도',
+            yAxis: 1,
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+          {
+            name: '일사량',
+            yAxis: 2,
+            data: [
+              0, // 0시
+              0, // 1시
+              0, // 2시
+              0, // 3시
+              0, // 4시
+              0, // 5시
+              0, // 6시
+              41, // 7시
+              82, // 8시
+              524, // 9시
+              762, // 10시
+              866, // 11시
+              899, // 12시
+              841, // 13시
+              689, // 14시
+              444, // 15시
+              41, // 7시
+              82, // 8시
+              524, // 9시
+              762, // 10시
+              866, // 11시
+              899, // 12시
+              841, // 13시
+              689, // 14시
+              444, // 15시
+              41, // 7시
+              82, // 8시
+              524, // 9시
+              762, // 10시
+              866, // 11시
+              899, // 12시
+              841, // 13시
+              689, // 14시
+              444, // 15시
+              41, // 7시
+              82, // 8시
+              524, // 9시
+              762, // 10시
+              866, // 11시
+              899, // 12시
+              841, // 13시
+              689, // 14시
+              444, // 15시
+              162, // 16시
+              39, // 17시
+              1, // 18시
+              0, // 19시
+              0, // 20시
+              0, // 21시
+              0, // 22시
+              0, // 23시
+              0, // 24시},
+            ],
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 모듈 출력 트렌드 2 Negative Area Chart -->
+    <script>
+      Highcharts.chart('inverter_trend_2', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 출력',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            title: {
+              text: '일사량',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        series: [
+          {
+            name: '실측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '예측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '일사량',
+            yAxis: 1,
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 모듈 출력 트렌드 3 Negative Area Chart -->
+    <script>
+      Highcharts.chart('inverter_trend_3', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 출력',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            title: {
+              text: '일사량',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        series: [
+          {
+            name: '실측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '예측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '일사량',
+            yAxis: 1,
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 모듈 출력 트렌드 4 Negative Area Chart -->
+    <script>
+      Highcharts.chart('inverter_trend_4', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 출력',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            title: {
+              text: '일사량',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        series: [
+          {
+            name: '실측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '예측 발전',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '일사량',
+            yAxis: 1,
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+  </body>
+</html>

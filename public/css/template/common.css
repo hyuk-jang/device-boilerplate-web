@@ -318,6 +318,10 @@ _:-ms-input-placeholder,
   width: 98%;
 }
 
+.component_only_one > .component_piece_box > .component_piece_area {
+  width: 100%;
+}
+
 .component_piece_area > header {
   margin: 0;
   height: 13%;

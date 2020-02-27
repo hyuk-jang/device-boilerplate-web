@@ -161,10 +161,10 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      {
-        href: 'analysis',
-        name: '데이터분석',
-      },
+      // {
+      //   href: 'analysis',
+      //   name: '데이터분석',
+      // },
       {
         href: 'trend',
         name: '트렌드',
