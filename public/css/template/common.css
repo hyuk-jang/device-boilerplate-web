@@ -229,7 +229,16 @@ _:-ms-input-placeholder,
   margin-bottom: 1rem;
   margin-left: 2.5%;
   padding: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container_header {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem auto 0;
 }
 
 .container_row {
@@ -237,7 +246,12 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 2rem auto 0;
+  margin: 1rem auto 0;
+}
+
+.container_row.division {
+  flex: 1 0.5 350px;
+  /* height: 200px; */
 }
 
 .component_side_box {
@@ -295,10 +309,19 @@ _:-ms-input-placeholder,
 
 .component_piece_box {
   width: 100px;
-  height: 370px;
+  min-height: 100px;
   display: flex;
-  flex: 1 1 auto;
+  flex: 1 1 100px;
   justify-content: center;
+}
+
+.component_piece_box.side_box {
+  min-width: 250px;
+  flex: 0;
+}
+
+.component_piece_box.gauge_box {
+  height: 370px;
 }
 
 .component_piece_area {
@@ -308,11 +331,13 @@ _:-ms-input-placeholder,
   width: 96%;
 }
 
+.component_piece_box:first-child > .component_side_area,
 .component_piece_box:first-child > .component_piece_area {
   margin-right: auto;
   width: 98%;
 }
 
+.component_piece_box:last-child > .component_side_area,
 .component_piece_box:last-child > .component_piece_area {
   margin-left: auto;
   width: 98%;
@@ -324,7 +349,8 @@ _:-ms-input-placeholder,
 
 .component_piece_area > header {
   margin: 0;
-  height: 13%;
+  height: 50px;
+  /* height: 13%; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -338,10 +364,14 @@ _:-ms-input-placeholder,
 }
 
 .component_piece_body {
-  height: 87%;
+  /* height: 87%; */
   padding: 0 1rem;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.gauge_box .component_piece_body {
+  height: calc(100% - 50px);
 }
 
 .component_piece_body > .gauge_contents {
@@ -985,7 +1015,7 @@ article.sdv_w_side > p:last-child {
   }
 
   .container_row {
-    margin: 1rem 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
   }
@@ -1014,6 +1044,10 @@ article.sdv_w_side > p:last-child {
     width: 100%;
     height: 100%;
     box-shadow: none;
+  }
+
+  .container_row .component_piece_box > .component_piece_area {
+    width: 100%;
   }
 
   .table_desc_area {

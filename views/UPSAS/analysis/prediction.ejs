@@ -56,11 +56,11 @@
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body">
-        <div class="container_row mb_50rem">
+        <div class="container_header">
           <div id="subCategoryDom" class="report_category"></div>
           <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
-        <div class="container_row">
+        <div class="container_row division">
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>수중태양광 1, 2 발전</header>
@@ -74,7 +74,7 @@
             </article>
           </div>
         </div>
-        <div class="container_row">
+        <div class="container_row division">
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>수중태양광 5, 6 발전</header>
@@ -106,6 +106,9 @@
           .parent()
           .addClass('hidden');
 
+        $('.container_body').height(window.innerHeight);
+
+        window.dispatchEvent(new Event('resize'));
         // TODO: 데이터 자동 갱신 시작
       });
 
@@ -116,8 +119,9 @@
           $('#subCategoryDom')
             .parent()
             .removeClass('hidden');
-
+          $('.container_body').height('auto');
           // TODO: 데이터 자동 갱신 정지
+          window.dispatchEvent(new Event('resize'));
         }
       });
     </script>

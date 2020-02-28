@@ -56,12 +56,12 @@
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body">
-        <div class="container_row mb_50rem">
+        <div class="container_header">
           <div id="subCategoryDom" class="report_category"></div>
           <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
         <div class="container_row">
-          <div class="component_piece_box">
+          <div class="component_piece_box gauge_box">
             <article class="component_piece_area">
               <header>
                 육상 30˚ 발전현황
@@ -78,7 +78,7 @@
               </div>
             </article>
           </div>
-          <div class="component_piece_box">
+          <div class="component_piece_box gauge_box">
             <article class="component_piece_area">
               <header>
                 육상 0˚ 발전현황
@@ -105,7 +105,7 @@
               </div>
             </article>
           </div>
-          <div class="component_piece_box">
+          <div class="component_piece_box gauge_box">
             <article class="component_piece_area">
               <header>수중 0˚ 발전현황</header>
               <div class="component_piece_body overY_h">
@@ -184,6 +184,12 @@
 
     <!-- 모니터링 모드 동작 -->
     <script>
+      // $(window).resize(function() {
+      // window.addEventListener('resize', function() {
+      //   console.log('hi');
+      //   $('.container_body').height(window.innerHeight);
+      // });
+
       document.querySelector('#monitoring_mode').addEventListener('click', function() {
         $('#wrap > header').addClass('hidden');
         $('#wrap > footer').addClass('hidden');
@@ -191,7 +197,13 @@
           .parent()
           .addClass('hidden');
 
+        $('.container_body').height(window.innerHeight);
+
+        window.dispatchEvent(new Event('resize'));
+
         // TODO: 데이터 자동 갱신 시작
+        // $('.container_body').height(window.innerHeight);
+        // window.dispatchEvent(new Event('resize'));
       });
 
       document.addEventListener('keyup', function(e) {
@@ -202,6 +214,11 @@
             .parent()
             .removeClass('hidden');
 
+          $('.container_body').height('auto');
+          // TODO: 데이터 자동 갱신 정지
+          window.dispatchEvent(new Event('resize'));
+
+          // window.dispatchEvent(new Event('resize'));
           // TODO: 데이터 자동 갱신 정지
         }
       });

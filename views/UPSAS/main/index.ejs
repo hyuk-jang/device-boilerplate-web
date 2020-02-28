@@ -17,8 +17,8 @@
       <!--메인-->
       <div class="container_body">
         <div class="container_row">
-          <div class="component_side_box">
-            <article class="component_side_area side_section_power">
+          <div class="component_piece_box side_box">
+            <article class="component_piece_area side_section_power">
               <div class="data_title_section">
                 <h4>발전 현황</h4>
                 <h5>Power Status</h5>
@@ -63,76 +63,76 @@
               </section>
             </article>
           </div>
-          <div class="component_contents_area">
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>
-                  현재 발전현황
-                </header>
-                <div class="component_piece_body overY_h">
-                  <div id="current_power_graph" class="gauge_chart">Graph</div>
-                  <section id="current_power_data" class="gauge_contents">
-                    <article class="sensor_data_view sdv_w541 fs_170rem">
-                      <p>현재 출력</p>
-                      <p class="fs_150em" data-id="currKw">196</p>
-                      <p>kW</p>
-                    </article>
-                    <article class="sensor_data_view sdv_w541 fs_170rem">
-                      <p>발전 효율</p>
-                      <p class="fs_150em" data-id="currPf">196</p>
-                      <p>%</p>
-                    </article>
-                  </section>
-                </div>
-              </article>
-            </div>
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>금일발전량</header>
-                <div class="component_piece_body overY_h">
-                  <div id="daily_power_graph" class="gauge_chart">Graph</div>
-                  <section id="daily_power_data" class="gauge_contents">
-                    <article class="sensor_data_view sdv_w541 fs_170rem">
-                      <p>당월 발전량</p>
-                      <p class="fs_150em" data-id="monthPower">196</p>
-                      <p>kWh</p>
-                    </article>
-                    <article class="sensor_data_view sdv_w541 fs_170rem">
-                      <p>누적 발전량</p>
-                      <p class="fs_150em" data-id="cumulativePower">196</p>
-                      <p>MWh</p>
-                    </article>
-                  </section>
-                </div>
-              </article>
-            </div>
-            <div class="component_piece_box flex_151auto">
-              <article class="component_piece_area">
-                <header>인버터 전압/전류(AC)</header>
-                <section id="inverterStatus" class="component_piece_body">
-                  <article class="component_ele_status">
-                    <header>나주 고정식 33 kW급 쏠라테크</header>
-                    <section class="sensor_data_view sddv_w35">
-                      <article class="sensor_data_view sdv_w541 fs_150rem">
-                        <p>전압</p>
-                        <p>243.3</p>
-                        <p>V</p>
-                      </article>
-                      <article class="sensor_data_view sdv_w541 fs_150rem">
-                        <p>전류</p>
-                        <p>43.3</p>
-                        <p>A</p>
-                      </article>
-                    </section>
+          <!-- <div class="component_contents_area"> -->
+          <div class="component_piece_box gauge_box">
+            <article class="component_piece_area">
+              <header>
+                현재 발전현황
+              </header>
+              <div class="component_piece_body overY_h">
+                <div id="current_power_graph" class="gauge_chart">Graph</div>
+                <section id="current_power_data" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>현재 출력</p>
+                    <p class="fs_150em" data-id="currKw">196</p>
+                    <p>kW</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>발전 효율</p>
+                    <p class="fs_150em" data-id="currPf">196</p>
+                    <p>%</p>
                   </article>
                 </section>
-              </article>
-            </div>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box gauge_box">
+            <article class="component_piece_area">
+              <header>금일발전량</header>
+              <div class="component_piece_body overY_h">
+                <div id="daily_power_graph" class="gauge_chart">Graph</div>
+                <section id="daily_power_data" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>당월 발전량</p>
+                    <p class="fs_150em" data-id="monthPower">196</p>
+                    <p>kWh</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>누적 발전량</p>
+                    <p class="fs_150em" data-id="cumulativePower">196</p>
+                    <p>MWh</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box flex_151auto">
+            <article class="component_piece_area">
+              <header>인버터 전압/전류(AC)</header>
+              <section id="inverterStatus" class="component_piece_body">
+                <article class="component_ele_status">
+                  <header>나주 고정식 33 kW급 쏠라테크</header>
+                  <section class="sensor_data_view sddv_w35">
+                    <article class="sensor_data_view sdv_w541 fs_150rem">
+                      <p>전압</p>
+                      <p>243.3</p>
+                      <p>V</p>
+                    </article>
+                    <article class="sensor_data_view sdv_w541 fs_150rem">
+                      <p>전류</p>
+                      <p>43.3</p>
+                      <p>A</p>
+                    </article>
+                  </section>
+                </article>
+              </section>
+            </article>
           </div>
         </div>
+        <!-- </div> -->
         <div class="container_row">
-          <div class="component_side_box">
-            <div class="component_side_area side_section_growth">
+          <div class="component_piece_box side_box">
+            <div class="component_piece_area side_section_growth">
               <div class="data_title_section">
                 <h4>염전 환경</h4>
                 <h5>Saltern Environment</h5>
@@ -171,19 +171,18 @@
               </section>
             </div>
           </div>
-          <div class="component_contents_area">
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>금일 발전 현황</header>
-                <div id="daily_kw_graph" class="component_piece_body p_column_rem"></div>
-              </article>
-            </div>
-            <div class="component_piece_box">
-              <article class="component_piece_area">
-                <header>기상청 동네 예보</header>
-                <div id="weatherCastTable" class="component_piece_body p_column_rem_2"></div>
-              </article>
-            </div>
+
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>금일 발전 현황</header>
+              <div id="daily_kw_graph" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>기상청 동네 예보</header>
+              <div id="weatherCastTable" class="component_piece_body p_column_rem_2"></div>
+            </article>
           </div>
         </div>
       </div>
