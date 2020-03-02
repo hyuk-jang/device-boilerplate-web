@@ -238,7 +238,7 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 1rem auto 0;
+  margin: 0.5rem auto 0;
 }
 
 .container_row {
@@ -246,12 +246,12 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 1rem auto 0;
+  margin: 0.5rem auto 0;
 }
 
 .container_row.division {
-  flex: 1 0.5 350px;
-  /* height: 200px; */
+  flex: 1 0.5 370px;
+  min-height: 370px;
 }
 
 .component_side_box {
@@ -302,16 +302,11 @@ _:-ms-input-placeholder,
 /***************************************/
 /********** Dash Board 영역 ************/
 /***************************************/
-.component_pieceDouble_box {
-  width: 60%;
-  height: 370px;
-}
-
 .component_piece_box {
   width: 100px;
-  min-height: 100px;
+  min-height: 370px;
   display: flex;
-  flex: 1 1 100px;
+  flex: 1 1 auto;
   justify-content: center;
 }
 
@@ -368,6 +363,7 @@ _:-ms-input-placeholder,
   padding: 0 1rem;
   overflow-y: auto;
   overflow-x: hidden;
+  height: calc(100% - 50px);
 }
 
 .gauge_box .component_piece_body {
@@ -1011,13 +1007,14 @@ article.sdv_w_side > p:last-child {
   .container_body {
     width: 100%;
     max-width: none;
-    margin: auto 0;
+    margin: 0.5rem 0;
   }
 
   .container_row {
     margin: 0;
     display: flex;
     flex-direction: column;
+    /* flex-wrap: wrap; */
   }
 
   .component_side_box {
