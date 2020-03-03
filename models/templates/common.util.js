@@ -15,6 +15,8 @@ function convertProjectSource(projectMainId) {
 
   switch (projectMainId) {
     case 'UPSAS':
+      // projectImg = 'sm_logo.png';
+      // projectName = '염전 수중 태양광 발전소 통합 관리 시스템 v1.0'; // FIXME: GS 인증으로 임시 변경
       projectImg = 'kepco_logo.png';
       projectName = '수중태양광 발전 시스템 모니터링';
       break;

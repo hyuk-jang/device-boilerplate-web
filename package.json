@@ -8,6 +8,7 @@
   "pkg": {
     "assets": [
       "views/**/*",
+      "map/**/*",
       "public/**/*"
     ]
   },

@@ -21,7 +21,7 @@ const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
 
-const accountUserGradeRange = ['manager', 'owner', 'guest'];
+// const accountUserGradeRange = ['manager', 'owner', 'guest'];
 
 // server middleware
 // router.use((req, res, next) => {
@@ -196,13 +196,13 @@ router.get(
       currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
     }
 
-    if (_.includes(accountUserGradeRange, req.user.grade)) {
-      _.set(req, 'locals.mainInfo.manualPath', 'userManual');
-    } else if (req.user.grade === 'admin') {
-      _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
-    } else {
-      _.set(req, 'locals.mainInfo.manualPath', '');
-    }
+    // if (_.includes(accountUserGradeRange, req.user.grade)) {
+    //   _.set(req, 'locals.mainInfo.manualPath', 'userManual');
+    // } else if (req.user.grade === 'admin') {
+    //   _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
+    // } else {
+    //   _.set(req, 'locals.mainInfo.manualPath', '');
+    // }
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

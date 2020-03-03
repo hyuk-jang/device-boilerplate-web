@@ -23,6 +23,16 @@
   vertical-align: middle;
 }
 
+.table.nowrap > tbody > tr > td,
+.table.nowrap > tfoot > tr > td,
+.table.nowrap > thead > tr > td {
+  vertical-align: middle;
+  word-break: break-word;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 .wrap {
   position: relative;
   overflow: hidden;
@@ -219,7 +229,16 @@ _:-ms-input-placeholder,
   margin-bottom: 1rem;
   margin-left: 2.5%;
   padding: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container_header {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem auto 0;
 }
 
 .container_row {
@@ -227,7 +246,12 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 2rem auto 0;
+  margin: 0.5rem auto 0;
+}
+
+.container_row.division {
+  flex: 1 0.5 370px;
+  min-height: 370px;
 }
 
 .component_side_box {
@@ -236,23 +260,10 @@ _:-ms-input-placeholder,
   height: 370px;
 }
 
-.flex_dir_row {
-  flex-direction: row;
-}
-
-.flex_dir_col {
-  flex-direction: column;
-}
-
-.flex_jus_center {
-  justify-content: center;
-}
-
-.flex_jus_end {
-  justify-content: flex-end;
-}
-
-.flex_jus_bet {
+.component_contents_area {
+  width: calc(100% - 250px - 1%);
+  height: 370px;
+  display: flex;
   justify-content: space-between;
 }
 
@@ -291,28 +302,50 @@ _:-ms-input-placeholder,
 /***************************************/
 /********** Dash Board 영역 ************/
 /***************************************/
-.component_pieceDouble_box {
-  width: 60%;
-  height: 370px;
+.component_piece_box {
+  width: 100px;
+  min-height: 370px;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
-.component_piece_box {
-  width: 45%;
+.component_piece_box.side_box {
+  min-width: 250px;
+  flex: 0;
+}
+
+.component_piece_box.gauge_box {
   height: 370px;
-  display: flex;
-  justify-content: center;
 }
 
 .component_piece_area {
   display: flex;
   flex-direction: column;
   height: 98%;
+  width: 96%;
+}
+
+.component_piece_box:first-child > .component_side_area,
+.component_piece_box:first-child > .component_piece_area {
+  margin-right: auto;
   width: 98%;
+}
+
+.component_piece_box:last-child > .component_side_area,
+.component_piece_box:last-child > .component_piece_area {
+  margin-left: auto;
+  width: 98%;
+}
+
+.component_only_one > .component_piece_box > .component_piece_area {
+  width: 100%;
 }
 
 .component_piece_area > header {
   margin: 0;
-  height: 13%;
+  height: 50px;
+  /* height: 13%; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,21 +354,31 @@ _:-ms-input-placeholder,
 }
 
 .gauge_chart {
-  height: 75%;
+  /* position: absolute; */
+  height: 100%;
 }
 
 .component_piece_body {
-  height: 87%;
+  /* height: 87%; */
   padding: 0 1rem;
   overflow-y: auto;
   overflow-x: hidden;
+  height: calc(100% - 50px);
+}
+
+.gauge_box .component_piece_body {
+  height: calc(100% - 50px);
 }
 
 .component_piece_body > .gauge_contents {
   padding: 0 2rem;
-  height: 25%;
+  bottom: 35%;
+  /* height: 25%; */
   position: relative;
-  bottom: 2.2rem;
+
+  /* display: flex;
+  flex-direction: column;
+  justify-content: space-between; */
 }
 
 .component_piece_body input {
@@ -414,6 +457,16 @@ _:-ms-input-placeholder,
   margin: 10px;
 }
 
+.command_status {
+  align-items: center;
+  display: flex;
+}
+
+.view_type_selector_box {
+  display: flex;
+  align-items: center;
+}
+
 /***************************************/
 /************** Table 영역 *************/
 /***************************************/
@@ -479,13 +532,17 @@ _:-ms-input-placeholder,
   width: -o-max-content;
 }
 
-/* 센서 데이터 뷰 50% 40% 10% */
+.noHover {
+  pointer-events: none;
+}
+
+/* 센서 데이터 뷰 60% 30% 10% */
 article.sdv_w541 > p:first-child {
-  width: 50%;
+  width: 60%;
 }
 
 article.sdv_w541 > p:nth-child(2) {
-  width: 40%;
+  width: 30%;
 }
 
 article.sdv_w541 > p:last-child {
@@ -517,7 +574,7 @@ article.sdv_w_side > p:last-child {
 }
 
 .component_ele_status {
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 .component_ele_status > header {
@@ -534,7 +591,7 @@ article.sdv_w_side > p:last-child {
 /* 검색 박스 */
 .search_area {
   display: flex;
-  justify-content: start;
+  justify-content: flex-end;
   padding: 1rem;
 }
 
@@ -617,6 +674,13 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /************ Common *************/
 /***************************************/
+.overX_h {
+  overflow-x: hidden;
+}
+.overY_h {
+  overflow-y: hidden;
+}
+
 .notice_next_box {
   display: block;
   font-size: 0.7em;
@@ -628,6 +692,18 @@ article.sdv_w_side > p:last-child {
   font-size: 0.7em;
   margin-top: 0.5em;
   color: red;
+}
+
+.txt_align_r {
+  text-align: right;
+}
+
+.txt_align_l {
+  text-align: left;
+}
+
+.txt_align_c {
+  text-align: center;
 }
 
 /***************************************/
@@ -690,6 +766,7 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /**************** interval ****************/
 /***************************************/
+
 .w_auto {
   width: auto;
 }
@@ -706,12 +783,32 @@ article.sdv_w_side > p:last-child {
   width: 20%;
 }
 
+.w_25per {
+  width: 25%;
+}
+
+.w_29per {
+  width: 29%;
+}
+
 .w_30per {
   width: 30%;
 }
 
+.w_35per {
+  width: 35%;
+}
+
 .w_40per {
   width: 40%;
+}
+
+.w_45per {
+  width: 45%;
+}
+
+.w_49per {
+  width: 49%;
 }
 
 .w_50per {
@@ -846,6 +943,60 @@ article.sdv_w_side > p:last-child {
   padding-top: 2rem;
 }
 
+/***************************************/
+/**************** Flex Option ****************/
+/***************************************/
+.flex_dir_row {
+  flex-direction: row;
+}
+
+.flex_dir_col {
+  flex-direction: column;
+}
+
+.flex_jus_center {
+  justify-content: center;
+}
+
+.flex_jus_end {
+  justify-content: flex-end;
+}
+
+.flex_jus_bet {
+  justify-content: space-between;
+}
+
+.flex_101auto {
+  flex: 1 1 auto;
+}
+
+.flex_111auto {
+  flex: 1.1 1 auto;
+}
+.flex_121auto {
+  flex: 1.2 1 auto;
+}
+
+.flex_151auto {
+  flex: 1.5 1 auto;
+}
+
+.flex_201auto {
+  flex: 2 1 auto;
+}
+
+.flex_grow_1 {
+  flex-grow: 1;
+}
+
+.flex_grow_2 {
+  flex-grow: 2;
+}
+
+/***************************************/
+/**************** Dynamic Media ****************/
+/***************************************/
+
 @media all and (max-width: 942px) {
   .container-fluid {
     padding: 0;
@@ -856,18 +1007,25 @@ article.sdv_w_side > p:last-child {
   .container_body {
     width: 100%;
     max-width: none;
-    margin: auto 0;
+    margin: 0.5rem 0;
   }
 
   .container_row {
-    margin: 1rem 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
+    /* flex-wrap: wrap; */
   }
 
   .component_side_box {
     width: 100%;
     height: auto;
+  }
+
+  .component_contents_area {
+    width: auto;
+    height: auto;
+    display: block;
   }
 
   .power_img {
@@ -883,6 +1041,10 @@ article.sdv_w_side > p:last-child {
     width: 100%;
     height: 100%;
     box-shadow: none;
+  }
+
+  .container_row .component_piece_box > .component_piece_area {
+    width: 100%;
   }
 
   .table_desc_area {
@@ -1003,6 +1165,14 @@ article.sdv_w_side > p:last-child {
 
   .header_w_r {
     /* padding: 0 2rem; */
+  }
+
+  .header_home_area {
+    font-size: 1.1em;
+    width: 84%;
+    word-break: break-word;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .data_view_section {

@@ -101,7 +101,7 @@ function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
   // 데이터, 속성, 스타일 등을 적용해 tspan 다시 그리기
   foundNodeTextChild.get(
     0,
-  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}"> ${nodeName}</tspan>`;
+  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}" dy="8"> ${nodeName}</tspan>`;
   foundNodeTextChild.get(
     0,
   ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${foundSvgTextInfo.textX}" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
@@ -144,7 +144,7 @@ function changeNodeStatusColor(nDefId, data) {
 
     // 데이터 상태에 따른 색상 변경
     if (checkDataStatus === FALSE_DATA) {
-      drawedSvgElement.attr({ fill: getNodeBgColor[0], opacity: 0.8 });
+      drawedSvgElement.attr({ fill: getNodeBgColor[0] });
     } else if (checkDataStatus === TRUE_DATA) {
       drawedSvgElement.attr({ fill: getNodeBgColor[1] });
     } else {

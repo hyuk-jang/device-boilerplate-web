@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <%- include("../UPSAS/master/head.ejs") %>
-    <script src="/js/handlebars.min.js"></script>
+    <%- include("../master/head.ejs") %>
+    <script src="/js/handlebars.js"></script>
   </head>
   <body>
     <div id="wrap" class="wrap hidden">
       <!-- Header -->
-      <%- include("../UPSAS/master/header.ejs") %>
+      <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body">
         <div class="container_row mb_50rem">
@@ -15,37 +15,33 @@
         </div>
         <div class="container_row flex_dir_col">
           <div class="table-responsive default_area">
-            <table class="table table-bordered number_table nowrap">
+            <table class="table table-bordered number_table ">
               <colgroup>
-                <col width="5%" />
-                <col width="15%" />
-                <col width="20%" />
-                <col width="10%" />
-                <col width="10%" />
-                <col width="15%" />
-                <col width="25%" />
+                <!-- <col width="0%" /> -->
               </colgroup>
               <thead id="tableHeaderDom">
                 <tr>
                   <th>번호</th>
-                  <th>회원 아이디</th>
-                  <th>변경 요소</th>
-                  <th>변경 전</th>
-                  <th>변경 후</th>
-                  <th>관리자 아이디</th>
-                  <th>수정일</th>
+                  <th>사이트</th>
+                  <th>회원 이름</th>
+                  <th>명령 형식</th>
+                  <th>명령 ID</th>
+                  <th>명령 이름</th>
+                  <th>실행 시각</th>
+                  <th>완료 시각</th>
                 </tr>
               </thead>
               <tbody id="tableBodyDom">
                 <script id="bodyTemplate" type="template">
                   <tr>
                     <td class="text-center">{{ rowsNumber }}</td>
-                    <td class="text-center">{{ member_id }}</td>
-                    <td class="text-center">{{ edit_column_name }}</td>
-                    <td class="text-center">{{ prev_value }}</td>
-                    <td class="text-center">{{ curr_value }}</td>
-                    <td class="text-center">{{ admin_id }}</td>
-                    <td class="text-center">{{ str_updatedate }}</td>
+                    <td class="text-center">{{ siteName }}</td>
+                    <td class="text-center">{{ memberName }}</td>
+                    <td class="text-center">{{ cmd_format }}</td>
+                    <td class="text-center">{{ cmd_id }}</td>
+                    <td class="text-center">{{ cmd_name }}</td>
+                    <td class="text-center">{{ start_date }}</td>
+                    <td class="text-center">{{ end_date }}</td>
                   </tr>
                 </script>
               </tbody>
@@ -55,7 +51,7 @@
         </div>
       </div>
       <!--하단1-->
-      <%- include("../UPSAS/master/footer.ejs") %>
+      <%- include("../master/footer.ejs") %>
     </div>
   </body>
 
@@ -66,11 +62,8 @@
     var firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
 
     $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
-
     $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
   </script>
-
-  <script src="/js/contents/report/search.js"></script>
 
   <script>
     //2. htmlTemplate을 가져온후 Handlebars로 compile 한다.
@@ -90,20 +83,8 @@
     // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
     var commentUl = document.querySelector('#tableBodyDom');
     $('#tableBodyDom').html(tableBody);
-
-    // 조회한 쿼리스트링 가져옴
-    var searchInfo = paginationInfo.queryString;
-    // 쿼리스트링이 존재할 경우에만
-    if (typeof searchInfo === 'object') {
-      // 쿼리스트링 존재 수 만큼 반복하면서 selectBox 값 변경
-      _.forEach(searchInfo, function(value, key) {
-        var domElement = document.getElementById(key);
-        // domElement가 존재할 경우에만 실행
-        domElement &&
-          $(domElement)
-            .val(value)
-            .prop('selected', true);
-      });
-    }
   </script>
+
+  <!-- 검색 관련 js 모음 -->
+  <script src="/js/contents/report/search.js"></script>
 </html>

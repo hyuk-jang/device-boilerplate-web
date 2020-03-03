@@ -10,9 +10,11 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const control = require('./control');
 const status = require('./status');
+const analysis = require('./analysis');
 const trend = require('./trend');
 const report = require('./report');
 const cctv = require('./cctv');
+const admin = require('../users/admin');
 
 const commonUtil = require('../../models/templates/common.util');
 
@@ -159,14 +161,10 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      // {
-      //   href: 'connector',
-      //   name: '접속반',
-      // },
-      // {
-      //   href: 'inverter',
-      //   name: '인버터',
-      // },
+      {
+        href: 'analysis',
+        name: '데이터분석',
+      },
       {
         href: 'trend',
         name: '트렌드',
@@ -180,6 +178,13 @@ router.get(
       //   name: 'CCTV',
       // },
     ];
+
+    if (_.eq(grade, 'admin')) {
+      naviList.push({
+        href: 'admin',
+        name: '관리',
+      });
+    }
 
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
@@ -219,10 +224,13 @@ router.get(
 // Router 추가
 router.use('/', main);
 router.use('/control', control);
+router.use('/tta_status', status);
 router.use('/status', status);
+router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/cctv', cctv);
+router.use('/admin', admin);
 
 // router.use('/users', users);
 

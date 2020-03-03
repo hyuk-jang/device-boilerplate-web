@@ -12,7 +12,6 @@ const admin = require('./admin/users');
 // const guest = require('./guest/users');
 const users = require('./users');
 const upsas = require('./upsas');
-const Ean = require('./Ean');
 
 const accountGradeList = ['admin', 'manager', 'owner', 'guest', 'awaiter'];
 const AWAITER = 'awaiter';
@@ -25,9 +24,6 @@ switch (process.env.PJ_MAIN_ID) {
     break;
   case 'FP':
     selectedRouter = users;
-    break;
-  case 'Ean':
-    selectedRouter = Ean;
     break;
   default:
     selectedRouter = users;

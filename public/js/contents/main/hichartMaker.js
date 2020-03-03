@@ -5,8 +5,8 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '85%'],
-    size: '135%',
+    center: ['50%', '60%'],
+    size: '100%',
     startAngle: -90,
     endAngle: 90,
     background: {
@@ -30,7 +30,10 @@ const gaugeOptions = {
     minorTickInterval: null,
     tickAmount: 2,
     title: {
-      y: -70,
+      y: -85,
+      style: {
+        fontSize: 20,
+      },
     },
     labels: {
       y: 16,
@@ -42,7 +45,7 @@ const gaugeOptions = {
   plotOptions: {
     solidgauge: {
       dataLabels: {
-        y: 10,
+        y: -50,
         borderWidth: 0,
         useHTML: true,
       },
@@ -384,6 +387,7 @@ function makeColumnChart(chartOption) {
   Highcharts.chart(chartOption.domId, {
     chart: {
       type: 'column',
+      spacingRight: 25,
     },
     title: {
       text: _.get(chartOption, 'title.text', ''),
@@ -433,7 +437,7 @@ Highcharts.setOptions({
       '11월',
       '12월',
     ],
-    weekdays: ['일', '월', '화', '수', '목', '금', '토'],
+    weekdays: ['월', '화', '수', '목', '금', '토', '일'],
   },
 });
 
@@ -464,6 +468,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       chart: {
         type: 'spline',
         zoomType: 'xy',
+        spacingRight: 25,
       },
       title: {
         text: _.get(chartInfo, 'title', ''),
@@ -531,7 +536,26 @@ function makeLineChart(chartInfo, isAreaChart = false) {
         shared: true,
         // crosshairs: true
       },
-
+      exporting: {
+        buttons: {
+          contextButton: {
+            // viewFullscreen, printChart, downloadPNG, downloadJPEG, downloadSVG, downloadPDF, downloadCSV, downloadXLS, viewData, openInCloud, separator(경계선)
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadSVG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS',
+              'viewData',
+            ],
+          },
+        },
+      },
       plotOptions: {
         spline: {
           marker: {

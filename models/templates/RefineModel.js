@@ -143,7 +143,7 @@ class RefineModel extends BiModule {
       dailyPower,
       monthPower,
       cumulativePower,
-      // co2: _.round(cumulativePower * 0.424, 3),
+      co2: _.round(cumulativePower * 0.424, 3),
       isOperationInverter: _.chain(validInverterDataList)
         .map('hasValidData')
         .values()

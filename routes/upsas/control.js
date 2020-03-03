@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ const controlDom = require('../../models/domMaker/controlDom');
 const commonUtil = require('../../models/templates/common.util');
 
 const DEFAULT_CATEGORY = 'command';
+const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
 
 /** @type {setCategoryInfo[]} */
 const subCategoryList = [
@@ -20,13 +22,17 @@ const subCategoryList = [
     btnName: '제어관리',
   },
   {
-    subCategory: 'event',
-    btnName: '이벤트관리',
+    subCategory: 'history',
+    btnName: '제어이력',
   },
-  {
-    subCategory: 'threshold',
-    btnName: '임계치관리',
-  },
+  // {
+  //   subCategory: 'event',
+  //   btnName: '이벤트관리',
+  // },
+  // {
+  //   subCategory: 'threshold',
+  //   btnName: '임계치관리',
+  // },
 ];
 
 /* middleware. */
@@ -126,7 +132,105 @@ router.get(
 
     // BU.CLI(req.locals);
 
-    res.render('./UPSAS/control/command', req.locals);
+    // FIXME: gs 인증용 임시 교체
+    res.render('./UPSAS/control/tta_command', req.locals);
+    // res.render('./UPSAS/control/command', req.locals);
+  }),
+);
+
+router.get(
+  ['/', '/:siteId', '/:siteId/history'],
+  asyncHandler(async (req, res) => {
+    /** @type {BiModule} */
+    const biModule = global.app.get('biModule');
+    const {
+      mainInfo: { siteId, mainWhere },
+    } = req.locals;
+    const { page = 1 } = req.query;
+
+    /** @type {ControlModel} */
+    const controlModel = global.app.get('controlModel');
+
+    // FIXME: 임시 나중에 삭제 또는 수정
+    const cmdFormatBase = [
+      {
+        key: 'SINGLE',
+        value: '단일 제어',
+      },
+      {
+        key: 'FLOW',
+        value: '염수 이동',
+      },
+      {
+        key: 'SET',
+        value: '설정 제어',
+      },
+      {
+        key: 'SCENARIO',
+        value: '시나리오',
+      },
+    ];
+
+    // 레포트 데이터로 환산
+
+    const { reportRows, totalCount } = await controlModel.getCmdHistoryReport(
+      {
+        page,
+        pageListCount: PAGE_LIST_COUNT,
+      },
+      mainWhere,
+    );
+
+    // 회원 정보
+    /** @type{MEMBER[]} */
+    const memberRows = await biModule.getTable('MEMBER');
+    /** @type{MAIN[]} */
+    const mainRows = await biModule.getTable('MAIN');
+
+    // 제어 이력 데이터 가공
+    _.forEach(reportRows, cmdHistoryInfo => {
+      // /** @type{DV_CONTROL_CMD_HISTORY} */
+      const { member_seq: ms, cmd_format: cf, start_date: sd, end_date: ed } = cmdHistoryInfo;
+
+      // 회원 이름 추가
+      const memberInfo = _.find(memberRows, { member_seq: ms });
+      cmdHistoryInfo.memberName = _.get(memberInfo, 'name', '');
+
+      // 사이트 이름 추가
+      const mainInfo = _.find(mainRows, { main_seq: cmdHistoryInfo.main_seq });
+      cmdHistoryInfo.siteName = _.get(mainInfo, 'name', '');
+
+      // 명령 타입 한글 표시
+      const cmdFormat = _.find(cmdFormatBase, { key: cmdHistoryInfo.cmd_format });
+      cmdHistoryInfo.cmd_format = _.get(cmdFormat, 'value', '');
+
+      // 명령 시각 포멧 처리
+      cmdHistoryInfo.start_date = moment(cmdHistoryInfo.start_date).format('YYYY-MM-DD HH:mm:ss');
+      cmdHistoryInfo.end_date = moment(cmdHistoryInfo.end_date).format('YYYY-MM-DD HH:mm:ss');
+
+      // FIXME: null 데이터 - 표시 , 임시 나중에 수정 해야함.
+      _.isNull(cmdHistoryInfo.control_set_value) && _.set(cmdHistoryInfo, 'control_set_value', '-');
+    });
+
+    _.set(req, 'locals.reportRows', reportRows);
+
+    // 페이지 네이션 생성
+    let paginationInfo = DU.makeBsPagination(
+      page,
+      totalCount,
+      `/control/${siteId}/history`,
+      _.omit(req.query, 'page'),
+      PAGE_LIST_COUNT,
+    );
+
+    // 페이지네이션 돔 추가
+    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
+
+    // 페이지 정보 추가
+    paginationInfo = _.omit(paginationInfo, 'paginationDom');
+    _.set(req, 'locals.paginationInfo', paginationInfo);
+
+    res.render('./UPSAS/control/history', req.locals);
   }),
 );
 

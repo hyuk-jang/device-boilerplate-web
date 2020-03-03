@@ -35,6 +35,7 @@ const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
 const BiDevice = require('./models/templates/BiDevice');
 const AdminModel = require('./models/templates/AdminModel');
+const ControlModel = require('./models/templates/ControlModel');
 const PowerModel = require('./models/templates/PowerModel');
 const WeatherModel = require('./models/templates/WeatherModel');
 const BlockModel = require('./models/templates/BlockModel');
@@ -72,7 +73,8 @@ switch (projectMainId) {
     faviPath = 's2w.ico';
     break;
   case 'UPSAS':
-    faviPath = 'kepco.ico';
+    // faviPath = 'kepco.ico';
+    faviPath = 'sm.ico';
     break;
   default:
     faviPath = 'favicon.ico';
@@ -85,6 +87,7 @@ app.set('biAuth', new BiAuth(dbInfo));
 app.set('biModule', new BiModule(dbInfo));
 app.set('biDevice', new BiDevice(dbInfo));
 app.set('adminModel', new AdminModel(dbInfo));
+app.set('controlModel', new ControlModel(dbInfo));
 app.set('powerModel', new PowerModel(dbInfo));
 app.set('weatherModel', new WeatherModel(dbInfo));
 app.set('blockModel', new BlockModel(dbInfo));

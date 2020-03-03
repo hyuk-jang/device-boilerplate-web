@@ -29,10 +29,11 @@ const subCategoryList = [
     subCategory: 'connector',
     btnName: '접속반',
   },
-  {
-    subCategory: 'saltern',
-    btnName: '염전',
-  },
+  // FIXME: GS 인증으로 임시 변경
+  // {
+  //   subCategory: 'saltern',
+  //   btnName: '염전',
+  // },
   // {
   //   subCategory: 'damage',
   //   btnName: '손실 및 저하요인 분석',
@@ -73,16 +74,16 @@ router.get(
     const { mainWhere } = req.locals.mainInfo;
 
     // Step1: SEB_RELATION에서 main_seq를 충족하는 rows 추출
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await powerModel.getTable('V_DV_PLACE_RELATION', mainWhere);
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await powerModel.getTable('V_DV_PLACE', mainWhere);
 
-    const sebPlaceSeqList = _(placeRelationRows)
+    const sebPlaceSeqList = _(placeRows)
       .filter({ pd_target_id: 'solarEvaporationBlock' })
       .map('place_seq')
       .union()
       .value();
 
-    /** @type {SEB_RELATION[]}  */
+    /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
     const sebRelationRows = await powerModel.getTable('SEB_RELATION', {
       place_seq: sebPlaceSeqList,
     });
