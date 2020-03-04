@@ -161,10 +161,10 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      {
-        href: 'analysis',
-        name: '데이터분석',
-      },
+      // {
+      //   href: 'analysis',
+      //   name: '데이터분석',
+      // },
       {
         href: 'trend',
         name: '트렌드',
@@ -226,7 +226,7 @@ router.use('/', main);
 router.use('/control', control);
 router.use('/tta_status', status);
 router.use('/status', status);
-router.use('/analysis', analysis);
+// router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/cctv', cctv);
