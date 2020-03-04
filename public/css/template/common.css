@@ -304,7 +304,7 @@ _:-ms-input-placeholder,
 /***************************************/
 .component_piece_box {
   width: 100px;
-  min-height: 370px;
+  /* min-height: 370px; */
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
@@ -1015,6 +1015,10 @@ article.sdv_w_side > p:last-child {
     display: flex;
     flex-direction: column;
     /* flex-wrap: wrap; */
+  }
+
+  .container_row.division {
+    min-height: auto;
   }
 
   .component_side_box {
