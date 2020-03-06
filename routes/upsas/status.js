@@ -29,11 +29,10 @@ const subCategoryList = [
     subCategory: 'connector',
     btnName: '접속반',
   },
-  // FIXME: GS 인증으로 임시 변경
-  // {
-  //   subCategory: 'saltern',
-  //   btnName: '염전',
-  // },
+  {
+    subCategory: 'saltern',
+    btnName: '염전',
+  },
   // {
   //   subCategory: 'damage',
   //   btnName: '손실 및 저하요인 분석',
@@ -84,27 +83,37 @@ router.get(
       .value();
 
     /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
-    const sebRelationRows = await powerModel.getTable('SEB_RELATION', {
-      place_seq: sebPlaceSeqList,
-    });
+    const sebRelationRows = sebPlaceSeqList.length
+      ? await powerModel.getTable('SEB_RELATION', {
+          place_seq: sebPlaceSeqList,
+        })
+      : [];
 
     // Step2-1: 연결된 접속반의 현재 데이터를 추출
-    const connectorRows = await powerModel.getTable('PW_CONNECTOR', {
-      connector_seq: _.map(sebRelationRows, 'connector_seq'),
-    });
+    const connectSeqList = _.map(sebRelationRows, 'connector_seq');
+    const connectorRows = connectSeqList.length
+      ? await powerModel.getTable('PW_CONNECTOR', {
+          connector_seq: connectSeqList,
+        })
+      : [];
 
     // 접속반 현재 상태
     const connectorStatusRows = await powerModel.getConnectorStatus(
       _.map(connectorRows, 'connector_seq'),
     );
 
+    const inverterSeqList = _(sebRelationRows)
+      .map('inverter_seq')
+      .union()
+      .value();
+
     /** @type {V_INVERTER_STATUS[]} */
-    const inverterStatusRows = await powerModel.getTable('V_PW_INVERTER_STATUS', {
-      inverter_seq: _(sebRelationRows)
-        .map('inverter_seq')
-        .union()
-        .value(),
-    });
+    const inverterStatusRows = inverterSeqList.length
+      ? await powerModel.getTable('V_PW_INVERTER_STATUS', {
+          inverter_seq: inverterSeqList,
+        })
+      : [];
+
     // 염전 상태 계측 센서 상태
     const salternStatusRows = await blockModel.getBlockStatus({
       tableName: 'saltern_sensor_data',
@@ -265,9 +274,11 @@ router.get(
       .value();
 
     /** @type {CONNECTOR[]} */
-    const connectorRows = await powerModel.getTable('PW_CONNECTOR', {
-      connector_seq: connectorSeqList,
-    });
+    const connectorRows = connectorSeqList.length
+      ? await powerModel.getTable('PW_CONNECTOR', {
+          connector_seq: connectorSeqList,
+        })
+      : [];
 
     // 접속반 현재 상태
     const statusRows = await powerModel.getConnectorStatus(_.map(connectorRows, 'connector_seq'));

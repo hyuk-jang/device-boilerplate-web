@@ -374,110 +374,118 @@ class RefineModel extends BiModule {
    * @param {number=} mainSeq
    */
   async getDynamicBlockRows(searchRange, blockId, mainSeq) {
-    const deviceProtocol = new DeviceProtocol();
-    // mainWhere 추출
-    const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
+    try {
+      const deviceProtocol = new DeviceProtocol();
+      // mainWhere 추출
+      const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
 
-    /** @type {V_DV_PLACE[]} SiteId에 맞는 V_DV_PLACE 목록 가져옴 */
-    const viewPlaceRows = await this.getTable(VIEW_DV_PLACE, mainWhere);
+      /** @type {V_DV_PLACE[]} SiteId에 맞는 V_DV_PLACE 목록 가져옴 */
+      const viewPlaceRows = await this.getTable(VIEW_DV_PLACE, mainWhere);
 
-    const placeSeqList = _.map(viewPlaceRows, 'place_seq');
+      const placeSeqList = _.map(viewPlaceRows, 'place_seq');
 
-    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
-    const blockTrendViews = deviceProtocol.getBlockChart(blockId);
-    const {
-      blockTableName,
-      baseTableInfo: { tableName, placeKey, fromToKeyTableList },
-      blockChartList,
-    } = blockTrendViews;
+      // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
+      const blockTrendViews = deviceProtocol.getBlockChart(blockId);
+      const {
+        blockTableName,
+        baseTableInfo: { tableName, placeKey, fromToKeyTableList },
+        blockChartList,
+      } = blockTrendViews;
 
-    let baseTableRows = viewPlaceRows;
-    // Base Table이 존재할 경우 해당 Base Table Rows를 가져옴
-    if (tableName !== VIEW_DV_PLACE) {
-      const baseWhere = placeSeqList.length ? { [placeKey]: placeSeqList } : null;
-      baseTableRows = await this.getTable(tableName, baseWhere);
+      let baseTableRows = viewPlaceRows;
+      // Base Table이 존재할 경우 해당 Base Table Rows를 가져옴
+      if (tableName !== VIEW_DV_PLACE) {
+        const baseWhere = placeSeqList.length ? { [placeKey]: placeSeqList } : null;
+        baseTableRows = await this.getTable(tableName, baseWhere);
+      }
+
+      let mainSelectQuery = '';
+      let sqlBlockWhere = '';
+
+      // 실제로 가져올 Block Chart Where 절 생성
+      _.forEach(fromToKeyTableList, (fromToKeyInfo, index) => {
+        const { fromKey, toKey } = fromToKeyInfo;
+        mainSelectQuery += fromToKeyTableList.length - 1 === index ? `${toKey}` : `${toKey},`;
+        const values = _.map(baseTableRows, fromKey);
+        if (values.length === 0) {
+          throw new Error(`${toKey} values is 0`);
+        }
+        sqlBlockWhere += ` AND ${toKey} IN (${values})`;
+      });
+
+      const dynamicSelectQuery = _.chain(blockChartList)
+        .map('chartOptionList')
+        .flatten()
+        .map('blockConfigList')
+        .flatten()
+        .unionBy(blockConfig => {
+          const { toKey, convertKey = toKey } = blockConfig;
+          return convertKey;
+        })
+        .map(calcInfo => {
+          const { toKey, convertKey = toKey, calcType, calculate, toFixed = 1 } = calcInfo;
+          const { AVG, INTERVAL_MAX, MAX, MIN } = deviceProtocol.CALC_TYPE;
+
+          let dynamicSql = '';
+          switch (calcType) {
+            case INTERVAL_MAX:
+              dynamicSql = `MAX(${toKey}) - MIN(${toKey})`;
+              break;
+            case MAX:
+              dynamicSql = `MAX(${toKey})`;
+              break;
+            case MIN:
+              dynamicSql = `MIN(${toKey})`;
+              break;
+            case AVG:
+            default:
+              dynamicSql = `AVG(${toKey})`;
+              break;
+          }
+
+          if (_.isNumber(calculate) && calculate !== 1) {
+            dynamicSql = `ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
+          } else {
+            dynamicSql = `ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
+          }
+          return dynamicSql;
+        })
+        .value();
+
+      // BU.CLI(dynamicSelectQuery);
+
+      // Make Dynamic Query
+      const {
+        selectGroupDate,
+        selectViewDate,
+        firstGroupByFormat,
+      } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
+
+      const mainSql = `
+          SELECT
+                  ${mainSelectQuery},
+                  ${selectViewDate},
+                  ${selectGroupDate},
+                  ${dynamicSelectQuery.join(',\n\t\t')},
+                  COUNT(*) AS row_count
+          FROM ${blockTableName}
+          WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+          ${sqlBlockWhere}
+          GROUP BY ${firstGroupByFormat}, ${mainSelectQuery}
+          ORDER BY ${mainSelectQuery}, writedate
+        `;
+
+      // Get Rows
+      const dataRows = await this.db.single(mainSql, '', false);
+
+      return {
+        viewPlaceRows,
+        baseTableRows,
+        dataRows,
+      };
+    } catch (error) {
+      return [];
     }
-
-    let mainSelectQuery = '';
-    let sqlBlockWhere = '';
-
-    // 실제로 가져올 Block Chart Where 절 생성
-    _.forEach(fromToKeyTableList, (fromToKeyInfo, index) => {
-      const { fromKey, toKey } = fromToKeyInfo;
-      mainSelectQuery += fromToKeyTableList.length - 1 === index ? `${toKey}` : `${toKey},`;
-      sqlBlockWhere += ` AND ${toKey} IN (${_.map(baseTableRows, fromKey)})`;
-    });
-
-    const dynamicSelectQuery = _.chain(blockChartList)
-      .map('chartOptionList')
-      .flatten()
-      .map('blockConfigList')
-      .flatten()
-      .unionBy(blockConfig => {
-        const { toKey, convertKey = toKey } = blockConfig;
-        return convertKey;
-      })
-      .map(calcInfo => {
-        const { toKey, convertKey = toKey, calcType, calculate, toFixed = 1 } = calcInfo;
-        const { AVG, INTERVAL_MAX, MAX, MIN } = deviceProtocol.CALC_TYPE;
-
-        let dynamicSql = '';
-        switch (calcType) {
-          case INTERVAL_MAX:
-            dynamicSql = `MAX(${toKey}) - MIN(${toKey})`;
-            break;
-          case MAX:
-            dynamicSql = `MAX(${toKey})`;
-            break;
-          case MIN:
-            dynamicSql = `MIN(${toKey})`;
-            break;
-          case AVG:
-          default:
-            dynamicSql = `AVG(${toKey})`;
-            break;
-        }
-
-        if (_.isNumber(calculate) && calculate !== 1) {
-          dynamicSql = `ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
-        } else {
-          dynamicSql = `ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
-        }
-        return dynamicSql;
-      })
-      .value();
-
-    // BU.CLI(dynamicSelectQuery);
-
-    // Make Dynamic Query
-    const {
-      selectGroupDate,
-      selectViewDate,
-      firstGroupByFormat,
-    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
-
-    const mainSql = `
-        SELECT
-                ${mainSelectQuery},
-                ${selectViewDate},
-                ${selectGroupDate},
-                ${dynamicSelectQuery.join(',\n\t\t')},
-                COUNT(*) AS row_count
-        FROM ${blockTableName}
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-        ${sqlBlockWhere}
-        GROUP BY ${firstGroupByFormat}, ${mainSelectQuery}
-        ORDER BY ${mainSelectQuery}, writedate
-      `;
-
-    // Get Rows
-    const dataRows = await this.db.single(mainSql, '', false);
-
-    return {
-      viewPlaceRows,
-      baseTableRows,
-      dataRows,
-    };
   }
 }
 module.exports = RefineModel;

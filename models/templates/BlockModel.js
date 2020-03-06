@@ -56,82 +56,89 @@ class BlockModel extends BiModule {
    * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo
    */
   getDynamicBlockRows(dynamicQueryGuideInfo) {
-    const { searchRange, dynamicQueryConfig, whereColumnInfo } = dynamicQueryGuideInfo;
+    try {
+      const { searchRange, dynamicQueryConfig, whereColumnInfo } = dynamicQueryGuideInfo;
 
-    // 동적 Query 생성을 위한 Table 정보
-    const {
-      baseTableInfo: { fromToKeyTableList, writeDateKey = 'writedate' },
-      blockTableName,
-      dbTableDynamicSqlConfig,
-    } = dynamicQueryConfig;
+      // 동적 Query 생성을 위한 Table 정보
+      const {
+        baseTableInfo: { fromToKeyTableList, writeDateKey = 'writedate' },
+        blockTableName,
+        dbTableDynamicSqlConfig,
+      } = dynamicQueryConfig;
 
-    const staticSelectQueryList = _.map(fromToKeyTableList, 'toKey');
-    const sqlBlockWhere = _.isEmpty(whereColumnInfo)
-      ? ''
-      : ` AND ${whereColumnInfo.column} IN (${whereColumnInfo.seqList})`;
+      const staticSelectQueryList = _.map(fromToKeyTableList, 'toKey');
 
-    const selectDynamicQueryList = [];
-
-    _.forEach(dbTableDynamicSqlConfig, (columnList, key) => {
-      let dynamicSqlTemplate = '';
-
-      switch (key) {
-        case 'avgColumnList':
-          dynamicSqlTemplate = _.template('AVG(<%= value %>) AS avg_<%= value %>');
-          break;
-        case 'maxColumnList':
-          dynamicSqlTemplate = _.template('MAX(<%= value %>) AS max_<%= value %>');
-          break;
-        case 'minColumnList':
-          dynamicSqlTemplate = _.template('MIN(<%= value %>) AS min_<%= value %>');
-          break;
-        case 'intervalColumnList':
-          dynamicSqlTemplate = _.template(
-            'MAX(<%= value %>) - MIN(<%= value %>) AS interval_<%= value %>',
-          );
-          break;
-        case 'expressionList':
-          dynamicSqlTemplate = _.template('<%= expression %> AS <%= columnId %>');
-          break;
-        default:
-          break;
+      let sqlBlockWhere = '';
+      if (!_.isEmpty(whereColumnInfo)) {
+        if (whereColumnInfo.seqList.length) {
+          sqlBlockWhere = ` AND ${whereColumnInfo.column} IN (${whereColumnInfo.seqList})`;
+        } else {
+          throw new RangeError(`whereColumnInfo key: ${whereColumnInfo.column} length 0`);
+        }
       }
 
-      // 계산식이 아닐 경우
-      if (key !== 'expressionList') {
-        _.forEach(columnList, columnId => {
-          selectDynamicQueryList.push(dynamicSqlTemplate({ value: columnId }));
-        });
-      } else {
-        // 계산식을 활용한 컬럼이 있을 경우 적용
-        _.forEach(columnList, expressionInfo => {
-          let { expression } = expressionInfo;
-          const { columnId, scale, toFixed = 1 } = expressionInfo;
+      const selectDynamicQueryList = [];
 
-          if (_.isNumber(scale)) {
-            expression = `(${expression}) * ${scale}`;
-          }
-          if (_.isNumber(toFixed)) {
-            expression = `ROUND(${expression}, ${toFixed})`;
-          }
+      _.forEach(dbTableDynamicSqlConfig, (columnList, key) => {
+        let dynamicSqlTemplate = '';
 
-          selectDynamicQueryList.push(
-            dynamicSqlTemplate({
-              expression,
-              columnId,
-            }),
-          );
-        });
-      }
-    });
+        switch (key) {
+          case 'avgColumnList':
+            dynamicSqlTemplate = _.template('AVG(<%= value %>) AS avg_<%= value %>');
+            break;
+          case 'maxColumnList':
+            dynamicSqlTemplate = _.template('MAX(<%= value %>) AS max_<%= value %>');
+            break;
+          case 'minColumnList':
+            dynamicSqlTemplate = _.template('MIN(<%= value %>) AS min_<%= value %>');
+            break;
+          case 'intervalColumnList':
+            dynamicSqlTemplate = _.template(
+              'MAX(<%= value %>) - MIN(<%= value %>) AS interval_<%= value %>',
+            );
+            break;
+          case 'expressionList':
+            dynamicSqlTemplate = _.template('<%= expression %> AS <%= columnId %>');
+            break;
+          default:
+            break;
+        }
 
-    const {
-      selectGroupDate,
-      selectViewDate,
-      firstGroupByFormat,
-    } = this.convertSearchRangeToDBFormat(searchRange, writeDateKey);
+        // 계산식이 아닐 경우
+        if (key !== 'expressionList') {
+          _.forEach(columnList, columnId => {
+            selectDynamicQueryList.push(dynamicSqlTemplate({ value: columnId }));
+          });
+        } else {
+          // 계산식을 활용한 컬럼이 있을 경우 적용
+          _.forEach(columnList, expressionInfo => {
+            let { expression } = expressionInfo;
+            const { columnId, scale, toFixed = 1 } = expressionInfo;
 
-    const mainSql = `
+            if (_.isNumber(scale)) {
+              expression = `(${expression}) * ${scale}`;
+            }
+            if (_.isNumber(toFixed)) {
+              expression = `ROUND(${expression}, ${toFixed})`;
+            }
+
+            selectDynamicQueryList.push(
+              dynamicSqlTemplate({
+                expression,
+                columnId,
+              }),
+            );
+          });
+        }
+      });
+
+      const {
+        selectGroupDate,
+        selectViewDate,
+        firstGroupByFormat,
+      } = this.convertSearchRangeToDBFormat(searchRange, writeDateKey);
+
+      const mainSql = `
         SELECT
                 ${staticSelectQueryList.toString()},
                 ${selectViewDate},
@@ -140,15 +147,18 @@ class BlockModel extends BiModule {
                 COUNT(*) AS row_count
         FROM ${blockTableName}
         WHERE ${writeDateKey} >= "${searchRange.strStartDate}" and ${writeDateKey} <"${
-      searchRange.strEndDate
-    }"
+        searchRange.strEndDate
+      }"
         ${sqlBlockWhere}
         GROUP BY ${firstGroupByFormat}, ${staticSelectQueryList.toString()}
         ORDER BY ${staticSelectQueryList.toString()}, ${writeDateKey}
       `;
 
-    // BU.CLI(mainSql);
-    return this.db.single(mainSql, null, false);
+      // BU.CLI(mainSql);
+      return this.db.single(mainSql, null, false);
+    } catch (error) {
+      return [];
+    }
   }
 
   /**
@@ -156,7 +166,7 @@ class BlockModel extends BiModule {
    * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo
    * @param {boolean=} isMergeByDate staticSelectQueryList를 무시하고 writeDate으로 GroupBy 처리 여부
    */
-  getDynamicBlockReportRows(dynamicQueryGuideInfo, isMergeByDate = false) {
+  getDynamicBlockReportRowsQuery(dynamicQueryGuideInfo, isMergeByDate = false) {
     const { searchRange, dynamicQueryConfig, whereColumnInfo } = dynamicQueryGuideInfo;
 
     const { strStartDate, strEndDate } = searchRange;
@@ -175,6 +185,11 @@ class BlockModel extends BiModule {
       groupByFormat,
       firstGroupByFormat,
     } = this.convertSearchRangeToDBFormat(searchRange, writeDateKey);
+
+    // 검색 조건은 있으나 seqList가 없다면 유효하지 않은 질의로 판단
+    if (_.isObject(whereColumnInfo) && whereColumnInfo.seqList.length === 0) {
+      return '';
+    }
 
     const staticSelectQueryList = _.map(fromToKeyTableList, 'toKey');
     const sqlBlockWhere = _.isEmpty(whereColumnInfo)
@@ -300,7 +315,16 @@ class BlockModel extends BiModule {
    * @return {{totalCount: number, reportRows: []}} 총 갯수, 검색 결과 목록
    */
   async getDynamicReport(dynamicQueryGuideInfo, pageInfo) {
-    const sql = this.getDynamicBlockReportRows(dynamicQueryGuideInfo, true);
+    const returnValue = {
+      totalCount: 0,
+      reportRows: [],
+    };
+
+    const sql = this.getDynamicBlockReportRowsQuery(dynamicQueryGuideInfo, true);
+
+    if (sql.length === 0) {
+      return returnValue;
+    }
 
     const { page = 1, pageListCount = 10 } = pageInfo;
     // 총 갯수 구하는 Query 생성
@@ -309,13 +333,10 @@ class BlockModel extends BiModule {
     const mainQuery = `${sql}\n LIMIT ${(page - 1) * pageListCount}, ${pageListCount}`;
 
     const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
-    const totalCount = _.head(resTotalCountQuery).total_count;
-    const reportRows = await this.db.single(mainQuery, '', false);
+    returnValue.totalCount = _.head(resTotalCountQuery).total_count;
+    returnValue.reportRows = await this.db.single(mainQuery, '', false);
 
-    return {
-      totalCount,
-      reportRows,
-    };
+    return returnValue;
   }
 
   /**
@@ -323,7 +344,7 @@ class BlockModel extends BiModule {
    * @param {dynamicQueryRowsGuideInfo} dynamicQueryGuideInfo createSearchRange() Return 객체
    */
   getDynamicTrend(dynamicQueryGuideInfo) {
-    const sql = this.getDynamicBlockReportRows(dynamicQueryGuideInfo);
+    const sql = this.getDynamicBlockReportRowsQuery(dynamicQueryGuideInfo);
 
     return this.db.single(sql);
   }

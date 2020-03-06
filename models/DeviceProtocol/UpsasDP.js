@@ -391,25 +391,24 @@ class UpsasDP extends DeviceProtocol {
         scale: 0.001,
         toFixed: 3,
       },
-      // FIXME: GS인증으로 임시 변경
-      // {
-      //   dataKey: 'water_level',
-      //   dataName: '수위',
-      //   dataUnit: 'cm',
-      //   mainTitle: '염전 상태 계측',
-      // },
-      // {
-      //   dataKey: 'salinity',
-      //   dataName: '염도',
-      //   dataUnit: '%',
-      //   mainTitle: '염전 상태 계측',
-      // },
-      // {
-      //   dataKey: 'module_rear_temp',
-      //   dataName: '모듈온도',
-      //   dataUnit: '℃',
-      //   mainTitle: '염전 상태 계측',
-      // },
+      {
+        dataKey: 'water_level',
+        dataName: '수위',
+        dataUnit: 'cm',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'salinity',
+        dataName: '염도',
+        dataUnit: '%',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'module_rear_temp',
+        dataName: '모듈온도',
+        dataUnit: '℃',
+        mainTitle: '염전 상태 계측',
+      },
     ];
   }
 

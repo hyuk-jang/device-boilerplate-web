@@ -75,22 +75,22 @@
             // tickInterval: 10,
             // tickAmount: 5,
           },
-          // {
-          //   labels: {
-          //     format: '{value} ',
-          //     style: {
-          //       color: Highcharts.getOptions().colors[1],
-          //     },
-          //   },
-          //   title: {
-          //     // text: '온도/수위/염도',
-          //   },
-          //   min: 0,
-          //   max: 50,
-          //   tickInterval: 5,
-          //   // tickAmount: 5,
-          //   opposite: 1,
-          // },
+          {
+            labels: {
+              format: '{value} ',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              // text: '온도/수위/염도',
+            },
+            min: 0,
+            max: 50,
+            tickInterval: 5,
+            // tickAmount: 5,
+            opposite: 1,
+          },
         ],
         series: [
           {
@@ -101,33 +101,33 @@
               valueSuffix: ' kW',
             },
           },
-          // {
-          //   name: '모듈후면온도',
-          //   data: _.map(sebRelationRows, 'module_rear_temp'),
-          //   yAxis: 1,
-          //   color: 'red',
-          //   tooltip: {
-          //     valueSuffix: ' ℃',
-          //   },
-          // },
-          // {
-          //   name: '수위',
-          //   data: _.map(sebRelationRows, 'water_level'),
-          //   color: 'blue',
-          //   yAxis: 1,
-          //   tooltip: {
-          //     valueSuffix: ' cm',
-          //   },
-          // },
-          // {
-          //   name: '염도',
-          //   data: _.map(sebRelationRows, 'salinity'),
-          //   color: 'brown',
-          //   yAxis: 1,
-          //   tooltip: {
-          //     valueSuffix: ' %',
-          //   },
-          // },
+          {
+            name: '모듈후면온도',
+            data: _.map(sebRelationRows, 'module_rear_temp'),
+            yAxis: 1,
+            color: 'red',
+            tooltip: {
+              valueSuffix: ' ℃',
+            },
+          },
+          {
+            name: '수위',
+            data: _.map(sebRelationRows, 'water_level'),
+            color: 'blue',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' cm',
+            },
+          },
+          {
+            name: '염도',
+            data: _.map(sebRelationRows, 'salinity'),
+            color: 'brown',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
         ],
       });
     </script>

@@ -113,6 +113,11 @@ header {
   box-shadow: 1px 1px 10px #a1a1a1;
 }
 
+.data_title_section,
+.data_view_section {
+  color: #fff;
+}
+
 .component_piece_area > header {
   background: linear-gradient(rgb(34, 80, 150), rgb(22, 58, 110));
   border: 1px solid #d1d1d1;

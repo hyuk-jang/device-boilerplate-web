@@ -27,11 +27,10 @@ const subCategoryList = [
     subCategory: 'connector',
     btnName: '접속반',
   },
-  // FIXME: GS 인증으로 임시 변경
-  // {
-  //   subCategory: 'saltern',
-  //   btnName: '염전',
-  // },
+  {
+    subCategory: 'saltern',
+    btnName: '염전',
+  },
 ];
 
 // middleware

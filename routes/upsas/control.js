@@ -10,8 +10,6 @@ const { BU, DU } = require('base-util-jh');
 const defaultDom = require('../../models/domMaker/defaultDom');
 const controlDom = require('../../models/domMaker/controlDom');
 
-const commonUtil = require('../../models/templates/common.util');
-
 const DEFAULT_CATEGORY = 'command';
 const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
 
@@ -40,8 +38,6 @@ router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
     /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
     const { subCategory = DEFAULT_CATEGORY } = req.params;
 
     // 선택된 subCategoryDom 정의
@@ -64,7 +60,7 @@ router.get(
     const biModule = global.app.get('biModule');
 
     // Site Sequence.지점 Id를 불러옴
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { mainWhere } = req.locals.mainInfo;
 
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', mainWhere);
@@ -76,16 +72,9 @@ router.get(
 
     // 장치 카테고리 별 Dom 생성
     const deviceDomList = controlDom.makeNodeDom(nodeRows);
-    const sensorDomList = controlDom.makeNodeDom(nodeRows, false);
-
-    // BU.CLI(deviceInfoList);
 
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biModule.getTable('v_dv_place', mainWhere);
-    // BU.CLI(placeRows);
-
-    // /** @type {V_DV_PLACE_RELATION[]} */
-    // const placeRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
 
     /**
      * Main Storage List에서 각각의 거점 별 모든 정보를 가지고 있을 객체 정보 목록
@@ -97,28 +86,23 @@ router.get(
     const foundMsInfo = _.find(mainController.mainStorageList, msInfo =>
       _.isEqual(msInfo.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
     );
-    // BU.CLIN(foundMsInfo.msDataInfo.placeList);
+
     if (foundMsInfo) {
       const wsPlaceRelList = mainController.convertPlaRelsToWsPlaRels({
         placeRelationRows: foundMsInfo.msDataInfo.placeRelList,
         isSubmitAPI: 1,
       });
-      // BU.CLIN(wsPlaceRelList);
+
       // FIXME: 만약 제어 장치도 넣고자 할 경우 EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
       req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr => _.omit(pr, 'is'));
     } else {
       req.locals.wsPlaceRelList = [];
     }
 
-    // BU.CLIN(mainRow.map);
     /** @type {mDeviceMap} */
     const map = JSON.parse(mainRow.map);
 
     controlDom.initCommand(map, placeRows);
-
-    // const flowCmdDom = controlDom.makeFlowCmdDom(placeList, map.controlInfo.flowCmdList);
-
-    // BU.CLI(flowCmdDom);
 
     // 명령 정보만 따로 저장
     req.locals.controlInfo = map.controlInfo;
@@ -129,8 +113,6 @@ router.get(
     req.locals.map = map;
 
     req.locals.deviceDomList = deviceDomList;
-
-    // BU.CLI(req.locals);
 
     // FIXME: gs 인증용 임시 교체
     res.render('./UPSAS/control/tta_command', req.locals);
