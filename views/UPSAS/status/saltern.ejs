@@ -39,7 +39,8 @@
 
     <script>
       $('#tableHeaderDom').html(<%- JSON.stringify(dom.tableHeaderDom) %>);
-      $('#tableBodyDom').html(<%- JSON.stringify(dom.tableBodyDom) %>);
+      var tableBodyDom = <%- JSON.stringify(dom.tableBodyDom) %>;
+      $('#tableBodyDom').html(tableBodyDom[0]);
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
 
       var measureInfo = <%- JSON.stringify(measureInfo) %>;
