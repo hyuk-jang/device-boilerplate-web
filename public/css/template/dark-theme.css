@@ -151,12 +151,12 @@ footer .footer_copyright > a {
 }
 
 .component_piece_area .p_column_rem {
-  padding: 2rem 0 0;
+  /* padding: 2rem 0 0; */
   overflow: hidden;
 }
 /* FIXME: */
 .component_piece_area .p_column_rem_2 {
-  padding: 1rem 0 0;
+  /* padding: 1rem 0 0; */
   overflow-y: hidden;
   overflow-x: auto;
 }

@@ -224,10 +224,11 @@ _:-ms-input-placeholder,
 /************** Container **************/
 /***************************************/
 .container_body {
-  max-width: 95%;
+  /* max-width: 95%; */
   min-height: 700px;
-  margin-bottom: 1rem;
-  margin-left: 2.5%;
+  /* margin-bottom: 1rem; */
+  /* margin-left: 2.5%; */
+  margin: 0 1.5%;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -238,7 +239,7 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 0.5rem auto 0;
+  /* margin: 0.5rem auto 0; */
 }
 
 .container_row {
@@ -246,23 +247,23 @@ _:-ms-input-placeholder,
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 0.5rem auto 0;
+  margin: 0.5rem auto;
 }
 
 .container_row.division {
-  flex: 1 0.5 370px;
-  min-height: 370px;
+  flex: 1 0.5 348px;
+  min-height: 348px;
 }
 
 .component_side_box {
   width: 250px;
   min-width: 250px;
-  height: 370px;
+  height: 348px;
 }
 
 .component_contents_area {
   width: calc(100% - 250px - 1%);
-  height: 370px;
+  height: 348px;
   display: flex;
   justify-content: space-between;
 }
@@ -304,7 +305,7 @@ _:-ms-input-placeholder,
 /***************************************/
 .component_piece_box {
   width: 100px;
-  /* min-height: 370px; */
+  /* min-height: 348px; */
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
@@ -316,13 +317,13 @@ _:-ms-input-placeholder,
 }
 
 .component_piece_box.gauge_box {
-  height: 370px;
+  height: 348px;
 }
 
 .component_piece_area {
   display: flex;
   flex-direction: column;
-  height: 98%;
+  /* height: 98%; */
   width: 96%;
 }
 
@@ -360,7 +361,7 @@ _:-ms-input-placeholder,
 
 .component_piece_body {
   /* height: 87%; */
-  padding: 0 1rem;
+  padding: 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
   height: calc(100% - 50px);
@@ -574,7 +575,7 @@ article.sdv_w_side > p:last-child {
 }
 
 .component_ele_status {
-  margin: 1rem 0;
+  margin: 1rem 0 0;
 }
 
 .component_ele_status > header {
@@ -679,6 +680,13 @@ article.sdv_w_side > p:last-child {
 }
 .overY_h {
   overflow-y: hidden;
+}
+
+.overX_a {
+  overflow-x: auto;
+}
+.overY_a {
+  overflow-y: auto;
 }
 
 .notice_next_box {
