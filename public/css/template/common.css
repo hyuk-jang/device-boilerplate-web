@@ -304,8 +304,9 @@ _:-ms-input-placeholder,
 /********** Dash Board 영역 ************/
 /***************************************/
 .component_piece_box {
-  width: 100px;
-  /* min-height: 348px; */
+  width: 250px;
+  min-width: 250px;
+  min-height: 348px;
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
@@ -345,7 +346,7 @@ _:-ms-input-placeholder,
 
 .component_piece_area > header {
   margin: 0;
-  height: 50px;
+  height: 45px;
   /* height: 13%; */
   display: flex;
   align-items: center;
@@ -939,6 +940,10 @@ article.sdv_w_side > p:last-child {
   margin-left: 2rem;
 }
 
+.mb_0 {
+  margin-bottom: 0;
+}
+
 .mb_50rem {
   margin-bottom: 0.5rem;
 }
@@ -974,23 +979,42 @@ article.sdv_w_side > p:last-child {
   justify-content: space-between;
 }
 
-.flex_101auto {
+.flex_0 {
+  flex: 0;
+}
+
+.flex_1,
+.flex_10 {
   flex: 1 1 auto;
 }
 
-.flex_111auto {
+.flex_11 {
   flex: 1.1 1 auto;
 }
-.flex_121auto {
-  flex: 1.2 1 auto;
+.flex_12 {
+  flex: 1.1 1 auto;
 }
 
-.flex_151auto {
+.flex_15 {
   flex: 1.5 1 auto;
 }
 
-.flex_201auto {
+.flex_20 {
   flex: 2 1 auto;
+}
+
+.flex_3,
+.flex_30 {
+  flex: 3 1 auto;
+}
+
+.flex_35 {
+  flex: 3.5 1 auto;
+}
+
+.flex_4,
+.flex_40 {
+  flex: 4 1 auto;
 }
 
 .flex_grow_1 {
@@ -1046,6 +1070,7 @@ article.sdv_w_side > p:last-child {
 
   .component_piece_box {
     width: 100%;
+    min-height: auto;
   }
 
   .component_side_area,
