@@ -576,7 +576,11 @@ article.sdv_w_side > p:last-child {
 }
 
 .component_ele_status {
-  margin: 1rem 0 0;
+  margin: 0 0 0.9rem;
+}
+
+.component_ele_status:last-child {
+  margin: 0;
 }
 
 .component_ele_status > header {
