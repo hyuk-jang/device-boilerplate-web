@@ -228,7 +228,7 @@ _:-ms-input-placeholder,
   min-height: 700px;
   /* margin-bottom: 1rem; */
   /* margin-left: 2.5%; */
-  margin: 0 1.5%;
+  margin: 0 1%;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -248,6 +248,7 @@ _:-ms-input-placeholder,
   display: flex;
   justify-content: space-between;
   margin: 0.5rem auto;
+  flex-wrap: wrap;
 }
 
 .container_row.division {
@@ -306,7 +307,8 @@ _:-ms-input-placeholder,
 .component_piece_box {
   width: 250px;
   min-width: 250px;
-  min-height: 348px;
+  height: 348px;
+  padding: 0.1rem 0.5rem;
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
@@ -325,9 +327,9 @@ _:-ms-input-placeholder,
   display: flex;
   flex-direction: column;
   /* height: 98%; */
-  width: 96%;
+  width: 100%;
 }
-
+/* 
 .component_piece_box:first-child > .component_side_area,
 .component_piece_box:first-child > .component_piece_area {
   margin-right: auto;
@@ -338,7 +340,7 @@ _:-ms-input-placeholder,
 .component_piece_box:last-child > .component_piece_area {
   margin-left: auto;
   width: 98%;
-}
+} */
 
 .component_only_one > .component_piece_box > .component_piece_area {
   width: 100%;
@@ -365,11 +367,11 @@ _:-ms-input-placeholder,
   padding: 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
-  height: calc(100% - 50px);
+  height: calc(100% - 45px);
 }
 
 .gauge_box .component_piece_body {
-  height: calc(100% - 50px);
+  height: calc(100% - 45px);
 }
 
 .component_piece_body > .gauge_contents {

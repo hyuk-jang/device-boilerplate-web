@@ -276,6 +276,7 @@
           .parent()
           .addClass('hidden');
 
+        // $('.container_row').addClass('division');
         $('.container_body').height(window.innerHeight);
 
         window.dispatchEvent(new Event('resize'));
@@ -287,6 +288,8 @@
 
       document.addEventListener('keyup', function(e) {
         if (e.keyCode === 27) {
+          // $('.container_row').removeClass('division');
+
           $('#wrap > header').removeClass('hidden');
           $('#wrap > footer').removeClass('hidden');
           $('#subCategoryDom')
