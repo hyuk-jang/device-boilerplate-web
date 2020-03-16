@@ -67,74 +67,7 @@
           <div id="subCategoryDom" class="report_category"></div>
           <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
-        <div class="container_row division">
-          <div class="component_piece_box flex_0">
-            <article class="component_piece_area">
-              <header>
-                환경 정보
-              </header>
-              <div class="component_piece_body overY_a">
-                <section id="salternEnv" class="data_view_section fs_150rem">
-                  <p class="table_desc_area">
-                    <span id=""> 기상정보 </span>
-                  </p>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>일사량</p>
-                    <p id="solar">578.2</p>
-                    <p>W/m²</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>온도</p>
-                    <p id="temp">18.2</p>
-                    <p>℃</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>습도</p>
-                    <p id="reh">47.7</p>
-                    <p>%</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>풍속</p>
-                    <p id="ws">3.9</p>
-                    <p>m/s</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>1시간 강수량</p>
-                    <p id="rain_h">0</p>
-                    <p>mm</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>금일 강수량</p>
-                    <p id="rain_d">0</p>
-                    <p>mm</p>
-                  </article>
-                  <p class="table_desc_area">
-                    <span id=""> 염전환경정보 </span>
-                  </p>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>수위</p>
-                    <p id="">2.3</p>
-                    <p>cm</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>수온</p>
-                    <p id="">12.3</p>
-                    <p>℃</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>모듈온도</p>
-                    <p id="">22.6</p>
-                    <p>℃</p>
-                  </article>
-                  <article class="sensor_data_view sdv_w_side">
-                    <p>염도</p>
-                    <p id="">12.6</p>
-                    <p>%</p>
-                  </article>
-                </section>
-              </div>
-            </article>
-          </div>
+        <div class="container_row">
           <div class="component_piece_box flex_35">
             <article class="component_piece_area">
               <header>금일 발전 효율</header>
@@ -147,15 +80,27 @@
               <div id="realtime_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
-        </div>
-        <div class="container_row division">
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
               <header>지난 3일 효율 분석</header>
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
+        </div>
+        <div class="container_row">
           <div class="component_piece_box flex_3">
+            <article class="component_piece_area">
+              <header>최대 발전 효율</header>
+              <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box flex_3">
+            <article class="component_piece_area">
+              <header>최대 환경 변화 추이</header>
+              <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box flex_4">
             <article class="component_piece_area">
               <header>발전 효율 최대순간 분석</header>
               <section class="component_piece_body">
@@ -237,18 +182,6 @@
               </section>
             </article>
           </div>
-          <div class="component_piece_box flex_35">
-            <article class="component_piece_area">
-              <header>최대 발전 효율</header>
-              <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
-            </article>
-          </div>
-          <div class="component_piece_box flex_35">
-            <article class="component_piece_area">
-              <header>최대 환경 변화 추이</header>
-              <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
-            </article>
-          </div>
         </div>
       </div>
       <!--하단1-->
@@ -276,7 +209,7 @@
           .parent()
           .addClass('hidden');
 
-        // $('.container_row').addClass('division');
+        $('.container_row').addClass('division');
         $('.container_body').height(window.innerHeight);
 
         window.dispatchEvent(new Event('resize'));
@@ -288,7 +221,7 @@
 
       document.addEventListener('keyup', function(e) {
         if (e.keyCode === 27) {
-          // $('.container_row').removeClass('division');
+          $('.container_row').removeClass('division');
 
           $('#wrap > header').removeClass('hidden');
           $('#wrap > footer').removeClass('hidden');
@@ -1656,7 +1589,7 @@
       drawAllChart();
       $(document).ready(function() {
         // FIXME: 1분에 한번씩 갱신 시연
-        setInterval(drawAllChart, 1000 * 60);
+        // setInterval(drawAllChart, 1000 * 60);
       });
     </script>
 

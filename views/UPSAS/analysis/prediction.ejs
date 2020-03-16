@@ -60,7 +60,7 @@
           <div id="subCategoryDom" class="report_category"></div>
           <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
-        <div class="container_row division">
+        <div class="container_row ">
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>금일 발전량 트렌드</header>
@@ -74,7 +74,7 @@
             </article>
           </div>
         </div>
-        <div class="container_row division">
+        <div class="container_row ">
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>지난 3일간 발전량 트렌드</header>
@@ -106,6 +106,7 @@
           .parent()
           .addClass('hidden');
 
+        $('.container_row').addClass('division');
         $('.container_body').height(window.innerHeight);
 
         window.dispatchEvent(new Event('resize'));
@@ -120,6 +121,8 @@
             .parent()
             .removeClass('hidden');
           $('.container_body').height('auto');
+
+          $('.container_row').removeClass('division');
           // TODO: 데이터 자동 갱신 정지
           window.dispatchEvent(new Event('resize'));
         }
@@ -7028,7 +7031,7 @@
 
       $(document).ready(function() {
         // FIXME: 1분에 한번씩 갱신 시연
-        setInterval(drawAllChart, 1000 * 10);
+        // setInterval(drawAllChart, 1000 * 10);
       });
     </script>
   </body>
