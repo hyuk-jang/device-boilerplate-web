@@ -385,7 +385,7 @@ class UpsasDP extends DeviceProtocol {
       },
       {
         dataKey: 'powerCpKwh',
-        dataName: '누적발전량',
+        dataName: '누적 발전량',
         dataUnit: 'MWh',
         mainTitle: '인버터',
         scale: 0.001,
@@ -398,15 +398,21 @@ class UpsasDP extends DeviceProtocol {
         mainTitle: '염전 상태 계측',
       },
       {
-        dataKey: 'salinity',
-        dataName: '염도',
-        dataUnit: '%',
+        dataKey: 'brine_temp',
+        dataName: '수온',
+        dataUnit: '℃',
         mainTitle: '염전 상태 계측',
       },
       {
         dataKey: 'module_rear_temp',
-        dataName: '모듈온도',
+        dataName: '모듈 온도',
         dataUnit: '℃',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'salinity',
+        dataName: '염도',
+        dataUnit: '%',
         mainTitle: '염전 상태 계측',
       },
     ];
@@ -524,7 +530,7 @@ class UpsasDP extends DeviceProtocol {
   get statusSalternTable() {
     return [
       {
-        dataKey: 'place_name',
+        dataKey: 'seb_name',
         mainTitle: '장소',
         cssWidthPer: 25,
       },
