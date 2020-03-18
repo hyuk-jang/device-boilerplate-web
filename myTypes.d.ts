@@ -2,6 +2,7 @@ import { Server } from 'http';
 import express from 'express';
 
 import AdminModel from './models/templates/AdminModel';
+import AnalysisModel from './models/templates/AnalysisModel';
 import BiAuth from './models/templates/auth/BiAuth';
 import BiDevice from './models/templates/BiDevice';
 import BiModule from './models/templates/BiModule';
@@ -18,6 +19,7 @@ declare global {
   const BiModule: BiModule;
   const BiDevice: BiDevice;
   const AdminModel: AdminModel;
+  const AnalysisModel: AnalysisModel;
   const PowerModel: PowerModel;
   const WeatherModel: WeatherModel;
   const BlockModel: BlockModel;

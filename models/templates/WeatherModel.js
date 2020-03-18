@@ -164,7 +164,7 @@ class WeatherModel extends BiModule {
   }
 
   /**
-   * 기상청 현재시간 기준 오늘, 내일, 모레 날씨를 가져옴 
+   * 기상청 현재시간 기준 오늘, 내일, 모레 날씨를 가져옴
    * @param {number} weatherLocationSeq 기상청 동네 예보 위치 seq
    * @return {WC_KMA_DATA} 날씨 정보
    */
@@ -238,7 +238,7 @@ class WeatherModel extends BiModule {
         ) AS result_wdd
      GROUP BY ${groupByFormat}
     `;
-    return this.db.single(sql, '', false);
+    return this.db.single(sql, '', true);
   }
 
   /**

@@ -2,7 +2,18 @@ const _ = require('lodash');
 const moment = require('moment');
 const xss = require('xss');
 
-const BU = require('base-util-jh').baseUtil;
+const { BU } = require('base-util-jh');
+
+/**
+ * 날짜 데이터를 UTC 날짜로 변환 후 반환
+ * @param {string|Date} date
+ */
+function convertDateToUTC(date) {
+  return moment(date)
+    .add(9, 'hours')
+    .valueOf();
+}
+exports.convertDateToUTC = convertDateToUTC;
 
 /**
  *

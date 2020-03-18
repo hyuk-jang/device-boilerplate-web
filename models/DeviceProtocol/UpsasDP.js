@@ -6,6 +6,7 @@ const {
   Inverter: { BASE_KEY: BASE_INV_KEY },
   UPSAS: { BASE_KEY: BASE_UPSAS_KEY },
   Sensor: { BASE_KEY: BASE_SENSOR_KEY },
+  Weathercast: { BASE_KEY: BASE_WEATHER_KEY },
 } = BaseModel;
 
 const DeviceProtocol = require('./DeviceProtocol');
@@ -611,6 +612,8 @@ class UpsasDP extends DeviceProtocol {
         return this.blockInverterChart;
       case 'saltern':
         return this.blockSalternChart;
+      case 'weatherDevice':
+        return this.blockWeatherDeviceChart;
       default:
         break;
     }
@@ -944,6 +947,46 @@ class UpsasDP extends DeviceProtocol {
               ],
               // dataUnit: '℃',
               yTitle: '온도(℃)',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  /**
+   * 인버터 생성 정보
+   * @return {blockTableInfo}
+   */
+  get blockWeatherDeviceChart() {
+    return {
+      blockTableName: 'weather_device_data',
+      baseTableInfo: {
+        tableName: 'main',
+        // idKey: 'target_id',
+        // placeKey: 'place_seq',
+        fromToKeyTableList: [
+          {
+            fromKey: 'main_seq',
+            toKey: 'main_seq',
+          },
+        ],
+      },
+      blockChartList: [
+        {
+          domId: 'weather_device_chart',
+          title: '일사량',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: 'solar',
+                  toKey: 'solar',
+                  convertName: '',
+                },
+              ],
+              // dataUnit: 'kW',
+              yTitle: '전력(kW)',
             },
           ],
         },
