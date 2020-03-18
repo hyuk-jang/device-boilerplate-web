@@ -66,33 +66,37 @@ router.get(
     const analysisModel = global.app.get('analysisModel');
 
     const effSearchRange = analysisModel.createSearchRange({
+      // FIXME: 1일전 테스트
+      strStartDate: moment()
+        .subtract(1, 'day')
+        .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
 
     // 금일 발전 효율 트렌드
     // 1. 발전 효율 구함
-    const effReportRows = await analysisModel.getEffReport(effSearchRange);
+    const dailyPowerEffRows = await analysisModel.getPowerEffReport(effSearchRange);
 
-    // 2. 발전 효율이 시작하는 시간 구함
-    const startEffDate = _(effReportRows)
-      .sortBy('group_date')
-      .head().group_date;
+    // 2. 발전 효율이 시작 및 종료 시간 구함
+    const groupEffReport = _.sortBy(dailyPowerEffRows, 'group_date');
+    const { group_date: startEffDate } = _.head(groupEffReport) || {};
+    const { group_date: endEffDate } = _.last(groupEffReport) || {};
 
     // 3. 100kW 일사량 트렌드 구하고 일사 데이터를 발전 효율이 시작하는 시간부터 자름
 
     const weatherDeviceRows = await weatherModel
       .getWeatherTrend(effSearchRange, siteId)
-      .filter(wddRow => wddRow.group_date >= startEffDate);
+      .filter(row => row.group_date >= startEffDate && row.group_date <= endEffDate);
 
     // 4. 발전 효율을 카테고리 별로 분류하고 chartData에 맞게 데이터 변환 후 반환
-    const moduleEfficiencyChart = _(effReportRows)
+    const moduleEfficiencyChart = _(dailyPowerEffRows)
       .groupBy('install_place')
       .map((moduleEffRows, installPlace) => {
         return {
           name: installPlace,
           data: moduleEffRows.map(effRow => {
-            return [commonUtil.convertDateToUTC(effRow.group_date), effRow.module_eff];
+            return [commonUtil.convertDateToUTC(effRow.group_date), effRow.avg_power_eff];
           }),
         };
       })
@@ -113,15 +117,12 @@ router.get(
     _.set(req.locals, 'chartInfo.dailyPowerChart', dailyPowerChart);
 
     // 금일 환경 변화 추이
-    // TODO: 1. 100kW 온도 트렌드 구함
-
-    // TODO: 2. 비교군 모듈 온도, 수온 구함
-    // TODO: 3. 발전 효율이 시작하는 구간부터 자름
+    // 1. 비교군 모듈 온도, 수온 구하고 발전 효율이 시작 및 종료하는 구간 자름
     const envReportRows = await analysisModel
       .getEnvReport(effSearchRange)
-      .filter(row => row.group_date >= startEffDate);
+      .filter(row => row.group_date >= startEffDate && row.group_date <= endEffDate);
 
-    // TODO: 4. 날짜 데이터를 UTC로 변환
+    // 2. 날짜 데이터를 UTC로 변환
     // 모듈 온도로 분석
     const envModuleTempChart = _(envReportRows)
       .groupBy('install_place')
@@ -138,7 +139,7 @@ router.get(
 
     // 수온으로 분석
     const envBrineTempChart = {
-      name: '수중 0도 모듈 온도',
+      name: '수중 0도 수온',
       data: _(envReportRows)
         .filter(envRow => envRow.target_category === '100kw')
         .map(envRow => [commonUtil.convertDateToUTC(envRow.group_date), envRow.avg_brine_temp])
@@ -146,7 +147,7 @@ router.get(
       dashStyle: 'shortdot',
     };
 
-    // TODO: 5. 금일 환경 변화 추이 데이터 전송
+    // 금일 환경 변화 추이 데이터 전송
     const dailyEnvChart = envModuleTempChart.concat(envBrineTempChart, {
       name: '외기온도',
       // yAxis: 1,
@@ -161,7 +162,36 @@ router.get(
     _.set(req.locals, 'chartInfo.dailyEnvChart', dailyEnvChart);
 
     // 지난 3일 효율 분석
-    // TODO: 1. 지난 3일동안의 발전 효율을 구함 (1일 합산)
+    // 3일 검색 Search Range 생성
+    const prevSearchRange = analysisModel.createSearchRange({
+      searchType: 'range',
+      searchInterval: 'day',
+      strStartDate: moment()
+        .subtract(3, 'day')
+        .format('YYYY-MM-DD'),
+      strEndDate: moment()
+        .subtract(1, 'day')
+        .format('YYYY-MM-DD'),
+    });
+
+    // 1. 지난 3일동안의 발전 효율을 구함 (1일 합산)
+    const prevPowerEffRows = await analysisModel.getPowerEffReport(prevSearchRange);
+    // BU.CLIN(prevPowerEffRows);
+
+    const prevRangePowerEffChart = _.chain(prevPowerEffRows)
+      .groupBy('install_place')
+      .map((powerEffRows, installPlace) => {
+        return {
+          name: installPlace,
+          data: powerEffRows.map(row => [
+            commonUtil.convertDateToUTC(row.group_date),
+            row.t_interval_power_eff,
+          ]),
+        };
+      })
+      .value();
+
+    _.set(req.locals, 'chartInfo.prevRangePowerEffChart', prevRangePowerEffChart);
 
     // TODO: 2. 발전 효율이 가장 높게 나온 날의 발전 효율 트렌드 구함
 

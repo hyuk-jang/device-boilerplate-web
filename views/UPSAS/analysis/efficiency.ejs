@@ -390,44 +390,15 @@
                   color: Highcharts.getOptions().colors[10],
                 },
               },
-              // Primary yAxis
-              // labels: {
-              //   format: '{value} %',
-              //   style: {
-              //     color: Highcharts.getOptions().colors[10],
-              //   },
-              // },
             },
           ],
           plotOptions: {
-            series: {
-              pointStart: Date.UTC(2020, 3, 2),
-              pointInterval: 1000 * 60 * 60 * 24,
-            },
+            series: {},
           },
           tooltip: {
             shared: true,
           },
-          series: [
-            {
-              name: '육상 태양광',
-              data: [
-                150.6,
-                160.8,
-                180.3,
-                // 210.2, 300.1, 350.7, 410.6, 380.5, 220.4, 270.8
-              ],
-            },
-            {
-              name: '수중 태양광',
-              data: [
-                142.2,
-                170.8,
-                189.3,
-                //  190.5, 310.1, 320.7, 440.1, 340.5, 200.2, 240.9
-              ],
-            },
-          ],
+          series: chartInfo.prevRangePowerEffChart,
           credits: {
             enabled: false,
           },

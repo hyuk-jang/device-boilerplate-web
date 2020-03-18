@@ -25,9 +25,9 @@ module.exports = class extends BiModule {
   /**
    * 인버터 차트 반환
    * @param {searchRange} searchRange
-   * @return {Promise.<{target_category: string, install_place: string, t_amount: number, t_power_kw: number, group_date: string}[]>}
+   * @return {Promise.<{target_category: string, install_place: string, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, group_date: string}[]>}
    */
-  getEffReport(searchRange) {
+  getPowerEffReport(searchRange) {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(
       searchRange,
       'writedate',
@@ -37,7 +37,9 @@ module.exports = class extends BiModule {
       SELECT
             target_category, install_place, ROUND(SUM(amount), 2)  t_amount,
             ROUND(SUM(avg_power_kw) , 4) AS t_power_kw,
-            ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS module_eff,
+            ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS avg_power_eff,
+            ROUND(SUM(interval_power_cp_kwh) , 4) AS t_interval_power_cp_kwh,
+            ROUND(SUM(interval_power_cp_kwh) / SUM(amount) * 100, 2) AS t_interval_power_eff,
             group_date
       FROM
         (
@@ -45,6 +47,7 @@ module.exports = class extends BiModule {
               inv_tbl.inverter_seq, inv_tbl.target_category, inv_tbl.install_place, inv_tbl.amount, 
               inv_data.writedate,
               AVG(inv_data.power_kw) AS avg_power_kw,
+              MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
               ${selectViewDate},
               ${selectGroupDate}
         FROM pw_inverter_data inv_data
@@ -70,7 +73,7 @@ module.exports = class extends BiModule {
    * 인버터 차트 반환
    * @param {searchRange} searchRange
    * @param {number=} mainSeq
-   * @return {Promise.<{target_category: string, install_place: string, t_amount: number, t_power_kw: number, group_date: string}[]>}
+   * @return {Promise.<{seb_name: string, target_category: string, install_place: string, avg_water_level: number, avg_salinity: number, avg_module_rear_temp:number, avg_brine_temp:number, group_date: string}[]>}
    */
   getEnvReport(searchRange, mainSeq) {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(

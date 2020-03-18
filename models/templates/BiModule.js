@@ -656,9 +656,11 @@ class BiModule extends BM {
     } else if (searchInterval === 'min10') {
       divideTimeNumber = 6;
       firstGroupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
-    } else {
+    } else if (searchInterval === 'hour') {
       divideTimeNumber = 1;
       firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d %H")`;
+    } else {
+      firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d")`;
     }
 
     // 최종 묶는 타입을 지정 안했다면 조회 간격으로 dateFormat 생성

@@ -238,7 +238,7 @@ class WeatherModel extends BiModule {
         ) AS result_wdd
      GROUP BY ${groupByFormat}
     `;
-    return this.db.single(sql, '', true);
+    return this.db.single(sql, '', false);
   }
 
   /**
@@ -336,7 +336,7 @@ class WeatherModel extends BiModule {
     GROUP BY main_group.main_seq, ${groupByFormat}
         `;
     // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-    return this.db.single(sql, '', true);
+    return this.db.single(sql, '', false);
   }
 
   /**
