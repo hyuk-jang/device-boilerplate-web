@@ -284,58 +284,31 @@ class WeatherModel extends BiModule {
    * @return {weatherRowDataPacketList}
    */
   getWeatherDeviceAverage(searchRange, mainSeq) {
-    const { strBetweenStart, strBetweenEnd, strStartDate, strEndDate } = searchRange;
     const {
-      // selectGroupDate,
-      // selectViewDate,
-      // firstGroupByFormat,
-      // groupByFormat,
-    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
-
-    BU.CLI(searchRange);
-
-    const {
-      firstGroupByFormat,
       selectGroupDate,
       selectViewDate,
+      firstGroupByFormat,
       groupByFormat,
-      divideTimeNumber,
     } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
-    const sql = `
 
-    SELECT
-          main_group.main_seq,
-          ${selectViewDate},
-          ${selectGroupDate},
-          ROUND(AVG(avg_temp), 1) AS avg_temp,
-          ROUND(AVG(avg_reh), 1) AS avg_reh,
-          ROUND(AVG(avg_ws), 1) AS avg_ws,
-          ROUND(AVG(avg_solar), 1) AS avg_solar,
-          ROUND(SUM(interval_solar), 1) AS total_interval_solar,
-          ROUND(AVG(avg_inclined_solar), 1) AS avg_inclined_solar,
-          ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
-          ROUND(AVG(avg_uv), 0) AS avg_uv
-    FROM
-      (SELECT
-              main_seq,
-              writedate,
-              DATE_FORMAT(writedate,"%H") AS hour_time,
-              AVG(temp) AS avg_temp,
-              AVG(reh) AS avg_reh,
-              AVG(ws) AS avg_ws,
-              AVG(solar) AS avg_solar,
-              AVG(solar) / ${divideTimeNumber} AS interval_solar,
-              AVG(inclined_solar) AS avg_inclined_solar,
-              COUNT(*) AS first_count
-      FROM weather_device_data wdd
-      WHERE writedate>= "${strStartDate}" AND writedate<"${strEndDate}"
+    const sql = `
+      SELECT
+            main_seq,
+            ${selectViewDate},
+            ${selectGroupDate},
+            ROUND(AVG(temp), 1) AS avg_temp,
+            ROUND(AVG(reh), 1) AS avg_reh,
+            ROUND(AVG(ws), 1) AS avg_ws,
+            ROUND(AVG(solar), 1) AS avg_solar,
+            ROUND(AVG(inclined_solar), 1) AS avg_inclined_solar,
+            ROUND(AVG(uv), 0) AS avg_uv
+      FROM
+        weather_device_data wdd
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
       GROUP BY ${firstGroupByFormat}, main_seq
       ORDER BY main_seq, writedate
-      ) as main_group
-    GROUP BY main_group.main_seq, ${groupByFormat}
-        `;
-    // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
+      `;
     return this.db.single(sql, '', false);
   }
 

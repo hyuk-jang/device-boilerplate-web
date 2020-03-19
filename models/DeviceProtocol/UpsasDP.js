@@ -379,8 +379,14 @@ class UpsasDP extends DeviceProtocol {
         mainTitle: '인버터',
       },
       {
+        dataKey: 'gridEfficiency',
+        dataName: '발전 효율',
+        dataUnit: '%',
+        mainTitle: '인버터',
+      },
+      {
         dataKey: 'gridPf',
-        dataName: '효율',
+        dataName: '역률',
         dataUnit: '%',
         mainTitle: '인버터',
       },
@@ -415,6 +421,56 @@ class UpsasDP extends DeviceProtocol {
         dataName: '염도',
         dataUnit: '%',
         mainTitle: '염전 상태 계측',
+      },
+    ];
+  }
+
+  /**
+   * 종합 계측 현황
+   * @return {blockViewMakeOption[]}
+   */
+  get statusAnalysisTable() {
+    return [
+      {
+        dataKey: 'seb_name',
+        mainTitle: '',
+        cssWidthPer: 13,
+      },
+      {
+        dataKey: 'moduleEfficiency',
+        dataName: '발전 효율',
+        dataUnit: '%',
+        // mainTitle: '인버터',
+      },
+      {
+        dataKey: 'module_rear_temp',
+        dataName: '모듈 온도',
+        dataUnit: '℃',
+        // mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'out_temp',
+        dataName: '기온',
+        dataUnit: '℃',
+        // mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'brine_temp',
+        dataName: '수온',
+        dataUnit: '℃',
+        // mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'water_level',
+        dataName: '수위',
+        dataUnit: 'cm',
+        // mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'salinity',
+        dataName: '염도',
+        dataUnit: '%',
+        // mainTitle: '염전 상태 계측',
       },
     ];
   }

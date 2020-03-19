@@ -8,6 +8,7 @@ const BiModule = require('./BiModule');
 const BiDevice = require('./BiDevice');
 const WeatherModel = require('./WeatherModel');
 
+const commonUtil = require('./common.util');
 const webUtil = require('./web.util');
 const excelUtil = require('./excel.util');
 
@@ -22,12 +23,94 @@ module.exports = class extends BiModule {
     this.weatherModel = new WeatherModel(dbInfo);
   }
 
+  /* ****************************************************
+   ********             데이터 정제
+   **************************************************** */
+  /**
+   * 발전 효율 차트 생성
+   * @param {[]} powerEffRows
+   * @param {Object} option
+   * @param {string} option.dataKey 차트에 뿌릴 데이터 Key
+   * @param {string} option.dateKey 차트에 추출할 날짜 Key
+   * @param {string=} option.groupKey Rows를 그루핑할 Key
+   * @param {string[]=} option.nameKeys 이름을 부여할 Key List
+   * @param {Object} option.mergeInfo 2차 병합이 필요할 경우
+   * @param {string=} option.mergeInfo.mergeKey 데이터 병합할 Key
+   * @param {string=} option.mergeInfo.mergeType AVG, SUM, MAX
+   */
+  makePowerEfficiencyChart(powerEffRows, option) {
+    const {
+      dataKey,
+      dateKey = 'group_date',
+      groupKey = 'install_place',
+      nameKeys = [groupKey],
+    } = option;
+
+    return _.chain(powerEffRows)
+      .groupBy(groupKey)
+      .map(powerRows => {
+        return {
+          name: nameKeys.map(nKey => powerRows[0][nKey]).join(' '),
+          data: powerRows.map(row => [commonUtil.convertDateToUTC(row[dateKey]), row[dataKey]]),
+        };
+      })
+      .value();
+  }
+
+  /**
+   *
+   * @param {{}[]} dataRows
+   * @param {Object[]} selectOptions 차트로 만들 정보
+   * @param {string} selectOptions.dataKey 차트로 만들 Data Key
+   * @param {string} selectOptions.name 차트 라인 이름
+   * @param {number=} selectOptions.yAxis 차트 y축 방향
+   * @param {string=} selectOptions.color 차트 라인 색상
+   * @param {string=} selectOptions.dashStyle 차트 라인 스타일
+   */
+  makeChartData(dataRows, selectOptions) {
+    return selectOptions.map(selectInfo => {
+      const { dataKey, name, color = null, dashStyle, yAxis = 0 } = selectInfo;
+
+      return {
+        name,
+        color,
+        dashStyle,
+        yAxis,
+        data: dataRows.map(wddRow => [
+          commonUtil.convertDateToUTC(wddRow.group_date),
+          _.get(wddRow, dataKey, ''),
+        ]),
+      };
+    });
+  }
+
+  /**
+   * group_date로 묶었을 때 가장 이른 시각과 늦은 시각을 각각 반환
+   * @param {[{}]} rows
+   * @param {string} dateKey 날짜로 묶을 키
+   * @return {{sDate: string, eDate: string}}
+   */
+  getStartEndDate(rows, dateKey = 'group_date') {
+    const sortedRows = _.sortBy(rows, dateKey);
+    const { group_date: sDate } = _.head(sortedRows) || {};
+    const { group_date: eDate } = _.last(sortedRows) || {};
+    return { sDate, eDate };
+  }
+
+  /* ****************************************************
+   ********                 SQL
+   **************************************************** */
+
   /**
    * 인버터 차트 반환
    * @param {searchRange} searchRange
+   * @param {string=} effType 검색 조건. target_category or inverter_seq
    * @return {Promise.<{target_category: string, install_place: string, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, group_date: string}[]>}
+   * @example
+   * effType: target_category = 육상 0도, 육상 30도, 수중 0도
+   * effType: inverter_seq = 육상 0도(A~B), 육상 30도(A~B), 수중 0도(A~D)
    */
-  getPowerEffReport(searchRange) {
+  getPowerEffReport(searchRange, effType = 'target_category') {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(
       searchRange,
       'writedate',
@@ -35,7 +118,7 @@ module.exports = class extends BiModule {
 
     const sql = `
       SELECT
-            target_category, install_place, ROUND(SUM(amount), 2)  t_amount,
+            inverter_seq, serial_number, target_category, install_place, ROUND(SUM(amount), 2)  t_amount,
             ROUND(SUM(avg_power_kw) , 4) AS t_power_kw,
             ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS avg_power_eff,
             ROUND(SUM(interval_power_cp_kwh) , 4) AS t_interval_power_cp_kwh,
@@ -44,7 +127,7 @@ module.exports = class extends BiModule {
       FROM
         (
         SELECT 
-              inv_tbl.inverter_seq, inv_tbl.target_category, inv_tbl.install_place, inv_tbl.amount, 
+              inv_tbl.inverter_seq, serial_number, target_category, install_place, amount,
               inv_data.writedate,
               AVG(inv_data.power_kw) AS avg_power_kw,
               MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
@@ -56,14 +139,14 @@ module.exports = class extends BiModule {
           SELECT
             * 
           FROM pw_inverter inv
-          WHERE inv.target_category IN ('100kw', 'earth30angle', 'earth0angle')
+          WHERE inv.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
           ) inv_tbl
         ON inv_tbl.inverter_seq = inv_data.inverter_seq
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
          AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
-        GROUP BY target_category, group_date, inverter_seq
+        GROUP BY ${effType}, group_date, inverter_seq
         ) final
-      GROUP BY target_category, group_date
+      GROUP BY ${effType}, group_date
     `;
 
     return this.db.single(sql, null, false);
@@ -72,10 +155,11 @@ module.exports = class extends BiModule {
   /**
    * 인버터 차트 반환
    * @param {searchRange} searchRange
+   * @param {string=} effType 검색 조건. target_category or inverter_seq
    * @param {number=} mainSeq
    * @return {Promise.<{seb_name: string, target_category: string, install_place: string, avg_water_level: number, avg_salinity: number, avg_module_rear_temp:number, avg_brine_temp:number, group_date: string}[]>}
    */
-  getEnvReport(searchRange, mainSeq) {
+  getEnvReport(searchRange, effType = 'target_category', mainSeq) {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(
       searchRange,
       'writedate',
@@ -109,8 +193,8 @@ module.exports = class extends BiModule {
          ON sub_tbl.place_seq = ssd.place_seq
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
          AND ssd.place_seq IN (sub_tbl.place_seq)
-         AND sub_tbl.target_category IN ('100kw', 'earth30angle', 'earth0angle')
-        GROUP BY sub_tbl.target_category, group_date
+         AND sub_tbl.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
+        GROUP BY sub_tbl.${effType}, group_date
     `;
 
     return this.db.single(sql, null, false);

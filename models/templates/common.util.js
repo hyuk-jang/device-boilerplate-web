@@ -9,9 +9,8 @@ const { BU } = require('base-util-jh');
  * @param {string|Date} date
  */
 function convertDateToUTC(date) {
-  return moment(date)
-    .add(9, 'hours')
-    .valueOf();
+  date = date instanceof Date ? date : new Date(date);
+  return Date.parse(date.addHours(9));
 }
 exports.convertDateToUTC = convertDateToUTC;
 

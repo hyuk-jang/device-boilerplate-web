@@ -62,13 +62,13 @@
         yAxis: [
           {
             labels: {
-              format: '{value} kW',
+              format: '{value} %',
               style: {
                 color: Highcharts.getOptions().colors[1],
               },
             },
             title: {
-              text: '출력',
+              text: '출력 효율',
             },
             min: 0,
             // max: 40,
@@ -83,7 +83,7 @@
               },
             },
             title: {
-              // text: '온도/수위/염도',
+              text: '온도/수위/염도',
             },
             min: 0,
             max: 50,
@@ -94,11 +94,11 @@
         ],
         series: [
           {
-            name: 'DC 출력',
-            data: _.map(sebRelationRows, 'modulePvKw'),
+            name: 'DC 출력 효율',
+            data: _.map(sebRelationRows, 'moduleEfficiency'),
             color: 'black',
             tooltip: {
-              valueSuffix: ' kW',
+              valueSuffix: ' %',
             },
           },
           {

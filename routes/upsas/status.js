@@ -200,6 +200,15 @@ router.get(
           .divide(1000)
           .round(2)
           .value();
+
+        // BU.CLIS(sebRelRow);
+
+        sebRelRow.moduleEfficiency = _.chain(sebRelRow.modulePvKw)
+          .divide(sebRelRow.power_amount)
+          .multiply(100)
+          .round(1)
+          .value();
+        // BU.CLI(sebRelRow.moduleEfficiency);
       }
       const foundInverterStatusIndex = _.findIndex(inverterStatusRows, { inverter_seq: ivtSeq });
 
@@ -207,7 +216,7 @@ router.get(
       if (foundInverterStatusIndex > -1) {
         const inverterStatusRow = inverterStatusRows[foundInverterStatusIndex];
         // 중복으로 들어가는 경우가 발생하기 때문에 인버터 상태 Rows에서 제거
-        _.pullAt(inverterStatusRows, [foundInverterStatusIndex]);
+        // _.pullAt(inverterStatusRows, [foundInverterStatusIndex]);
 
         // 의미없는 데이터일 경우 무시
         if (moment().diff(moment(inverterStatusRow.writedate), 'minutes') <= 10) {
@@ -221,8 +230,14 @@ router.get(
                   .round(2)
                   .value()
               : null;
+
           sebRelRow.pvKw = pvKw;
           sebRelRow.gridKw = _.get(inverterStatusRow, 'power_kw', null);
+          sebRelRow.gridEfficiency = _.chain(sebRelRow.gridKw)
+            .divide(inverterStatusRow.amount)
+            .multiply(100)
+            .round(1)
+            .value();
           sebRelRow.powerCpKwh = _.get(inverterStatusRow, 'power_cp_kwh', null);
         }
       }
