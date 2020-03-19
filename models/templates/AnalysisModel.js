@@ -105,7 +105,7 @@ module.exports = class extends BiModule {
    * 인버터 차트 반환
    * @param {searchRange} searchRange
    * @param {string=} effType 검색 조건. target_category or inverter_seq
-   * @return {Promise.<{target_category: string, install_place: string, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, group_date: string}[]>}
+   * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, group_date: string}[]>}
    * @example
    * effType: target_category = 육상 0도, 육상 30도, 수중 0도
    * effType: inverter_seq = 육상 0도(A~B), 육상 30도(A~B), 수중 0도(A~D)
@@ -118,7 +118,8 @@ module.exports = class extends BiModule {
 
     const sql = `
       SELECT
-            inverter_seq, serial_number, target_category, install_place, ROUND(SUM(amount), 2)  t_amount,
+            inverter_seq, serial_number, target_category, install_place, chart_sort_rank, 
+            ROUND(SUM(amount), 2) t_amount,
             ROUND(SUM(avg_power_kw) , 4) AS t_power_kw,
             ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS avg_power_eff,
             ROUND(SUM(interval_power_cp_kwh) , 4) AS t_interval_power_cp_kwh,
@@ -127,7 +128,7 @@ module.exports = class extends BiModule {
       FROM
         (
         SELECT 
-              inv_tbl.inverter_seq, serial_number, target_category, install_place, amount,
+              inv_tbl.inverter_seq, serial_number, target_category, install_place, amount, chart_sort_rank,
               inv_data.writedate,
               AVG(inv_data.power_kw) AS avg_power_kw,
               MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
@@ -157,7 +158,7 @@ module.exports = class extends BiModule {
    * @param {searchRange} searchRange
    * @param {string=} effType 검색 조건. target_category or inverter_seq
    * @param {number=} mainSeq
-   * @return {Promise.<{seb_name: string, target_category: string, install_place: string, avg_water_level: number, avg_salinity: number, avg_module_rear_temp:number, avg_brine_temp:number, group_date: string}[]>}
+   * @return {Promise.<{inverter_seq: number, seb_name: string, target_category: string, install_place: string, serial_number: string, avg_water_level: number, avg_salinity: number, avg_module_rear_temp:number, avg_brine_temp:number, group_date: string}[]>}
    */
   getEnvReport(searchRange, effType = 'target_category', mainSeq) {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(
@@ -167,7 +168,7 @@ module.exports = class extends BiModule {
 
     const sql = `
         SELECT 
-            ssd.place_seq, sub_tbl.seb_name, sub_tbl.target_category, sub_tbl.install_place,
+            ssd.place_seq, sub_tbl.inverter_seq, sub_tbl.seb_name, sub_tbl.target_category, sub_tbl.install_place, sub_tbl.serial_number,
             ROUND(AVG(ssd.water_level), 1)  AS avg_water_level,
             ROUND(AVG(ssd.salinity), 1) AS avg_salinity,
             ROUND(AVG(ssd.module_rear_temp), 1) AS avg_module_rear_temp,
@@ -179,7 +180,7 @@ module.exports = class extends BiModule {
           (
           SELECT
                 sb.*,
-                inv.target_category, inv.install_place, inv.amount,
+                inv.target_category, inv.install_place, inv.serial_number, inv.amount,
                 main.main_seq
           FROM seb_relation sb
           JOIN pw_relation_power rp

@@ -507,7 +507,7 @@ class BiModule extends BM {
    * 인버터 발전량 구해옴
    * @param {searchRange} searchRange  검색 옵션
    * @param {number[]} inverterSeqList
-   * @return {PW_INVERTER_TREND[]}
+   * @return {{}[]}
    */
   getInverterTrend(searchRange = this.createSearchRange(), inverterSeqList) {
     // BU.CLI(searchRange);

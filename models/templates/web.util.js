@@ -2,6 +2,8 @@ const _ = require('lodash');
 const moment = require('moment');
 const { BU } = require('base-util-jh');
 
+const commonUtil = require('./common.util');
+
 /**
  * 기상청 날씨 변경
  * @param {{temp: number, pty: number, wf_kor: string, wf_en: string, pop: number, r12: number, ws:number, wd: number, reh: number, applydate: Date}} weatherCastInfo
@@ -540,10 +542,6 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       };
 
       _.forEach(groupedTableRows, dataRow => {
-        // dateKey를 기준으로 UTC 날짜를 환산
-        const utcDate = moment(_.get(dataRow, dateKey))
-          .add(9, 'hours')
-          .valueOf();
         // 데이터 형식은 [Date, Data]
         let data = _.get(dataRow, selectKey);
         // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
@@ -554,7 +552,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
               .value()
           : data;
 
-        chartSeries.data.push([utcDate, data]);
+        chartSeries.data.push([commonUtil.convertDateToUTC(dataRow[dateKey]), data]);
       });
       refinedLineChart.series.push(chartSeries);
     });
@@ -579,10 +577,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       .sortBy() // 날짜 오름 차순 정렬
       .map(pairList => {
         return [
-          moment(_.head(pairList))
-            .add(9, 'hours')
-            .valueOf(),
-
+          commonUtil.convertDateToUTC(_.head(pairList)),
           _.chain(_.nth(pairList, 1))
             .map(selectKey)
             .sum()

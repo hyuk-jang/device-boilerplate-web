@@ -321,6 +321,8 @@ class UpsasDP extends DeviceProtocol {
         return this.statusSalternTable;
       case 'weatherCast':
         return this.statusWeatherCastTable;
+      case 'analysis':
+        return this.statusAnalysisTable;
       default:
         break;
     }
@@ -432,45 +434,38 @@ class UpsasDP extends DeviceProtocol {
   get statusAnalysisTable() {
     return [
       {
-        dataKey: 'seb_name',
-        mainTitle: '',
-        cssWidthPer: 13,
+        dataKey: 'install_place',
+        mainTitle: '구분',
+        // cssWidthPer: 13,
       },
       {
-        dataKey: 'moduleEfficiency',
-        dataName: '발전 효율',
-        dataUnit: '%',
-        // mainTitle: '인버터',
+        dataKey: 'serial_number',
+        mainTitle: '타입',
+        // cssWidthPer: 13,
       },
       {
-        dataKey: 'module_rear_temp',
-        dataName: '모듈 온도',
-        dataUnit: '℃',
-        // mainTitle: '염전 상태 계측',
+        dataKey: 'avg_power_eff',
+        mainTitle: '발전 효율 (%)',
       },
       {
-        dataKey: 'out_temp',
-        dataName: '기온',
-        dataUnit: '℃',
-        // mainTitle: '염전 상태 계측',
+        dataKey: 'avg_module_rear_temp',
+        mainTitle: '모듈 온도 (℃)',
       },
       {
-        dataKey: 'brine_temp',
-        dataName: '수온',
-        dataUnit: '℃',
-        // mainTitle: '염전 상태 계측',
+        dataKey: 'avg_temp',
+        mainTitle: '기온 (℃)',
       },
       {
-        dataKey: 'water_level',
-        dataName: '수위',
-        dataUnit: 'cm',
-        // mainTitle: '염전 상태 계측',
+        dataKey: 'avg_brine_temp',
+        mainTitle: '수온 (℃)',
       },
       {
-        dataKey: 'salinity',
-        dataName: '염도',
-        dataUnit: '%',
-        // mainTitle: '염전 상태 계측',
+        dataKey: 'avg_water_level',
+        mainTitle: '수위 (cm)',
+      },
+      {
+        dataKey: 'avg_salinity',
+        mainTitle: '염도 (%)',
       },
     ];
   }

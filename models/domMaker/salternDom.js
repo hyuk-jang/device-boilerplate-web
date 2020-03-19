@@ -82,6 +82,80 @@ module.exports = {
       tableBodyDom,
     };
   },
+
+  /**
+   * 센서 현재 정보값 생성 돔. 좌측 사이드 영역을 생성할 때 사용
+   * @param {SEB_RELATION[]} analysisStatusList
+   * @param {blockViewMakeOption[]} blockViewList
+   */
+  makeAnalysisStatusDom(analysisStatusList, blockViewList) {
+    const tableHeaderDom = defaultDom.makeDynamicBlockTableHeader({
+      blockTableOptions: blockViewList,
+    });
+
+    const placeRegeditList = [];
+
+    const tableBodyDom = analysisStatusList
+      .sort((pRow, nRow) => pRow.chart_sort_rank - nRow.chart_sort_rank)
+      .map((dataRow, index) => {
+        let contentsTemplate = '';
+
+        // 최초 인버터 인지 확인
+        const isMergePlace = _.includes(placeRegeditList, dataRow.install_place);
+        // 인버터를 찾지 못하였다면 병합 대상
+        if (isMergePlace === false) {
+          // 병합 처리한 걸로 등록
+          placeRegeditList.push(dataRow.install_place);
+
+          // 인버터가 포함하는 모듈은 몇개인지 확인
+          const placeMergeLength = _.filter(analysisStatusList, {
+            install_place: dataRow.install_place,
+          }).length;
+
+          // 인버터가 mainTitle에 걸릴경우 병합 처리.
+          contentsTemplate = _.chain(blockViewList)
+            .map(blockInfo => {
+              const { dataKey } = blockInfo;
+              switch (dataKey) {
+                case 'install_place':
+                  return `<td rowspan=${placeMergeLength}><%= ${dataKey} %></td>`;
+                case 'avg_temp':
+                  return index === 0
+                    ? `<td rowspan=${analysisStatusList.length}><%= ${dataKey} %></td>`
+                    : '';
+                default:
+                  return `<td><%= ${dataKey} %></td>`;
+              }
+            })
+            .value()
+            .toString();
+        } else {
+          contentsTemplate = _.chain(blockViewList)
+            .map(blockInfo => {
+              const { dataKey } = blockInfo;
+              switch (dataKey) {
+                case 'install_place':
+                case 'avg_temp':
+                  return '';
+                default:
+                  return `<td><%= ${dataKey} %></td>`;
+              }
+            })
+            .value()
+            .toString();
+        }
+        // 온전한 바디 템플릿 돔 생성
+        const bodyTemplate = _.template(`<tr>${contentsTemplate}</tr>`);
+
+        return bodyTemplate(dataRow);
+      });
+
+    return {
+      tableHeaderDom,
+      tableBodyDom,
+    };
+  },
+
   /**
    * 센서 현재 정보값 생성 돔. 좌측 사이드 영역을 생성할 때 사용
    * @param {SEB_RELATION[]} measureStatusList

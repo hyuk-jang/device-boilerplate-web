@@ -70,19 +70,19 @@
         <div class="container_row">
           <div class="component_piece_box flex_35">
             <article class="component_piece_area">
-              <header>금일 발전 효율</header>
+              <header>금일 발전 효율 트렌드</header>
               <div id="realtime_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_35">
             <article class="component_piece_area">
-              <header>금일 환경 변화 추이</header>
+              <header>금일 발전 환경 트렌드</header>
               <div id="realtime_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>지난 3일 효율 분석</header>
+              <header>지난 3일 발전 효율 분석</header>
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -90,96 +90,38 @@
         <div class="container_row">
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>최대 발전 효율</header>
+              <header>최대 발전 요일 효율</header>
               <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>최대 환경 변화 추이</header>
+              <header>최대 발전 환경 변화 추이</header>
               <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_4">
             <article class="component_piece_area">
-              <header>발전 효율 최대순간 분석</header>
+              <header>발전 효율 최대 순간 분석</header>
               <section class="component_piece_body">
                 <p class="table_desc_area">
                   측정시간 &nbsp; <span id="measureTime"> 2020년 4월 3일 15시 35분 </span>
                 </p>
-                <div class="table-responsive default_area">
-                  <table class="table table-bordered max-efficienct-analysis">
-                    <colgroup>
-                      <col width="5%" />
-                      <col width="7%" />
-                      <col width="7%" />
-                      <col width="7%" />
-                      <col width="8%" />
-                      <col width="8%" />
-                      <col width="8%" />
-                    </colgroup>
-                    <thead class="text-center">
-                      <tr>
-                        <th>구분</th>
-                        <th>타입</th>
-                        <th>모듈 효율 (%)</th>
-                        <th>모듈 온도 (˚C)</th>
-                        <th>외기 온도 (˚C)</th>
-                        <th>수중 온도 (˚C)</th>
-                        <th>수위 (cm)</th>
-                      </tr>
-                    </thead>
-                    <tbody id="">
-                      <tr>
-                        <td rowspan="2">육상</td>
-                        <td>A</td>
-                        <td>97.1</td>
-                        <td>35.2</td>
-                        <td rowspan="2">27.5</td>
-                        <td>-</td>
-                        <td>-</td>
-                      </tr>
-                      <tr>
-                        <td>B</td>
-                        <td>97.5</td>
-                        <td>35.2</td>
-                        <td>-</td>
-                        <td>-</td>
-                      </tr>
-                      <tr>
-                        <td rowspan="4">수중</td>
-                        <td>A</td>
-                        <td>98.1</td>
-                        <td>31.2</td>
-                        <td rowspan="4">28.1</td>
-                        <td>32.1</td>
-                        <td>2.3</td>
-                      </tr>
-                      <tr>
-                        <td>B</td>
-                        <td>98.3</td>
-                        <td>31.2</td>
-                        <td>32.4</td>
-                        <td>2.4</td>
-                      </tr>
-                      <tr>
-                        <td>C</td>
-                        <td>98.2</td>
-                        <td>30.5</td>
-                        <td>32.4</td>
-                        <td>2.1</td>
-                      </tr>
-                      <tr>
-                        <td>D</td>
-                        <td>98.3</td>
-                        <td>31.2</td>
-                        <td>30.8</td>
-                        <td>2.5</td>
-                      </tr>
-                    </tbody>
+                <div class="default_area text-center">
+                  <table class="table table-bordered ">
+                    <thead id="tableHeaderDom"></thead>
+                    <tbody id="tableBodyDom"></tbody>
                   </table>
                 </div>
               </section>
+            </article>
+          </div>
+        </div>
+        <div class="container_row hidden">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>발전 효율 최대순간</header>
+              <div id="maxPeakEfficiencyArea" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
         </div>
@@ -189,11 +131,17 @@
     </div>
 
     <script>
+      $('#tableHeaderDom').html(<%- JSON.stringify(dom.tableHeaderDom) %>);
+      $('#tableBodyDom').html(<%- JSON.stringify(dom.tableBodyDom) %>);
+
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
 
       var searchRangeInfo =  <%- JSON.stringify(searchRangeInfo) %>;
 
       var chartInfo =  <%- JSON.stringify(chartInfo) %>;
+
+      var maxPeakEnvRows =  <%- JSON.stringify(maxPeakEnvRows) %>;
 
       console.log(chartInfo)
     </script>
@@ -398,7 +346,7 @@
             series: {},
           },
           tooltip: {
-            shared: true,
+            // shared: true,
           },
           series: chartInfo.prevRangePowerEffChart,
           credits: {
@@ -484,7 +432,7 @@
             zoomType: 'xy',
           },
           title: {
-            text: '2020년 4월 3일',
+            text: searchRangeInfo.dailyMaxSR.rangeStart,
           },
           xAxis: {
             type: 'datetime',
@@ -523,6 +471,103 @@
           },
         });
       }
+    </script>
+
+    <!-- 효율 최대 분석 순간 추이 -->
+    <script>
+      makeColumnChart({
+        domId: 'maxPeakEfficiencyArea',
+        xAxis: {
+          categories: maxPeakEnvRows.map(function(row) {
+            return row.install_place + ' ' + row.serial_number;
+          }),
+        },
+        yAxis: [
+          {
+            labels: {
+              format: '{value} %',
+              style: {
+                color: Highcharts.getOptions().colors[10],
+              },
+            },
+            title: {
+              text: '출력 효율',
+              style: {
+                color: Highcharts.getOptions().colors[10],
+              },
+            },
+            min: 0,
+            // max: 40,
+            // tickInterval: 10,
+            // tickAmount: 5,
+          },
+          {
+            labels: {
+              format: '{value} ',
+              style: {
+                color: Highcharts.getOptions().colors[10],
+              },
+            },
+            title: {
+              text: '온도/수위/염도',
+              style: {
+                color: Highcharts.getOptions().colors[10],
+              },
+            },
+            min: 0,
+            max: 50,
+            tickInterval: 5,
+            // tickAmount: 5,
+            opposite: 1,
+          },
+        ],
+        series: [
+          {
+            name: '발전 효율',
+            data: _.map(maxPeakEnvRows, 'avg_power_eff'),
+            color: 'greenyellow',
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '모듈 온도',
+            data: _.map(maxPeakEnvRows, 'avg_module_rear_temp'),
+            yAxis: 1,
+            color: 'red',
+            tooltip: {
+              valueSuffix: ' ℃',
+            },
+          },
+          {
+            name: '수온',
+            data: _.map(maxPeakEnvRows, 'avg_brine_temp'),
+            color: 'orange',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' ℃',
+            },
+          },
+          {
+            name: '수위',
+            data: _.map(maxPeakEnvRows, 'avg_water_level'),
+            color: 'lightskyblue',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' cm',
+            },
+          },
+          {
+            name: '염도',
+            data: _.map(maxPeakEnvRows, 'avg_salinity'),
+            color: 'aliceblue',
+            yAxis: 1,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+        ],
+      });
     </script>
 
     <!-- FIXME: 시연용 1분 단위 ReDraw -->

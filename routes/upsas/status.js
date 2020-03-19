@@ -87,13 +87,6 @@ router.get(
 
     const sebPlaceSeqList = sebRelationRows.map(row => row.place_seq);
 
-    // /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
-    // const sebRelationRows = sebPlaceSeqList.length
-    //   ? await powerModel.getTable('SEB_RELATION', {
-    //       place_seq: sebPlaceSeqList,
-    //     })
-    //   : [];
-
     // Step2-1: 연결된 접속반의 현재 데이터를 추출
     const connectSeqList = _.map(sebRelationRows, 'connector_seq');
     const connectorRows = connectSeqList.length
