@@ -75,10 +75,10 @@ router.get(
     // 1. 금일 검색 구간 정의
     let dailySearchRange = analysisModel.createSearchRange({
       // FIXME: 1일전 테스트
-      strStartDate: moment()
-        .subtract(1, 'day')
-        .format('YYYY-MM-DD'),
-      searchType: 'days',
+      // strStartDate: moment()
+      //   .subtract(1, 'day')
+      //   .format('YYYY-MM-DD'),
+      // searchType: 'days',
       searchInterval: 'min10',
     });
     // 2. 발전 효율 구함
@@ -147,6 +147,7 @@ router.get(
       {
         dataKey: 'avg_temp',
         name: '외기온도',
+        color: 'red',
         dashStyle: 'ShortDashDot',
       },
     ]);
@@ -355,11 +356,11 @@ router.get(
     // ----------------- 금일 발전 효율 트렌드
 
     // 1. 검색 구간 정의
-    const dailySearchRange = analysisModel.createSearchRange({
+    let searchRange = analysisModel.createSearchRange({
       // FIXME: 1일전 테스트
-      strStartDate: moment()
-        .subtract(1, 'day')
-        .format('YYYY-MM-DD'),
+      // strStartDate: moment()
+      //   .subtract(1, 'day')
+      //   .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
@@ -373,25 +374,22 @@ router.get(
     });
 
     // 3. 발전량 레포트 추출
-    const dailyPowerEffRows = await analysisModel.getInverterTrend(
-      dailySearchRange,
-      inverterSeqList,
-    );
+    let powerTrendRows = await analysisModel.getInverterTrend(searchRange, inverterSeqList);
 
     // 3. 발전 시작 및 종료 시간 구함
-    const { sDate, eDate } = analysisModel.getStartEndDate(dailyPowerEffRows);
-    dailySearchRange.strStartDate = sDate;
-    dailySearchRange.strEndDate = eDate;
+    const { sDate, eDate } = analysisModel.getStartEndDate(powerTrendRows);
+    searchRange.strStartDate = sDate;
+    searchRange.strEndDate = eDate;
 
     // 4. 기상 데이터 추출
-    const weatherDeviceRows = await weatherModel.getWeatherTrend(dailySearchRange, siteId);
+    let weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
     // 5. 인버터 목록에 따라 발전량 차트 생성,
-    const gInvDataRows = _.groupBy(dailyPowerEffRows, 'inverter_seq');
-    let dailyPowerData = inverterRows.map((invRow, index) => {
+    let gPowerTrendRows = _.groupBy(powerTrendRows, 'inverter_seq');
+    let powerChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number}`,
         color: colorTable1[index],
-        data: gInvDataRows[invRow.inverter_seq.toString()].map(row => [
+        data: gPowerTrendRows[invRow.inverter_seq.toString()].map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.avg_power_kw,
         ]),
@@ -399,7 +397,7 @@ router.get(
     });
 
     // 6. 기상-일사량 데이터 차트에 삽입
-    let weatherCharts = analysisModel.makeChartData(weatherDeviceRows, [
+    let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_solar',
         name: '일사량',
@@ -408,21 +406,35 @@ router.get(
         dashStyle: 'ShortDot',
       },
     ]);
-    dailyPowerData = dailyPowerData.concat(weatherCharts);
-    _.set(req.locals, 'chartInfo.dailyPowerData', dailyPowerData);
+    powerChartData = powerChartData.concat(weatherCharts);
+    _.set(req.locals, 'chartInfo.dailyPowerData', powerChartData);
 
     // ----------------- 금일 환경 변화 추이
     // 1. 비교군 모듈 온도, 수온 구함
-    let envReportRows = await analysisModel.getEnvReport(dailySearchRange, 'inverter_seq', siteId);
-    const gEnvDataRows = _.groupBy(envReportRows, 'inverter_seq');
-    // 2. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
-    let colorIndex = 0;
-    let envModuleTempChart = _.map(gEnvDataRows, (envRows, strInvSeq) => {
+    let envReportRows = await analysisModel.getEnvReport(searchRange, 'inverter_seq', siteId);
+    let gEnvReportRows = _.groupBy(envReportRows, 'inverter_seq');
+
+    // 2. 날짜 데이터를 UTC로 변환 (수온으로 분석)
+    let colorIndex = -1;
+    let envBrineTempChart = _.map(gEnvReportRows, (envRows, strInvSeq) => {
       const invRow = inverterRows.find(row => row.inverter_seq === Number(strInvSeq));
+      colorIndex += 1;
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 수온`,
+        color: colorTable1[colorIndex],
+        data: envRows.map(row => [commonUtil.convertDateToUTC(row.group_date), row.avg_brine_temp]),
+      };
+    });
+
+    // 3. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
+    colorIndex = -1;
+    let envModuleTempChart = _.map(gEnvReportRows, (envRows, strInvSeq) => {
+      const invRow = inverterRows.find(row => row.inverter_seq === Number(strInvSeq));
+      colorIndex += 1;
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 수위`,
-        color: colorTable1[colorIndex++],
-        dashStyle: 'ShortDash',
+        color: colorTable2[colorIndex],
+        dashStyle: 'ShortDot',
         yAxis: 1,
         data: envRows.map(row => [
           commonUtil.convertDateToUTC(row.group_date),
@@ -431,20 +443,8 @@ router.get(
       };
     });
 
-    // 3. 날짜 데이터를 UTC로 변환 (수온으로 분석)
-    colorIndex = 0;
-    let envBrineTempChart = _.map(gEnvDataRows, (envRows, strInvSeq) => {
-      const invRow = inverterRows.find(row => row.inverter_seq === Number(strInvSeq));
-      return {
-        name: `${invRow.install_place} ${invRow.serial_number} 수온`,
-        color: colorTable2[colorIndex++],
-        dashStyle: 'ShortDot',
-        data: envRows.map(row => [commonUtil.convertDateToUTC(row.group_date), row.avg_brine_temp]),
-      };
-    });
-
     // 4. 금일 환경 변화 추이 데이터 전송
-    weatherCharts = analysisModel.makeChartData(weatherDeviceRows, [
+    weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_temp',
         name: '외기온도',
@@ -452,9 +452,102 @@ router.get(
       },
     ]);
 
-    let dailyEnvChart = envModuleTempChart.concat(envBrineTempChart, ...weatherCharts);
+    const dailyEnvChart = envBrineTempChart.concat(envModuleTempChart, ...weatherCharts);
 
     _.set(req.locals, 'chartInfo.dailyEnvChart', dailyEnvChart);
+
+    // ----------------- 기간 발전 효율 트렌드
+
+    // 1. 검색 구간 정의
+    searchRange = analysisModel.createSearchRange({
+      searchType: 'range',
+      searchInterval: 'min10',
+      strStartDate: moment()
+        .subtract(3, 'day')
+        .format('YYYY-MM-DD'),
+      strEndDate: moment()
+        .subtract(1, 'day')
+        .format('YYYY-MM-DD'),
+    });
+
+    // 2. 발전량 레포트 추출
+    powerTrendRows = await analysisModel.getInverterTrend(searchRange, inverterSeqList);
+
+    // 4. 기상 데이터 추출
+    weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+    // 5. 인버터 목록에 따라 발전량 차트 생성,
+    gPowerTrendRows = _.groupBy(powerTrendRows, 'inverter_seq');
+    powerChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number}`,
+        color: colorTable1[index],
+        data: gPowerTrendRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.avg_power_kw,
+        ]),
+      };
+    });
+
+    // 6. 기상-일사량 데이터 차트에 삽입
+    weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+      {
+        dataKey: 'avg_solar',
+        name: '일사량',
+        yAxis: 1,
+        color: 'red',
+        dashStyle: 'ShortDot',
+      },
+    ]);
+    powerChartData = powerChartData.concat(weatherCharts);
+    _.set(req.locals, 'chartInfo.rangePowerChart', powerChartData);
+
+    // ----------------- 금일 환경 변화 추이
+    // 1. 비교군 모듈 온도, 수온 구함
+    envReportRows = await analysisModel.getEnvReport(searchRange, 'inverter_seq', siteId);
+    gEnvReportRows = _.groupBy(envReportRows, 'inverter_seq');
+
+    // 2. 날짜 데이터를 UTC로 변환 (수온으로 분석)
+    colorIndex = -1;
+    envBrineTempChart = _.map(gEnvReportRows, (envRows, strInvSeq) => {
+      const invRow = inverterRows.find(row => row.inverter_seq === Number(strInvSeq));
+      colorIndex += 1;
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 수온`,
+        color: colorTable1[colorIndex],
+        data: envRows.map(row => [commonUtil.convertDateToUTC(row.group_date), row.avg_brine_temp]),
+      };
+    });
+
+    // 3. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
+    colorIndex = -1;
+    envModuleTempChart = _.map(gEnvReportRows, (envRows, strInvSeq) => {
+      const invRow = inverterRows.find(row => row.inverter_seq === Number(strInvSeq));
+      colorIndex += 1;
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 수위`,
+        color: colorTable2[colorIndex],
+        dashStyle: 'ShortDot',
+        yAxis: 1,
+        data: envRows.map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.avg_water_level,
+        ]),
+      };
+    });
+
+    // 4. 금일 환경 변화 추이 데이터 전송
+    weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+      {
+        dataKey: 'avg_temp',
+        name: '외기온도',
+        color: 'red',
+        dashStyle: 'ShortDashDot',
+      },
+    ]);
+
+    const rangeEnvChart = envBrineTempChart.concat(envModuleTempChart, ...weatherCharts);
+
+    _.set(req.locals, 'chartInfo.rangeEnvChart', rangeEnvChart);
     // console.timeEnd('금일 환경 변화 추이');
 
     // BU.CLI(req.locals);
