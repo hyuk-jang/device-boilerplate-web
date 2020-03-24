@@ -451,10 +451,10 @@ class UpsasDP extends DeviceProtocol {
         dataKey: 'avg_module_rear_temp',
         mainTitle: '모듈 온도 (℃)',
       },
-      {
-        dataKey: 'avg_temp',
-        mainTitle: '기온 (℃)',
-      },
+      // {
+      //   dataKey: 'avg_temp',
+      //   mainTitle: '기온 (℃)',
+      // },
       {
         dataKey: 'avg_brine_temp',
         mainTitle: '수온 (℃)',

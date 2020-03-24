@@ -68,21 +68,21 @@
           <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
         <div class="container_row">
-          <div class="component_piece_box flex_35">
+          <div class="component_piece_box flex_3">
             <article class="component_piece_area">
               <header>금일 발전 효율 트렌드</header>
               <div id="realtime_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
-          <div class="component_piece_box flex_35">
+          <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>금일 발전 환경 트렌드</header>
-              <div id="realtime_env_efficiency" class="component_piece_body p_column_rem"></div>
+              <header>최대 발전 요일 효율</header>
+              <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>지난 3일 발전 효율 분석</header>
+              <header>최근 3일 최대 발전 효율</header>
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -90,17 +90,18 @@
         <div class="container_row">
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>최대 발전 요일 효율</header>
-              <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
+              <header>금일 발전 환경 트렌드</header>
+              <div id="realtime_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
+
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
               <header>최대 발전 환경 변화 추이</header>
               <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
-          <div class="component_piece_box flex_4">
+          <div class="component_piece_box flex_15">
             <article class="component_piece_area">
               <header>발전 효율 최대 순간 분석</header>
               <section class="component_piece_body">
@@ -143,7 +144,7 @@
 
       var maxPeakEnvRows =  <%- JSON.stringify(maxPeakEnvRows) %>;
 
-      console.log(chartInfo)
+      // console.log(chartInfo)
     </script>
 
     <!-- 모니터링 모드 동작 -->
@@ -191,6 +192,9 @@
           // TODO: 데이터 자동 갱신 정지
         }
       });
+
+      var mainFontSize = 15;
+      var subFontSize = 13;
     </script>
 
     <!-- 금일 발전 효율 -->
@@ -200,6 +204,9 @@
           chart: {
             type: 'line',
             zoomType: 'xy',
+            marginLeft: 45,
+            marginRight: 55,
+            marginTop: 35,
           },
           title: {
             text: '',
@@ -215,21 +222,50 @@
               month: '%y-%m',
               year: '%Y',
             },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
           },
           yAxis: [
             {
               title: {
-                text: '모듈 효율 %',
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -35,
+                y: -15,
+                text: '모듈 효율 (%)',
                 style: {
+                  fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
                 },
               },
             },
             {
               title: {
-                text: '일사량 W/㎡',
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 43,
+                y: -15,
+                text: '일사량 (W/㎡)',
                 style: {
+                  fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
                 },
               },
               opposite: true,
@@ -238,10 +274,13 @@
           legend: {
             layout: 'vertical',
             align: 'left',
-            x: 70,
             verticalAlign: 'top',
-            y: 10,
+            x: 70,
+            y: 25,
             floating: true,
+            itemStyle: {
+              fontSize: mainFontSize,
+            },
             backgroundColor:
               Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
           },
@@ -293,6 +332,15 @@
                 },
               },
             },
+            {
+              title: {
+                text: '온도 ˚C',
+                style: {
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              opposite: true,
+            },
           ],
           tooltip: {
             shared: true,
@@ -303,6 +351,109 @@
             },
           },
           series: chartInfo.dailyEnvChart,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
+    </script>
+
+    <!-- 최대 발전 효율 -->
+    <script>
+      function drawPeakPowerEff() {
+        Highcharts.chart('peak_power_efficiency', {
+          chart: {
+            type: 'line',
+            zoomType: 'xy',
+            marginLeft: 45,
+            marginRight: 55,
+            marginTop: 35,
+          },
+          title: {
+            text: searchRangeInfo.dailyMaxSR.rangeStart,
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%e',
+              week: '%m-%e',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -35,
+                y: -15,
+                text: '모듈 효율 %',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+            {
+              title: {
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 43,
+                y: -15,
+                text: '일사량 W/㎡',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+          ],
+          legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 60,
+            verticalAlign: 'top',
+            y: 30,
+            floating: true,
+            itemStyle: {
+              fontSize: mainFontSize,
+            },
+            backgroundColor:
+              Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
+          },
+          plotOptions: {
+            series: {
+              marker: false,
+            },
+          },
+          tooltip: {
+            shared: true,
+          },
+          series: chartInfo.dailyMaxPowerChart,
           credits: {
             enabled: false,
           },
@@ -356,73 +507,6 @@
       }
     </script>
 
-    <!-- 최대 발전 효율 -->
-    <script>
-      function drawPeakPowerEff() {
-        Highcharts.chart('peak_power_efficiency', {
-          chart: {
-            type: 'line',
-          },
-          title: {
-            text: searchRangeInfo.dailyMaxSR.rangeStart,
-          },
-          xAxis: {
-            type: 'datetime',
-            dateTimeLabelFormats: {
-              second: '%H:%M:%S',
-              minute: '%H:%M',
-              hour: '%H:%M',
-              day: '%m-%e',
-              week: '%m-%e',
-              month: '%y-%m',
-              year: '%Y',
-            },
-          },
-          yAxis: [
-            {
-              title: {
-                text: '모듈 효율 %',
-                style: {
-                  color: Highcharts.getOptions().colors[10],
-                },
-              },
-            },
-            {
-              title: {
-                text: '일사량 W/㎡',
-                style: {
-                  color: Highcharts.getOptions().colors[10],
-                },
-              },
-              opposite: true,
-            },
-          ],
-          legend: {
-            layout: 'vertical',
-            align: 'left',
-            x: 60,
-            verticalAlign: 'top',
-            y: 30,
-            floating: true,
-            backgroundColor:
-              Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
-          },
-          plotOptions: {
-            series: {
-              marker: false,
-            },
-          },
-          tooltip: {
-            shared: true,
-          },
-          series: chartInfo.dailyMaxPowerChart,
-          credits: {
-            enabled: false,
-          },
-        });
-      }
-    </script>
-
     <!-- 최대 환경 변화 추이 -->
     <script>
       function drawPeakEnvEff() {
@@ -454,6 +538,15 @@
                   color: Highcharts.getOptions().colors[10],
                 },
               },
+            },
+            {
+              title: {
+                text: '온도 ˚C',
+                style: {
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              opposite: true,
             },
           ],
           tooltip: {
