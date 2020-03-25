@@ -445,27 +445,28 @@ class UpsasDP extends DeviceProtocol {
       },
       {
         dataKey: 'avg_power_eff',
-        mainTitle: '발전 효율 (%)',
+        mainTitle: '발전 효율',
+        dataUnit: '%',
       },
       {
         dataKey: 'avg_module_rear_temp',
-        mainTitle: '모듈 온도 (℃)',
+        mainTitle: '모듈 온도',
+        dataUnit: '℃',
       },
-      // {
-      //   dataKey: 'avg_temp',
-      //   mainTitle: '기온 (℃)',
-      // },
       {
         dataKey: 'avg_brine_temp',
-        mainTitle: '수온 (℃)',
+        mainTitle: '수온',
+        dataUnit: '℃',
       },
       {
         dataKey: 'avg_water_level',
-        mainTitle: '수위 (cm)',
+        mainTitle: '수위',
+        dataUnit: 'cm',
       },
       {
         dataKey: 'avg_salinity',
-        mainTitle: '염도 (%)',
+        mainTitle: '염도',
+        dataUnit: '%',
       },
     ];
   }

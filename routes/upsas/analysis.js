@@ -36,6 +36,9 @@ const subCategoryList = [
   },
 ];
 
+const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
+const colorTable2 = ['yellow', 'purple', 'gray', 'white'];
+
 // trend middleware
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
@@ -61,9 +64,6 @@ router.get(
       subCategory,
       searchRange,
     } = req.locals;
-
-    /** @type {RefineModel} */
-    const refineModel = global.app.get('refineModel');
 
     /** @type {WeatherModel} */
     const weatherModel = global.app.get('weatherModel');
@@ -92,6 +92,7 @@ router.get(
     // 4. 발전 효율을 카테고리 별로 분류하고 chartData에 맞게 데이터 변환 후 반환
     let moduleEfficiencyChart = analysisModel.makePowerEfficiencyChart(dailyPowerEffRows, {
       dataKey: 'avg_power_eff',
+      colorTable: colorTable1,
     });
 
     // 4. 기상 계측 데이터를 구하고 일사량 차트 데이터 생성
@@ -103,7 +104,8 @@ router.get(
         dataKey: 'avg_solar',
         name: '일사량',
         yAxis: 1,
-        dashStyle: 'ShortDot',
+        color: 'red',
+        dashStyle: 'ShortDash',
       },
     ]);
 
@@ -123,23 +125,26 @@ router.get(
       .groupBy('install_place')
       .map((envRows, installPlace) => {
         return {
+          sortIndex: envRows[0].chart_sort_rank,
           name: `${installPlace} 모듈 온도`,
           data: envRows.map(row => {
             return [commonUtil.convertDateToUTC(row.group_date), row.avg_module_rear_temp];
           }),
-          dashStyle: 'ShortDash',
         };
       })
-      .value();
+      .sortBy('sortIndex')
+      .forEach((chartData, index) => {
+        chartData.color = colorTable1[index];
+      });
 
     // 3. 날짜 데이터를 UTC로 변환 (수온으로 분석)
     let envBrineTempChart = {
-      name: '수중 0도 수온',
+      name: '시스템 수온',
+      color: 'skyblue',
       data: _(envReportRows)
         .filter(envRow => envRow.target_category === mType.WATER_0)
         .map(envRow => [commonUtil.convertDateToUTC(envRow.group_date), envRow.avg_brine_temp])
         .value(),
-      dashStyle: 'ShortDot',
     };
 
     // 4. 금일 환경 변화 추이 데이터 전송
@@ -148,7 +153,6 @@ router.get(
         dataKey: 'avg_temp',
         name: '외기온도',
         color: 'red',
-        dashStyle: 'ShortDashDot',
       },
     ]);
 
@@ -176,7 +180,7 @@ router.get(
 
     // 3. 구간 발전량을 데이터 Key 로 하여 모듈 효율 분석
     const prevRangePowerEffChart = analysisModel.makePowerEfficiencyChart(prevPowerEffRows, {
-      dataKey: 't_interval_power_eff',
+      dataKey: 'peak_power_eff',
     });
 
     // 4. req 객체에 할당
@@ -208,6 +212,7 @@ router.get(
     // 5. 발전 효율을 카테고리 별로 분류하고 chartData에 맞게 데이터 변환
     moduleEfficiencyChart = analysisModel.makePowerEfficiencyChart(dailyPowerEffRows, {
       dataKey: 'avg_power_eff',
+      colorTable: colorTable1,
       // dateKey: 'group'
       // groupKey: 'inverter_seq',
       // nameKeys: ['install_place', 'serial_number'],
@@ -219,8 +224,9 @@ router.get(
       {
         dataKey: 'avg_solar',
         name: '일사량',
+        color: 'red',
         yAxis: 1,
-        dashStyle: 'ShortDot',
+        dashStyle: 'ShortDash',
       },
     ]);
     // 8. 최대 발전 효율 차트(발전량, 일사량) 병합
@@ -241,23 +247,26 @@ router.get(
       .groupBy('install_place')
       .map((envRows, installPlace) => {
         return {
+          sortIndex: envRows[0].chart_sort_rank,
           name: `${installPlace} 모듈 온도`,
           data: envRows.map(row => {
             return [commonUtil.convertDateToUTC(row.group_date), row.avg_module_rear_temp];
           }),
-          dashStyle: 'ShortDash',
         };
       })
-      .value();
+      .sortBy('sortIndex')
+      .forEach((chartData, index) => {
+        chartData.color = colorTable1[index];
+      });
 
     // 3. 날짜 데이터를 UTC로 변환 (수온으로 분석)
     envBrineTempChart = {
-      name: '수중 0도 수온',
+      name: '시스템 수온',
+      color: 'skyblue',
       data: _(envReportRows)
         .filter(envRow => envRow.target_category === mType.WATER_0)
         .map(envRow => [commonUtil.convertDateToUTC(envRow.group_date), envRow.avg_brine_temp])
         .value(),
-      dashStyle: 'ShortDot',
     };
 
     // 4. 금일 환경 변화 추이 데이터 전송
@@ -265,7 +274,7 @@ router.get(
       {
         dataKey: 'avg_temp',
         name: '외기온도',
-        dashStyle: 'ShortDashDot',
+        color: 'red',
       },
     ]);
 
@@ -275,7 +284,7 @@ router.get(
     // console.timeEnd('최대 환경 변화 추이');
     // BU.CLIN(dailyPowerEffRows);
 
-    // ----------------- 최대 발전 순간 분석
+    // ----------------- 발전 효율 최대 순간 분석
     // 1. 해당 일의 발전 효율이 최대치일때의 순간 데이터를 구함
     let maxPeakEfficiencyInfo = _.maxBy(dailyPowerEffRows, row => {
       return row.target_category === mType.WATER_0 && row.avg_power_eff;
@@ -305,6 +314,7 @@ router.get(
     const maxPeakPowerRows = dailyPowerEffRows.filter(
       row => row.group_date === maxPeakEfficiencyInfo.group_date,
     );
+
     const maxPeakEnvRows = envReportRows.filter(
       row => row.group_date === maxPeakEfficiencyInfo.group_date,
     );
@@ -312,19 +322,21 @@ router.get(
       row => row.group_date === maxPeakEfficiencyInfo.group_date,
     );
     // 6. 순간 데이터 목록(발전, 환경, 기상) 중에서 날짜가 동일한 객체끼리 병합
-    _.forEach(maxPeakEnvRows, (envRow, index) => {
-      const powerRow = maxPeakPowerRows.find(row => row.inverter_seq === envRow.inverter_seq);
-      maxPeakEnvRows[index] = Object.assign(envRow, powerRow, maxPeakWeatherRow);
+    const maxPeakDataList = _.map(maxPeakPowerRows, (powerRow, index) => {
+      const envRow = maxPeakEnvRows.find(
+        row => row.inverter_seq === powerRow.inverter_seq && row.group_date === powerRow.group_date,
+      );
+      return Object.assign(powerRow, envRow, maxPeakWeatherRow);
     });
 
     const deviceProtocol = new DeviceProtocol();
     // 7. 병합된 데이터를 Table Dom 으로 변환
     const { tableHeaderDom, tableBodyDom } = salternDom.makeAnalysisStatusDom(
-      maxPeakEnvRows,
+      maxPeakDataList,
       deviceProtocol.getBlockStatusTable('analysis'),
     );
     // 8. Req 객체에 발전 현황 정보와 테이블 정보 정의
-    _.set(req, 'locals.maxPeakEnvRows', maxPeakEnvRows);
+    _.set(req, 'locals.maxPeakEnvRows', maxPeakDataList);
     _.set(req, 'locals.dom.tableHeaderDom', tableHeaderDom);
     _.set(req, 'locals.dom.tableBodyDom', tableBodyDom);
 
@@ -341,8 +353,8 @@ router.get(
       viewPowerProfileRows,
     } = req.locals;
 
-    const colorTable1 = ['greenyellow', 'violet', 'lightskyblue', 'aliceblue'];
-    const colorTable2 = ['yellow', 'purple', 'gray', 'white'];
+    // const colorTable1 = ['greenyellow', 'violet', 'lightskyblue', 'aliceblue'];
+    // const colorTable2 = ['yellow', 'purple', 'gray', 'white'];
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);

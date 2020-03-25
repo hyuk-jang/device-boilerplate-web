@@ -34,6 +34,7 @@ module.exports = class extends BiModule {
    * @param {string} option.dateKey 차트에 추출할 날짜 Key
    * @param {string=} option.groupKey Rows를 그루핑할 Key
    * @param {string[]=} option.nameKeys 이름을 부여할 Key List
+   * @param {string[]=} option.colorTable 색상 테이블
    * @param {Object} option.mergeInfo 2차 병합이 필요할 경우
    * @param {string=} option.mergeInfo.mergeKey 데이터 병합할 Key
    * @param {string=} option.mergeInfo.mergeType AVG, SUM, MAX
@@ -43,16 +44,23 @@ module.exports = class extends BiModule {
       dataKey,
       dateKey = 'group_date',
       groupKey = 'install_place',
+      sortKey = 'chart_sort_rank',
       nameKeys = [groupKey],
+      colorTable = ['greenyellow', 'violet', 'lightskyblue', 'aliceblue'],
     } = option;
 
     return _.chain(powerEffRows)
       .groupBy(groupKey)
       .map(powerRows => {
         return {
+          sortIndex: powerRows[0][sortKey],
           name: nameKeys.map(nKey => powerRows[0][nKey]).join(' '),
           data: powerRows.map(row => [commonUtil.convertDateToUTC(row[dateKey]), row[dataKey]]),
         };
+      })
+      .sortBy('sortIndex')
+      .forEach((chartData, index) => {
+        chartData.color = colorTable[index];
       })
       .value();
   }
@@ -105,7 +113,7 @@ module.exports = class extends BiModule {
    * 인버터 차트 반환
    * @param {searchRange} searchRange
    * @param {string=} effType 검색 조건. target_category or inverter_seq
-   * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, group_date: string}[]>}
+   * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, peak_power_eff: number, group_date: string}[]>}
    * @example
    * effType: target_category = 육상 0도, 육상 30도, 수중 0도
    * effType: inverter_seq = 육상 0도(A~B), 육상 30도(A~B), 수중 0도(A~D)
@@ -122,6 +130,7 @@ module.exports = class extends BiModule {
             ROUND(SUM(amount), 2) t_amount,
             ROUND(SUM(avg_power_kw) , 4) AS t_power_kw,
             ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS avg_power_eff,
+            MAX(peak_power_eff) AS peak_power_eff,            
             ROUND(SUM(interval_power_cp_kwh) , 4) AS t_interval_power_cp_kwh,
             ROUND(SUM(interval_power_cp_kwh) / SUM(amount) * 100, 2) AS t_interval_power_eff,
             group_date
@@ -131,6 +140,7 @@ module.exports = class extends BiModule {
               inv_tbl.inverter_seq, serial_number, target_category, install_place, amount, chart_sort_rank,
               inv_data.writedate,
               AVG(inv_data.power_kw) AS avg_power_kw,
+              ROUND(MAX(inv_data.power_kw) / amount * 100, 1) AS peak_power_eff,              
               MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
               ${selectViewDate},
               ${selectGroupDate}
@@ -168,7 +178,8 @@ module.exports = class extends BiModule {
 
     const sql = `
         SELECT 
-            ssd.place_seq, sub_tbl.inverter_seq, sub_tbl.seb_name, sub_tbl.target_category, sub_tbl.install_place, sub_tbl.serial_number,
+            ssd.place_seq, sub_tbl.inverter_seq, sub_tbl.seb_name, sub_tbl.target_category, 
+            sub_tbl.install_place, sub_tbl.serial_number, sub_tbl.chart_sort_rank,
             ROUND(AVG(ssd.water_level), 1)  AS avg_water_level,
             ROUND(AVG(ssd.salinity), 1) AS avg_salinity,
             ROUND(AVG(ssd.module_rear_temp), 1) AS avg_module_rear_temp,

@@ -93,66 +93,78 @@ module.exports = {
       blockTableOptions: blockViewList,
     });
 
-    const placeRegeditList = [];
+    const gAnalysisStatusList = _.groupBy(analysisStatusList, 'target_category');
 
-    const tableBodyDom = analysisStatusList
-      .sort((pRow, nRow) => pRow.chart_sort_rank - nRow.chart_sort_rank)
-      .map((dataRow, index) => {
-        let contentsTemplate = '';
-
-        // 최초 인버터 인지 확인
-        const isMergePlace = _.includes(placeRegeditList, dataRow.install_place);
-        // 인버터를 찾지 못하였다면 병합 대상
-        if (isMergePlace === false) {
-          // 병합 처리한 걸로 등록
-          placeRegeditList.push(dataRow.install_place);
-
-          // 인버터가 포함하는 모듈은 몇개인지 확인
-          const placeMergeLength = _.filter(analysisStatusList, {
-            install_place: dataRow.install_place,
-          }).length;
-
-          // 인버터가 mainTitle에 걸릴경우 병합 처리.
-          contentsTemplate = _.chain(blockViewList)
+    const tableBodyDom = _.map(gAnalysisStatusList, (rows, gKey) => {
+      // 그룹키가 water0angle 일 경우
+      if (gKey === 'water0angle') {
+        // rows를 순회하며 tr 생성
+        return rows.map((row, index) => {
+          return _.chain(blockViewList)
             .map(blockInfo => {
-              const { dataKey } = blockInfo;
+              const { dataKey, dataUnit = '', toFixed = 1 } = blockInfo;
+              if (dataUnit.length && _.isNumber(row[dataKey])) {
+                row[dataKey] = _.round(row[dataKey], toFixed);
+              }
+              const realValue = _.has(row, dataKey) ? `<%= ${dataKey} %>` : '-';
               switch (dataKey) {
                 case 'install_place':
-                  return `<td rowspan=${placeMergeLength}><%= ${dataKey} %></td>`;
-                case 'avg_temp':
-                  return index === 0
-                    ? `<td rowspan=${analysisStatusList.length}><%= ${dataKey} %></td>`
-                    : '';
+                  return index === 0 ? `<td rowspan=${rows.length}>${realValue}</td>` : '';
                 default:
-                  return `<td><%= ${dataKey} %></td>`;
+                  return `<td>${realValue}</td>`;
               }
             })
-            .value()
-            .toString();
-        } else {
-          contentsTemplate = _.chain(blockViewList)
+            .thru(template => {
+              const bodyTemplate = _.template(`<tr>${template.toString()}</tr>`);
+              return bodyTemplate(row);
+            })
+            .value();
+        });
+      }
+
+      // 그 외 평균 병합
+      // blockViews 를 순회하면서 dataUnit이 존재할경우
+      // rows 값 평균, 아닐 경우 0번째 인덱스 값 추출하여 row 한개로 병합
+      return _(blockViewList)
+        .map(blockView => {
+          const { dataKey, dataUnit } = blockView;
+          const avgValue = dataUnit ? _.mean(_.map(rows, dataKey)) || '-' : rows[0][dataKey];
+
+          return {
+            [dataKey]: avgValue,
+          };
+        })
+        .thru(row => {
+          const mergeRow = _.reduce(row, (prev, next) => Object.assign(prev, next), {});
+
+          return _.chain(blockViewList)
             .map(blockInfo => {
-              const { dataKey } = blockInfo;
+              const { dataKey, dataUnit = '', toFixed = 1 } = blockInfo;
+              if (dataUnit.length && _.isNumber(mergeRow[dataKey])) {
+                mergeRow[dataKey] = _.round(mergeRow[dataKey], toFixed);
+              }
+              const realValue = _.has(mergeRow, dataKey) ? `<%= ${dataKey} %>` : '';
               switch (dataKey) {
                 case 'install_place':
-                case 'avg_temp':
+                  return `<td colspan=2><%= ${dataKey} %></td>`;
+                case 'serial_number':
                   return '';
                 default:
-                  return `<td><%= ${dataKey} %></td>`;
+                  return `<td>${realValue}</td>`;
               }
             })
-            .value()
-            .toString();
-        }
-        // 온전한 바디 템플릿 돔 생성
-        const bodyTemplate = _.template(`<tr>${contentsTemplate}</tr>`);
-
-        return bodyTemplate(dataRow);
-      });
+            .thru(template => {
+              const bodyTemplate = _.template(`<tr>${template.toString()}</tr>`);
+              return bodyTemplate(mergeRow);
+            })
+            .value();
+        })
+        .value();
+    });
 
     return {
       tableHeaderDom,
-      tableBodyDom,
+      tableBodyDom: _.flatten(tableBodyDom),
     };
   },
 
