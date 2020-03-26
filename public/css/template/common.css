@@ -243,7 +243,7 @@ _:-ms-input-placeholder,
   display: flex;
   justify-content: space-between;
 
-  /* margin: 0.5rem auto 0; */
+  margin: 0.5rem auto 0;
 }
 
 .container_row {
@@ -452,12 +452,11 @@ _:-ms-input-placeholder,
 }
 
 .lineChart_box {
-  text-align: center;
   margin-bottom: 2rem;
   height: 40rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  width: 100%;
 }
 
 /***************************************/
@@ -969,6 +968,16 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /**************** Flex Option ****************/
 /***************************************/
+.flex {
+  display: flex;
+}
+
+.flex_box {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .flex_dir_row {
   flex-direction: row;
 }

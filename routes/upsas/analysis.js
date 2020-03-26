@@ -37,7 +37,7 @@ const subCategoryList = [
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
-const colorTable2 = ['yellow', 'purple', 'gray', 'white'];
+const colorTable2 = ['blue', 'purple', 'gray', 'white'];
 
 // trend middleware
 router.get(
@@ -60,9 +60,6 @@ router.get(
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { siteId },
-      viewPowerProfileRows,
-      subCategory,
-      searchRange,
     } = req.locals;
 
     /** @type {WeatherModel} */
@@ -151,7 +148,7 @@ router.get(
     weatherCharts = analysisModel.makeChartData(weatherDeviceRows, [
       {
         dataKey: 'avg_temp',
-        name: '외기온도',
+        name: '외기 온도',
         color: 'red',
       },
     ]);
@@ -181,6 +178,7 @@ router.get(
     // 3. 구간 발전량을 데이터 Key 로 하여 모듈 효율 분석
     const prevRangePowerEffChart = analysisModel.makePowerEfficiencyChart(prevPowerEffRows, {
       dataKey: 'peak_power_eff',
+      colorTable: colorTable1,
     });
 
     // 4. req 객체에 할당
@@ -273,7 +271,7 @@ router.get(
     weatherCharts = analysisModel.makeChartData(weatherDeviceRows, [
       {
         dataKey: 'avg_temp',
-        name: '외기온도',
+        name: '외기 온도',
         color: 'red',
       },
     ]);
@@ -309,6 +307,8 @@ router.get(
     maxPeakEfficiencyInfo = _.maxBy(dailyPowerEffRows, row => {
       return row.target_category === mType.WATER_0 && row.avg_power_eff;
     });
+
+    _.set(req, 'locals.maxPeakEfficiencyInfo', maxPeakEfficiencyInfo);
 
     // 5. 발전 효율 최대 순간 데이터(발전, 환경, 기상) 추출
     const maxPeakPowerRows = dailyPowerEffRows.filter(
@@ -352,9 +352,6 @@ router.get(
       mainInfo: { mainWhere, siteId },
       viewPowerProfileRows,
     } = req.locals;
-
-    // const colorTable1 = ['greenyellow', 'violet', 'lightskyblue', 'aliceblue'];
-    // const colorTable2 = ['yellow', 'purple', 'gray', 'white'];
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
@@ -415,7 +412,7 @@ router.get(
         name: '일사량',
         yAxis: 1,
         color: 'red',
-        dashStyle: 'ShortDot',
+        dashStyle: 'ShortDash',
       },
     ]);
     powerChartData = powerChartData.concat(weatherCharts);
@@ -445,8 +442,8 @@ router.get(
       colorIndex += 1;
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 수위`,
-        color: colorTable2[colorIndex],
-        dashStyle: 'ShortDot',
+        color: colorTable1[colorIndex],
+        dashStyle: 'ShortDash',
         yAxis: 1,
         data: envRows.map(row => [
           commonUtil.convertDateToUTC(row.group_date),
@@ -459,12 +456,13 @@ router.get(
     weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_temp',
-        name: '외기온도',
-        dashStyle: 'ShortDashDot',
+        name: '외기 온도',
+        color: 'red',
+        dashStyle: 'ShortDot',
       },
     ]);
 
-    const dailyEnvChart = envBrineTempChart.concat(envModuleTempChart, ...weatherCharts);
+    const dailyEnvChart = envBrineTempChart.concat(...weatherCharts, envModuleTempChart);
 
     _.set(req.locals, 'chartInfo.dailyEnvChart', dailyEnvChart);
 
@@ -507,7 +505,7 @@ router.get(
         name: '일사량',
         yAxis: 1,
         color: 'red',
-        dashStyle: 'ShortDot',
+        dashStyle: 'ShortDash',
       },
     ]);
     powerChartData = powerChartData.concat(weatherCharts);
@@ -537,8 +535,8 @@ router.get(
       colorIndex += 1;
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 수위`,
-        color: colorTable2[colorIndex],
-        dashStyle: 'ShortDot',
+        color: colorTable1[colorIndex],
+        dashStyle: 'ShortDash',
         yAxis: 1,
         data: envRows.map(row => [
           commonUtil.convertDateToUTC(row.group_date),
@@ -551,13 +549,13 @@ router.get(
     weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_temp',
-        name: '외기온도',
+        name: '외기 온도',
         color: 'red',
-        dashStyle: 'ShortDashDot',
+        dashStyle: 'ShortDot',
       },
     ]);
 
-    const rangeEnvChart = envBrineTempChart.concat(envModuleTempChart, ...weatherCharts);
+    const rangeEnvChart = envBrineTempChart.concat(...weatherCharts, envModuleTempChart);
 
     _.set(req.locals, 'chartInfo.rangeEnvChart', rangeEnvChart);
     // console.timeEnd('금일 환경 변화 추이');

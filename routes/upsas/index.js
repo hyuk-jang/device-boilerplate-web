@@ -110,17 +110,17 @@ router.get(
 
     let totalSiteAmount = 0;
     const siteList = mainRows.map(mainRow => {
-      const { name: mainName, main_seq: mainSeq } = mainRow;
+      const { name: mainName, main_seq: mainSeq, power_amount: pAmount = 0 } = mainRow;
 
-      const totalAmount = _.chain(viewPowerProfileRows)
-        .filter(viewPowerProfileRow => viewPowerProfileRow.main_seq === mainSeq)
-        .map('ivt_amount')
-        .sum()
-        .round(1);
+      // const totalAmount = _.chain(viewPowerProfileRows)
+      //   .filter(viewPowerProfileRow => viewPowerProfileRow.main_seq === mainSeq)
+      //   .map('ivt_amount')
+      //   .sum()
+      //   .round(1);
 
-      totalSiteAmount += totalAmount;
+      totalSiteAmount += pAmount;
 
-      const siteName = `${totalAmount}kW급 (${mainName})`;
+      const siteName = `${pAmount}kW급 (${mainName})`;
       return { siteId: mainSeq.toString(), name: siteName, m_name: mainName };
     });
     siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });

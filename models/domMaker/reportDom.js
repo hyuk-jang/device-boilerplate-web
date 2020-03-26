@@ -242,8 +242,8 @@ module.exports = {
 
     const bodyTemplate = _.template(`
       <tr>
-        <td><%= num %></td>
-        <td><%= group_date %></td>
+        <td class="text-center"><%= num %></td>
+        <td class="text-center"><%= group_date %></td>
         ${defaultDom.makeStaticBodyElements(_.map(blockViewList, 'dataKey'))}
       </tr>
     `);

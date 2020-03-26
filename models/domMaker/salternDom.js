@@ -34,19 +34,27 @@ module.exports = {
         // 인버터가 mainTitle에 걸릴경우 병합 처리.
         contentsTemplate = _.chain(blockViewList)
           .map(blockInfo => {
-            const { dataKey, mainTitle } = blockInfo;
+            const { dataKey, mainTitle, classList } = blockInfo;
             if (mainTitle === '인버터') {
-              return `<td rowspan=${inverterMergeLength}><%= ${dataKey} %></td>`;
+              return `<td rowspan=${inverterMergeLength} ${
+                _.isArray(classList) ? `class='${classList.toString()}'` : ''
+              }><%= ${dataKey} %></td>`;
             }
-            return `<td><%= ${dataKey} %></td>`;
+            return `<td ${
+              _.isArray(classList) ? `class='${classList.toString()}'` : ''
+            }><%= ${dataKey} %></td>`;
           })
           .value()
           .toString();
       } else {
         contentsTemplate = _.chain(blockViewList)
           .map(blockInfo => {
-            const { dataKey, mainTitle } = blockInfo;
-            return mainTitle !== '인버터' ? `<td><%= ${dataKey} %></td>` : '';
+            const { dataKey, mainTitle, classList } = blockInfo;
+            return mainTitle !== '인버터'
+              ? `<td ${
+                  _.isArray(classList) ? `class='${classList.toString()}'` : ''
+                }><%= ${dataKey} %></td>`
+              : '';
           })
           .value()
           .toString();

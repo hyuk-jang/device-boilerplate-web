@@ -58,11 +58,14 @@
             <article class="component_piece_area">
               <header>발전 효율 최대 순간 분석</header>
               <section class="component_piece_body">
-                <p class="table_desc_area">
-                  측정시간 &nbsp; <span id="measureTime"> 2020년 4월 3일 15시 35분 </span>
-                  <span id="measureTime"></span>
-                </p>
-                <p class="table_desc_area">외기온도 &nbsp; <span id="peakOutTemp"></span></p>
+                <div class="flex flex_jus_bet" style="align-items: baseline;">
+                  <p class="table_desc_area">
+                    측정시간 &nbsp; <span id="measureTime"> 2020년 4월 3일 15시 35분 </span>
+                  </p>
+                  <p class="text-right mr_1rem">
+                    외기 온도(˚C): <span style="color: #fff934;" id="peakOutTemp"></span>
+                  </p>
+                </div>
                 <div class="default_area text-center">
                   <table class="table table-bordered ">
                     <thead id="tableHeaderDom"></thead>
@@ -92,13 +95,16 @@
 
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
 
+      // 측정 시간 입력
+      // 측정 시간 입력
+      var maxPeakEfficiencyInfo = <%- JSON.stringify(maxPeakEfficiencyInfo) %>;
+      document.getElementById('measureTime').innerHTML = moment(maxPeakEfficiencyInfo.group_date).format('YYYY년 MM월 DD일 HH시 mm분')
 
       var searchRangeInfo =  <%- JSON.stringify(searchRangeInfo) %>;
 
       var chartInfo =  <%- JSON.stringify(chartInfo) %>;
 
       var maxPeakEnvRows =  <%- JSON.stringify(maxPeakEnvRows) %>;
-      // console.log(maxPeakEnvRows)
 
       $('#peakOutTemp').text(maxPeakEnvRows[0].avg_temp)
 
@@ -195,7 +201,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '모듈 효율 (%)',
+                text: '발전 효율 (%)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -298,7 +304,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '모듈 효율 %',
+                text: '발전 효율 (%)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -318,7 +324,7 @@
                 offset: 0,
                 x: 43,
                 y: -15,
-                text: '일사량 W/㎡',
+                text: '일사량 (W/㎡)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -385,7 +391,9 @@
               month: '%y-%m',
               year: '%Y',
             },
+            crosshair: true,
             labels: {
+              x: 50,
               style: {
                 fontSize: subFontSize,
               },
@@ -393,6 +401,7 @@
           },
           yAxis: [
             {
+              tickInterval: 25,
               title: {
                 align: 'high',
                 textAlign: 'left',
@@ -400,7 +409,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '모듈 효율 (%)',
+                text: '발전 효율 (%)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -414,7 +423,10 @@
             },
           ],
           plotOptions: {
-            series: {},
+            // column: {
+            //   pointPadding: 0.2,
+            //   // borderWidth: 0,
+            // },
           },
           tooltip: {
             // shared: true,
@@ -470,7 +482,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '온도 ˚C',
+                text: '온도 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -493,7 +505,7 @@
                 offset: 0,
                 x: 43,
                 y: -15,
-                text: '온도 ˚C',
+                text: '온도 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -579,7 +591,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '온도 ˚C',
+                text: '온도 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -602,7 +614,7 @@
                 offset: 0,
                 x: 43,
                 y: -15,
-                text: '온도 ˚C',
+                text: '온도 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],

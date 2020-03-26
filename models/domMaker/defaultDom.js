@@ -315,7 +315,7 @@ const defaultDom = {
         blockTableOptions,
         configInfo =>
           `<td ${
-            _.isArray(configInfo.cssList) ? `class='${configInfo.cssList.toString()}'` : ''
+            _.isArray(configInfo.classList) ? `class='${configInfo.classList.toString()}'` : ''
           } ><%= ${configInfo.dataKey} %></td>`,
       ).toString()}</tr>`,
     );

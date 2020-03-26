@@ -338,11 +338,13 @@ class UpsasDP extends DeviceProtocol {
         dataKey: 'seb_name',
         mainTitle: '',
         cssWidthPer: 13,
+        classList: ['text-center'],
       },
       {
         dataKey: 'manufacturer',
         dataName: '제조사',
         mainTitle: '모듈',
+        classList: ['text-center'],
       },
       {
         dataKey: 'power_amount',
@@ -436,37 +438,42 @@ class UpsasDP extends DeviceProtocol {
       {
         dataKey: 'install_place',
         mainTitle: '구분',
-        // cssWidthPer: 13,
+        cssWidthPer: 15,
       },
       {
         dataKey: 'serial_number',
         mainTitle: '타입',
-        // cssWidthPer: 13,
+        cssWidthPer: 10,
       },
       {
         dataKey: 'avg_power_eff',
         mainTitle: '발전 효율',
         dataUnit: '%',
+        cssWidthPer: 18,
       },
       {
         dataKey: 'avg_module_rear_temp',
         mainTitle: '모듈 온도',
         dataUnit: '℃',
+        cssWidthPer: 18,
       },
       {
         dataKey: 'avg_brine_temp',
         mainTitle: '수온',
         dataUnit: '℃',
+        cssWidthPer: 13,
       },
       {
         dataKey: 'avg_water_level',
         mainTitle: '수위',
         dataUnit: 'cm',
+        cssWidthPer: 13,
       },
       {
         dataKey: 'avg_salinity',
         mainTitle: '염도',
         dataUnit: '%',
+        cssWidthPer: 13,
       },
     ];
   }
@@ -482,12 +489,14 @@ class UpsasDP extends DeviceProtocol {
         // dataName: '접속반',
         cssWidthPer: 10,
         mainTitle: '접속반',
+        classList: ['text-center'],
       },
       {
         dataKey: 'install_place',
         // dataName: '관련 모듈',
         cssWidthPer: 15,
         mainTitle: '관련 모듈',
+        classList: ['text-center'],
       },
       {
         dataKey: 'a_ch_1',
@@ -586,6 +595,7 @@ class UpsasDP extends DeviceProtocol {
         dataKey: 'seb_name',
         mainTitle: '장소',
         cssWidthPer: 25,
+        classList: ['text-center'],
       },
       {
         dataKey: 'water_level',
@@ -1107,7 +1117,7 @@ class UpsasDP extends DeviceProtocol {
           dataKey: 'group_date',
           isAddComma: false,
           cssWidthPer: 15,
-          cssList: ['text-center'],
+          classList: ['text-center'],
         },
         {
           mainTitle: '태양광',
