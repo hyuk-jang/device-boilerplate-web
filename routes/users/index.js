@@ -21,7 +21,7 @@ const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
 
-const accountUserGradeRange = ['manager', 'owner', 'guest'];
+// const accountUserGradeRange = ['manager', 'owner', 'guest'];
 
 // server middleware
 // router.use((req, res, next) => {
@@ -102,29 +102,31 @@ router.get(
 
     _.set(req, 'locals.searchRange', searchRange);
 
+    /** @type {MAIN[]} */
+    const mainRows = await biModule.getTable('main', { is_deleted: 0 });
+
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
-    _.set(req, 'locals.viewPowerProfileRows', viewPowerProfileRows);
-
     let totalSiteAmount = 0;
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        totalSiteAmount += totalAmount;
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 테스트베드 (${siteMainName})`;
-        return { siteId: strMainSeq.toString(), name: siteName, m_name: siteMainName };
-      })
-      .value();
-    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
+    const siteList = mainRows.map(mainRow => {
+      const { name: mainName, main_seq: mainSeq, power_amount: pAmount = 0 } = mainRow;
 
-    // _.set(req, 'locals.siteList', siteList);
+      // const totalAmount = _.chain(viewPowerProfileRows)
+      //   .filter(viewPowerProfileRow => viewPowerProfileRow.main_seq === mainSeq)
+      //   .map('ivt_amount')
+      //   .sum()
+      //   .round(1);
+
+      totalSiteAmount += pAmount;
+
+      const siteName = `${pAmount}kW급 (${mainName})`;
+      return { siteId: mainSeq.toString(), name: siteName, m_name: mainName };
+    });
+
+    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
+    _.set(req, 'locals.viewPowerProfileRows', _.filter(viewPowerProfileRows, mainWhere));
+
     const projectSource = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
 
     _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
@@ -196,13 +198,13 @@ router.get(
       currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
     }
 
-    if (_.includes(accountUserGradeRange, req.user.grade)) {
-      _.set(req, 'locals.mainInfo.manualPath', 'userManual');
-    } else if (req.user.grade === 'admin') {
-      _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
-    } else {
-      _.set(req, 'locals.mainInfo.manualPath', '');
-    }
+    // if (_.includes(accountUserGradeRange, req.user.grade)) {
+    //   _.set(req, 'locals.mainInfo.manualPath', 'userManual');
+    // } else if (req.user.grade === 'admin') {
+    //   _.set(req, 'locals.mainInfo.manualPath', 'adminManual');
+    // } else {
+    //   _.set(req, 'locals.mainInfo.manualPath', '');
+    // }
 
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);

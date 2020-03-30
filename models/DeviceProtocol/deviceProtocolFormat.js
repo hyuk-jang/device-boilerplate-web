@@ -147,7 +147,7 @@
  * @property {number=} scale 배율. 원 데이터에 곱할 수치
  * @property {number=} toFixed 최종 계산 결과 값에 소수점 절삭 처리할 자리수
  * @property {number=} cssWidthPer Table 셀 가로 길이(%) TH.style='width: ${cssWidthPer} %'
- * @property {string[]=} cssList 해당 Dom Element에 적용할 css 목록
+ * @property {string[]=} classList 해당 Dom Element에 적용할 css 목록
  * @property {boolean=} isAddComma 천단위 기호 추가 여부. default true
  */
 

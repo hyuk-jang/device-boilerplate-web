@@ -34,19 +34,27 @@ module.exports = {
         // 인버터가 mainTitle에 걸릴경우 병합 처리.
         contentsTemplate = _.chain(blockViewList)
           .map(blockInfo => {
-            const { dataKey, mainTitle } = blockInfo;
+            const { dataKey, mainTitle, classList } = blockInfo;
             if (mainTitle === '인버터') {
-              return `<td rowspan=${inverterMergeLength}><%= ${dataKey} %></td>`;
+              return `<td rowspan=${inverterMergeLength} ${
+                _.isArray(classList) ? `class='${classList.toString()}'` : ''
+              }><%= ${dataKey} %></td>`;
             }
-            return `<td><%= ${dataKey} %></td>`;
+            return `<td ${
+              _.isArray(classList) ? `class='${classList.toString()}'` : ''
+            }><%= ${dataKey} %></td>`;
           })
           .value()
           .toString();
       } else {
         contentsTemplate = _.chain(blockViewList)
           .map(blockInfo => {
-            const { dataKey, mainTitle } = blockInfo;
-            return mainTitle !== '인버터' ? `<td><%= ${dataKey} %></td>` : '';
+            const { dataKey, mainTitle, classList } = blockInfo;
+            return mainTitle !== '인버터'
+              ? `<td ${
+                  _.isArray(classList) ? `class='${classList.toString()}'` : ''
+                }><%= ${dataKey} %></td>`
+              : '';
           })
           .value()
           .toString();
@@ -55,25 +63,24 @@ module.exports = {
       // 온전한 바디 템플릿 돔 생성
       const bodyTemplate = _.template(`<tr>${contentsTemplate}</tr>`);
 
-      const pvKw = _.get(dataRow, 'pvKw', '');
-      const powerKw = _.get(dataRow, 'gridKw', '');
+      const { pvKw = '', gridKw = '', gridPf } = dataRow;
 
+      // 발전 효율
+      if (!_.isNumber(gridPf)) {
+        dataRow.gridPf = _.round(_.divide(gridKw, pvKw) * 100, 1);
+      }
+      if (!Number.isFinite(dataRow.gridPf)) {
+        dataRow.gridPf = '-';
+      }
       // 번호
       // _.set(dataRow, 'num', index + 1);
       // 발전 효율 (계산하여 재정의 함)
 
-      // 발전 효율
-      const gridPf =
-        _.isNumber(powerKw) && _.isNumber(pvKw) ? _.round(_.divide(powerKw, pvKw) * 100, 1) : '';
-
-      _.set(dataRow, 'gridPf', gridPf);
       // 계산식 반영 및 천단위 기호 추가
       defaultDom.applyCalcDataRow({
         dataRow,
         bodyConfigList: blockViewList,
       });
-
-      // BU.toLocaleString(dataRow);
 
       return bodyTemplate(dataRow);
     });
@@ -83,6 +90,92 @@ module.exports = {
       tableBodyDom,
     };
   },
+
+  /**
+   * 센서 현재 정보값 생성 돔. 좌측 사이드 영역을 생성할 때 사용
+   * @param {SEB_RELATION[]} analysisStatusList
+   * @param {blockViewMakeOption[]} blockViewList
+   */
+  makeAnalysisStatusDom(analysisStatusList, blockViewList) {
+    const tableHeaderDom = defaultDom.makeDynamicBlockTableHeader({
+      blockTableOptions: blockViewList,
+    });
+
+    const gAnalysisStatusList = _.groupBy(analysisStatusList, 'target_category');
+
+    const tableBodyDom = _.map(gAnalysisStatusList, (rows, gKey) => {
+      // 그룹키가 water0angle 일 경우
+      if (gKey === 'water0angle') {
+        // rows를 순회하며 tr 생성
+        return rows.map((row, index) => {
+          return _.chain(blockViewList)
+            .map(blockInfo => {
+              const { dataKey, dataUnit = '', toFixed = 1 } = blockInfo;
+              if (dataUnit.length && _.isNumber(row[dataKey])) {
+                row[dataKey] = _.round(row[dataKey], toFixed);
+              }
+              const realValue = _.has(row, dataKey) ? `<%= ${dataKey} %>` : '-';
+              switch (dataKey) {
+                case 'install_place':
+                  return index === 0 ? `<td rowspan=${rows.length}>${realValue}</td>` : '';
+                default:
+                  return `<td>${realValue}</td>`;
+              }
+            })
+            .thru(template => {
+              const bodyTemplate = _.template(`<tr>${template.toString()}</tr>`);
+              return bodyTemplate(row);
+            })
+            .value();
+        });
+      }
+
+      // 그 외 평균 병합
+      // blockViews 를 순회하면서 dataUnit이 존재할경우
+      // rows 값 평균, 아닐 경우 0번째 인덱스 값 추출하여 row 한개로 병합
+      return _(blockViewList)
+        .map(blockView => {
+          const { dataKey, dataUnit } = blockView;
+          const avgValue = dataUnit ? _.mean(_.map(rows, dataKey)) || '-' : rows[0][dataKey];
+
+          return {
+            [dataKey]: avgValue,
+          };
+        })
+        .thru(row => {
+          const mergeRow = _.reduce(row, (prev, next) => Object.assign(prev, next), {});
+
+          return _.chain(blockViewList)
+            .map(blockInfo => {
+              const { dataKey, dataUnit = '', toFixed = 1 } = blockInfo;
+              if (dataUnit.length && _.isNumber(mergeRow[dataKey])) {
+                mergeRow[dataKey] = _.round(mergeRow[dataKey], toFixed);
+              }
+              const realValue = _.has(mergeRow, dataKey) ? `<%= ${dataKey} %>` : '';
+              switch (dataKey) {
+                case 'install_place':
+                  return `<td colspan=2><%= ${dataKey} %></td>`;
+                case 'serial_number':
+                  return '';
+                default:
+                  return `<td>${realValue}</td>`;
+              }
+            })
+            .thru(template => {
+              const bodyTemplate = _.template(`<tr>${template.toString()}</tr>`);
+              return bodyTemplate(mergeRow);
+            })
+            .value();
+        })
+        .value();
+    });
+
+    return {
+      tableHeaderDom,
+      tableBodyDom: _.flatten(tableBodyDom),
+    };
+  },
+
   /**
    * 센서 현재 정보값 생성 돔. 좌측 사이드 영역을 생성할 때 사용
    * @param {SEB_RELATION[]} measureStatusList

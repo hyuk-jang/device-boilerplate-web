@@ -10,9 +10,11 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const control = require('./control');
 const status = require('./status');
+const analysis = require('./analysis');
 const trend = require('./trend');
 const report = require('./report');
 const cctv = require('./cctv');
+const admin = require('../users/admin');
 
 const commonUtil = require('../../models/templates/common.util');
 
@@ -100,29 +102,30 @@ router.get(
 
     _.set(req, 'locals.searchRange', searchRange);
 
+    /** @type {MAIN[]} */
+    const mainRows = await biModule.getTable('main', { is_deleted: 0 });
+
     /** @type {V_PW_PROFILE[]} */
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
+    let totalSiteAmount = 0;
+    const siteList = mainRows.map(mainRow => {
+      const { name: mainName, main_seq: mainSeq, power_amount: pAmount = 0 } = mainRow;
+
+      // const totalAmount = _.chain(viewPowerProfileRows)
+      //   .filter(viewPowerProfileRow => viewPowerProfileRow.main_seq === mainSeq)
+      //   .map('ivt_amount')
+      //   .sum()
+      //   .round(1);
+
+      totalSiteAmount += pAmount;
+
+      const siteName = `${pAmount}kW급 (${mainName})`;
+      return { siteId: mainSeq.toString(), name: siteName, m_name: mainName };
+    });
+    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
     _.set(req, 'locals.viewPowerProfileRows', _.filter(viewPowerProfileRows, mainWhere));
 
-    let totalSiteAmount = 0;
-    const siteList = _(viewPowerProfileRows)
-      .groupBy('main_seq')
-      .map((profileRows, strMainSeq) => {
-        const totalAmount = _.round(
-          _(profileRows)
-            .map('ivt_amount')
-            .sum(),
-        );
-        totalSiteAmount += totalAmount;
-        const siteMainName = _.get(_.head(profileRows), 'm_name', '');
-        const siteName = `${totalAmount}kW급 (${siteMainName})`;
-        return { siteId: strMainSeq.toString(), name: siteName, m_name: siteMainName };
-      })
-      .value();
-    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
-
-    // _.set(req, 'locals.siteList', siteList);
     const projectSource = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
 
     _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
@@ -159,14 +162,10 @@ router.get(
         href: 'status',
         name: '계측현황',
       },
-      // {
-      //   href: 'connector',
-      //   name: '접속반',
-      // },
-      // {
-      //   href: 'inverter',
-      //   name: '인버터',
-      // },
+      {
+        href: 'analysis',
+        name: '데이터분석',
+      },
       {
         href: 'trend',
         name: '트렌드',
@@ -175,19 +174,18 @@ router.get(
         href: 'report',
         name: '보고서',
       },
-      {
-        href: 'cctv',
-        name: 'CCTV',
-      },
+      // {
+      //   href: 'cctv',
+      //   name: 'CCTV',
+      // },
     ];
 
-    // admin 등급에선 제어 페이지 노출(무안)
-    // if (_.eq(grade, 'admin')) {
-    //   naviList.push({
-    //     href: 'control',
-    //     name: '제어',
-    //   });
-    // }
+    if (_.eq(grade, 'admin')) {
+      naviList.push({
+        href: 'admin',
+        name: '관리',
+      });
+    }
 
     const naviListDom = domMakerMaster.makeNaviListDom(naviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
@@ -227,10 +225,13 @@ router.get(
 // Router 추가
 router.use('/', main);
 router.use('/control', control);
+router.use('/tta_status', status);
 router.use('/status', status);
+router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);
 router.use('/cctv', cctv);
+router.use('/admin', admin);
 
 // router.use('/users', users);
 

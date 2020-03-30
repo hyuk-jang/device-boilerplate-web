@@ -73,37 +73,45 @@ router.get(
     const { mainWhere } = req.locals.mainInfo;
 
     // Step1: SEB_RELATION에서 main_seq를 충족하는 rows 추출
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await powerModel.getTable('V_DV_PLACE_RELATION', mainWhere);
+    /** @type {V_DV_PLACE[]} */
+    const placeRows = await powerModel.getTable('V_DV_PLACE', mainWhere);
 
-    const sebPlaceSeqList = _(placeRelationRows)
-      .filter({ pd_target_id: 'solarEvaporationBlock' })
-      .map('place_seq')
-      .union()
-      .value();
+    const placeSeqList = _.map(placeRows, 'place_seq');
 
-    /** @type {SEB_RELATION[]}  */
-    const sebRelationRows = await powerModel.getTable('SEB_RELATION', {
-      place_seq: sebPlaceSeqList,
+    /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
+    const sebRelRows = await powerModel.getTable('SEB_RELATION');
+
+    const sebRelationRows = sebRelRows.filter(sebRelRow => {
+      return _.includes(placeSeqList, sebRelRow.place_seq);
     });
+
+    const sebPlaceSeqList = sebRelationRows.map(row => row.place_seq);
 
     // Step2-1: 연결된 접속반의 현재 데이터를 추출
-    const connectorRows = await powerModel.getTable('PW_CONNECTOR', {
-      connector_seq: _.map(sebRelationRows, 'connector_seq'),
-    });
+    const connectSeqList = _.map(sebRelationRows, 'connector_seq');
+    const connectorRows = connectSeqList.length
+      ? await powerModel.getTable('PW_CONNECTOR', {
+          connector_seq: connectSeqList,
+        })
+      : [];
 
     // 접속반 현재 상태
     const connectorStatusRows = await powerModel.getConnectorStatus(
       _.map(connectorRows, 'connector_seq'),
     );
 
+    const inverterSeqList = _(sebRelationRows)
+      .map('inverter_seq')
+      .union()
+      .value();
+
     /** @type {V_INVERTER_STATUS[]} */
-    const inverterStatusRows = await powerModel.getTable('V_PW_INVERTER_STATUS', {
-      inverter_seq: _(sebRelationRows)
-        .map('inverter_seq')
-        .union()
-        .value(),
-    });
+    const inverterStatusRows = inverterSeqList.length
+      ? await powerModel.getTable('V_PW_INVERTER_STATUS', {
+          inverter_seq: inverterSeqList,
+        })
+      : [];
+
     // 염전 상태 계측 센서 상태
     const salternStatusRows = await blockModel.getBlockStatus({
       tableName: 'saltern_sensor_data',
@@ -185,6 +193,15 @@ router.get(
           .divide(1000)
           .round(2)
           .value();
+
+        // BU.CLIS(sebRelRow);
+
+        sebRelRow.moduleEfficiency = _.chain(sebRelRow.modulePvKw)
+          .divide(sebRelRow.power_amount)
+          .multiply(100)
+          .round(1)
+          .value();
+        // BU.CLI(sebRelRow.moduleEfficiency);
       }
       const foundInverterStatusIndex = _.findIndex(inverterStatusRows, { inverter_seq: ivtSeq });
 
@@ -192,7 +209,7 @@ router.get(
       if (foundInverterStatusIndex > -1) {
         const inverterStatusRow = inverterStatusRows[foundInverterStatusIndex];
         // 중복으로 들어가는 경우가 발생하기 때문에 인버터 상태 Rows에서 제거
-        _.pullAt(inverterStatusRows, [foundInverterStatusIndex]);
+        // _.pullAt(inverterStatusRows, [foundInverterStatusIndex]);
 
         // 의미없는 데이터일 경우 무시
         if (moment().diff(moment(inverterStatusRow.writedate), 'minutes') <= 10) {
@@ -206,8 +223,14 @@ router.get(
                   .round(2)
                   .value()
               : null;
+
           sebRelRow.pvKw = pvKw;
           sebRelRow.gridKw = _.get(inverterStatusRow, 'power_kw', null);
+          sebRelRow.gridEfficiency = _.chain(sebRelRow.gridKw)
+            .divide(inverterStatusRow.amount)
+            .multiply(100)
+            .round(1)
+            .value();
           sebRelRow.powerCpKwh = _.get(inverterStatusRow, 'power_cp_kwh', null);
         }
       }
@@ -219,7 +242,7 @@ router.get(
       if (moment().diff(moment(_.get(salternStatusRow, 'writedate')), 'minutes') <= 10) {
         _.assign(
           sebRelRow,
-          _.pick(salternStatusRow, ['water_level', 'salinity', 'module_rear_temp']),
+          _.pick(salternStatusRow, ['water_level', 'salinity', 'brine_temp', 'module_rear_temp']),
         );
       }
     });
@@ -249,9 +272,7 @@ router.get(
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    const { subCategory } = req.locals.measureInfo;
-
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { siteId, mainWhere, subCategory } = req.locals.mainInfo;
 
     const deviceProtocol = new DeviceProtocol();
     // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴
@@ -266,9 +287,11 @@ router.get(
       .value();
 
     /** @type {CONNECTOR[]} */
-    const connectorRows = await powerModel.getTable('PW_CONNECTOR', {
-      connector_seq: connectorSeqList,
-    });
+    const connectorRows = connectorSeqList.length
+      ? await powerModel.getTable('PW_CONNECTOR', {
+          connector_seq: connectorSeqList,
+        })
+      : [];
 
     // 접속반 현재 상태
     const statusRows = await powerModel.getConnectorStatus(_.map(connectorRows, 'connector_seq'));
@@ -297,7 +320,10 @@ router.get(
           .round(1);
 
         // 접속반 채널별 데이터 및 전류 총합, 평균 전류를 포함한 객체 확장
-        _.assign(cntRow, _.pick(statusRow, _.map(blockStatusTable, 'dataKey')), { sumAmp, avgVol });
+        _.assign(cntRow, _.pick(statusRow, _.map(blockStatusTable, 'dataKey')), {
+          sumAmp,
+          avgVol,
+        });
       }
     });
 
@@ -409,9 +435,7 @@ router.get(
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    const { subCategory } = req.locals.measureInfo;
-
-    const { siteId, mainWhere } = req.locals.mainInfo;
+    const { siteId, mainWhere, subCategory } = req.locals.mainInfo;
 
     const deviceProtocol = new DeviceProtocol();
     // 현재 염전 상태를 포현할 BlockStatusTableOptions 가져옴
@@ -420,12 +444,23 @@ router.get(
     /** @type {V_DV_PLACE[]} */
     const placeRows = await refineModel.getTable('V_DV_PLACE', mainWhere);
 
+    const placeSeqList = _.map(placeRows, 'place_seq');
+
+    /** @type {SEB_RELATION[]} 수중태양광 모듈과 관계된 접속반, 인버터, 장소 관계 목록 */
+    const sebRelRows = await blockModel.getTable('SEB_RELATION');
+
+    const sebRelationRows = sebRelRows.filter(sebRelRow => {
+      return _.includes(placeSeqList, sebRelRow.place_seq);
+    });
+
+    const sebPlaceSeqList = sebRelationRows.map(row => row.place_seq);
+
     // 목록으로 표출할 장소 카테고리
     const salternPlaceClassId = ['salternBlock', 'brineWarehouse', 'reservoir'];
 
     // 실제적으로 출력할 염전 장소 Rows
-    const salternPlaceRows = _.filter(placeRows, plaRelRow => {
-      return _.includes(salternPlaceClassId, plaRelRow.pc_target_id);
+    const salternPlaceRows = _.filter(placeRows, placeRow => {
+      return _.includes(sebPlaceSeqList, placeRow.place_seq);
     });
 
     // 염전 상태 계측 센서 상태
@@ -434,15 +469,18 @@ router.get(
       uniqueColumn: 'saltern_sensor_data_seq',
       groupColumn: 'place_seq',
       whereColumn: 'place_seq',
-      whereColumnValueList: _(salternPlaceRows)
-        .map('place_seq')
-        .union()
-        .value(),
+      whereColumnValueList: sebPlaceSeqList,
     });
 
     // 염전 장소 Rows를 순회하면서 장소에 해당하는 Sensor Data를 Assign 처리
     _.forEach(salternPlaceRows, salternPlaRow => {
       const salternStatusRow = _.find(salternStatusRows, { place_seq: salternPlaRow.place_seq });
+
+      const sebRelationRow = _.find(sebRelationRows, { place_seq: salternPlaRow.place_seq });
+
+      if (sebRelationRow) {
+        Object.assign(salternPlaRow, { seb_name: sebRelationRow.seb_name });
+      }
 
       // 스마트 염전 센서 데이터의 계측 시간이 10분을 초과할 경우
       if (salternStatusRow && moment().diff(moment(salternStatusRow.writedate), 'minutes') <= 10) {

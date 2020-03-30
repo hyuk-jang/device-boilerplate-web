@@ -30,7 +30,7 @@
           <p class="table_desc_area">
             접속반 채널별 전류 전압
           </p>
-          <article id="divDomArea"></article>
+          <article id="divDomArea" class="flex_box"></article>
         </div>
       </div>
       <!--하단1-->
@@ -45,8 +45,6 @@
       var measureInfo = <%- JSON.stringify(measureInfo) %>;
       // 측정 시간 입력
       document.getElementById('measureTime').innerHTML = measureInfo.measureTime;
-      var siteId = _.get(measureInfo, 'siteId');
-      var subCategory = _.get(measureInfo, 'subCategory');
     </script>
 
     <!-- subCategoryDom 자동 이벤트 부여  -->

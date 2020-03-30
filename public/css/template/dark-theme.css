@@ -110,12 +110,12 @@ footer .footer_copyright > a {
 /***************************************/
 /*         Container - Side            */
 /***************************************/
-.side_section_power {
+.component_piece_area.side_section_power {
   background: #2a506c;
   box-shadow: 5px 2px 10px #091219;
 }
 
-.side_section_growth {
+.component_piece_area.side_section_growth {
   background: #1b616b;
   box-shadow: 5px 2px 10px #091219;
 }
@@ -151,12 +151,12 @@ footer .footer_copyright > a {
 }
 
 .component_piece_area .p_column_rem {
-  padding: 2rem 0 0;
+  /* padding: 2rem 0 0; */
   overflow: hidden;
 }
 /* FIXME: */
 .component_piece_area .p_column_rem_2 {
-  padding: 1rem 0 0;
+  /* padding: 1rem 0 0; */
   overflow-y: hidden;
   overflow-x: auto;
 }
@@ -232,4 +232,9 @@ input.form-control:read-only {
 
 .input_tre {
   color: #333;
+}
+
+.panel-heading {
+  color: #fff !important;
+  background: linear-gradient(#2c5364, #0f2027);
 }

@@ -8,7 +8,7 @@
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
     <script src="/js/svg/svg.js"></script>
     <script src="/js/svg/svg.filter.js"></script>
-    <script src="/js/jquery.panzoom.js"></script>
+    <script src="/js/jquery.panzoom.min.js"></script>
     <script src="/js/jquery.mousewheel.js"></script>
 
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
@@ -133,21 +133,19 @@
                     갱신 시간:
                     <span id="cmdUpdateDate"></span>
                   </div>
-                  <!-- Table -->
-                  <table id="cmdTableBody" class="table">
-                    <thead>
-                      <tr>
-                        <th data-field="wrapCmdFormat">명령 형식</th>
-                        <th data-field="wrapCmdType">명령 타입</th>
-                        <th data-field="wrapCmdStep">명령 단계</th>
-                        <th data-field="wrapCmdId">명령 ID</th>
-                        <th data-field="wrapCmdName">명령 이름</th>
-                        <th data-field="wrapCmdCancel">명령 취소</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
+                                  <!-- Table -->
+                <table id="cmdTableBody" class="table-bordered number_table noHover">
+                  <thead>
+                    <tr>
+                      <th data-field="wrapCmdFormat">명령 형식</th>
+                      <th data-field="wrapCmdType">명령 타입</th>
+                      <th data-field="wrapCmdStep">명령 단계</th>
+                      <th data-field="wrapCmdId">명령 ID</th>
+                      <th data-field="wrapCmdName">명령 이름</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
               </div>
               <div id="contents" class="row_st_line min_h_780 command_status_view">
                 <div class="panel panel-default">
@@ -157,19 +155,19 @@
                     갱신 시간:
                     <span id="nodeUpdateDate"></span>
                   </div>
-                  <!-- Table -->
-                  <table id="nodeTableBody" class="table">
-                    <thead>
-                      <tr>
-                        <th data-field="ntn">장치 명</th>
-                        <th data-field="ni">장치 ID</th>
-                        <th data-field="pnl">관련 장소</th>
-                        <th data-field="d">데이터</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
                 </div>
+                <!-- Table -->
+                <table id="nodeTableBody" class="table-bordered number_table noHover">
+                  <thead>
+                    <tr>
+                      <th data-field="ntn">장치 명</th>
+                      <th data-field="ni">장치 ID</th>
+                      <th data-field="pnl">관련 장소</th>
+                      <th data-field="d">데이터</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -365,6 +363,9 @@
         !_.isEmpty(reqCmdInfo) &&
           socket.emit('executeCommand', reqCmdInfo) &&
           $('#cmdGoalArea').html('');
+      // 서버로 명령 실행 요청한 결과 알림
+      socket.on('updateAlert', function(message) {
+        alert(message);
       });
 
       // FIXME: TEXT 종료 후 삭제

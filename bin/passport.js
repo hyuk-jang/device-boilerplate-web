@@ -74,6 +74,7 @@ module.exports = (app, dbInfo) => {
 
       const pickedUserInfo = _.pick(_.head(result), [
         'main_seq',
+        'member_seq',
         'weather_location_seq',
         'user_id',
         'name',

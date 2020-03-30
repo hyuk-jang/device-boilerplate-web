@@ -56,7 +56,7 @@ class FpRndControl extends Control {
     await super.setMainStorage(dbInfo);
 
     /** @type {CAMERA[]} */
-    const cameraList = await this.biModule.getTable('camera', { is_deleted: 0 });
+    const cameraList = await this.controlModel.getTable('camera', { is_deleted: 0 });
 
     // 카메라 목록 설정
     this.mainStorageList.forEach(msInfo => {

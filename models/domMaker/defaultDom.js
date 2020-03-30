@@ -84,9 +84,6 @@ const defaultDom = {
 
     const staticDom = staticTitleList.map(title => staticTitleTemplate({ title, rowsPan: 2 }));
 
-    // BU.CLI(mainTitleList);
-    // BU.CLI(subTitleOptionList);
-
     // 대분류 Header Dom 생성
     const mainTitleDom = _.chain(mainTitleList)
       .union()
@@ -122,6 +119,35 @@ const defaultDom = {
   },
 
   /**
+   * 데이터 숫자로 변환 및 배율 적용. 아닌 경우 '-' or '' 처리
+   * @param {*} data
+   * @param {blockViewMakeOption} bodyConfig
+   */
+  refineData(calcData, bodyConfig) {
+    const { scale = 1, toFixed = 1, isAddComma = true } = bodyConfig;
+
+    // 데이터 변형 목록에 있는지 확인
+    if (_.isNumber(calcData)) {
+      // 유한 수 일 경우
+      if (Number.isFinite(calcData)) {
+        calcData = _.chain(calcData)
+          .multiply(scale)
+          .round(toFixed)
+          .thru(cValue => {
+            // 천단위 기호 추가
+            return isAddComma ? this.addComma(cValue) : cValue;
+          })
+          .value();
+      } else {
+        calcData = '-';
+      }
+    } else if (calcData === undefined || calcData === null) {
+      calcData = '';
+    }
+    return calcData;
+  },
+
+  /**
    *
    * @param {Object} staticInfo
    * @param {Object[]} staticInfo.dataRows DB Data Rows
@@ -147,15 +173,13 @@ const defaultDom = {
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
     return dataRows.map(dataRow => {
       bodyConfigList.forEach(bodyConfig => {
-        const { dataKey, scale = 1, toFixed = 1 } = bodyConfig;
+        const { dataKey } = bodyConfig;
         let calcData = _.get(dataRow, [dataKey]);
         // 데이터 변형 목록에 있는지 확인
         if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
-          calcData = scale !== 1 ? _.multiply(calcData, scale) : calcData;
-          calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
+          calcData = this.refineData(calcData, bodyConfig);
         }
-        // 천단위 기호 추가 후 본 객체에 적용
-        _.set(dataRow, [dataKey], this.addComma(calcData));
+        _.set(dataRow, [dataKey], calcData);
       });
 
       return bodyTemplate(dataRow);
@@ -291,7 +315,7 @@ const defaultDom = {
         blockTableOptions,
         configInfo =>
           `<td ${
-            _.isArray(configInfo.cssList) ? `class='${configInfo.cssList.toString()}'` : ''
+            _.isArray(configInfo.classList) ? `class='${configInfo.classList.toString()}'` : ''
           } ><%= ${configInfo.dataKey} %></td>`,
       ).toString()}</tr>`,
     );
@@ -302,13 +326,9 @@ const defaultDom = {
       _.isNumber(page) && _.set(dataRow, 'num', firstRowNum + index + 1);
 
       blockTableOptions.forEach(bodyConfig => {
-        const { dataKey, scale = 1, toFixed = 1, isAddComma = true } = bodyConfig;
-        let calcData = _.get(dataRow, [dataKey]);
-        // 데이터 변형 목록에 있는지 확인
-        calcData = _.isNumber(scale) && scale !== 1 ? _.multiply(calcData, scale) : calcData;
-        calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
-        // 천단위 기호 추가 후 본 객체에 적용
-        isAddComma && _.set(dataRow, [dataKey], this.addComma(calcData));
+        const { dataKey } = bodyConfig;
+
+        dataRow[dataKey] = this.refineData(dataRow[dataKey], bodyConfig);
       });
 
       return bodyTemplate(dataRow);
@@ -352,19 +372,15 @@ const defaultDom = {
     });
 
     bodyConfigList.forEach(bodyConfig => {
-      const { dataKey, scale = 1, toFixed = 1 } = bodyConfig;
+      const { dataKey } = bodyConfig;
       let calcData = _.get(dataRow, [dataKey]);
       // 데이터 변형 목록에 있는지 확인
       if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
-        if (!_.isNumber(calcData)) {
-          calcData = '';
-        } else {
-          calcData = scale !== 1 ? _.multiply(calcData, scale) : calcData;
-          calcData = _.isNumber(toFixed) ? _.round(calcData, toFixed) : calcData;
-        }
+        calcData = this.refineData(calcData, bodyConfig);
+        // 데이터 변형 목록에 있는지 확인
       }
+      _.set(dataRow, [dataKey], calcData);
       // 천단위 기호 추가 후 본 객체에 적용
-      _.set(dataRow, [dataKey], this.addComma(calcData));
     });
   },
 

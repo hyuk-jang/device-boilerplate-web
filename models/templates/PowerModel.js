@@ -461,6 +461,8 @@ class PowerModel extends BiModule {
    * @param {number[]} connectorSeq
    */
   getConnectorStatus(connectorSeqList) {
+    if (!connectorSeqList.length) return [];
+
     const sql = `
       SELECT
         cnt.*,

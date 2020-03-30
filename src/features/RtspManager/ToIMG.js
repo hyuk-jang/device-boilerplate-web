@@ -78,7 +78,7 @@ class ToIMG extends AbstRtspManager {
           };
 
           // DB에 1Row 추가
-          this.controller.biModule
+          this.controller.controlModel
             .setTable('camera_snapshot_data', snapshotData)
             .catch(err => BU.CLI(err));
         });

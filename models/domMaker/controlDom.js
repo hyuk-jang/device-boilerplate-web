@@ -10,7 +10,7 @@ module.exports = {
    */
   initCommand(deviceMap, placeList) {
     const {
-      controlInfo: { flowCmdList, setCmdList, scenarioCmdList },
+      controlInfo: { flowCmdList = [], setCmdList = [], scenarioCmdList = [] },
     } = deviceMap;
 
     // 단순 명령을 쉽게 인식하기 위한 한글 명령을 입력

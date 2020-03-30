@@ -5,8 +5,8 @@ const gaugeOptions = {
   },
   title: null,
   pane: {
-    center: ['50%', '85%'],
-    size: '135%',
+    center: ['50%', '60%'],
+    size: '100%',
     startAngle: -90,
     endAngle: 90,
     background: {
@@ -30,7 +30,10 @@ const gaugeOptions = {
     minorTickInterval: null,
     tickAmount: 2,
     title: {
-      y: -70,
+      y: -85,
+      style: {
+        fontSize: 20,
+      },
     },
     labels: {
       y: 16,
@@ -42,7 +45,7 @@ const gaugeOptions = {
   plotOptions: {
     solidgauge: {
       dataLabels: {
-        y: 10,
+        y: -50,
         borderWidth: 0,
         useHTML: true,
       },
@@ -384,6 +387,7 @@ function makeColumnChart(chartOption) {
   Highcharts.chart(chartOption.domId, {
     chart: {
       type: 'column',
+      spacingRight: 25,
     },
     title: {
       text: _.get(chartOption, 'title.text', ''),
@@ -403,7 +407,7 @@ function makeColumnChart(chartOption) {
     plotOptions: {
       column: {
         pointPadding: 0.2,
-        borderWidth: 0,
+        // borderWidth: 0,
       },
       series: {
         threshold: -20,

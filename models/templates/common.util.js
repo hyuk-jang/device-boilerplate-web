@@ -2,7 +2,17 @@ const _ = require('lodash');
 const moment = require('moment');
 const xss = require('xss');
 
-const BU = require('base-util-jh').baseUtil;
+const { BU } = require('base-util-jh');
+
+/**
+ * 날짜 데이터를 UTC 날짜로 변환 후 반환
+ * @param {string|Date} date
+ */
+function convertDateToUTC(date) {
+  date = date instanceof Date ? date : new Date(date);
+  return Date.parse(date.addHours(9));
+}
+exports.convertDateToUTC = convertDateToUTC;
 
 /**
  *
@@ -15,6 +25,8 @@ function convertProjectSource(projectMainId) {
 
   switch (projectMainId) {
     case 'UPSAS':
+      // projectImg = 'sm_logo.png';
+      // projectName = '염전 수중 태양광 발전소 통합 관리 시스템 v1.0'; // FIXME: GS 인증으로 임시 변경
       projectImg = 'kepco_logo.png';
       projectName = '수중태양광 발전 시스템 모니터링';
       break;

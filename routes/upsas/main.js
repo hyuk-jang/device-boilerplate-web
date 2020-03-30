@@ -9,8 +9,6 @@ const { BU } = require('base-util-jh');
 
 const domMakerMain = require('../../models/domMaker/mainDom');
 
-const commonUtil = require('../../models/templates/common.util');
-
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
 require('../../models/jsdoc/domGuide');
@@ -18,7 +16,11 @@ require('../../models/jsdoc/domGuide');
 router.get(
   ['/', '/main', '/main/:siteId'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
+    const {
+      mainInfo: { siteId },
+      viewPowerProfileRows,
+    } = req.locals;
+
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
@@ -36,12 +38,6 @@ router.get(
       ? _.set(req, 'locals.salternEnvInfo', {})
       : _.set(req, 'locals.salternEnvInfo', weatherDeviceStatus);
 
-    // Site Sequence.지점 Id를 불러옴
-    const { siteId } = req.locals.mainInfo;
-    /** @type {V_PW_PROFILE[]} powerProfileRows */
-    const powerProfileRows = req.locals.viewPowerProfileRows;
-    // BU.CLI(searchRangeInfo);
-
     // ********** Power 관련
     // 발전 현황을 나타내는 기본적인 정보
     const { powerGenerationInfo, validInverterDataList } = await refineModel.refineGeneralPowerInfo(
@@ -50,7 +46,7 @@ router.get(
 
     const searchRange = refineModel.createSearchRange({ searchInterval: 'min10' });
 
-    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+    const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
     // 인버터 평균 출력 현황 차트로 긁어옴
     const inverterLineChart = await refineModel.refineInverterChart(searchRange, inverterSeqList, {
       domId: 'daily_kw_graph',

@@ -1,13 +1,32 @@
 <footer class="footer_area">
+  <!-- <div>
+    <p class="footer_copyright" id="footer_copyright">
+      <span>
+        Copyright © <a href="http://smsoft.co.kr"><b>(주)에스엠소프트</b></a> All Rights Reserved.
+      </span>
+      |
+      <a href="" id="downloadManual">사용자 취급 설명서</a>
+    </p>
+    <p>
+      <span>전라남도 나주시 빛가람동 892-7 3층 Tel) 061-285-3411</span>
+    </p>
+    <p class="footer_logo">
+      <img width="30" height="30" src="/image/common/sm_logo.png" />
+      <span>(주)에스엠소프트</span>
+    </p>
+  </div> -->
   <div>
-    <img height="30" src="/image/icon/kepco_f_logo.png" />
+    <p>
+      <img height="30" src="/image/icon/kepco_f_logo.png" />
+      <a href="" id="downloadManual">사용자 취급 설명서</a>
+    </p>
     <address class="footer_logo">
       (우) 58217 전라남도 나주시 전력로 55 (빛가람동 120) Copyright@2017 KEPCO. All Rights Reserved.
     </address>
-    <!-- <span>Copyright@2017 KEPCO. All Rights Reserved.</span> -->
-    <!-- <p class="footer_logo">
-      <img width="30" height="30" src="/image/common/sm_logo.png" />
-      <span>에스엠소프트웨어(주)</span>
-    </p> -->
   </div>
 </footer>
+
+<script>
+  // 매뉴얼 다운
+  document.querySelector('#downloadManual').setAttribute('href', '/docs/manual.pptx');
+</script>

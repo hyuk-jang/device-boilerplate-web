@@ -507,7 +507,7 @@ class BiModule extends BM {
    * 인버터 발전량 구해옴
    * @param {searchRange} searchRange  검색 옵션
    * @param {number[]} inverterSeqList
-   * @return {PW_INVERTER_TREND[]}
+   * @return {{}[]}
    */
   getInverterTrend(searchRange = this.createSearchRange(), inverterSeqList) {
     // BU.CLI(searchRange);
@@ -524,18 +524,18 @@ class BiModule extends BM {
           id_group.inverter_seq,
           ${selectViewDate},
           ${selectGroupDate},
-          ROUND(AVG(avg_pv_v), 1) AS avg_pv_v,
-          ROUND(AVG(avg_pv_a), 1) AS avg_pv_a,
-          ROUND(AVG(avg_pv_kw), 1) AS avg_pv_kw,
-          ROUND(AVG(avg_grid_rs_v), 1) AS avg_grid_rs_v,
-          ROUND(AVG(avg_grid_st_v), 1) AS avg_grid_st_v,
-          ROUND(AVG(avg_grid_tr_v), 1) AS avg_grid_tr_v,
-          ROUND(AVG(avg_grid_r_a), 1) AS avg_grid_r_a,
-          ROUND(AVG(avg_grid_s_a), 1) AS avg_grid_s_a,
-          ROUND(AVG(avg_grid_t_a), 1) AS avg_grid_t_a,
-          ROUND(AVG(avg_line_f), 1) AS avg_line_f,
+          ROUND(AVG(avg_pv_v), 2) AS avg_pv_v,
+          ROUND(AVG(avg_pv_a), 2) AS avg_pv_a,
+          ROUND(AVG(avg_pv_kw), 2) AS avg_pv_kw,
+          ROUND(AVG(avg_grid_rs_v), 2) AS avg_grid_rs_v,
+          ROUND(AVG(avg_grid_st_v), 2) AS avg_grid_st_v,
+          ROUND(AVG(avg_grid_tr_v), 2) AS avg_grid_tr_v,
+          ROUND(AVG(avg_grid_r_a), 2) AS avg_grid_r_a,
+          ROUND(AVG(avg_grid_s_a), 2) AS avg_grid_s_a,
+          ROUND(AVG(avg_grid_t_a), 2) AS avg_grid_t_a,
+          ROUND(AVG(avg_line_f), 2) AS avg_line_f,
           ROUND(AVG(avg_power_kw) / AVG(avg_pv_kw), 3) AS avg_p_f,
-          ROUND(AVG(avg_power_kw), 1) AS avg_power_kw,
+          ROUND(AVG(avg_power_kw), 2) AS avg_power_kw,
           ROUND(MIN(min_c_kwh), 3) AS min_c_kwh,
           ROUND(MAX(max_c_kwh), 3) AS max_c_kwh,
           ROUND(MAX(max_c_kwh) - MIN(min_c_kwh), 3) AS interval_power,
@@ -656,9 +656,11 @@ class BiModule extends BM {
     } else if (searchInterval === 'min10') {
       divideTimeNumber = 6;
       firstGroupByFormat = `LEFT(DATE_FORMAT(${dateName},"%Y-%m-%d %H:%i"), 15)`;
-    } else {
+    } else if (searchInterval === 'hour') {
       divideTimeNumber = 1;
       firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d %H")`;
+    } else {
+      firstGroupByFormat = `DATE_FORMAT(${dateName},"%Y-%m-%d")`;
     }
 
     // 최종 묶는 타입을 지정 안했다면 조회 간격으로 dateFormat 생성

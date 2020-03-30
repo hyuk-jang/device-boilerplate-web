@@ -6,6 +6,7 @@ const {
   Inverter: { BASE_KEY: BASE_INV_KEY },
   UPSAS: { BASE_KEY: BASE_UPSAS_KEY },
   Sensor: { BASE_KEY: BASE_SENSOR_KEY },
+  Weathercast: { BASE_KEY: BASE_WEATHER_KEY },
 } = BaseModel;
 
 const DeviceProtocol = require('./DeviceProtocol');
@@ -320,6 +321,8 @@ class UpsasDP extends DeviceProtocol {
         return this.statusSalternTable;
       case 'weatherCast':
         return this.statusWeatherCastTable;
+      case 'analysis':
+        return this.statusAnalysisTable;
       default:
         break;
     }
@@ -335,11 +338,13 @@ class UpsasDP extends DeviceProtocol {
         dataKey: 'seb_name',
         mainTitle: '',
         cssWidthPer: 13,
+        classList: ['text-center'],
       },
       {
         dataKey: 'manufacturer',
         dataName: '제조사',
         mainTitle: '모듈',
+        classList: ['text-center'],
       },
       {
         dataKey: 'power_amount',
@@ -378,14 +383,20 @@ class UpsasDP extends DeviceProtocol {
         mainTitle: '인버터',
       },
       {
+        dataKey: 'gridEfficiency',
+        dataName: '발전 효율',
+        dataUnit: '%',
+        mainTitle: '인버터',
+      },
+      {
         dataKey: 'gridPf',
-        dataName: '효율',
+        dataName: '역률',
         dataUnit: '%',
         mainTitle: '인버터',
       },
       {
         dataKey: 'powerCpKwh',
-        dataName: '누적발전량',
+        dataName: '누적 발전량',
         dataUnit: 'MWh',
         mainTitle: '인버터',
         scale: 0.001,
@@ -398,16 +409,71 @@ class UpsasDP extends DeviceProtocol {
         mainTitle: '염전 상태 계측',
       },
       {
+        dataKey: 'brine_temp',
+        dataName: '수온',
+        dataUnit: '℃',
+        mainTitle: '염전 상태 계측',
+      },
+      {
+        dataKey: 'module_rear_temp',
+        dataName: '모듈 온도',
+        dataUnit: '℃',
+        mainTitle: '염전 상태 계측',
+      },
+      {
         dataKey: 'salinity',
         dataName: '염도',
         dataUnit: '%',
         mainTitle: '염전 상태 계측',
       },
+    ];
+  }
+
+  /**
+   * 종합 계측 현황
+   * @return {blockViewMakeOption[]}
+   */
+  get statusAnalysisTable() {
+    return [
       {
-        dataKey: 'module_rear_temp',
-        dataName: '모듈온도',
+        dataKey: 'install_place',
+        mainTitle: '구분',
+        cssWidthPer: 15,
+      },
+      {
+        dataKey: 'serial_number',
+        mainTitle: '타입',
+        cssWidthPer: 10,
+      },
+      {
+        dataKey: 'avg_power_eff',
+        mainTitle: '발전 효율',
+        dataUnit: '%',
+        cssWidthPer: 18,
+      },
+      {
+        dataKey: 'avg_module_rear_temp',
+        mainTitle: '모듈 온도',
         dataUnit: '℃',
-        mainTitle: '염전 상태 계측',
+        cssWidthPer: 18,
+      },
+      {
+        dataKey: 'avg_brine_temp',
+        mainTitle: '수온',
+        dataUnit: '℃',
+        cssWidthPer: 13,
+      },
+      {
+        dataKey: 'avg_water_level',
+        mainTitle: '수위',
+        dataUnit: 'cm',
+        cssWidthPer: 13,
+      },
+      {
+        dataKey: 'avg_salinity',
+        mainTitle: '염도',
+        dataUnit: '%',
+        cssWidthPer: 13,
       },
     ];
   }
@@ -423,12 +489,14 @@ class UpsasDP extends DeviceProtocol {
         // dataName: '접속반',
         cssWidthPer: 10,
         mainTitle: '접속반',
+        classList: ['text-center'],
       },
       {
         dataKey: 'install_place',
         // dataName: '관련 모듈',
         cssWidthPer: 15,
         mainTitle: '관련 모듈',
+        classList: ['text-center'],
       },
       {
         dataKey: 'a_ch_1',
@@ -524,9 +592,10 @@ class UpsasDP extends DeviceProtocol {
   get statusSalternTable() {
     return [
       {
-        dataKey: 'place_name',
+        dataKey: 'seb_name',
         mainTitle: '장소',
         cssWidthPer: 25,
+        classList: ['text-center'],
       },
       {
         dataKey: 'water_level',
@@ -605,6 +674,8 @@ class UpsasDP extends DeviceProtocol {
         return this.blockInverterChart;
       case 'saltern':
         return this.blockSalternChart;
+      case 'weatherDevice':
+        return this.blockWeatherDeviceChart;
       default:
         break;
     }
@@ -946,6 +1017,46 @@ class UpsasDP extends DeviceProtocol {
   }
 
   /**
+   * 인버터 생성 정보
+   * @return {blockTableInfo}
+   */
+  get blockWeatherDeviceChart() {
+    return {
+      blockTableName: 'weather_device_data',
+      baseTableInfo: {
+        tableName: 'main',
+        // idKey: 'target_id',
+        // placeKey: 'place_seq',
+        fromToKeyTableList: [
+          {
+            fromKey: 'main_seq',
+            toKey: 'main_seq',
+          },
+        ],
+      },
+      blockChartList: [
+        {
+          domId: 'weather_device_chart',
+          title: '일사량',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: 'solar',
+                  toKey: 'solar',
+                  convertName: '',
+                },
+              ],
+              // dataUnit: 'kW',
+              yTitle: '전력(kW)',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  /**
    * 레포트 생성 정보
    * @param {string} blockId
    * @return {reportTableInfo}
@@ -1006,7 +1117,7 @@ class UpsasDP extends DeviceProtocol {
           dataKey: 'group_date',
           isAddComma: false,
           cssWidthPer: 15,
-          cssList: ['text-center'],
+          classList: ['text-center'],
         },
         {
           mainTitle: '태양광',

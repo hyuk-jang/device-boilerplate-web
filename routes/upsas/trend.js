@@ -71,7 +71,7 @@ router.get(
     // const searchRange = biModule.createSearchRange({
     //   searchType: 'days',
     //   searchInterval: 'hour',
-    //   strStartDate: '2019-08-16',
+    //   strStartDate: '2020-02-16',
     //   strEndDate: '',
     // });
 
@@ -142,13 +142,13 @@ router.get(
     /** @type {WeatherModel} */
     const weatherModel = global.app.get('weatherModel');
 
-    const { siteId } = req.locals.mainInfo;
+    const { siteId, siteList } = req.locals.mainInfo;
     const searchRange = _.get(req, 'locals.searchRange');
 
     const weatherDeviceRows = await weatherModel.getWeatherTrend(searchRange, siteId);
     // BU.CLI(weatherDeviceRows);
     // plotSeries 를 구하기 위한 객체
-    const { plotSeries } = commonUtil.getMomentFormat(searchRange);
+    // const { plotSeries } = commonUtil.getMomentFormat(searchRange);
     // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
     const strGroupDateList = commonUtil.getGroupDateList(searchRange);
 
@@ -175,31 +175,35 @@ router.get(
       // dataUnit: 'W/m²',
     });
 
-    const avgSolarList = _.map(_.get(blockDataRowsGroup, siteId), 'avg_solar');
-    const avgTempList = _.map(_.get(blockDataRowsGroup, siteId), 'avg_temp');
+    const includedSiteList =
+      _.lowerCase(siteId) === 'all' ? _.map(siteList, 'siteId') : [_.toString(siteId)];
 
-    acLineChart.series.push(
-      {
-        name: '일사량',
-        // tooltip: {
-        //   valueSuffix: 'W/m²',
-        // },
-        color: 'red',
-        yAxis: 1,
-        data: avgSolarList,
-      },
-      {
-        name: '기온',
-        // tooltip: {
-        //   valueSuffix: 'W/m²',
-        // },
-        color: 'purple',
-        yAxis: 0,
-        data: avgTempList,
-      },
-    );
-
-    // BU.CLIN(_.head(madeLineChartList), 3);
+    includedSiteList.forEach((strSiteId, index) => {
+      const dataRows = _.get(blockDataRowsGroup, strSiteId, []);
+      if (dataRows.length) {
+        const siteInfo = _.find(siteList, { siteId: strSiteId });
+        acLineChart.series.push(
+          {
+            name: `${siteInfo.m_name} 일사량`,
+            // tooltip: {
+            //   valueSuffix: ' W/m²',
+            // },
+            color: BU.blendColors('#ff0000', '#0000ff', (index + 1) / 10),
+            yAxis: 1,
+            data: _.map(dataRows, 'avg_solar'),
+          },
+          {
+            name: `${siteInfo.m_name} 기온`,
+            // tooltip: {
+            //   valueSuffix: ' ℃',
+            // },
+            color: BU.blendColors('#7157c4', '#ffce61', (index + 1) / 10),
+            yAxis: 0,
+            data: _.map(dataRows, 'avg_temp'),
+          },
+        );
+      }
+    });
 
     res.render('./UPSAS/trend/trend', req.locals);
   }),

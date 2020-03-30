@@ -125,9 +125,10 @@ router.post(
     } = req.body;
 
     // ID, 비밀번호, 닉네임, 휴대폰 정규식
-    const idReg = /^[A-Za-z0-9]{4,12}$/;
+    const idReg = /^[a-z0-9]{4,12}$/;
+    const nameReg = /^[가-힣]{2,20}$/;
+    const nickNameReg = /^[a-zA-Z가-힣0-9]{2,20}$/;
     const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
-    const nickNameReg = /^[\w\Wㄱ-ㅎㅏ-ㅣ가-힣]{2,20}$/;
     const cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
     // 쓰이는 장소 목록
     const placeRows = await biAuth.getTable('V_DV_PLACE');
@@ -139,11 +140,13 @@ router.post(
 
     // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
     const idFlag = idReg.test(userid);
-    const pwFlag = pwReg.test(password);
+    const nameFlag = nameReg.test(name);
     const nickNameFlag = nickNameReg.test(nick_name);
+    const pwFlag = pwReg.test(password);
     const telFlag = cellPhoneReg.test(tel);
     // BU.CLIS(idFlag, pwFlag, nickNameFlag, telFlag);
-    if (!(idFlag && pwFlag && nickNameFlag && telFlag) || !_.includes(placeSelList, place_seq)) {
+    const isPassFlag = idFlag && nameFlag && nickNameFlag && pwFlag && telFlag;
+    if (!isPassFlag || !_.includes(placeSelList, place_seq)) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
     }
 

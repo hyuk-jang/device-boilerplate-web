@@ -21,7 +21,7 @@
         <%- include("../../master/search.ejs") %>
         <div class="container_row flex_dir_col mt0">
           <p class="table_desc_area"><span id="categoryName"></span> &nbsp; <span>트렌드</span></p>
-          <div id="divDomArea"></div>
+          <div id="divDomArea" class="flex_box"></div>
         </div>
       </div>
       <!--하단1-->
@@ -43,7 +43,7 @@
     <!-- 기본 데이터 세팅 -->
     <script>
       $('#divDomArea').html(divDomList);
-
+      console.log(madeLineChartList);
       madeLineChartList.forEach(function(chartInfo) {
         makeLineChart(chartInfo);
       });

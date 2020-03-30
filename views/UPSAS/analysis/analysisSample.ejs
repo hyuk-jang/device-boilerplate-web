@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <!-- 발전량 예측 관련 -->
+    <script src="/js/contents/main/powerPredictor.js"></script>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/hichart/dark-unica.theme.js"></script>
+
+    <style>
+      .highcharts-figure,
+      .highcharts-data-table table {
+        min-width: 310px;
+        max-width: 800px;
+        margin: 1em auto;
+      }
+
+      .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+      }
+      .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+      }
+      .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+      }
+      .highcharts-data-table td,
+      .highcharts-data-table th,
+      .highcharts-data-table caption {
+        padding: 0.5em;
+      }
+      .highcharts-data-table thead tr,
+      .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+      }
+      .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_header">
+          <div id="subCategoryDom" class="report_category"></div>
+          <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
+        </div>
+        <div class="container_row">
+          <div class="component_piece_box gauge_box">
+            <article class="component_piece_area">
+              <header>
+                육상 30˚ 발전현황
+              </header>
+              <div class="component_piece_body overY_h">
+                <div id="gauge_chart_1" class="gauge_chart">Graph</div>
+                <section id="current_power_data" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>금일 발전량 효율</p>
+                    <p class="fs_150em" data-id="">215.2</p>
+                    <p>%</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box gauge_box">
+            <article class="component_piece_area">
+              <header>
+                육상 0˚ 발전현황
+              </header>
+              <div class="component_piece_body overY_h">
+                <div id="gauge_chart_2" class="gauge_chart">Graph</div>
+                <section id="" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>금일 발전량 효율</p>
+                    <p class="fs_150em" data-id="">175.7</p>
+                    <p>%</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>육상 30˚ 대비 출력 효율</p>
+                    <p class="fs_150em" data-id="">87.5</p>
+                    <p>%</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>육상 30˚ 대비 금일 발전량 효율</p>
+                    <p class="fs_150em" data-id="">88.7</p>
+                    <p>%</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box gauge_box">
+            <article class="component_piece_area">
+              <header>수중 0˚ 발전현황</header>
+              <div class="component_piece_body overY_h">
+                <div id="gauge_chart_3" class="gauge_chart">Graph</div>
+                <section id="" class="gauge_contents">
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>금일 발전량 효율</p>
+                    <p class="fs_150em" data-id="">223.5</p>
+                    <p>%</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>육상 30˚ 대비 출력 효율</p>
+                    <p class="fs_150em" data-id="">103.5</p>
+                    <p>%</p>
+                  </article>
+                  <article class="sensor_data_view sdv_w541 fs_170rem">
+                    <p>육상 30˚ 대비 금일 발전량 효율</p>
+                    <p class="fs_150em" data-id="">97.1</p>
+                    <p>%</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row division">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>지난 3일 효율 분석</header>
+              <div id="prev_week_efficiency" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box flex_15">
+            <article class="component_piece_area">
+              <header>육상 30˚ 대비 발전 효율</header>
+              <div id="efficiency" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box flex_20">
+            <article class="component_piece_area">
+              <header>육상 30˚ 대비 환경 분석</header>
+              <div id="env_analysis" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row division">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>모듈 출력 트렌드</header>
+              <div id="module_efficiency_trend" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>모듈 온도 트렌드</header>
+              <div id="module_temp_trend" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row division component_only_one">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>지난 일주일간 효율</header>
+              <div id="prev_week_trend" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+    </script>
+
+    <!-- 모니터링 모드 동작 -->
+    <script>
+      // $(window).resize(function() {
+      // window.addEventListener('resize', function() {
+      //   console.log('hi');
+      //   $('.container_body').height(window.innerHeight);
+      // });
+
+      document.querySelector('#monitoring_mode').addEventListener('click', function() {
+        $('#wrap > header').addClass('hidden');
+        $('#wrap > footer').addClass('hidden');
+        $('#subCategoryDom')
+          .parent()
+          .addClass('hidden');
+
+        $('.container_body').height(window.innerHeight);
+
+        window.dispatchEvent(new Event('resize'));
+
+        // TODO: 데이터 자동 갱신 시작
+        // $('.container_body').height(window.innerHeight);
+        // window.dispatchEvent(new Event('resize'));
+      });
+
+      document.addEventListener('keyup', function(e) {
+        if (e.keyCode === 27) {
+          $('#wrap > header').removeClass('hidden');
+          $('#wrap > footer').removeClass('hidden');
+          $('#subCategoryDom')
+            .parent()
+            .removeClass('hidden');
+
+          $('.container_body').height('auto');
+          // TODO: 데이터 자동 갱신 정지
+          window.dispatchEvent(new Event('resize'));
+
+          // window.dispatchEvent(new Event('resize'));
+          // TODO: 데이터 자동 갱신 정지
+        }
+      });
+    </script>
+
+    <script>
+      // 금일 발전량 차트
+      makeGaugeChart({
+        domId: 'gauge_chart_1',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 76.6,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+
+      makeGaugeChart({
+        domId: 'gauge_chart_2',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 73.1,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+
+      makeGaugeChart({
+        domId: 'gauge_chart_3',
+        yAxis: {
+          min: 0,
+          max: 100,
+          title: '발전효율',
+        },
+        series: {
+          name: '',
+          data: 80.1,
+          tooltip: {
+            valueSuffix: '%',
+          },
+        },
+      });
+    </script>
+
+    <!-- 모듈 출력 트렌드 Negative Area Chart -->
+    <script>
+      Highcharts.chart('prev_week_trend', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 발전 효율 %',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              // formatter: function() {
+              //   return this.value / 1000;
+              // },
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        labels: {
+          items: [
+            {
+              html: '금일 발전 효율',
+              style: {
+                left: '30px',
+                top: '0px',
+                color:
+                  // theme
+                  (Highcharts.defaultOptions.title.style &&
+                    Highcharts.defaultOptions.title.style.color) ||
+                  'black',
+              },
+            },
+          ],
+        },
+
+        series: [
+          {
+            name: '육상 30˚',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '육상 0˚',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '수중 0˚',
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+          {
+            type: 'pie',
+            name: '금일 발전 효율',
+            data: [
+              {
+                name: '육상 30˚',
+                y: 215.2,
+                color: Highcharts.getOptions().colors[0],
+              },
+              {
+                name: '육상 0˚',
+                y: 175.7,
+                color: Highcharts.getOptions().colors[1],
+              },
+              {
+                name: '수중 0˚',
+                y: 223.5,
+                color: Highcharts.getOptions().colors[2],
+              },
+            ],
+            center: [50, 50],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+              enabled: false,
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 모듈 출력 트렌드 Negative Area Chart -->
+    <script>
+      Highcharts.chart('module_efficiency_trend', {
+        chart: {
+          type: 'line',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          tickmarkPlacement: 'on',
+          title: {
+            enabled: false,
+          },
+          categories: [
+            '7:10',
+            '7:20',
+            '7:30',
+            '7:40',
+            '7:50',
+            '8:00',
+            '8:10',
+            '8:20',
+            '8:30',
+            '8:40',
+            '8:50',
+            '9:00',
+            '9:10',
+            '9:20',
+            '9:30',
+            '9:40',
+            '9:50',
+            '10:00',
+            '10:10',
+            '10:20',
+            '10:30',
+            '10:40',
+            '10:50',
+            '11:00',
+            '11:10',
+            '11:20',
+            '11:30',
+            '11:40',
+            '11:50',
+            '12:00',
+            '12:10',
+            '12:20',
+            '12:30',
+            '12:40',
+            '12:50',
+            '13:00',
+            '13:10',
+            '13:20',
+            '13:30',
+            '13:40',
+            '13:50',
+            '14:00',
+            '14:10',
+            '14:20',
+            '14:30',
+            '14:40',
+            '14:50',
+            '15:00',
+            '15:10',
+            '15:20',
+            '15:30',
+            '15:40',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 발전 효율 %',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              // formatter: function() {
+              //   return this.value / 1000;
+              // },
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+        ],
+        area: {
+          stacking: 'normal',
+          lineColor: '#666666',
+          lineWidth: 1,
+          marker: {
+            lineWidth: 1,
+            lineColor: '#666666',
+          },
+        },
+        tooltip: {
+          shared: true,
+          valueSuffix: ' %',
+        },
+        labels: {
+          items: [
+            {
+              html: '금일 발전 효율',
+              style: {
+                left: '30px',
+                top: '0px',
+                color:
+                  // theme
+                  (Highcharts.defaultOptions.title.style &&
+                    Highcharts.defaultOptions.title.style.color) ||
+                  'black',
+              },
+            },
+          ],
+        },
+
+        series: [
+          {
+            name: '육상 30˚',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.5,
+              3.2,
+              2.3,
+              2.4,
+              2.1,
+              2.3,
+              2.9,
+              3.4,
+              4.7,
+              6,
+              4,
+              7.7,
+              7.9,
+              8.4,
+              9.2,
+              9.7,
+              9.9,
+              9.5,
+              9.5,
+              10.4,
+              10.5,
+              10,
+              10.4,
+              10.8,
+              11.5,
+              11.2,
+              11.9,
+              11.4,
+              11.8,
+              11.7,
+              11.6,
+              10.4,
+              11.5,
+              11.1,
+              10.9,
+              10.5,
+              9.8,
+              9.5,
+              9.3,
+              9.1,
+              8.7,
+              8.3,
+              8,
+              7.5,
+              7,
+            ],
+          },
+          {
+            name: '육상 0˚',
+            data: [
+              0,
+              0,
+              0,
+              0.3,
+              0.5,
+              0.7,
+              0.8,
+              1.4,
+              2.9,
+              2.1,
+              2.2,
+              2,
+              2.1,
+              2.7,
+              3.1,
+              4.4,
+              5.5,
+              3.7,
+              7,
+              7.2,
+              7.8,
+              8.5,
+              8.9,
+              9.2,
+              8.8,
+              8.9,
+              9.8,
+              9.8,
+              9.3,
+              9.7,
+              10.1,
+              10.7,
+              10.4,
+              11.1,
+              10.7,
+              11,
+              10.9,
+              10.9,
+              9.6,
+              10.8,
+              10.3,
+              10.2,
+              9.8,
+              9.1,
+              8.8,
+              8.6,
+              8.4,
+              8.1,
+              7.7,
+              7.4,
+              6.9,
+              6.5,
+            ],
+          },
+          {
+            name: '수중 0˚',
+            data: [
+              0,
+              0,
+              0.1,
+              0.4,
+              0.7,
+              0.9,
+              1.1,
+              1.9,
+              4.1,
+              3,
+              3.1,
+              2.7,
+              3,
+              3.7,
+              4.4,
+              6,
+              7.7,
+              5.2,
+              9.8,
+              10.1,
+              10.8,
+              11.7,
+              12.3,
+              17.6,
+              18.1,
+              19.1,
+              20.3,
+              21.4,
+              22.7,
+              22.2,
+              25.8,
+              25.6,
+              14.2,
+              15.1,
+              14.5,
+              15,
+              14.8,
+              14.8,
+              13.2,
+              14.7,
+              14.2,
+              14,
+              13.5,
+              12.6,
+              12.2,
+              12,
+              11.7,
+              11.3,
+              10.7,
+              10.4,
+              9.7,
+              9.1,
+            ],
+          },
+          {
+            type: 'pie',
+            name: '금일 발전 효율',
+            data: [
+              {
+                name: '육상 30˚',
+                y: 215.2,
+                color: Highcharts.getOptions().colors[0],
+              },
+              {
+                name: '육상 0˚',
+                y: 175.7,
+                color: Highcharts.getOptions().colors[1],
+              },
+              {
+                name: '수중 0˚',
+                y: 223.5,
+                color: Highcharts.getOptions().colors[2],
+              },
+            ],
+            center: [50, 50],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+              enabled: false,
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 컬럼 차트 -->
+    <script>
+      Highcharts.chart('module_temp_trend', {
+        title: {
+          text: '',
+        },
+        xAxis: {
+          categories: [
+            '07:00',
+            '08:00',
+            '09:00',
+            '10:00',
+            '11:00',
+            '12:00',
+            '13:00',
+            '14:00',
+            '15:00',
+            '16:00',
+            '17:00',
+          ],
+        },
+        yAxis: [
+          {
+            title: {
+              text: '모듈 온도',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            // Primary yAxis
+            labels: {
+              format: '{value} ˚C',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+        ],
+        labels: {
+          items: [
+            {
+              html: '평균 모듈 온도',
+              style: {
+                left: '30px',
+                top: '0px',
+                color:
+                  // theme
+                  (Highcharts.defaultOptions.title.style &&
+                    Highcharts.defaultOptions.title.style.color) ||
+                  'black',
+              },
+            },
+          ],
+        },
+        series: [
+          {
+            type: 'column',
+            name: '육상 30˚',
+            data: [15.6, 16.8, 18.3, 21.2, 30.1, 35.7, 41.6, 38.5, 22.4, 27.8],
+          },
+          {
+            type: 'column',
+            name: '육상 0˚',
+            data: [15.6, 17.8, 19.3, 20.5, 33.1, 37.7, 44.6, 32.5, 21.2, 26.9],
+          },
+          {
+            type: 'column',
+            name: '수중 0˚',
+            data: [15.2, 16.8, 18.3, 19.5, 29.1, 32.7, 35.1, 34.5, 20.2, 24.9],
+          },
+          {
+            type: 'pie',
+            name: 'Total consumption',
+            data: [
+              {
+                name: '육상 30˚',
+                y: 23,
+                color: Highcharts.getOptions().colors[0], // Jane's color
+              },
+              {
+                name: '육상 0˚',
+                y: 20,
+                color: Highcharts.getOptions().colors[1], // John's color
+              },
+              {
+                name: '수중 0˚',
+                y: 15,
+                color: Highcharts.getOptions().colors[2], // Joe's color
+              },
+            ],
+            center: [50, 50],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+              enabled: false,
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 육상 대비 환경 분석 -->
+    <script>
+      Highcharts.chart('env_analysis', {
+        chart: {
+          zoomType: 'xy',
+        },
+        title: {
+          text: '',
+        },
+        subtitle: {
+          text: '',
+        },
+        xAxis: [
+          {
+            categories: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00'],
+            crosshair: true,
+          },
+        ],
+        yAxis: [
+          {
+            // Primary yAxis
+            labels: {
+              // format: '{value} W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '일사량 W/㎡',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            title: {
+              text: '모듈 온도',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            labels: {
+              format: '{value} ˚C',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        tooltip: {
+          shared: true,
+        },
+        legend: {
+          layout: 'vertical',
+          align: 'left',
+          x: 70,
+          verticalAlign: 'top',
+          y: 10,
+          floating: true,
+          backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
+        },
+        plotOptions: {
+          column: {
+            grouping: false,
+            shadow: false,
+            borderWidth: 0,
+          },
+        },
+        series: [
+          {
+            name: '육상 30˚ 일사량',
+            type: 'column',
+            // color: 'blue',
+            data: [
+              41, // 7시
+              554, // 9시
+              956, // 11시
+              901, // 13시
+              574, // 15시
+              69, // 17시
+            ],
+            pointPadding: 0.3,
+            pointPlacement: -0.3,
+            tooltip: {
+              valueSuffix: ' W/㎡',
+            },
+          },
+          {
+            name: '육상 0˚ 일사량',
+            type: 'column',
+            // color: 'gold',
+            data: [
+              41, // 7시
+              524, // 9시
+              866, // 11시
+              841, // 13시
+              444, // 15시
+              39, // 17시
+            ],
+            pointPadding: 0.3,
+            pointPlacement: 0,
+            tooltip: {
+              valueSuffix: ' W/㎡',
+            },
+          },
+          {
+            name: '수중 0˚ 일사량',
+            type: 'column',
+            // color: 'red',
+            data: [
+              48, // 7시
+              464, // 9시
+              846, // 11시
+              841, // 13시
+              464, // 15시
+              49, // 17시
+            ],
+            pointPadding: 0.3,
+            pointPlacement: 0.3,
+            tooltip: {
+              valueSuffix: ' W/㎡',
+            },
+          },
+          {
+            name: '육상 30˚ 모듈 온도',
+            type: 'column',
+            color: Highcharts.getOptions().colors[4],
+            data: [16.8, 29.2, 45.7, 48.5, 27.8, 20],
+            yAxis: 1,
+            pointPadding: 0.4,
+            pointPlacement: -0.3,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '육상 0˚ 모듈 온도',
+            type: 'column',
+            color: Highcharts.getOptions().colors[7],
+            data: [15.6, 25.3, 38.1, 44.6, 25.2, 18],
+            yAxis: 1,
+            pointPadding: 0.4,
+            pointPlacement: 0,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚ 모듈 온도',
+            type: 'column',
+            color: Highcharts.getOptions().colors[6],
+            data: [16.8, 19.5, 29.7, 31.5, 20.9, 15.5],
+            yAxis: 1,
+            pointPadding: 0.4,
+            pointPlacement: 0.3,
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 육상 대비 발전 효율 -->
+    <script>
+      Highcharts.chart('efficiency', {
+        chart: {
+          zoomType: 'xy',
+        },
+        title: {
+          text: '',
+        },
+        subtitle: {
+          text: '',
+        },
+        xAxis: [
+          {
+            categories: [
+              '07:00',
+              '08:00',
+              '09:00',
+              '10:00',
+              '11:00',
+              '12:00',
+              '13:00',
+              '14:00',
+              '15:00',
+              '16:00',
+              '17:00',
+            ],
+            crosshair: true,
+          },
+        ],
+        yAxis: [
+          {
+            // Primary yAxis
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            title: {
+              text: '발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            title: {
+              text: '누적 발전 효율',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            labels: {
+              format: '{value}%',
+              style: {
+                color: Highcharts.getOptions().colors[4],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        tooltip: {
+          shared: true,
+        },
+        legend: {
+          layout: 'vertical',
+          align: 'left',
+          x: 70,
+          verticalAlign: 'top',
+          y: 10,
+          floating: true,
+          backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || 'rgba(255,255,255,0.25)', // theme
+        },
+        series: [
+          {
+            name: '육상 0˚ 발전 효율',
+            type: 'column',
+            // color: 'gold',
+            color: Highcharts.getOptions().colors[1],
+            data: [-3.6, -5.6, -5.2, -3.2, -1.8, -1.5, -0.6, -3.2, -1.8, -1.5, -0.6],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '수중 0˚ 발전 효율',
+            type: 'column',
+            // color: 'blue',
+            color: Highcharts.getOptions().colors[2],
+            data: [2, -2, -3, 2, 1, 6, 8.2, 2, 1, 6, 8.2],
+            tooltip: {
+              valueSuffix: ' %',
+            },
+          },
+          {
+            name: '육상 0˚ 누적 효율',
+            type: 'spline',
+            // color: 'orange',
+            color: Highcharts.getOptions().colors[4],
+            yAxis: 1,
+            data: [0, -3.9, -6.5, -14.5, -18.2, -21.5, -26.2, -36.5, -43.3, -58.3, -63.9],
+            tooltip: {
+              valueSuffix: '%',
+            },
+          },
+          {
+            name: '수중 0˚ 누적 효율',
+            type: 'spline',
+            // color: 'aqua',
+            color: Highcharts.getOptions().colors[5],
+            yAxis: 1,
+            data: [0, -4.9, -10.5, -3.5, 4.2, 11.5, 26.2, 36.5, 43.3, 58.3, 63.9],
+            tooltip: {
+              valueSuffix: '%',
+            },
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <!-- 지난 3일 효율 -->
+    <script>
+      Highcharts.chart('prev_week_efficiency', {
+        chart: {
+          type: 'bar',
+        },
+        title: {
+          text: '',
+        },
+        xAxis: {
+          categories: ['3일전', '2일전', '1일전'],
+          title: {
+            text: null,
+          },
+        },
+        yAxis: {
+          min: 0,
+          title: {
+            text: '모듈 효율 (%)',
+            // align: 'high',
+            style: {
+              color: Highcharts.getOptions().colors[1],
+            },
+          },
+          labels: {
+            overflow: 'justify',
+          },
+        },
+        tooltip: {
+          valueSuffix: ' %',
+        },
+        plotOptions: {
+          bar: {
+            dataLabels: {
+              enabled: true,
+            },
+          },
+        },
+        // legend: {
+        //   layout: 'vertical',
+        //   align: 'right',
+        //   verticalAlign: 'top',
+        //   x: -40,
+        //   y: 80,
+        //   floating: true,
+        //   borderWidth: 1,
+        //   backgroundColor: Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+        //   shadow: true,
+        // },
+        series: [
+          {
+            name: '육상 30˚',
+            data: [412, 254, 385],
+          },
+          {
+            name: '육상 0˚',
+            data: [355, 211, 347],
+          },
+          {
+            name: '수중 0˚',
+            data: [444, 244, 414],
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+      });
+    </script>
+
+    <script src="/js/contents/report/search.js"></script>
+  </body>
+</html>
