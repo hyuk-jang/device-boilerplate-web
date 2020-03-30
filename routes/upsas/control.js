@@ -114,9 +114,7 @@ router.get(
 
     req.locals.deviceDomList = deviceDomList;
 
-    // FIXME: gs 인증용 임시 교체
-    res.render('./UPSAS/control/tta_command', req.locals);
-    // res.render('./UPSAS/control/command', req.locals);
+    res.render('./UPSAS/control/command', req.locals);
   }),
 );
 
