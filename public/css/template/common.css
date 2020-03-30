@@ -267,6 +267,11 @@ _:-ms-input-placeholder,
   justify-content: center;
 }
 
+.container_row.division {
+  flex: 1 0.5 348px;
+  min-height: 348px;
+}
+
 .component_side_box {
   width: 250px;
   min-width: 250px;
@@ -467,10 +472,9 @@ _:-ms-input-placeholder,
 }
 
 /***************************************/
-/************** structure 영역 *********/
+/************** structure 영역  FIXME: 현재는 제어 페이지dh*********/
 /***************************************/
 
-/* FIXME: */
 .command_status_view {
   width: 48%;
   margin: 10px;
@@ -484,6 +488,16 @@ _:-ms-input-placeholder,
 .view_type_selector_box {
   display: flex;
   align-items: center;
+}
+
+.svg_area {
+  display: flex;
+  justify-content: center;
+}
+
+.zoom_box {
+  display: flex;
+  justify-content: center;
 }
 
 /***************************************/
@@ -681,11 +695,6 @@ article.sdv_w_side > p:last-child {
   min-height: 500px;
 }
 
-.zoom_box {
-  display: flex;
-  justify-content: center;
-}
-
 /***************************************/
 /************ Common *************/
 /***************************************/
@@ -729,6 +738,10 @@ article.sdv_w_side > p:last-child {
 
 .txt_align_c {
   text-align: center;
+}
+
+.default_area {
+  width: 100%;
 }
 
 /***************************************/
