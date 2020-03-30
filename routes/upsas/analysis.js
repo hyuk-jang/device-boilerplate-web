@@ -10,7 +10,6 @@ const { BU } = require('base-util-jh');
 const defaultDom = require('../../models/domMaker/defaultDom');
 
 const commonUtil = require('../../models/templates/common.util');
-const webUtil = require('../../models/templates/web.util');
 
 const salternDom = require('../../models/domMaker/salternDom');
 
@@ -32,7 +31,7 @@ const subCategoryList = [
   },
   {
     subCategory: 'prediction',
-    btnName: '예측분석',
+    btnName: '발전분석',
   },
 ];
 
@@ -73,9 +72,9 @@ router.get(
     let dailySearchRange = analysisModel.createSearchRange({
       // FIXME: 1일전 테스트
       // strStartDate: moment()
-      //   .subtract(1, 'day')
+      //   .subtract(2, 'day')
       //   .format('YYYY-MM-DD'),
-      // searchType: 'days',
+      searchType: 'days',
       searchInterval: 'min10',
     });
     // 2. 발전 효율 구함
@@ -88,6 +87,7 @@ router.get(
 
     // 4. 발전 효율을 카테고리 별로 분류하고 chartData에 맞게 데이터 변환 후 반환
     let moduleEfficiencyChart = analysisModel.makePowerEfficiencyChart(dailyPowerEffRows, {
+      // groupKey: 'inverter_seq',
       dataKey: 'avg_power_eff',
       colorTable: colorTable1,
     });

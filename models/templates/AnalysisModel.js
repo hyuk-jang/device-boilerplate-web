@@ -127,12 +127,12 @@ module.exports = class extends BiModule {
     const sql = `
       SELECT
             inverter_seq, serial_number, target_category, install_place, chart_sort_rank, 
-            ROUND(SUM(amount), 2) t_amount,
-            ROUND(SUM(avg_power_kw) , 4) AS t_power_kw,
-            ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 2) AS avg_power_eff,
+            SUM(amount) t_amount,
+            SUM(avg_power_kw) AS t_power_kw,
+            SUM(avg_power_kw) / SUM(amount) * 100 AS avg_power_eff,
             MAX(peak_power_eff) AS peak_power_eff,            
-            ROUND(SUM(interval_power_cp_kwh) , 4) AS t_interval_power_cp_kwh,
-            ROUND(SUM(interval_power_cp_kwh) / SUM(amount) * 100, 2) AS t_interval_power_eff,
+            SUM(interval_power_cp_kwh) AS t_interval_power_cp_kwh,
+            SUM(interval_power_cp_kwh) / SUM(amount) * 100 AS t_interval_power_eff,
             group_date
       FROM
         (
@@ -140,7 +140,7 @@ module.exports = class extends BiModule {
               inv_tbl.inverter_seq, serial_number, target_category, install_place, amount, chart_sort_rank,
               inv_data.writedate,
               AVG(inv_data.power_kw) AS avg_power_kw,
-              ROUND(MAX(inv_data.power_kw) / amount * 100, 1) AS peak_power_eff,              
+              ROUND(MAX(inv_data.power_kw) / amount * 100, 3) AS peak_power_eff,              
               MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
               ${selectViewDate},
               ${selectGroupDate}
