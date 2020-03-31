@@ -23,7 +23,7 @@ function drawSvgBasePlace(documentId, isText, isShow = true) {
   const svgCanvas = SVG(documentId).size(svgCanvasWidth, svgCanvasHeight);
 
   // 팬줌 초기 맵 사이즈를 지정하기 위한 그려지는 공간의 id 지정
-  svgCanvas.attr({ id: 'svgCanvas', style: 'overflow: overlay' });
+  svgCanvas.attr({ id: 'svgCanvas', class: 'svg_map' });
 
   // map에 배경의 데이터가 있을경우 배경 이미지 지정
   const backgroundImg = svgCanvas.image(backgroundData);
