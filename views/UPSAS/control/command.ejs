@@ -85,22 +85,20 @@
         <div class="container_row default_search_area">
           <div class=""></div>
           <div class="search_area">
-            <select class="form-control w_auto mr_2rem" id="operationModeSel">
+            <select class="form-control w_auto m_1rem" id="operationModeSel">
               <option selected value="DEFAULT">기본 모드</option>
             </select>
-            <button id="changeOperationModeBtn" class="btn btn-success">
+            <button id="changeOperationModeBtn" class="btn btn-success m_1rem">
               구동 모드 변경
             </button>
           </div>
         </div>
-        <div class="">
           <%- include("./addCommand.ejs") %>
-        </div>
         <!-- Content -->
         <div class="container_row flex_dir_col" id="content">
           <!-- Svg Map -->
             <div class="default_area pt_1rem" id="structure" >
-              <div class="zoom_box">
+              <div class="zoom_box" id="panzoomBox">
                 <!-- panzoom -->
                 <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
                   <span class="glyphicon glyphicon-zoom-in"></span> 확대
@@ -388,9 +386,12 @@
         // 제어 모드 변경 요청
         socket.emit('changeOperationMode', selectedAlgorithmId);
       });
+    </script>
 
-      // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
-      $('input[name="contentTypeBtn"]').on('click', function() {
+    <!-- 상단 카테고리 버튼 세팅 -->
+    <script>
+       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
+       $('input[name="contentTypeBtn"]').on('click', function() {
         var viewType = $(this).data('view');
 
         // 버튼 색상 변경
@@ -428,10 +429,9 @@
     
     <!-- panzoom 세팅 -->
     <script>
-      
-      var filter = "win16|win32|win64|mac";
+      var filter = "win16|win32|win64|mac|macintel";
       var canvas = document.getElementById('svgCanvas');
-      var startScale= 0.5;
+      var startScale= 1;
 
         var canvasPanzoom = Panzoom(canvas, {
           cursor: 'default',
@@ -443,10 +443,18 @@
         $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
         canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
 
-        // canvasPanzoom.setOptions({
-        //   disableZoom:true,
-        //   disablePan:true
-        // })
+      // 모바일 접속일 경우
+      if (navigator.platform && filter.indexOf(navigator.platform.toLowerCase()) < 0){
+        // panzoom 기능 중지
+        canvasPanzoom.setOptions({
+          disableZoom:true,
+          disablePan:true
+        })
+
+        // panzoom 버튼 숨김
+        $('#panzoomBox').addClass('hidden')
+    }
+
 
     </script>
     <!-- 검색 관련 js 모음 -->
