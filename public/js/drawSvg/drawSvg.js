@@ -7,10 +7,10 @@ const writtenSvgTextList = [];
 
 /**
  * @param {string} documentId // 그려질 div의 id
- * @param {string=} title // 제목
+ * @param {string=} isKorText // 장소, 장치, 센서 한글로 표현 유무
  * @param {Boolean=} isShow // true: 화면 표시 (기본값), false: 숨김
  */
-function drawSvgBasePlace(documentId, isText, isShow = true) {
+function drawSvgBasePlace(documentId, isKorText, isShow = true) {
   /** @type {mDeviceMap} */
   const realMap = map;
 
@@ -51,7 +51,7 @@ function drawSvgBasePlace(documentId, isText, isShow = true) {
         isShow,
       );
       // 그려진 장소 위에 해당 장소의 이름 그리기
-      writeSvgText(svgCanvas, placeDefInfo, placeSvgResourceInfo, isText);
+      writeSvgText(svgCanvas, placeDefInfo, placeSvgResourceInfo, isKorText);
     });
   });
 
@@ -74,42 +74,65 @@ function drawSvgBasePlace(documentId, isText, isShow = true) {
         isShow,
       );
       // 그려진 장비, 센서 위에 해당 장소의 이름 그리기
-      writeSvgText(svgCanvas, nodeDefInfo, nodeSvgResourceInfo, isText);
+      writeSvgText(svgCanvas, nodeDefInfo, nodeSvgResourceInfo, isKorText);
     });
   });
 }
 
 /**
+ * FIXME: 다른 방식으로 데이터 표현 고려
  * 노드 또는 센서에 데이터 표시
  * @param {string} nodeDefId
  * @param {number|string} data 데이터 값
+ * @param {Object=} options
+ * @param {boolean=} options.isKorText  id로 표현할 것인가 name으로 표현할 것인가.
+ * @param {boolean=} options.isShowCodeNum 고유 이름 중 고유 코드를 보여 줄 것인가.
  */
-function showNodeData(nodeDefId, data = '', isChangePlaceNodeName = false) {
-  // 데이터 값에 따른 상태 색 변경
-  changeNodeStatusColor(nodeDefId, data);
+function showNodeData(nodeDefId, data = '', options = {}) {
+  try {
+    const { isKorText = true, isShowCodeNum = true } = options;
 
-  let dataUnit = getDataUnit(nodeDefId); // 데이터 단위
-  if (data === '' || _.isNull(dataUnit)) dataUnit = ''; // 장치일 경우 단위가 없음
-  let [dx, dy, style, nodeName] = [0, 7, 'font-size: 5pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
+    // default Text가 숨겨진 상태이면 데이터 표시 생략
+    // if (checkHidableText(nodeDefId)) return false;
 
-  // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
-  const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });
-  if (_.isUndefined(foundSvgTextInfo)) return false;
-  // svg로 그려진 Text의 자식 Tspan 을 찾는다.
-  const foundNodeTextChild = $(`#text_${nodeDefId}`);
+    // 데이터 값에 따른 상태 색 변경
+    changeNodeStatusColor(nodeDefId, data);
 
-  // 장소, 장비, 센서 이름 재정의
-  isChangePlaceNodeName ? (nodeName = foundSvgTextInfo.id) : (nodeName = foundSvgTextInfo.name);
+    let dataUnit = getDataUnit(nodeDefId); // 데이터 단위
+    if (data === '' || _.isNull(dataUnit)) dataUnit = ''; // 장치일 경우 단위가 없음
+    let [dx, dy, style, nodeName] = [0, 7, 'font-size: 5pt; fill: #7675ff; stroke-width: 0.2', '']; // <Tspan> 속성
 
-  // 데이터, 속성, 스타일 등을 적용해 tspan 다시 그리기
-  foundNodeTextChild.get(
-    0,
-  ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}" dy="8"> ${nodeName}</tspan>`;
-  foundNodeTextChild.get(
-    0,
-  ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${foundSvgTextInfo.textX}" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
-  if (_.isString(dataUnit)) {
-    foundNodeTextChild.get(0).innerHTML += `<tspan>${dataUnit}</tspan>`; // data 단위 표시
+    // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
+    const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });
+    if (_.isUndefined(foundSvgTextInfo)) return false;
+    // svg로 그려진 Text의 자식 Tspan 을 찾는다.
+    const foundNodeTextChild = $(`#text_${nodeDefId}`);
+
+    // 장소, 장비, 센서 이름 재정의
+    isKorText ? (nodeName = foundSvgTextInfo.name) : (nodeName = foundSvgTextInfo.id);
+    if (!isShowCodeNum) {
+      nodeName = _(nodeName)
+        .split('_')
+        .dropRight()
+        .join('_');
+    }
+
+    nodeName = _.replace(nodeName, '_', '\n');
+
+    // 데이터, 속성, 스타일 등을 적용해 tspan 다시 그리기
+    foundNodeTextChild.get(
+      0,
+    ).innerHTML = `<tspan id='nodeName' x="${foundSvgTextInfo.textX}" dy="8"> ${nodeName}</tspan>`;
+    foundNodeTextChild.get(
+      0,
+    ).innerHTML += `<tspan id="nodeData" class ="${nodeDefId}" value="${data}" x="${foundSvgTextInfo.textX}" style="${style}" dx="${dx}" dy="${dy}">${data}</tspan>`; // data 표시
+    if (_.isString(dataUnit)) {
+      foundNodeTextChild.get(0).innerHTML += `<tspan>${dataUnit}</tspan>`; // data 단위 표시
+    }
+  } catch (error) {
+    console.log(`'${nodeDefId}' is not included in svgNodeList!`);
+
+    return false;
   }
 }
 
@@ -162,14 +185,14 @@ function changeNodeStatusColor(nDefId, data) {
  * @param {defInfo} defInfo 장치, 노드의  id, resourceId, point[] 정보
  * @param {mSvgModelResource} resourceInfo 장치, 노드의 resource id, type, elemetDrawInfo[width,height,radius,...] 정보
  */
-function writeSvgText(svgCanvas, defInfo, resourceInfo, isChangedPlaceNodeName = false) {
+function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
   const { width, height, radius } = resourceInfo.elementDrawInfo; // 텍스트가 그려질 공간 크기 또는 투명도
   const [x1, y1, x2, y2] = defInfo.point; // 텍스트 위치
   let naming; // defInfo.name: 한글, defInfo.id: 영문
   let [textX, textY, textColor, textSize, leading, anchor] = [0, 0, '', 0, '', '']; // 텍스트 스타일, 위치 초기값
 
   // 토글의 true, false 값에 대한 한/영문 이름 정의
-  isChangedPlaceNodeName ? (naming = defInfo.id) : (naming = defInfo.name);
+  isKorText ? (naming = defInfo.name) : (naming = defInfo.id);
 
   // svgPositionList를 검색하여 장치인지 센서인지 구분
   let foundSvgInfo = _.find(map.drawInfo.positionInfo.svgNodeList, svgNodeInfo =>
@@ -243,6 +266,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isChangedPlaceNodeName =
     textColor = foundSvgModelResourceInfo.textStyleInfo.color;
     textSize = foundSvgModelResourceInfo.textStyleInfo.fontSize;
     leading = foundSvgModelResourceInfo.textStyleInfo.leading;
+    transform = foundSvgModelResourceInfo.textStyleInfo.transform;
   }
 
   // 제외 할 텍스트 찾기
@@ -262,6 +286,8 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isChangedPlaceNodeName =
     .attr({
       'pointer-events': 'none', // text 커서 모양 설정
       id: `text_${defInfo.id}`,
+      name: 'text',
+      transform,
     });
 
   // 그려진 svg 텍스트의 정보 수집
@@ -283,6 +309,8 @@ function checkHidableText(defId) {
   /** @type {mDeviceMap} */
   const realMap = map;
   let isHidableText; //
+
+  if (_.includes(realMap.relationInfo.hiddenTextSvgModelResourceIdList, 'all')) return true;
 
   // defId 값이 장소인지 노드인지 구분
   // 장소
@@ -629,6 +657,7 @@ function drawSvgImage(svgCanvas, point, elementDrawInfo, id, isShow = true) {
  */
 function drawSvgShadow(model, defId) {
   if (isSensor(defId)) {
+    model.attr({ name: 'sensor' });
     model.filter(add => {
       const blur = add
         .offset(0, 5)
@@ -673,8 +702,14 @@ function getDataUnit(nDefId) {
   const realMap = map;
 
   const foundUnit = _.find(realMap.setInfo.nodeStructureList, nodeStructureInfo =>
-    _.map(nodeStructureInfo.defList, 'target_prefix').includes(_.replace(nDefId, /[_\d]/g, '')),
+    _.map(nodeStructureInfo.defList, 'target_prefix').includes(
+      _.replace(nDefId, /(?<=_)[0-9]+/g, '').substring(
+        nDefId,
+        _.replace(nDefId, /(?<=_)[0-9]+/g, '').length - 1,
+      ),
+    ),
   );
+
   if (_.isUndefined(foundUnit)) return false;
   return foundUnit.data_unit;
 }
