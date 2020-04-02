@@ -493,7 +493,8 @@ _:-ms-input-placeholder,
 }
 
 .svg_map {
-  overflow: overlay !important;
+  overflow: visible !important;
+  /* transform: scale(0.4) !important; */
 }
 
 /***************************************/
