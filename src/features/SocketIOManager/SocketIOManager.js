@@ -59,7 +59,7 @@ class SocketIOManager extends AbstSocketIOManager {
             msUserList,
             msClient,
             msDataInfo,
-            msDataInfo: { contractCmdList, nodeList, modeInfo },
+            msDataInfo: { nodeList, modeInfo },
           } = foundMsInfo;
           // 사용자 추가
           msUserList.push(msUser);
@@ -72,9 +72,9 @@ class SocketIOManager extends AbstSocketIOManager {
           // NodeList 에서 선택한 key 만을 정제해서 전송
           socket.emit('updateNode', this.pickNodeList(msDataInfo, nodeList));
           // OrderList에서 명령 타입을 한글로 변환 후 전송
-          socket.emit('updateCommand', this.pickContractCmdList(contractCmdList));
-          // // OrderList에서 명령 타입을 한글로 변환 후 전송
-          // socket.emit('updateS', this.pickContractCmdList(contractCmdList));
+          socket.emit('updateCommand', this.submitCommandList(foundMsInfo));
+          // 표현하는 이미지의 구성요소가 달라질 경우
+          socket.emit('updateSvgImg', this.submitSvgImgList(foundMsInfo));
         }
       });
 
@@ -359,10 +359,20 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {msInfo} msInfo
    */
   submitCommandList(msInfo) {
-    // const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('updateCommand', msInfo.msDataInfo.contractCmdList);
+    });
+  }
+
+  /**
+   * 현재 추적 중인 이미지를 보냄
+   * @param {msInfo} msInfo
+   */
+  submitSvgImgList(msInfo) {
+    // 해당 Socket Client에게로 데이터 전송
+    msInfo.msUserList.forEach(clientInfo => {
+      clientInfo.socketClient.emit('updateSvgImg', msInfo.msDataInfo.svgImgList);
     });
   }
 
@@ -372,8 +382,6 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {defaultFormatToResponse} execCommandResultInfo
    */
   submitExecCommandResult(msInfo, execCommandResultInfo) {
-    // const pickedOrderList = this.pickContractCmdList(msInfo.msDataInfo.contractCmdList);
-
     msInfo.msUserList.forEach(clientInfo => {
       clientInfo.socketClient.emit('resultExecCommand', execCommandResultInfo.message);
     });

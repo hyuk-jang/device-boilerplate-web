@@ -232,13 +232,13 @@ class WeatherModel extends BiModule {
                 COUNT(*) AS first_count
         FROM weather_device_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
-         AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
-         ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
-        GROUP BY ${firstGroupByFormat}
+        ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
+        GROUP BY ${firstGroupByFormat}, main_seq
         ) AS result_wdd
-     GROUP BY ${groupByFormat}
-    `;
+        GROUP BY ${groupByFormat}, main_seq
+        `;
     return this.db.single(sql, '', false);
+    // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
   }
 
   /**

@@ -281,6 +281,9 @@ class ApiServer extends AbstApiServer {
         case COMMAND: // 명령 정보가 업데이트 되었을 경우
           this.compareCommandList(msInfo, contents);
           break;
+        // case COMMAND: // 명령 정보가 업데이트 되었을 경우
+        //   this.compareCommandList(msInfo, contents);
+        //   break;
         case POWER_BOARD: // 현황판 데이터를 요청할 경우
           responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
           break;

@@ -127,7 +127,7 @@ router.get(
     _.set(req, 'locals.dom.divDomList', divDomList);
     _.set(req, 'locals.madeLineChartList', refinedBlockCharts);
 
-    if (subCategory === 'inverter') {
+    if (subCategory === 'inverter' || subCategory === 'saltern') {
       next();
     } else {
       res.render('./UPSAS/trend/trend', req.locals);
@@ -182,7 +182,8 @@ router.get(
       const dataRows = _.get(blockDataRowsGroup, strSiteId, []);
       if (dataRows.length) {
         const siteInfo = _.find(siteList, { siteId: strSiteId });
-        acLineChart.series.push(
+        // BU.CLI(dataRows);
+        acLineChart.series = acLineChart.series.concat([
           {
             name: `${siteInfo.m_name} 일사량`,
             // tooltip: {
@@ -201,7 +202,82 @@ router.get(
             yAxis: 0,
             data: _.map(dataRows, 'avg_temp'),
           },
-        );
+        ]);
+      }
+    });
+
+    res.render('./UPSAS/trend/trend', req.locals);
+  }),
+);
+
+/** 염전 트렌드 */
+router.get(
+  ['/:siteId/saltern'],
+  asyncHandler(async (req, res) => {
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
+
+    const { siteId, siteList } = req.locals.mainInfo;
+    const searchRange = _.get(req, 'locals.searchRange');
+
+    const weatherDeviceRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+    // BU.CLI(weatherDeviceRows);
+    // plotSeries 를 구하기 위한 객체
+    // const { plotSeries } = commonUtil.getMomentFormat(searchRange);
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    const strGroupDateList = commonUtil.getGroupDateList(searchRange);
+
+    // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
+    const blockDataRowsGroup = commonUtil.extPerfectRows(
+      'main_seq',
+      weatherDeviceRows,
+      strGroupDateList,
+    );
+
+    // BU.CLIN(blockDataRowsGroup);
+
+    const { madeLineChartList } = req.locals;
+
+    // BU.CLIN(weatherDeviceRows);
+
+    // BU.CLIN(req.locals);
+
+    /** @type {lineChartInfo} */
+    const lineChart = madeLineChartList[0];
+
+    lineChart.yAxis.push({
+      yTitle: '풍속(m/s)/기온(℃)',
+      // dataUnit: 'W/m²',
+    });
+
+    const includedSiteList =
+      _.lowerCase(siteId) === 'all' ? _.map(siteList, 'siteId') : [_.toString(siteId)];
+
+    includedSiteList.forEach((strSiteId, index) => {
+      const dataRows = _.get(blockDataRowsGroup, strSiteId, []);
+      if (dataRows.length) {
+        const siteInfo = _.find(siteList, { siteId: strSiteId });
+        // BU.CLI(dataRows);
+        lineChart.series = lineChart.series.concat([
+          {
+            name: `${siteInfo.m_name} 풍속`,
+            // tooltip: {
+            //   valueSuffix: ' W/m²',
+            // },
+            color: BU.blendColors('#ff0000', '#0000ff', (index + 1) / 10),
+            yAxis: 1,
+            data: _.map(dataRows, 'avg_ws'),
+          },
+          {
+            name: `${siteInfo.m_name} 기온`,
+            // tooltip: {
+            //   valueSuffix: ' W/m²',
+            // },
+            color: BU.blendColors('#7157c4', '#ffce61', (index + 1) / 10),
+            yAxis: 1,
+            data: _.map(dataRows, 'avg_temp'),
+          },
+        ]);
       }
     });
 

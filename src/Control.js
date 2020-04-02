@@ -179,6 +179,7 @@ class Control {
           nodeList: filteredNodeList,
           placeRelList: filteredPlaceRelList,
           contractCmdList: _.filter(controlCmdHistoryRows, where),
+          svgImgList: [],
           // controlEventHistoryRows: [],
           reqCmdList: [],
         },
