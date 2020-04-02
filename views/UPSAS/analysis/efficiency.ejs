@@ -8,7 +8,7 @@
     <script src="/js/contents/main/powerPredictor.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
     <script src="/js/hichart/dark-unica.theme.js"></script>
-    
+
     <script src="/js/hichart/exporting.js"></script>
     <script src="/js/hichart/export-data.js"></script>
   </head>
@@ -26,19 +26,19 @@
         <div class="container_row">
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>금일 발전 효율</header>
+              <header>금일 발전 현황</header>
               <div id="realtime_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>최대 전력 발생일 발전 효율</header>
+              <header>피크 전력 발생일 발전 현황</header>
               <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>최근 3일 최대 전력 발전 효율</header>
+              <header>최근 3일 피크 전력</header>
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -50,16 +50,15 @@
               <div id="realtime_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
-
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>최대 전력 발생일 온도 추이</header>
+              <header>피크 전력 발생일 온도 추이</header>
               <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>발전 효율 최대 순간 분석</header>
+              <header>피크 전력 순간 분석</header>
               <section class="component_piece_body">
                 <div class="flex flex_jus_bet" style="align-items: baseline;">
                   <p class="table_desc_area">
@@ -82,7 +81,7 @@
         <div class="container_row hidden">
           <div class="component_piece_box">
             <article class="component_piece_area">
-              <header>발전 효율 최대순간</header>
+              <header>출력 최대순간</header>
               <div id="maxPeakEfficiencyArea" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -164,7 +163,7 @@
       var subFontSize = 13;
     </script>
 
-    <!-- 금일 발전 효율 -->
+    <!-- 금일 출력 -->
     <script>
       function drawRtPowerEff() {
         Highcharts.chart('realtime_power_efficiency', {
@@ -204,7 +203,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 효율 (%)',
+                text: '발전 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -267,7 +266,7 @@
       }
     </script>
 
-    <!-- 최대 전력 발생일 발전 효율 -->
+    <!-- 최대 전력 발생일 출력 -->
     <script>
       function drawPeakPowerEff() {
         Highcharts.chart('peak_power_efficiency', {
@@ -307,7 +306,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 효율 (%)',
+                text: '발전 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -412,7 +411,9 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 효율 (%)',
+                text: '발전 (kW)',
+                min: 0,
+                max: 100,
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -711,7 +712,7 @@
         ],
         series: [
           {
-            name: '발전 효율',
+            name: '출력',
             data: _.map(maxPeakEnvRows, 'avg_power_eff'),
             color: 'greenyellow',
             tooltip: {

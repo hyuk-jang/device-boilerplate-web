@@ -532,7 +532,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       },
 
       tooltip: {
-        valueDecimals: 2,
+        // valueDecimals: 2,
         shared: true,
         // crosshairs: true
       },

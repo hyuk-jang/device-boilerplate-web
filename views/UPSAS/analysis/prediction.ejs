@@ -4,10 +4,13 @@
     <!-- Default Js -->
 
     <%- include("../master/head.ejs") %>
-    <!-- 발전량 예측 관련 -->
+    <!-- 발전 예측 관련 -->
     <script src="/js/contents/main/powerPredictor.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
     <script src="/js/hichart/dark-unica.theme.js"></script>
+
+    <!-- <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script> -->
   </head>
 
   <body>
@@ -135,7 +138,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '출력 (kW)',
+                text: '발전 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -313,7 +316,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '출력 (kW)',
+                text: '발전 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],

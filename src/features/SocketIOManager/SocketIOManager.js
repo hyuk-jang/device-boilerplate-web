@@ -13,11 +13,10 @@ const {
     reqWrapCmdFormat: reqWCF,
     reqWrapCmdType: reqWCT,
     reqDeviceControlType: reqDCT,
-    commandStep: cmdStep,
     nodePickKey,
   },
   dccFlagModel: { definedCommandSetRank: cmdRank },
-  dcmWsModel: { transmitToClientCommandType, transmitToServerCommandType: transmitToServerCT },
+  dcmWsModel: { transmitToServerCommandType: transmitToServerCT },
 } = require('../../module').di;
 
 /** 무안 6kW TB */
@@ -74,6 +73,8 @@ class SocketIOManager extends AbstSocketIOManager {
           socket.emit('updateNode', this.pickNodeList(msDataInfo, nodeList));
           // OrderList에서 명령 타입을 한글로 변환 후 전송
           socket.emit('updateCommand', this.pickContractCmdList(contractCmdList));
+          // // OrderList에서 명령 타입을 한글로 변환 후 전송
+          // socket.emit('updateS', this.pickContractCmdList(contractCmdList));
         }
       });
 
