@@ -109,6 +109,7 @@
                 <button id="reset" class="btn btn-default btn-sm mr_1rem">
                   <span class="glyphicon glyphicon-refresh"></span> 초기화
                 </button>
+                <input id="transLang" type="checkbox" data-toggle="toggle" class="btn btn-default btn-sm mr_1rem"></input>
               </div>
               <!-- canvas -->
               <div class="svg_area" id="canvas"></div>
@@ -291,7 +292,7 @@
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
           // SVG draw map
-          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          // showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
           // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
           var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
           foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
@@ -442,6 +443,14 @@
         $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
         $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
         canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
+    </script>
+
+    <!-- FIXME: 삭제 -->
+    <script>
+    showNodeData('S_002', 100)  
+    showNodeData('WL_009', 100)  
+    showNodeData('MRT_001', 100)  
+    showNodeData('BT_001', 100)  
     </script>
 
     <!-- 검색 관련 js 모음 -->
