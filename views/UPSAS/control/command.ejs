@@ -442,21 +442,8 @@
         $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
         $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
         canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
-
-      // 모바일 접속일 경우
-      if (navigator.platform && filter.indexOf(navigator.platform.toLowerCase()) < 0){
-        // panzoom 기능 중지
-        canvasPanzoom.setOptions({
-          disableZoom:true,
-          disablePan:true
-        })
-
-        // panzoom 버튼 숨김
-        $('#panzoomBox').addClass('hidden')
-    }
-
-
     </script>
+
     <!-- 검색 관련 js 모음 -->
     <script src="/js/contents/report/search.js"></script>
   </body>
