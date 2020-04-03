@@ -10,9 +10,10 @@ const writtenSvgTextList = [];
  * @param {string=} isKorText // 장소, 장치, 센서 한글로 표현 유무
  * @param {Boolean=} isShow // true: 화면 표시 (기본값), false: 숨김
  */
-function drawSvgBasePlace(documentId, isKorText, isShow = true) {
+function drawSvgBasePlace(documentId, isKorText = true, isShow = true) {
   /** @type {mDeviceMap} */
   const realMap = map;
+  const textLang = isKorText ? 'ko' : 'en';
 
   // svgCanvas 생성
   const { width: svgCanvasWidth, height: svgCanvasHeight } = realMap.drawInfo.frame.mapInfo;
@@ -23,7 +24,12 @@ function drawSvgBasePlace(documentId, isKorText, isShow = true) {
   const svgCanvas = SVG(documentId).size('100%', '100%');
 
   // 팬줌 초기 맵 사이즈를 지정하기 위한 그려지는 공간의 id 지정
-  svgCanvas.attr({ id: 'svgCanvas', class: 'svg_map', preserveAspectRatio: 'xMidYMin meet' });
+  svgCanvas.attr({
+    id: 'svgCanvas',
+    class: 'svg_map',
+    preserveAspectRatio: 'xMidYMin meet',
+    lang: textLang,
+  });
 
   // 브라우저 크기에 반응하기 위한 뷰박스 세팅
   svgCanvas.viewbox(0, 0, svgCanvasWidth, svgCanvasHeight);
@@ -88,27 +94,21 @@ function drawSvgBasePlace(documentId, isKorText, isShow = true) {
  * @param {boolean=} options.isKorText  id로 표현할 것인가 name으로 표현할 것인가.
  * @param {boolean=} options.isShowCodeNum 고유 이름 중 고유 코드를 보여 줄 것인가.
  */
-function showNodeData(nodeDefId, data = '', options = {}) {
+function showNodeData(nodeDefId, data = '') {
   try {
-    const { isKorText = true, isShowCodeNum = true } = options;
-    let dataUnit = getDataUnit(nodeDefId); // 데이터 단위
-    if (data === '' || _.isNull(dataUnit)) dataUnit = ''; // 장치일 경우 단위가 없음
-    let nodeName;
+    // 데이터 단위 정의
+    let dataUnit = getDataUnit(nodeDefId);
+    dataUnit = data === '' || _.isNull(dataUnit) ? '' : dataUnit;
 
     // default Text가 숨겨진 상태이면 데이터 표시 생략
-    // if (checkHidableText(nodeDefId)) return false;
+    if (checkHidableText(nodeDefId)) return false;
 
     // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
     const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });
     if (_.isUndefined(foundSvgTextInfo)) return false;
 
-    // 장소, 장비, 센서 이름 재정의
-    isKorText ? (nodeName = foundSvgTextInfo.name) : (nodeName = foundSvgTextInfo.id);
-
-    // 코드번호를 보여 줄 것인지
-    nodeName = !isShowCodeNum ? nodeName.slice(0, nodeName.lastIndexOf('_')) : nodeName;
-
     // TODO: 소스 개선 중. 노드에 데이터를 추가해서 text 재배치
+    const nodeName = SVG.get(`#text_${nodeDefId}`).node.textContent;
     SVG.get(`#text_${nodeDefId}`)
       // eslint-disable-next-line func-names
       .tspan(function(text) {
@@ -186,7 +186,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
   let [textX, textY, textColor, textSize, leading, anchor] = [0, 0, '', 0, '', '']; // 텍스트 스타일, 위치 초기값
 
   // 토글의 true, false 값에 대한 한/영문 이름 정의
-  isKorText ? (naming = defInfo.name) : (naming = defInfo.id);
+  naming = isKorText ? defInfo.name : defInfo.id;
 
   // svgPositionList를 검색하여 장치인지 센서인지 구분
   let foundSvgInfo = _.find(map.drawInfo.positionInfo.svgNodeList, svgNodeInfo =>
@@ -768,4 +768,12 @@ function checkTrueFalseData(data) {
     result = ERROR_DATA;
   }
   return result;
+}
+
+/**
+ * 현재 SVG TEXT 한영 기능
+ */
+function changeLang() {
+  //TODO: 현재 그려진 TEXT 상태 확인 (한글 or 영문)
+  const currLang = SVG.get('svgCanvas').attr().lang;
 }
