@@ -255,6 +255,10 @@ _:-ms-input-placeholder,
   flex-wrap: wrap;
 }
 
+.flex_jus_start {
+  justify-content: start;
+}
+
 .container_row.division {
   flex: 1 0.5 348px;
   min-height: 348px;
