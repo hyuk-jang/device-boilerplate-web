@@ -289,9 +289,10 @@ class ApiServer extends AbstApiServer {
           this.compareCommandList(msInfo, contents);
           break;
         case SVG_IMG: // 명령 정보가 업데이트 되었을 경우
+          // BU.CLI(contents);
           msInfo.msDataInfo.svgImgList = contents;
           msInfo.msUserList.forEach(clientInfo => {
-            clientInfo.socketClient.emit('updateSvgImg', msInfo.msDataInfo.contents);
+            clientInfo.socketClient.emit('updateSvgImg', contents);
           });
           break;
         case POWER_BOARD: // 현황판 데이터를 요청할 경우

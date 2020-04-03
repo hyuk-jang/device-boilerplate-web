@@ -476,7 +476,7 @@ class RefineModel extends BiModule {
         `;
 
       // Get Rows
-      const dataRows = await this.db.single(mainSql, '', true);
+      const dataRows = await this.db.single(mainSql, '', false);
 
       return {
         viewPlaceRows,

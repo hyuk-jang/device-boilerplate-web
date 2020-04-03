@@ -72,9 +72,9 @@ class SocketIOManager extends AbstSocketIOManager {
           // NodeList 에서 선택한 key 만을 정제해서 전송
           socket.emit('updateNode', this.pickNodeList(msDataInfo, nodeList));
           // OrderList에서 명령 타입을 한글로 변환 후 전송
-          socket.emit('updateCommand', this.submitCommandList(foundMsInfo));
+          socket.emit('updateCommand', msDataInfo.contractCmdList);
           // 표현하는 이미지의 구성요소가 달라질 경우
-          socket.emit('updateSvgImg', this.submitSvgImgList(foundMsInfo));
+          socket.emit('updateSvgImg', msDataInfo.svgImgList);
         }
       });
 
@@ -372,6 +372,7 @@ class SocketIOManager extends AbstSocketIOManager {
   submitSvgImgList(msInfo) {
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
+      BU.CLI('뭐야', msInfo.msDataInfo.svgImgList);
       clientInfo.socketClient.emit('updateSvgImg', msInfo.msDataInfo.svgImgList);
     });
   }

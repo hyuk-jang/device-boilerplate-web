@@ -41,34 +41,34 @@
   </script>
 
   <body>
-    <div id="wrap" class="wrap" >
+    <div id="wrap" class="wrap">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body ">
         <div class="container_row mb_50rem">
-            <div id="subCategoryDom" class="report_category"></div>
-              <div class="command_status">
-                <img id="updateIsApiClientConnImg" src=""></img>
-                <div id="updateIsApiClientConnDiv"></div>
-                <div id="contentTypeCategory" class='ml_2rem'>
-                  <input
-                  type="button"
-                  name="contentTypeBtn"
-                  class="btn btn-danger"
-                  data-view="structure"
-                  value="구성도"
-                  />
-                  <input
-                  type="button"
-                  name="contentTypeBtn"
-                  class="btn btn-default"
-                  data-view="operStatusTable"
-                  value="표"
-                  />
-                </div>
-              </div>
+          <div id="subCategoryDom" class="report_category"></div>
+          <div class="command_status">
+            <img id="updateIsApiClientConnImg" src="" />
+            <div id="updateIsApiClientConnDiv"></div>
+            <div id="contentTypeCategory" class="ml_2rem">
+              <input
+                type="button"
+                name="contentTypeBtn"
+                class="btn btn-danger"
+                data-view="structure"
+                value="구성도"
+              />
+              <input
+                type="button"
+                name="contentTypeBtn"
+                class="btn btn-default"
+                data-view="operStatusTable"
+                value="표"
+              />
+            </div>
           </div>
+        </div>
         <!-- 명령 상태, 결과 -->
         <div class="container-fluid_st">
           <p class="">
@@ -93,63 +93,67 @@
             </button>
           </div>
         </div>
-          <%- include("./addCommand.ejs") %>
+        <%- include("./addCommand.ejs") %>
         <!-- Content -->
         <div class="container_row flex_dir_col" id="content">
           <!-- Svg Map -->
-            <div class="default_area pt_1rem" id="structure" >
-              <div class="zoom_box" id="panzoomBox">
-                <!-- panzoom -->
-                <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
-                  <span class="glyphicon glyphicon-zoom-in"></span> 확대
-                </button>
-                <button id="zoomOut" class="btn btn-default btn-sm mr_1rem">
-                  <span class="glyphicon glyphicon-zoom-out"></span> 축소
-                </button>
-                <button id="reset" class="btn btn-default btn-sm mr_1rem">
-                  <span class="glyphicon glyphicon-refresh"></span> 초기화
-                </button>
+          <div class="default_area pt_1rem" id="structure">
+            <div class="zoom_box" id="panzoomBox">
+              <!-- panzoom -->
+              <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-zoom-in"></span> 확대
+              </button>
+              <button id="zoomOut" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-zoom-out"></span> 축소
+              </button>
+              <button id="reset" class="btn btn-default btn-sm mr_1rem">
+                <span class="glyphicon glyphicon-refresh"></span> 초기화
+              </button>
+            </div>
+            <!-- canvas -->
+            <div class="svg_area" id="canvas"></div>
+          </div>
+          <!-- Table -->
+          <div class="container_row hidden" id="operStatusTable">
+            <div class="mr_1rem">
+              <p class="table_desc_area">
+                명령 목록 - 갱신시간 &nbsp;<span id="cmdUpdateDate"></span>
+              </p>
+              <div class="panel table-responsive default_area">
+                <table id="cmdTableBody" class="table table-bordered number_table noHover">
+                  <thead>
+                    <tr>
+                      <th data-field="wrapCmdFormat">명령 형식</th>
+                      <th data-field="wrapCmdType">명령 타입</th>
+                      <th data-field="wrapCmdStep">명령 단계</th>
+                      <th data-field="wrapimgId">명령 ID</th>
+                      <th data-field="wrapCmdName">명령 이름</th>
+                      <!-- <th data-field="wrapCmdCancel">명령 취소</th> -->
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
               </div>
-              <!-- canvas -->
-              <div class="svg_area" id="canvas"></div>
             </div>
-            <!-- Table -->
-            <div class="container_row hidden" id="operStatusTable" >
-              <div class="mr_1rem">
-                <p class="table_desc_area">명령 목록 - 갱신시간 &nbsp;<span id="cmdUpdateDate"></span> </p>
-                  <div class="panel table-responsive default_area">
-                    <table id="cmdTableBody" class="table table-bordered number_table noHover">
-                      <thead>
-                        <tr>
-                          <th data-field="wrapCmdFormat">명령 형식</th>
-                          <th data-field="wrapCmdType">명령 타입</th>
-                          <th data-field="wrapCmdStep">명령 단계</th>
-                          <th data-field="wrapCmdId">명령 ID</th>
-                          <th data-field="wrapCmdName">명령 이름</th>
-                          <!-- <th data-field="wrapCmdCancel">명령 취소</th> -->
-                        </tr>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </div>
-                <div class='mr_1rem'>
-                  <p class="table_desc_area">장치 상태 정보 목록 - 갱신시간 &nbsp;<span id="nodeUpdateDate"></span> </p>
-                  <div class="panel table-responsive default_area">
-                      <table id="nodeTableBody" class="table table-bordered number_table noHover">
-                        <thead>
-                          <tr>
-                            <th data-field="ntn">장치 명</th>
-                            <th data-field="ni">장치 ID</th>
-                            <th data-field="pnl">관련 장소</th>
-                            <th data-field="d">데이터</th>
-                          </tr>
-                        </thead>
-                        <tbody></tbody>
-                      </table>
-                    </div>
-                  </div>
+            <div class="mr_1rem">
+              <p class="table_desc_area">
+                장치 상태 정보 목록 - 갱신시간 &nbsp;<span id="nodeUpdateDate"></span>
+              </p>
+              <div class="panel table-responsive default_area">
+                <table id="nodeTableBody" class="table table-bordered number_table noHover">
+                  <thead>
+                    <tr>
+                      <th data-field="ntn">장치 명</th>
+                      <th data-field="ni">장치 ID</th>
+                      <th data-field="pnl">관련 장소</th>
+                      <th data-field="d">데이터</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
             </div>
+          </div>
         </div>
       </div>
       <!--하단1-->
@@ -173,7 +177,7 @@
         $nodeTableDom = $('#' + nodeTableDomId);
         $nodeUpdateDom = $('#' + nodeUpdateDomId);
       }
-    
+
       // 테이블 ID 정의
       initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
     </script>
@@ -198,12 +202,13 @@
       var isApiClientConn = false;
       socket.on('updateIsApiClientConn', function(isConn) {
         isApiClientConn = isConn;
-        
-        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
-        var connStatusImg = isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
 
-        document.getElementById('updateIsApiClientConnDiv').innerText= connStatus
-        document.getElementById('updateIsApiClientConnImg').setAttribute('src', connStatusImg)
+        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
+        var connStatusImg =
+          isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
+
+        document.getElementById('updateIsApiClientConnDiv').innerText = connStatus;
+        document.getElementById('updateIsApiClientConnImg').setAttribute('src', connStatusImg);
       });
 
       // 제어 모드 정보
@@ -325,6 +330,55 @@
         $cmdUpdateDom.html(new Date().toLocaleString());
       });
 
+      // SVG 이미지 갱신
+      /**
+       * @typedef {Object} wsSvgImgInfo SVG 에서 추가적으로 이미지를 보여줄 정보
+       * @property {string} wrapimgId 래핑 명령 Id
+       * @property {string} imgId 명령 Id
+       * @property {string} imgId 보여줄 이미지 Id
+       */
+      var currSvgImgList = [];
+      socket.on('updateSvgImg', function(newSvgImgList = []) {
+        console.log('newSvgImgList', newSvgImgList);
+        // 새롭게 추가되는 이미지 목록 조회
+        var appearSvgImgList = newSvgImgList.reduce(function(storage, newSvgImgInfo) {
+          // 기존에 존재하는 이미지 존재 조회
+          var findIndex = currSvgImgList.findIndex(function(currSvgImgInfo) {
+            return currSvgImgInfo.imgId === newSvgImgInfo.imgId;
+          });
+          // 존재하지 않을 경우 생성 대상
+          findIndex < 0 && storage.push(newSvgImgInfo);
+          return storage;
+        }, []);
+
+        // console.log(appearSvgImgList);
+
+        // 기존에 존재하던 이미지 삭제 목록 조회
+        var disappearSvgImgList = currSvgImgList.reduce(function(storage, currSvgImgInfo) {
+          // 기존에 존재하는 이미지 존재 조회
+          var findIndex = newSvgImgList.findIndex(function(newSvgImgInfo) {
+            return newSvgImgInfo.imgId === currSvgImgInfo.imgId;
+          });
+          // 존재하지 않을 경우 삭제 대상
+          findIndex < 0 && storage.push(currSvgImgInfo);
+          return storage;
+        }, []);
+
+        // console.log(disappearSvgImgList);
+
+        // SVG Img 재생성 요청
+        appearSvgImgList.forEach(function(svgImgInfo) {
+          startFlowAnimation(svgImgInfo.imgId, 1);
+        });
+        // SVG Img 삭제 요청
+        disappearSvgImgList.forEach(function(svgImgInfo) {
+          // console.log('삭제요청', startFlowAnimation);
+          startFlowAnimation(svgImgInfo.imgId, 0);
+        });
+        // 갱신된 SVG Img 목록을 덮어씌움
+        currSvgImgList = newSvgImgList;
+      });
+
       // 서버로 명령 실행 요청
       // $('button[name="reqControlCmd"]').on('click', function(event) {
       $('#testRequestCmdBtn').on('click', function(event) {
@@ -362,7 +416,6 @@
         $('#cmdFormatSel')
           .val(thisSelectValue)
           .trigger('change');
-
       });
     </script>
 
@@ -378,8 +431,8 @@
 
     <!-- 상단 카테고리 버튼 세팅 -->
     <script>
-       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
-       $('input[name="contentTypeBtn"]').on('click', function() {
+      // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
+      $('input[name="contentTypeBtn"]').on('click', function() {
         var viewType = $(this).data('view');
 
         // 버튼 색상 변경
@@ -414,25 +467,34 @@
       drawSvgBasePlace('canvas'); // 멥 그리기
       bindingClickNodeEvent(socket, 'control');
     </script>
-    
+
     <!-- panzoom 세팅 -->
     <script>
-      var filter = "win16|win32|win64|mac|macintel";
+      var filter = 'win16|win32|win64|mac|macintel';
       var canvas = document.getElementById('svgCanvas');
-      var startScale= 1;
+      var startScale = 1;
 
-        var canvasPanzoom = Panzoom(canvas, {
-          cursor: 'default',
-          startScale: startScale,
-        });
-     
-        $('#zoomIn').on('click', canvasPanzoom.zoomIn); //확대 버튼 이벤트 
-        $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
-        $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
-        canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
+      var canvasPanzoom = Panzoom(canvas, {
+        cursor: 'default',
+        startScale: startScale,
+      });
+
+      $('#zoomIn').on('click', canvasPanzoom.zoomIn); //확대 버튼 이벤트
+      $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
+      $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
+      canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
     </script>
 
     <!-- 검색 관련 js 모음 -->
     <script src="/js/contents/report/search.js"></script>
+
+    <!-- FIXME: VIP Mode -->
+    <script src="/js/drawSvg/vipFunc.js"></script>
+    <script>
+      // FIXME: VIP 모드
+      if (user.user_id === 'vip') {
+        vipInit();
+      }
+    </script>
   </body>
 </html>
