@@ -309,49 +309,49 @@ class RefineModel extends BiModule {
             });
 
             // 존재하지 않을경우 throw
-            if (_.isEmpty(placeRelationInfo)) {
-              // throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
-              return false;
+            // throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
+
+            // 관계가 있을 경우에만 추가
+            if (!_.isEmpty(placeRelationInfo)) {
+              // Place Relation 에 있는 속성 선언
+              const {
+                chart_color: chartColor,
+                node_name: nName,
+                nd_target_name: ndName,
+                place_name: pName,
+                place_node_name: pNodeName,
+                p_target_name: pTargetName,
+                p_target_code: pTargetCode,
+                chart_sort_rank: chartSortRank,
+              } = placeRelationInfo;
+
+              // x 요소 이름 지정
+              let xAxisElementName = '';
+              if (_.isString(convertName)) {
+                xAxisElementName = `${pTargetName} ${convertName}`;
+              } else if (pTargetName) {
+                xAxisElementName = `${pTargetName} ${ndName}`;
+              } else {
+                xAxisElementName = pNodeName;
+              }
+
+              // BU.CLI(chartSortRank);
+
+              /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
+              const chartSeries = {
+                name: xAxisElementName,
+                color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
+                tooltip: {
+                  valueSuffix: dataUnit,
+                },
+                yAxis: index,
+                // 데이터가 없을 경우 빈공간으로 대체
+                data: _.map(blockDataRows, blockDataRow => _.get(blockDataRow, convertKey, '')),
+                chartSortRank,
+              };
+              // Chart Line 추가
+              refinedChart.series.push(chartSeries);
             }
-
-            // Place Relation 에 있는 속성 선언
-            const {
-              chart_color: chartColor,
-              node_name: nName,
-              nd_target_name: ndName,
-              place_name: pName,
-              place_node_name: pNodeName,
-              p_target_name: pTargetName,
-              p_target_code: pTargetCode,
-              chart_sort_rank: chartSortRank,
-            } = placeRelationInfo;
-
-            // x 요소 이름 지정
-            let xAxisElementName = '';
-            if (_.isString(convertName)) {
-              xAxisElementName = `${pTargetName} ${convertName}`;
-            } else if (pTargetName) {
-              xAxisElementName = `${pTargetName} ${ndName}`;
-            } else {
-              xAxisElementName = pNodeName;
-            }
-
-            // BU.CLI(chartSortRank);
-
-            /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
-            const chartSeries = {
-              name: xAxisElementName,
-              color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
-              tooltip: {
-                valueSuffix: dataUnit,
-              },
-              yAxis: index,
-              // 데이터가 없을 경우 빈공간으로 대체
-              data: _.map(blockDataRows, blockDataRow => _.get(blockDataRow, convertKey, '')),
-              chartSortRank,
-            };
-            // Chart Line 추가
-            refinedChart.series.push(chartSeries);
           });
         });
       });
@@ -476,7 +476,7 @@ class RefineModel extends BiModule {
         `;
 
       // Get Rows
-      const dataRows = await this.db.single(mainSql, '', false);
+      const dataRows = await this.db.single(mainSql, '', true);
 
       return {
         viewPlaceRows,

@@ -263,7 +263,14 @@ class ApiServer extends AbstApiServer {
     };
 
     try {
-      const { CERTIFICATION, COMMAND, MODE, NODE, POWER_BOARD } = transmitToServerCommandType;
+      const {
+        CERTIFICATION,
+        COMMAND,
+        MODE,
+        NODE,
+        SVG_IMG,
+        POWER_BOARD,
+      } = transmitToServerCommandType;
       // client를 인증하고자 하는 경우
       if (commandId === CERTIFICATION) {
         return this.certifyFieldClient(fieldClient, fieldData);
@@ -281,9 +288,12 @@ class ApiServer extends AbstApiServer {
         case COMMAND: // 명령 정보가 업데이트 되었을 경우
           this.compareCommandList(msInfo, contents);
           break;
-        // case COMMAND: // 명령 정보가 업데이트 되었을 경우
-        //   this.compareCommandList(msInfo, contents);
-        //   break;
+        case SVG_IMG: // 명령 정보가 업데이트 되었을 경우
+          msInfo.msDataInfo.svgImgList = contents;
+          msInfo.msUserList.forEach(clientInfo => {
+            clientInfo.socketClient.emit('updateSvgImg', msInfo.msDataInfo.contents);
+          });
+          break;
         case POWER_BOARD: // 현황판 데이터를 요청할 경우
           responseDataByServer.contents = msInfo.msDataInfo.statusBoard;
           break;

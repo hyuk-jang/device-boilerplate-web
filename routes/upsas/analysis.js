@@ -71,9 +71,9 @@ router.get(
     // 1. 금일 검색 구간 정의
     let dailySearchRange = analysisModel.createSearchRange({
       // FIXME: 1일전 테스트
-      // strStartDate: moment()
-      //   .subtract(2, 'day')
-      //   .format('YYYY-MM-DD'),
+      strStartDate: moment()
+        .subtract(4, 'day')
+        .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });

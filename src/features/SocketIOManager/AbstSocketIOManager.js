@@ -72,6 +72,12 @@ class AbstSocketIOManager {
   submitCommandList(msInfo) {}
 
   /**
+   * 현재 추적 중인 이미지를 보냄
+   * @param {msInfo} msInfo
+   */
+  submitSvgImgList(msInfo) {}
+
+  /**
    * 현재 수행중인 명령 리스트를 io Client로 보냄
    * @param {msInfo} msInfo
    * @param {defaultFormatToResponse} execCommandResultInfo
