@@ -28,6 +28,8 @@
     // 서브 카테고리 Dom
     var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
 
+    var simpleNodes = <%- JSON.stringify(simpleNodes) %>;
+
     // Map 정보
     var map = <%- JSON.stringify(map) %>;
     // 제어 명령 정보
@@ -278,13 +280,13 @@
       // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
       var currNodeList = [];
       // 갱신 노드 반영
-      socket.on('updateNode', function(wsNodeList) {
-        // console.log(wsNodeList);
+      // socket.on('updateNode', function(wsNodeList) {
+      //   console.log('updateNode', wsNodeList);
         var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
           // SVG draw map
-          // showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
           // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
           var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
           foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);

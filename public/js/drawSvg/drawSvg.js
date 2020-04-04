@@ -200,7 +200,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
   }
 
   // 텍스트 색, 크기, 미세한 위치 기본값 조정  , 0: 장치, 1: 센서, -1: 미분류
-  if (foundSvgInfo.is_sensor === 1) {
+  if (foundSvgInfo.is_sensor === 1 || foundSvgInfo.is_sensor === 2) {
     textColor = 'black';
     anchor = 'middle';
     textSize = 11;
@@ -379,7 +379,7 @@ function bindingClickNodeEvent(socket, selectedModeVal = 'view') {
             : alert('입력값을 확인해 주세요');
         }
         // 센서 and 개발모드
-        else if (deviceType === 1 && selectedModeVal === 'develop') {
+        else if ((deviceType === 1 || deviceType === 2) && selectedModeVal === 'develop') {
           const inputtedSensorValue = prompt(`'${nodeDefInfo.name}'`);
           inputtedSensorValue ? changeNodeData(nodeDefInfo.id, inputtedSensorValue) : null;
         }
@@ -705,11 +705,19 @@ function getDataUnit(nDefId) {
   //   ),
   // );
 
-  const foundUnit = _.find(realMap.setInfo.nodeStructureList, nodeStructureInfo =>
-    _.map(nodeStructureInfo.defList, 'target_prefix').includes(_.replace(nDefId, /[_\d]/g, '')),
-  );
-  if (_.isUndefined(foundUnit)) return false;
-  return foundUnit.data_unit;
+  // FIXME: DV_NODE에서 찾아버림
+  return _.chain(simpleNodes)
+    .find({ nId: nDefId })
+    .get('du', '')
+    .value();
+  // return _.get(_.find(simpleNodes, { nId: nDefId }), 'du', '');
+
+  // const foundUnit = _.find(realMap.setInfo.nodeStructureList, nodeStructureInfo =>
+  //   _.map(nodeStructureInfo.defList, 'target_prefix').includes(_.replace(nDefId, /[_\d]/g, '')),
+  // );
+
+  // if (_.isUndefined(foundUnit)) return false;
+  // return foundUnit.data_unit;
 }
 
 /**
