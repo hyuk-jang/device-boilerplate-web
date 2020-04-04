@@ -280,8 +280,8 @@
       // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
       var currNodeList = [];
       // 갱신 노드 반영
-      // socket.on('updateNode', function(wsNodeList) {
-      //   console.log('updateNode', wsNodeList);
+      socket.on('updateNode', function(wsNodeList) {
+        //   console.log('updateNode', wsNodeList);
         var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
