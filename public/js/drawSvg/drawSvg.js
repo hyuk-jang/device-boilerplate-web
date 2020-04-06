@@ -96,7 +96,7 @@ function showNodeData(nodeDefId, data = '', options = {}) {
     let nodeName;
 
     // default Text가 숨겨진 상태이면 데이터 표시 생략
-    // if (checkHidableText(nodeDefId)) return false;
+    if (checkHidableText(nodeDefId)) return false;
 
     // svg로 그려진 Text의 정보를 찾는다. (위치값을 알기위한 용도)
     const foundSvgTextInfo = _.find(writtenSvgTextList, { id: nodeDefId });

@@ -497,6 +497,10 @@
       if (user.user_id === 'vip') {
         vipInit();
       }
+      var sensor = SVG.get('#svgCanvas').select('rect[name="sensor"]');
+      var text = SVG.get('#svgCanvas').select('text[name="text"]');
+      sensor.front();
+      text.front();
     </script>
   </body>
 </html>
