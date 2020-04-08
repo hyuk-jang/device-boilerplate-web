@@ -155,7 +155,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
     })
     .attr({
       'pointer-events': 'none', // text 커서 모양 설정
-      id: `text_${defInfo.id}`,
+      id: `${defInfo.id}_text`,
       name: 'text',
       transform,
     });
@@ -627,7 +627,7 @@ function drawSvgBasePlace(documentId, isKorText = true) {
  */
 function showNodeData(nodeDefId, data = '') {
   try {
-    const nodeName = SVG.get(`#text_${nodeDefId}`).node.textContent;
+    const nodeName = _.find(writtenTextList, { id: nodeDefId }).name;
     let dataUnit = getDataUnit(nodeDefId);
 
     // default Text가 숨겨진 상태이면 데이터 표시 생략
@@ -637,14 +637,14 @@ function showNodeData(nodeDefId, data = '') {
     dataUnit = data === '' || _.isNull(dataUnit) ? '' : dataUnit;
 
     // text에 data, 단위를 추가후 재배치
-    SVG.get(`#text_${nodeDefId}`).text(text => {
+    SVG.get(`#${nodeDefId}_text`).text(text => {
       text.tspan(nodeName).dy('0.7rem');
       // TODO: 여기서 개행 처리 판단 해야함.
       text
         .tspan(data)
         .newLine()
         .fill('#7675ff') // FIXME: 추후 css로 처리
-        .addClass('node_data');
+        .attr({ id: `${nodeDefId}_data` });
       text.tspan(dataUnit);
     });
 
@@ -670,59 +670,22 @@ function bindingClickNodeEvent(socket) {
       const deviceType = svgNodeInfo.is_sensor; // 장치 or 센서 구분 ( 1: 센서, 0: 장치, -1: 미분류 )
 
       svgNodeInfo.defList.forEach(nodeDefInfo => {
-        const nodeData = $('#text_WD_001 > tspan[class="node_data"]');
-        console.log(nodeData);
-
         // 그려진 SVG 노드 객체에 클릭 이벤트 바인딩
         SVG.get(`#${nodeDefInfo.id}`).click(() => {
-          switch (deviceType) {
-            case 0:
-              {
-                const test = checkTrueFalseData(nodeData);
-              }
-              break;
-            case 1:
-              break;
+          const nodeData = SVG.get(`#${nodeDefInfo.id}_data`).node.innerHTML;
+          const dataStatus = checkTrueFalseData(nodeData);
 
-            default:
-              break;
+          if (_.isUndefined(nodeData)) return alert('장치 상태 미식별');
+
+          if (deviceType === 0 && dataStatus === TRUE_DATA) {
+            const confirmBool = confirm(`'${nodeDefInfo.name}' 을(를) 닫으시겠습니까?`);
+            confirmBool ? executeCommand(socket, '0', nodeDefInfo.id) : null;
+          } else if (deviceType === 0 && dataStatus === FALSE_DATA) {
+            const confirmBool = confirm(`'${nodeDefInfo.name}' 을(를) 여시겠습니까?`);
+            confirmBool ? executeCommand(socket, '1', nodeDefInfo.id) : null;
+          } else if (deviceType === 0 && dataStatus === ERROR_DATA) {
+            alert('장치 상태 이상');
           }
-
-          // // 장치 and 제어모드
-          // if (deviceType === 0) {
-          //   if ($nodeTspanEleList.length === 0) {
-          //     return alert('장치 상태 미식별');
-          //   }
-
-          //   const currentNodeStatus = _.head($nodeTspanEleList).innerHTML; // 현재 들어오는 노드의 최근 데이터
-          //   const checkedDataStatus = checkTrueFalseData(currentNodeStatus); // 데이터의 타입이 true데이터인지 false 데이터인지 체크
-          //   // 현재 상태에 따라 confirm창 내용 변경
-          //   if (checkedDataStatus === TRUE_DATA) {
-          //     const confirmBool = confirm(`'${nodeDefInfo.name}' 을(를) 닫으시겠습니까?`);
-          //     confirmBool ? executeCommand(socket, '0', nodeDefInfo.id) : null;
-          //   } else if (checkedDataStatus === FALSE_DATA) {
-          //     const confirmBool = confirm(`'${nodeDefInfo.name}' 을(를) 여시겠습니까?`);
-          //     confirmBool ? executeCommand(socket, '1', nodeDefInfo.id) : null;
-          //   } else if (checkedDataStatus === ERROR_DATA) {
-          //     alert('장치 상태 이상');
-          //   }
-
-          //   // 장치 and 개발모드
-          // } else if (deviceType === 0) {
-          //   const inputtedDeviceValue = prompt(`'${nodeDefInfo.name}'`);
-          //   if (_.isNull(inputtedDeviceValue)) return false;
-
-          //   // 데이터가 true/ false 값인지 확인
-          //   const checkedInputValue = checkTrueFalseData(inputtedDeviceValue);
-          //   checkedInputValue === TRUE_DATA || checkedInputValue === FALSE_DATA
-          //     ? changeNodeData(nodeDefInfo.id, inputtedDeviceValue)
-          //     : alert('입력값을 확인해 주세요');
-          // }
-          // // 센서 and 개발모드
-          // else if (deviceType === 1) {
-          //   const inputtedSensorValue = prompt(`'${nodeDefInfo.name}'`);
-          //   inputtedSensorValue ? changeNodeData(nodeDefInfo.id, inputtedSensorValue) : null;
-          // }
         });
       });
     });
