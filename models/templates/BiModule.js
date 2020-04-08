@@ -488,10 +488,10 @@ class BiModule extends BM {
             writedate, 
             ${dateFormat.selectViewDate},
             ${dateFormat.selectGroupDate},
-            ROUND(AVG(power_kw), 1)  AS avg_grid_kw,
+            ROUND(AVG(power_kw), 5)  AS avg_grid_kw,
             MAX(power_cp_kwh) AS max_c_kwh,
             MIN(power_cp_kwh) AS min_c_kwh,       
-            ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 1) AS interval_power
+            ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 5) AS interval_power
         FROM pw_inverter_data
         WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
         ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}

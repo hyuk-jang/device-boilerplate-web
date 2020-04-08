@@ -386,15 +386,27 @@ const defaultDom = {
 
   /**
    * 천단위 기호 추가 함수
-   * @param {number} num 수
+   * @param {number} value 수
    */
-  addComma(num) {
+  addComma(value) {
     try {
-      if (num >= 1) {
-        const regexp = /\B(?=(\d{3})+(?!\d))/g;
-        return num.toString().replace(regexp, ',');
+      if (value == null || value === '') {
+        return value;
       }
-      return num;
+
+      // 소수점 분리
+      const valueArr = value.toString().split('.');
+
+      let str = valueArr[0].toString();
+      str = str.replace(/,/g, '');
+      let retValue = '';
+
+      for (let i = 1; i <= str.length; i += 1) {
+        if (i > 1 && i % 3 === 1) retValue = `${str.charAt(str.length - i)},${retValue}`;
+        else retValue = str.charAt(str.length - i) + retValue;
+      }
+
+      return retValue + (valueArr.length > 1 ? `.${valueArr[1]}` : '');
     } catch (error) {
       return '';
     }
