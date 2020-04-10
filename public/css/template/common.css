@@ -476,7 +476,7 @@ _:-ms-input-placeholder,
 }
 
 /***************************************/
-/************** structure 영역  FIXME: 현재는 제어 페이지dh*********/
+/************** structure 영역  FIXME: 현재는 제어 페이지*********/
 /***************************************/
 
 .command_status_view {
@@ -507,6 +507,11 @@ _:-ms-input-placeholder,
 .svg_map {
   overflow: visible !important;
   /* transform: scale(0.4) !important; */
+}
+
+.node_data {
+  fill: #7675ff;
+  font-size: 0.5em;
 }
 
 /***************************************/
