@@ -138,67 +138,33 @@ class SocketIOManager extends AbstSocketIOManager {
             throw new Error('요청한 명령 형식이 맞지 않습니다. 관리자에게 문의하십시오.');
           }
 
-          /** @type {defaultFormatToRequest} */
-          const defaultFormatToRequestInfo = {
-            commandId: transmitToServerCT.COMMAND,
-            uuid: uuidv4(),
-            contents: controlCmdInfo,
-          };
-
-          // Main Storage 찾음.
-          const msInfo = this.findMainStorage(socket);
-
-          if (!msInfo) {
-            throw new Error('관리하는 사이트를 찾을 수 없습니다. 관리자에게 문의하여 주십시오.');
-          }
-
-          const {
-            msClient,
-            msDataInfo: { reqCmdList },
-            msUserList,
-          } = msInfo;
-
-          // DBS와 접속이 되어 있는지 체크
-          if (!(msClient instanceof net.Socket)) {
-            throw new Error('장치와 연결이 되어있지 않습니다.');
-          }
-
-          // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
-          const foundReqCmd = _.find(reqCmdList, reqCmd => {
-            return _.isEqual(reqCmd.reqCmdInfo.contents, controlCmdInfo);
-          });
-
-          if (foundReqCmd) {
-            throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
-          }
-
-          // 요청한 사용자 정보 추출
-          const userInfo = _.find(msUserList, msUserInfo => {
-            return msUserInfo.socketClient === socket;
-          });
-
-          if (userInfo === undefined) {
-            throw new Error('사용자 정보를 찾을 수 없습니다. 관리자에게 문의해주십시오.');
-          }
-
-          // 사용자가 요청한 명령을 요청 목록에 추가
-          reqCmdList.push({
-            user: userInfo.sessionUserInfo,
-            socket,
-            reqCmdInfo: defaultFormatToRequestInfo,
-            // 1초내에 DBS에서 명령 수행한 결과를 보내주지 않을 경우 에러로 판단
-            timer: setTimeout(() => {
-              // 요청한 사용자 목록에서 삭제
-              _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
-              socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
-            }, 3000),
-          });
-
-          // Socket Client로 명령 전송
-          msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));
+          this.reqExecuteCommand(socket, controlCmdInfo);
         } catch (error) {
+          BU.error(error);
           socket.emit('updateAlert', error.message);
         }
+      });
+
+      socket.on('cancelCommand', cancelCmdInfo => {
+        /** @type {contractCmdInfo} */
+        const {
+          wrapCmdUUID: WCU,
+          wrapCmdFormat: WCF,
+          wrapCmdId: WCI,
+          wrapCmdName: WCN,
+        } = cancelCmdInfo;
+
+        /** @type {wsControlCmdAPI} */
+        const controlCmdInfo = {
+          WCU,
+          WCF,
+          WCT: reqWCT.CANCEL,
+          WCI,
+          WCN,
+          rank: cmdRank.FIRST,
+        };
+
+        this.reqExecuteCommand(socket, controlCmdInfo);
       });
 
       socket.on('changeOperationMode', algorithmId => {
@@ -270,6 +236,72 @@ class SocketIOManager extends AbstSocketIOManager {
         }
       });
     });
+  }
+
+  reqExecuteCommand(socket, executeCmdInfo) {
+    try {
+      // Main Storage 찾음.
+      const msInfo = this.findMainStorage(socket);
+
+      if (!msInfo) {
+        throw new Error('관리하는 사이트를 찾을 수 없습니다. 관리자에게 문의하여 주십시오.');
+      }
+
+      const {
+        msClient,
+        msDataInfo: { reqCmdList },
+        msUserList,
+      } = msInfo;
+
+      // DBS와 접속이 되어 있는지 체크
+      if (!(msClient instanceof net.Socket)) {
+        throw new Error('장치와 연결이 되어있지 않습니다.');
+      }
+
+      // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
+      const foundReqCmd = _.find(reqCmdList, reqCmd => {
+        return _.isEqual(reqCmd.reqCmdInfo.contents, executeCmdInfo);
+      });
+
+      if (foundReqCmd) {
+        throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
+      }
+
+      // 요청한 사용자 정보 추출
+      const userInfo = _.find(msUserList, msUserInfo => {
+        return msUserInfo.socketClient === socket;
+      });
+
+      if (userInfo === undefined) {
+        throw new Error('사용자 정보를 찾을 수 없습니다. 관리자에게 문의해주십시오.');
+      }
+
+      /** @type {defaultFormatToRequest} */
+      const defaultFormatToRequestInfo = {
+        commandId: transmitToServerCT.COMMAND,
+        uuid: uuidv4(),
+        contents: executeCmdInfo,
+      };
+
+      // 사용자가 요청한 명령을 요청 목록에 추가
+      reqCmdList.push({
+        user: userInfo.sessionUserInfo,
+        socket,
+        reqCmdInfo: defaultFormatToRequestInfo,
+        // 1초내에 DBS에서 명령 수행한 결과를 보내주지 않을 경우 에러로 판단
+        timer: setTimeout(() => {
+          // 요청한 사용자 목록에서 삭제
+          _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
+          socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
+        }, 3000),
+      });
+
+      // Socket Client로 명령 전송
+      msClient.write(this.defaultConverter.encodingMsg(defaultFormatToRequestInfo));
+    } catch (error) {
+      BU.error(error);
+      socket.emit('updateAlert', error.message);
+    }
   }
 
   /**
@@ -372,7 +404,6 @@ class SocketIOManager extends AbstSocketIOManager {
   submitSvgImgList(msInfo) {
     // 해당 Socket Client에게로 데이터 전송
     msInfo.msUserList.forEach(clientInfo => {
-      BU.CLI('뭐야', msInfo.msDataInfo.svgImgList);
       clientInfo.socketClient.emit('updateSvgImg', msInfo.msDataInfo.svgImgList);
     });
   }
