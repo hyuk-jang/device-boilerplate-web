@@ -289,7 +289,7 @@
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
           // SVG draw map
-          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          // showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
           // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
           var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
           foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
@@ -507,10 +507,10 @@
       if (user.user_id === 'vip') {
         vipInit();
       }
-      var sensor = SVG.get('#svgCanvas').select('rect[name="sensor"]');
-      var text = SVG.get('#svgCanvas').select('text[name="text"]');
-      sensor.front();
-      text.front();
+      // var sensor = SVG.get('#svgCanvas').select('rect[name="sensor"]');
+      // var text = SVG.get('#svgCanvas').select('text[name="text"]');
+      // sensor.front();
+      // text.front();
     </script>
   </body>
 </html>

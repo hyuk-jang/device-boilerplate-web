@@ -80,22 +80,22 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
     textColor = 'black';
     anchor = 'middle';
     textSize = 11;
-    leading = '1.1em';
+    leading = '1.1rem';
   } else if (foundSvgInfo.is_sensor === 0) {
     textColor = 'black';
     anchor = 'middle';
-    textSize = 11;
-    leading = '1.1em';
+    textSize = '2em';
+    leading = '1.1rem';
   } else if (foundSvgInfo.is_sensor === -1) {
     textColor = 'black';
     anchor = 'middle';
     textSize = 11;
-    leading = '1.1em';
+    leading = '1.1rem';
   } else {
     textColor = 'black';
     anchor = 'middle';
     textSize = 25;
-    leading = '1.1em';
+    leading = '1.1rem';
   }
 
   // 사각형, 패턴 형식일 때 위치값 조정
@@ -143,22 +143,28 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
   checkHidableText(defInfo.id) ? (naming = '') : '';
 
   // 텍스트 그리기
-  const svgText = svgCanvas.text(naming);
-  svgText
+  const svgText = svgCanvas
+    .text(naming)
     .move(textX, textY)
-    .font({
-      fill: textColor,
-      size: textSize,
-      anchor,
-      leading,
-      weight: 'bold',
-    })
     .attr({
-      'pointer-events': 'none', // text 커서 모양 설정
       id: `${defInfo.id}_text`,
-      name: 'text',
-      transform,
+      class: 'node_title',
     });
+  // svgText
+  //   .move(textX, textY)
+  //   .font({
+  //     fill: textColor,
+  //     size: textSize,
+  //     anchor,
+  //     leading,
+  //     weight: 'bold',
+  //   })
+  //   .attr({
+  //     'pointer-events': 'none', // text 커서 모양 설정
+  //     id: `${defInfo.id}_text`,
+  //     name: 'text',
+  //     transform,
+  //   });
 
   // 그려진 svg 텍스트의 정보 수집
   const drawedNodeInfo = {
@@ -646,13 +652,14 @@ function showNodeData(nodeDefId, data = '') {
 
     // text에 data, 단위를 추가후 재배치
     SVG.get(`#${nodeDefId}_text`).text(text => {
-      text.tspan(nodeName).dy('0.7rem');
-      // TODO: 여기서 개행 처리 판단 해야함.
+      text
+        .tspan(nodeName)
+        .attr({ id: `${nodeDefId}_title` })
+        .dy('0.7rem');
       text
         .tspan(data)
         .newLine()
-        .fill('#7675ff') // FIXME: 추후 css로 처리
-        .attr({ id: `${nodeDefId}_data` });
+        .attr({ id: `${nodeDefId}_data`, class: 'node_data' });
       text.tspan(dataUnit);
     });
 
