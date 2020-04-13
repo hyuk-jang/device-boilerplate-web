@@ -592,6 +592,102 @@ router.get(
 router.get(
   ['/:siteId/abnormalCondition'],
   asyncHandler(async (req, res) => {
+    const {
+      mainInfo: { mainWhere, siteId },
+      viewPowerProfileRows,
+    } = req.locals;
+
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
+
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
+
+    /** @type {AnalysisModel} */
+    const analysisModel = global.app.get('analysisModel');
+
+    // ----------------- 금일 발전 효율 트렌드
+
+    // 인버터 Seq 목록
+    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+
+    /** @type {PW_INVERTER[]} */
+    const inverterRows = await analysisModel.getTable('PW_INVERTER', {
+      inverter_seq: inverterSeqList,
+    });
+
+    // 1. 검색 구간 정의
+    const searchRange = analysisModel.createSearchRange({
+      searchType: 'range',
+      searchInterval: 'min10',
+      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
+      strStartDate: moment()
+        .subtract(12, 'day')
+        .format('YYYY-MM-DD'),
+      strEndDate: moment()
+        .subtract(11, 'day')
+        .format('YYYY-MM-DD'),
+    });
+
+    const generalAnalysisRows = await analysisModel.getGeneralReport(searchRange, siteId);
+    // BU.CLIN(generalAnalysisRows);
+
+    const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
+
+    //
+
+    let powerChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number}`,
+        color: colorTable1[index],
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.t_power_kw,
+        ]),
+      };
+    });
+
+    // 5. 기상 데이터 추출
+    let weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+
+    // 7. 기상-일사량 데이터 차트에 삽입
+    let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+      {
+        dataKey: 'avg_solar',
+        name: '일사량',
+        yAxis: 1,
+        color: 'red',
+        dashStyle: 'ShortDash',
+      },
+    ]);
+
+    powerChartData = powerChartData.concat(weatherCharts);
+    _.set(req.locals, 'chartInfo.dailyPowerData', powerChartData);
+
+    let envChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 모듈 온도`,
+        color: colorTable1[index],
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.avg_module_rear_temp,
+        ]),
+      };
+    });
+
+    weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+      {
+        dataKey: 'avg_temp',
+        name: '기온',
+        yAxis: 1,
+        color: 'red',
+        dashStyle: 'ShortDash',
+      },
+    ]);
+
+    envChartData = envChartData.concat(weatherCharts);
+    _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
+
     res.render('./UPSAS/analysis/abnormalCondition', req.locals);
   }),
 );
