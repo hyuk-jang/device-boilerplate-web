@@ -33,12 +33,20 @@ const subCategoryList = [
     subCategory: 'prediction',
     btnName: '발전분석',
   },
+  {
+    subCategory: 'loosReduction',
+    btnName: '손실저하 요인분석',
+  },
+  {
+    subCategory: 'abnormalCondition',
+    btnName: '이상상태 요인분석',
+  },
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
 const colorTable2 = ['blue', 'purple', 'gray', 'white'];
 
-// trend middleware
+// analysis middleware
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
@@ -54,6 +62,7 @@ router.get(
   }),
 );
 
+// 효율 분석
 router.get(
   ['/', '/:siteId', '/:siteId/efficiency'],
   asyncHandler(async (req, res) => {
@@ -70,9 +79,9 @@ router.get(
     // ----------------- 금일 발전 효율 트렌드
     // 1. 금일 검색 구간 정의
     let dailySearchRange = analysisModel.createSearchRange({
-      // FIXME: 1일전 테스트
+      // FIXME: 날짜 변경 시 수정 (기본값 1)
       strStartDate: moment()
-        .subtract(4, 'day')
+        .subtract(11, 'day')
         .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
@@ -115,7 +124,9 @@ router.get(
     // console.time('금일 환경 변화 추이');
     // ----------------- 금일 환경 변화 추이
     // 1. 비교군 모듈 온도, 수온 구함
+    // console.time('getEnvReport');
     let envReportRows = await analysisModel.getEnvReport(dailySearchRange);
+    // console.timeEnd('getEnvReport');
 
     // 2. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
     let envModuleTempChart = _(envReportRows)
@@ -164,11 +175,12 @@ router.get(
     const prevSearchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
+      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
-        .subtract(3, 'day')
+        .subtract(13, 'day')
         .format('YYYY-MM-DD'),
       strEndDate: moment()
-        .subtract(1, 'day')
+        .subtract(11, 'day')
         .format('YYYY-MM-DD'),
     });
 
@@ -322,7 +334,7 @@ router.get(
       row => row.group_date === maxPeakEfficiencyInfo.group_date,
     );
     // 6. 순간 데이터 목록(발전, 환경, 기상) 중에서 날짜가 동일한 객체끼리 병합
-    const maxPeakDataList = _.map(maxPeakPowerRows, (powerRow, index) => {
+    const maxPeakDataList = _.map(maxPeakPowerRows, powerRow => {
       const envRow = maxPeakEnvRows.find(
         row => row.inverter_seq === powerRow.inverter_seq && row.group_date === powerRow.group_date,
       );
@@ -345,8 +357,9 @@ router.get(
   }),
 );
 
+// 발전 분석
 router.get(
-  ['/', '/:siteId', '/:siteId/:prediction'],
+  ['/:siteId/prediction'],
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { mainWhere, siteId },
@@ -366,10 +379,10 @@ router.get(
 
     // 1. 검색 구간 정의
     let searchRange = analysisModel.createSearchRange({
-      // FIXME: 1일전 테스트
-      // strStartDate: moment()
-      //   .subtract(1, 'day')
-      //   .format('YYYY-MM-DD'),
+      // FIXME: 1일전 테스트, 서비스시 제거
+      strStartDate: moment()
+        .subtract(11, 'day')
+        .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
@@ -385,14 +398,15 @@ router.get(
     // 3. 발전량 레포트 추출
     let powerTrendRows = await analysisModel.getInverterTrend(searchRange, inverterSeqList);
 
-    // 3. 발전 시작 및 종료 시간 구함
+    // 4. 발전 시작 및 종료 시간 구함
     const { sDate, eDate } = analysisModel.getStartEndDate(powerTrendRows);
     searchRange.strStartDate = sDate;
     searchRange.strEndDate = eDate;
 
-    // 4. 기상 데이터 추출
+    // 5. 기상 데이터 추출
     let weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
-    // 5. 인버터 목록에 따라 발전량 차트 생성,
+
+    // 6. 인버터 목록에 따라 발전량 차트 생성,
     let gPowerTrendRows = _.groupBy(powerTrendRows, 'inverter_seq');
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
@@ -405,7 +419,7 @@ router.get(
       };
     });
 
-    // 6. 기상-일사량 데이터 차트에 삽입
+    // 7. 기상-일사량 데이터 차트에 삽입
     let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_solar',
@@ -472,11 +486,12 @@ router.get(
     searchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'min10',
+      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
-        .subtract(3, 'day')
+        .subtract(13, 'day')
         .format('YYYY-MM-DD'),
       strEndDate: moment()
-        .subtract(1, 'day')
+        .subtract(11, 'day')
         .format('YYYY-MM-DD'),
     });
 
@@ -565,10 +580,19 @@ router.get(
   }),
 );
 
+// 손실 저하 요인 분석
 router.get(
-  '/main/:id',
+  ['/:siteId/loosReduction'],
   asyncHandler(async (req, res) => {
-    res.render('./UPSAS/main/index', req.locals);
+    res.render('./UPSAS/analysis/loosReduction', req.locals);
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/:siteId/abnormalCondition'],
+  asyncHandler(async (req, res) => {
+    res.render('./UPSAS/analysis/abnormalCondition', req.locals);
   }),
 );
 
