@@ -7,7 +7,10 @@
     <!-- 발전 예측 관련 -->
     <script src="/js/contents/main/powerPredictor.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
-    <script src="/js/hichart/dark-unica.theme.js"></script>
+    <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
+
+    <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script>
   </head>
 
   <body>
@@ -22,9 +25,9 @@
         </div>
         <%- include("../../master/search.ejs") %>
         <div class="container_row ">
-          <div class="component_piece_box">
+          <div class="component_piece_box" style="height:500px">
             <article class="component_piece_area">
-              <header>이상 상태 예측 트렌드</header>
+              <header>발전 예측 트렌드</header>
               <div id="section_1" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -32,7 +35,7 @@
         <div class="container_row ">
           <div class="component_piece_box">
             <article class="component_piece_area">
-              <header>환경 분석 트렌드</header>
+              <header>모듈 온도 예측 트렌드</header>
               <div id="section_2" class="component_piece_body p_column_rem"></div>
             </article>
           </div>

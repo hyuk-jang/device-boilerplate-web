@@ -107,10 +107,114 @@ module.exports = class extends BiModule {
 
   /**
    *
-   * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRows
+   * @param {Object} angleInfo
+   * @param {number=} angleInfo.angle 알고싶은 각도. Default 30도.
+   * @param {string} angleInfo.measureDate 계측 날짜
    */
-  getRefineGeneralAnalysis(generalAnalysisRows) {
-    generalAnalysisRows.forEach(row => {});
+  getSolarReduceRate(angleInfo) {
+    const { angle = 30, measureDate } = angleInfo;
+    const solarReduceList = [
+      { a30: 104.2, a0: 72.41 },
+      { a30: 113.06, a0: 86.49 },
+      { a30: 142.23, a0: 123.57 },
+      { a30: 153.5, a0: 149.11 },
+      { a30: 155.78, a0: 163.97 },
+      { a30: 135.95, a0: 147.61 },
+      { a30: 130.71, a0: 139.99 },
+      { a30: 148.48, a0: 150.29 },
+      { a30: 135.97, a0: 125.12 },
+      { a30: 142.97, a0: 114.2 },
+      { a30: 107.04, a0: 76.98 },
+      { a30: 92.8, a0: 63.6 },
+    ];
+
+    const { a0, a30 } = solarReduceList[BU.convertTextToDate(measureDate).getMonth()];
+
+    switch (angle) {
+      // 수평 일사량 대비 30도 일 경우 일사량 감소율
+      case 30:
+        return a30 / a0;
+      default:
+        return 1;
+    }
+  }
+
+  /**
+   * 수심에 따른 광량 감소
+   * @param {number} waterLevel
+   */
+  getWaterLevelReduceRate(waterLevel) {
+    let waterLevelReduceRate = 1;
+    switch (waterLevel) {
+      case 2:
+        waterLevelReduceRate = 0.9554;
+        break;
+      default:
+        waterLevelReduceRate = 0.9554;
+        break;
+    }
+    return waterLevelReduceRate;
+  }
+
+  /**
+   *
+   * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRows
+   * @param {Object} regressionAnalysisInfo 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.b1 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.b2 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.b3 회귀 분석 값
+   */
+  refineGeneralAnalysis(generalAnalysisRows, regressionAnalysisInfo = {}) {
+    const { b1 = 0.945, b2 = 10.93, b3 = -0.19 } = regressionAnalysisInfo;
+    const betaRef = 0.0025;
+    const tRef = 25;
+
+    const dustReduceRate = 0.95;
+
+    generalAnalysisRows.forEach(row => {
+      const {
+        avg_temp: outdoorTemp,
+        group_date: groupDate,
+        module_efficiency: moduleEff,
+        module_square: moduleSquare,
+      } = row;
+
+      let {
+        avg_horizontal_solar: horizontalSolar,
+        // avg_inclined_solar: inclinedSolar,
+      } = row;
+      // kW로 변환
+      horizontalSolar /= 1000;
+
+      // 수중 모듈 온도 예측 치
+      const preWaterModuleTemp = b1 * outdoorTemp + b2 * horizontalSolar + b3;
+      // 수중 태양광 발전 효율 예측
+      const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
+      // 수중 태양광 발전량 예측
+      const preWaterPowerKw =
+        (preWaterPowerEff * horizontalSolar * this.getWaterLevelReduceRate() * moduleSquare) / 100;
+
+      // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
+
+      // 육상 모듈 온도 예측 치
+      const preEarthModuleTemp =
+        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        34 * horizontalSolar;
+      // 육상 태양광 발전 효율 예측
+      const preEarthPowerEff =
+        moduleEff * (1 - betaRef * (outdoorTemp + 34 * horizontalSolar - tRef));
+      // 육상 태양광 발전량 예측
+      const preEarthPowerKw =
+        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        34 * horizontalSolar;
+
+      row.preWaterModuleTemp = preWaterModuleTemp;
+      row.preEarthModuleTemp = preEarthModuleTemp;
+      row.preWaterPowerEff = preWaterPowerEff;
+      row.preWaterPowerKw = preWaterPowerKw;
+      row.preEarthPowerEff = preEarthPowerEff;
+      row.preEarthPowerKw = preEarthPowerKw;
+    });
   }
 
   /* ****************************************************
@@ -163,7 +267,7 @@ module.exports = class extends BiModule {
           ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
           ) inv_tbl
         ON inv_tbl.inverter_seq = inv_data.inverter_seq
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
          AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
         GROUP BY ${effType}, group_date, inverter_seq
         ) final
@@ -213,7 +317,7 @@ module.exports = class extends BiModule {
           ${_.isNumber(mainSeq) ? `WHERE rp.main_seq = ${mysql.escape(mainSeq)}` : ''}
           ) sub_tbl
          ON sub_tbl.place_seq = ssd.place_seq
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
          AND ssd.place_seq IN (sub_tbl.place_seq)
          AND sub_tbl.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
         GROUP BY sub_tbl.${effType}, group_date
@@ -278,8 +382,8 @@ module.exports = class extends BiModule {
                   WHERE rp.main_seq = 1
                 ) inv_tbl
               ON inv_tbl.inverter_seq = inv_data.inverter_seq
-              WHERE writedate>= "${searchRange.strStartDate}" 
-               AND writedate<"${searchRange.strEndDate}"
+              WHERE writedate >= "${searchRange.strStartDate}" 
+               AND writedate < "${searchRange.strEndDate}"
                AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
               GROUP BY inverter_seq, group_date
             ) final
@@ -318,8 +422,8 @@ module.exports = class extends BiModule {
               GROUP BY sr.inverter_seq
             ) sub_tbl
           ON sub_tbl.place_seq = ssd.place_seq
-          WHERE writedate>= "${searchRange.strStartDate}" 
-           AND writedate<"${searchRange.strEndDate}"
+          WHERE writedate >= "${searchRange.strStartDate}" 
+           AND writedate < "${searchRange.strEndDate}"
            AND ssd.place_seq IN (sub_tbl.place_seq)
           GROUP BY sub_tbl.inverter_seq, group_date
         ) saltern_tbl
@@ -354,9 +458,8 @@ module.exports = class extends BiModule {
                     ${selectViewDate},
                     ${selectGroupDate}
               FROM weather_device_data
-              WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
-      searchRange.strEndDate
-    }"
+              WHERE writedate >= "${searchRange.strStartDate}" 
+               AND writedate < "${searchRange.strEndDate}"
               GROUP BY ${firstGroupByFormat}, main_seq
             ) AS result_wdd
           GROUP BY ${groupByFormat}, main_seq
@@ -400,4 +503,10 @@ module.exports = class extends BiModule {
  * @property {number} total_inclined_solar
  * @property {number} avg_ws
  * @property {number} avg_uv
+ * @property {number} preWaterModuleTemp 수중 모듈온도 예측치
+ * @property {number} preEarthModuleTemp 육상 모듈온도 예측치
+ * @property {number} preWaterPowerEff 온도에 따른 발전 효율
+ * @property {number} preEarthPowerEff 온도에 따른 발전 효율
+ * @property {number} preWaterPowerKw 발전량 예측
+ * @property {number} preEarthPowerKw 발전량 예측
  */

@@ -44,7 +44,7 @@ const subCategoryList = [
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
-const colorTable2 = ['blue', 'purple', 'gray', 'white'];
+const colorTable2 = ['blue', 'purple', 'gray', 'orange'];
 
 // analysis middleware
 router.get(
@@ -618,19 +618,22 @@ router.get(
 
     // 1. 검색 구간 정의
     const searchRange = analysisModel.createSearchRange({
-      searchType: 'range',
+      searchType: 'days',
       searchInterval: 'min10',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
         .subtract(12, 'day')
         .format('YYYY-MM-DD'),
-      strEndDate: moment()
-        .subtract(11, 'day')
-        .format('YYYY-MM-DD'),
+      // strEndDate: moment()
+      //   .subtract(11, 'day')
+      //   .format('YYYY-MM-DD'),
     });
 
     const generalAnalysisRows = await analysisModel.getGeneralReport(searchRange, siteId);
     // BU.CLIN(generalAnalysisRows);
+
+    // 발전량 예측 정제
+    analysisModel.refineGeneralAnalysis(generalAnalysisRows);
 
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 
@@ -638,8 +641,8 @@ router.get(
 
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
-        name: `${invRow.install_place} ${invRow.serial_number}`,
-        color: colorTable1[index],
+        name: `${invRow.install_place} ${invRow.serial_number} 발전량`,
+        color: colorTable2[index],
         data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.t_power_kw,
@@ -647,8 +650,20 @@ router.get(
       };
     });
 
+    const predictPowerChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 예측 발전량`,
+        color: colorTable2[index],
+        dashStyle: 'ShortDot',
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.preWaterPowerKw,
+        ]),
+      };
+    });
+
     // 5. 기상 데이터 추출
-    let weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+    const weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
 
     // 7. 기상-일사량 데이터 차트에 삽입
     let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
@@ -661,16 +676,28 @@ router.get(
       },
     ]);
 
-    powerChartData = powerChartData.concat(weatherCharts);
+    powerChartData = powerChartData.concat(...predictPowerChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyPowerData', powerChartData);
 
     let envChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 모듈 온도`,
-        color: colorTable1[index],
+        color: colorTable2[index],
         data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.avg_module_rear_temp,
+        ]),
+      };
+    });
+
+    const predictEnvChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 예측 모듈 온도`,
+        color: colorTable2[index],
+        dashStyle: 'ShortDot',
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.preWaterModuleTemp,
         ]),
       };
     });
@@ -685,7 +712,7 @@ router.get(
       },
     ]);
 
-    envChartData = envChartData.concat(weatherCharts);
+    envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
 
     res.render('./UPSAS/analysis/abnormalCondition', req.locals);
