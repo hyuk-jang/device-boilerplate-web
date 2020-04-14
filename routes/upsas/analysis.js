@@ -11,6 +11,7 @@ const defaultDom = require('../../models/domMaker/defaultDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
+const reportDom = require('../../models/domMaker/reportDom');
 const salternDom = require('../../models/domMaker/salternDom');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
@@ -48,7 +49,13 @@ const colorTable2 = ['blue', 'purple', 'gray', 'orange'];
 
 // analysis middleware
 router.get(
-  ['/', '/:siteId', '/:siteId/:subCategory'],
+  [
+    '/',
+    '/:siteId',
+    '/:siteId/:subCategory',
+    '/:siteId/:subCategory/:subCategoryId',
+    '/:siteId/:subCategory/:subCategoryId/:finalCategory',
+  ],
   asyncHandler(async (req, res, next) => {
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
@@ -590,12 +597,15 @@ router.get(
 
 // 이상상태 요인 분석
 router.get(
-  ['/:siteId/abnormalCondition'],
+  ['/:siteId/abnormalCondition', '/:siteId/abnormalCondition/:subCategoryId'],
   asyncHandler(async (req, res) => {
     const {
-      mainInfo: { mainWhere, siteId },
+      mainInfo: { mainWhere, siteId, subCategoryId },
       viewPowerProfileRows,
+      searchRange,
     } = req.locals;
+
+    // BU.CLI(subCategoryId);
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
@@ -606,10 +616,24 @@ router.get(
     /** @type {AnalysisModel} */
     const analysisModel = global.app.get('analysisModel');
 
+    // 인버터 사이트 목록 돔 추가
+    const inverterSiteDom = reportDom.makeInverterSiteDom(
+      powerProfileRows,
+      subCategoryId,
+      'cnt_target_name',
+    );
+
+    _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
+
     // ----------------- 금일 발전 효율 트렌드
 
+    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
+
     // 인버터 Seq 목록
-    const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
+    const inverterSeqList = _(powerProfileRows)
+      .filter(inverterWhere)
+      .map('inverter_seq')
+      .value();
 
     /** @type {PW_INVERTER[]} */
     const inverterRows = await analysisModel.getTable('PW_INVERTER', {
@@ -617,23 +641,35 @@ router.get(
     });
 
     // 1. 검색 구간 정의
-    const searchRange = analysisModel.createSearchRange({
-      searchType: 'days',
-      searchInterval: 'min10',
-      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
-      strStartDate: moment()
-        .subtract(12, 'day')
-        .format('YYYY-MM-DD'),
-      // strEndDate: moment()
-      //   .subtract(11, 'day')
-      //   .format('YYYY-MM-DD'),
-    });
+    // const searchRange = analysisModel.createSearchRange({
+    //   searchType: 'range',
+    //   searchInterval: 'min10',
+    //   // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
+    //   strStartDate: moment('2020-04-08').format('YYYY-MM-DD'),
+    //   strEndDate: moment('2020-04-13').format('YYYY-MM-DD'),
+    // });
 
     const generalAnalysisRows = await analysisModel.getGeneralReport(searchRange, siteId);
     // BU.CLIN(generalAnalysisRows);
 
+    const {
+      regressionB1 = 0.945,
+      regressionB2 = 10.93,
+      regressionB3 = -0.19,
+      regressionK = 0.9,
+    } = req.query;
+
+    const regressionInfo = {
+      regressionB1,
+      regressionB2,
+      regressionB3,
+      regressionK,
+    };
+
+    _.set(req, 'locals.regressionInfo', regressionInfo);
+
     // 발전량 예측 정제
-    analysisModel.refineGeneralAnalysis(generalAnalysisRows);
+    analysisModel.refineGeneralAnalysis(generalAnalysisRows, regressionInfo);
 
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 

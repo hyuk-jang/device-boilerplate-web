@@ -9,8 +9,9 @@ module.exports = {
    *
    * @param {V_PW_PROFILE[]} inverterProfileRows
    * @param {number} inverterSeq
+   * @param {string=} dataKey 직접적으로 삽입할 인버터 Key
    */
-  makeInverterSiteDom(inverterProfileRows, inverterSeq) {
+  makeInverterSiteDom(inverterProfileRows, inverterSeq, dataKey) {
     inverterSeq = BU.isNumberic(inverterSeq) ? Number(inverterSeq) : inverterSeq;
     const inverterSiteDom = _.template(`
   <option <%= selected %> data-type="inverter" value="<%= inverter_seq %>"><%= inverterName %></option>
@@ -24,9 +25,12 @@ module.exports = {
       } = row;
 
       _.set(row, 'selected', _.eq(row.inverter_seq, inverterSeq) ? 'selected' : '');
-      const inverterName = `${mainName} ${_.round(ivtAmount)}kW급 ${ivtName} ${
-        ivtDirectorName === null ? '' : ivtDirectorName
-      }`;
+      const inverterName =
+        dataKey === undefined
+          ? `${mainName} ${_.round(ivtAmount)}kW급 ${ivtName} ${
+              ivtDirectorName === null ? '' : ivtDirectorName
+            }`
+          : row[dataKey];
 
       _.set(row, 'inverterName', inverterName);
       return inverterSiteDom(row);

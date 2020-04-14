@@ -160,12 +160,18 @@ module.exports = class extends BiModule {
    *
    * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRows
    * @param {Object} regressionAnalysisInfo 회귀 분석 값
-   * @param {number} regressionAnalysisInfo.b1 회귀 분석 값
-   * @param {number} regressionAnalysisInfo.b2 회귀 분석 값
-   * @param {number} regressionAnalysisInfo.b3 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB1 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB2 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB3 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionK 보정계수 K
    */
   refineGeneralAnalysis(generalAnalysisRows, regressionAnalysisInfo = {}) {
-    const { b1 = 0.945, b2 = 10.93, b3 = -0.19 } = regressionAnalysisInfo;
+    const {
+      regressionB1 = 0.945,
+      regressionB2 = 10.93,
+      regressionB3 = -0.19,
+      regressionK = 0.9,
+    } = regressionAnalysisInfo;
     const betaRef = 0.0025;
     const tRef = 25;
 
@@ -184,10 +190,11 @@ module.exports = class extends BiModule {
         // avg_inclined_solar: inclinedSolar,
       } = row;
       // kW로 변환
-      horizontalSolar /= 1000;
+      horizontalSolar = (horizontalSolar * regressionK) / 1000;
 
       // 수중 모듈 온도 예측 치
-      const preWaterModuleTemp = b1 * outdoorTemp + b2 * horizontalSolar + b3;
+      const preWaterModuleTemp =
+        regressionB1 * outdoorTemp + regressionB2 * horizontalSolar + regressionB3;
       // 수중 태양광 발전 효율 예측
       const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
       // 수중 태양광 발전량 예측

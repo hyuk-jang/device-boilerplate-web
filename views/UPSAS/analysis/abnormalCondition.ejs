@@ -21,9 +21,84 @@
       <div class="container_body">
         <div class="container_row">
           <div id="subCategoryDom" class="report_category"></div>
-          <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
         </div>
-        <%- include("../../master/search.ejs") %>
+        <div class="container_row flex_jus_end default_search_area mt0">
+          <div class="search_area" id="searchArea">
+            <div class="search_box ">
+              <span class="search_title">회귀계수 B1</span>
+              <div class="search_body">
+                <input class="input_tre" id="regressionB1" name="subSearch" type="text" />
+              </div>
+            </div>
+            <div class="search_box ">
+              <span class="search_title">회귀계수 B2</span>
+              <div class="search_body">
+                <input class="input_tre" id="regressionB2" name="subSearch" type="text" />
+              </div>
+            </div>
+            <div class="search_box ">
+              <span class="search_title">회귀계수 B3</span>
+              <div class="search_body">
+                <input class="input_tre" id="regressionB3" name="subSearch" type="text" />
+              </div>
+            </div>
+            <div class="search_box ">
+              <span class="search_title">보정계수 K</span>
+              <div class="search_body">
+                <input class="input_tre" id="regressionK" name="subSearch" type="text" />
+              </div>
+            </div>
+            <div class="search_box search_category_box">
+              <span id="subCategoryName" class="search_title">인버터</span>
+              <select id="subSelectBoxDom" class="form-control"> </select>
+            </div>
+            <div class="search_box search_range_box">
+              <span class="search_title">조회기간</span>
+              <select id="searchType" class="form-control">
+                <option value="days">일일</option>
+                <option value="months">월간</option>
+                <option value="years">년간</option>
+                <option value="range">기간선택</option>
+              </select>
+            </div>
+            <div class="search_box search_interval_box">
+              <span class="search_title">조회간격</span>
+              <select id="searchInterval" class="form-control">
+                <option value="min">1분</option>
+                <option value="min10">10분</option>
+                <option value="hour">1시간</option>
+                <option value="day">1일</option>
+                <option value="month">1달</option>
+              </select>
+            </div>
+            <div class="search_box">
+              <span class="search_title">날짜</span>
+              <div class="search_body">
+                <input
+                  class="input_tre"
+                  name="start"
+                  id="strStartDateInputValue"
+                  type="text"
+                  readonly
+                />
+                <span id="between-start-end" hidden>~</span>
+                <input
+                  class="input_tre"
+                  name="end"
+                  id="strEndDateInputValue"
+                  type="text"
+                  readonly
+                  hidden
+                />
+              </div>
+            </div>
+            <div class="submit_box">
+              <button type="button" class="btn btn-primary" id="searchBtn">
+                검색
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="container_row ">
           <div class="component_piece_box" style="height:500px">
             <article class="component_piece_area">
@@ -31,6 +106,12 @@
               <div id="section_1" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
+          <!-- <div class="component_piece_box">
+            <article class="component_piece_area" style="height:500px">
+              <header>모듈 온도 예측 트렌드</header>
+              <div id="section_2" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div> -->
         </div>
         <div class="container_row ">
           <div class="component_piece_box">
@@ -49,11 +130,17 @@
     <script>
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
 
+      $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
+
+      var searchRange = <%- JSON.stringify(searchRange) %>;
+
+      var regressionInfo = <%- JSON.stringify(regressionInfo) %>;
+
       var chartInfo =  <%- JSON.stringify(chartInfo) %>;
-      console.log(chartInfo)
 
       var mainFontSize = 15;
       var subFontSize = 13;
+      setDomElementValueWithJson(document.getElementById('searchArea'), regressionInfo, 'value', 'id')
     </script>
 
     <script src="/js/contents/report/search.js"></script>
@@ -235,6 +322,46 @@
           },
         });
       }
+    </script>
+
+    <script>
+      // 초기 시작시 라디오 체크버튼 클릭처리
+      // var subCategory = _.get(trendInfo, 'subCategory');
+
+      checkSelectBoxOption('searchInterval', searchRange.searchInterval);
+      checkSelectBoxOption('searchType', searchRange.searchType);
+      checkSelectBoxOption('searchOption', searchRange.searchOption);
+
+      // 검색 타입에 따라 적용
+      applySearchType(searchRange.searchType);
+
+      // 검색 클릭 시
+      document.querySelector('#searchBtn').addEventListener('click', function(event) {
+        // searchRange 형태 만듬
+        var searchValue = getSearchValue();
+
+        if (_.isEmpty(searchValue)) return false;
+
+        var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value.trim();
+        // searchValue = Object.assign(searchValue, { subCategoryId: subCategoryId.trim() });
+
+        // 보정계수 검색
+        document.querySelectorAll('[name=subSearch]').forEach(domElement => {
+          searchValue[domElement.id] = domElement.value;
+        });
+        // 쿼리스트링 생성
+        var queryString = _.map(searchValue, function(value, key) {
+          return key + '=' + value;
+        }).join('&');
+
+        if (queryString.length) {
+          $('#loader').removeClass('hidden');
+          $('#loader-ground').removeClass('hidden');
+
+          // 사이트 변경 시
+          location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}/${subCategoryId}?${queryString}`;
+        }
+      });
     </script>
 
     <!-- FIXME: 시연용 1분 단위 ReDraw -->
