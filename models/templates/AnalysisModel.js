@@ -379,7 +379,7 @@ module.exports = class extends BiModule {
                   FROM pw_relation_power rp
                   JOIN pw_inverter inv
                   ON inv.inverter_seq = rp.inverter_seq
-                  WHERE rp.main_seq = 1
+                  ${mainSeq !== null ? ` WHERE rp.main_seq = ${mainSeq}` : ''}
                 ) inv_tbl
               ON inv_tbl.inverter_seq = inv_data.inverter_seq
               WHERE writedate >= "${searchRange.strStartDate}" 
@@ -389,7 +389,7 @@ module.exports = class extends BiModule {
             ) final
           GROUP BY inverter_seq, group_date
         ) power_tbl
-      JOIN 
+      LEFT JOIN 
         (
           SELECT
               sub_tbl.main_seq,
@@ -428,7 +428,7 @@ module.exports = class extends BiModule {
           GROUP BY sub_tbl.inverter_seq, group_date
         ) saltern_tbl
       ON power_tbl.inverter_seq = saltern_tbl.inverter_seq AND power_tbl.group_date = saltern_tbl.group_date
-      JOIN
+      LEFT JOIN 
         (
           SELECT
                 main_seq,
