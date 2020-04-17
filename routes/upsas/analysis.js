@@ -87,9 +87,9 @@ router.get(
     // 1. 금일 검색 구간 정의
     let dailySearchRange = analysisModel.createSearchRange({
       // FIXME: 날짜 변경 시 수정 (기본값 1)
-      strStartDate: moment()
-        .subtract(11, 'day')
-        .format('YYYY-MM-DD'),
+      // strStartDate: moment()
+      //   .subtract(11, 'day')
+      //   .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
@@ -184,10 +184,10 @@ router.get(
       searchInterval: 'day',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
-        .subtract(13, 'day')
+        .subtract(3, 'day')
         .format('YYYY-MM-DD'),
       strEndDate: moment()
-        .subtract(11, 'day')
+        .subtract(1, 'day')
         .format('YYYY-MM-DD'),
     });
 
@@ -387,9 +387,9 @@ router.get(
     // 1. 검색 구간 정의
     let searchRange = analysisModel.createSearchRange({
       // FIXME: 1일전 테스트, 서비스시 제거
-      strStartDate: moment()
-        .subtract(11, 'day')
-        .format('YYYY-MM-DD'),
+      // strStartDate: moment()
+      //   .subtract(11, 'day')
+      //   .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
@@ -495,10 +495,10 @@ router.get(
       searchInterval: 'min10',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
-        .subtract(13, 'day')
+        .subtract(3, 'day')
         .format('YYYY-MM-DD'),
       strEndDate: moment()
-        .subtract(11, 'day')
+        .subtract(1, 'day')
         .format('YYYY-MM-DD'),
     });
 
@@ -649,7 +649,9 @@ router.get(
     //   strEndDate: moment('2020-04-13').format('YYYY-MM-DD'),
     // });
 
-    const generalAnalysisRows = await analysisModel.getGeneralReport(searchRange, siteId);
+    const generalAnalysisRows = await analysisModel
+      .getGeneralReport(searchRange, siteId)
+      .filter(row => inverterSeqList.includes(row.inverter_seq));
     // BU.CLIN(generalAnalysisRows);
 
     const {
@@ -702,13 +704,20 @@ router.get(
     const weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
 
     // 7. 기상-일사량 데이터 차트에 삽입
-    let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+    const weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_solar',
         name: '일사량',
         yAxis: 1,
         color: 'red',
-        dashStyle: 'ShortDash',
+        // dashStyle: 'ShortDash',
+      },
+      {
+        dataKey: 'avg_temp',
+        name: '기온',
+        yAxis: 2,
+        color: 'green',
+        // dashStyle: 'ShortDash',
       },
     ]);
 
@@ -737,16 +746,6 @@ router.get(
         ]),
       };
     });
-
-    weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
-      {
-        dataKey: 'avg_temp',
-        name: '기온',
-        yAxis: 1,
-        color: 'red',
-        dashStyle: 'ShortDash',
-      },
-    ]);
 
     envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);

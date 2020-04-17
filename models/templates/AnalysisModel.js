@@ -281,7 +281,7 @@ module.exports = class extends BiModule {
       GROUP BY ${effType}, group_date
     `;
 
-    return this.db.single(sql, null, true);
+    return this.db.single(sql, null, false);
   }
 
   /**
@@ -330,7 +330,7 @@ module.exports = class extends BiModule {
         GROUP BY sub_tbl.${effType}, group_date
     `;
 
-    return this.db.single(sql, null, true);
+    return this.db.single(sql, null, false);
   }
 
   /**

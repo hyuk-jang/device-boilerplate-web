@@ -203,7 +203,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 (kW)',
+                text: '발전량 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -306,7 +306,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 (kW)',
+                text: '발전량 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -395,7 +395,7 @@
             },
             crosshair: true,
             labels: {
-              x: 50,
+              // x: 50,
               style: {
                 fontSize: subFontSize,
               },
@@ -411,7 +411,7 @@
                 offset: 0,
                 x: -35,
                 y: -15,
-                text: '발전 (kW)',
+                text: '발전량 (kW)',
                 min: 0,
                 max: 100,
                 style: {
@@ -477,9 +477,9 @@
           },
           yAxis: [
             {
-              min: 0,
-              max: 40,
-              tickInterval: 10,
+              // min: 0,
+              // max: 60,
+              // tickInterval: 15,
               title: {
                 align: 'high',
                 textAlign: 'left',
@@ -500,9 +500,7 @@
               },
             },
             {
-              min: 0,
-              max: 40,
-              tickInterval: 10,
+              linkedTo: 0,
               title: {
                 align: 'high',
                 textAlign: 'right',
@@ -586,9 +584,6 @@
           },
           yAxis: [
             {
-              min: 0,
-              max: 40,
-              tickInterval: 10,
               title: {
                 align: 'high',
                 textAlign: 'left',
@@ -609,9 +604,7 @@
               },
             },
             {
-              min: 0,
-              max: 40,
-              tickInterval: 10,
+              linkedTo: 0,
               title: {
                 align: 'high',
                 textAlign: 'right',

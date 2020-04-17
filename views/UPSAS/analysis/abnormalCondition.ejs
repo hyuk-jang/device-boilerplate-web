@@ -99,29 +99,12 @@
             </div>
           </div>
         </div>
-        <div class="container_row ">
-          <div class="component_piece_box" style="height:500px">
-            <article class="component_piece_area">
-              <header>발전 예측 트렌드</header>
-              <div id="section_1" class="component_piece_body p_column_rem"></div>
-            </article>
-          </div>
-          <!-- <div class="component_piece_box">
-            <article class="component_piece_area" style="height:500px">
-              <header>모듈 온도 예측 트렌드</header>
-              <div id="section_2" class="component_piece_body p_column_rem"></div>
-            </article>
-          </div> -->
-        </div>
-        <div class="container_row ">
-          <div class="component_piece_box">
-            <article class="component_piece_area">
-              <header>모듈 온도 예측 트렌드</header>
-              <div id="section_2" class="component_piece_body p_column_rem"></div>
-            </article>
+        <div class="container_row flex_dir_col">
+          <div id="divDomArea" class="flex_box">
+            <div class="lineChart_box default_area" id="section_1"></div>
+            <div class="lineChart_box default_area" id="section_2"></div>
           </div>
         </div>
-        <div class="container_row "></div>
       </div>
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
@@ -151,12 +134,13 @@
         Highcharts.chart('section_1', {
           chart: {
             type: 'line',
-            marginLeft: 45,
-            marginRight: 55,
+            // marginLeft: 45,
+            // marginRight: 20,
             marginTop: 35,
+            zoomType: 'xy',
           },
           title: {
-            text: '',
+            text: '발전 예측 트렌드',
           },
           xAxis: {
             type: 'datetime',
@@ -178,13 +162,7 @@
           yAxis: [
             {
               title: {
-                align: 'high',
-                textAlign: 'left',
-                rotation: 0,
-                offset: 0,
-                x: -35,
-                y: -15,
-                text: '발전 (kW)',
+                text: '발전량 (kW)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -198,13 +176,22 @@
             },
             {
               title: {
-                align: 'high',
-                textAlign: 'right',
-                rotation: 0,
-                offset: 0,
-                x: 43,
-                y: -15,
                 text: '일사량 (W/㎡)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+            {
+              title: {
+                text: '기온 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
@@ -240,13 +227,11 @@
         Highcharts.chart('section_2', {
           chart: {
             type: 'line',
-            marginLeft: 45,
-            marginRight: 50,
             marginTop: 35,
             zoomType: 'xy',
           },
           title: {
-            text: '',
+            text: '모듈 온도 예측 트렌드',
           },
           xAxis: {
             type: 'datetime',
@@ -268,12 +253,6 @@
           yAxis: [
             {
               title: {
-                align: 'high',
-                textAlign: 'left',
-                rotation: 0,
-                offset: 0,
-                x: -30,
-                y: -15,
                 text: '온도 (˚C)',
                 style: {
                   fontSize: mainFontSize,
@@ -288,13 +267,22 @@
             },
             {
               title: {
-                align: 'high',
-                textAlign: 'right',
-                rotation: 0,
-                offset: 0,
-                x: 35,
-                y: -15,
-                text: '온도 (˚C)',
+                text: '일사량 (W/㎡)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+            {
+              title: {
+                text: '기온 (˚C)',
                 style: {
                   fontSize: mainFontSize,
                   color: Highcharts.getOptions().colors[10],
