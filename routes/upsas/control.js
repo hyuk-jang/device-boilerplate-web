@@ -180,90 +180,46 @@ router.get(
     );
 
     // 회원 정보
-    /** @type{MEMBER[]} */
+    /** @type {MEMBER[]} */
     const memberRows = await biModule.getTable('MEMBER');
-    /** @type{MAIN[]} */
+    /** @type {MAIN[]} */
     const mainRows = await biModule.getTable('MAIN');
 
     // 제어 이력 데이터 가공
     _.forEach(reportRows, cmdHistoryInfo => {
       // /** @type{DV_CONTROL_CMD_HISTORY} */
-      const { member_seq: ms, cmd_format: cf, start_date: sd, end_date: ed } = cmdHistoryInfo;
+      const {
+        main_seq: mainSeq,
+        member_seq: memSeq,
+        cmd_format: cf,
+        start_date: sd,
+        end_date: ed,
+      } = cmdHistoryInfo;
 
       // 회원 이름 추가
-      const memberInfo = _.find(memberRows, { member_seq: ms });
-      cmdHistoryInfo.memberName = _.get(memberInfo, 'name', '');
+      cmdHistoryInfo.memberName = _.chain(memberRows)
+        .find({ member_seq: memSeq })
+        .get('name')
+        .value();
 
       // 사이트 이름 추가
-      const mainInfo = _.find(mainRows, { main_seq: cmdHistoryInfo.main_seq });
-      cmdHistoryInfo.siteName = _.get(mainInfo, 'name', '');
+      cmdHistoryInfo.siteName = _.chain(mainRows)
+        .find({ main_seq: mainSeq })
+        .get('name')
+        .value();
 
       // 명령 타입 한글 표시
-      const cmdFormat = _.find(cmdFormatBase, { key: cmdHistoryInfo.cmd_format });
-      cmdHistoryInfo.cmd_format = _.get(cmdFormat, 'value', '');
+      cmdHistoryInfo.cmd_format = _.chain(cmdFormatBase)
+        .find({ key: cf })
+        .get('value', '')
+        .value();
 
       // 명령 시각 포멧 처리
-      cmdHistoryInfo.start_date = moment(cmdHistoryInfo.start_date).format('YYYY-MM-DD HH:mm:ss');
-      cmdHistoryInfo.end_date = moment(cmdHistoryInfo.end_date).format('YYYY-MM-DD HH:mm:ss');
+      cmdHistoryInfo.start_date = moment(sd).format('YYYY-MM-DD HH:mm:ss');
+      cmdHistoryInfo.end_date = moment(ed).format('YYYY-MM-DD HH:mm:ss');
 
       // FIXME: null 데이터 - 표시 , 임시 나중에 수정 해야함.
       _.isNull(cmdHistoryInfo.control_set_value) && _.set(cmdHistoryInfo, 'control_set_value', '-');
-    });
-
-    _.set(req, 'locals.reportRows', reportRows);
-
-    // 페이지 네이션 생성
-    let paginationInfo = DU.makeBsPagination(
-      page,
-      totalCount,
-      `/control/${siteId}/history`,
-      _.omit(req.query, 'page'),
-      PAGE_LIST_COUNT,
-    );
-
-    // 페이지네이션 돔 추가
-    _.set(req, 'locals.dom.paginationDom', paginationInfo.paginationDom);
-
-    // 페이지 정보 추가
-    paginationInfo = _.omit(paginationInfo, 'paginationDom');
-    _.set(req, 'locals.paginationInfo', paginationInfo);
-
-    res.render('./UPSAS/control/history', req.locals);
-  }),
-);
-
-/* TODO: GET */
-router.get(
-  ['/', '/:siteId', '/:siteId/history'],
-  asyncHandler(async (req, res) => {
-    /** @type {BiModule} */
-    const biModule = global.app.get('biModule');
-
-    const {
-      mainInfo: { siteId },
-    } = req.locals;
-
-    const { page = 1 } = req.query;
-
-    /** @type {} */
-    const controlModel = global.app.get('controlModel');
-
-    // 레포트 데이터로 환산
-    const { reportRows, totalCount } = await controlModel.getCommandHistoryReport({
-      page,
-      pageListCount: PAGE_LIST_COUNT,
-    });
-
-    // TODO: 회원 정보
-    const memberRows = await biModule.getTable('MEMBER');
-
-    // TODO: 명령 목록의 member_seq에 맞게 memberName 추가
-    _.forEach(reportRows, cmdHistoryInfo => {
-      /** @type{MEMBER} */
-      const memberInfo = _.find(memberRows, { member_seq: cmdHistoryInfo.member_seq });
-      const memberName = memberInfo.name;
-
-      cmdHistoryInfo.memberName = memberName;
     });
 
     _.set(req, 'locals.reportRows', reportRows);

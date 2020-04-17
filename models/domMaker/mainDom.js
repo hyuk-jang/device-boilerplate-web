@@ -86,7 +86,7 @@ module.exports = {
         if (moment(dates[index]).format('D') === moment(dates[index + 1]).format('D')) {
           checkNextDayCount += 1;
         } else {
-          madeHeader = `<th colspan="${checkNextDayCount}">${moment(date).format(
+          madeHeader = `<th class="elipsis" colspan="${checkNextDayCount}">${moment(date).format(
             'D',
           )}일 (${day})</th>`;
           checkNextDayCount = 1;
