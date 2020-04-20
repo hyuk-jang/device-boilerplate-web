@@ -99,6 +99,26 @@
             </div>
           </div>
         </div>
+        <div class="container_row ">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>발전 예측 분석</header>
+              <div id="predictionRate" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>환경 데이터 분석</header>
+              <div id="envData" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>이상 상태 분석</header>
+              <div id="" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
         <div class="container_row flex_dir_col">
           <div id="divDomArea" class="flex_box">
             <div class="lineChart_box default_area" id="section_1"></div>
@@ -120,6 +140,10 @@
       var regressionInfo = <%- JSON.stringify(regressionInfo) %>;
 
       var chartInfo =  <%- JSON.stringify(chartInfo) %>;
+
+      var analysisReport =  <%- JSON.stringify(analysisReport) %>;
+
+      console.log(analysisReport)
 
       var mainFontSize = 15;
       var subFontSize = 13;

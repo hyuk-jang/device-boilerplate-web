@@ -65,6 +65,9 @@ router.get(
     const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
     _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
+    const isMonitoringMode = req.user.user_id === 'vip' ? 1 : 0;
+    _.set(req, 'locals.isMonitoringMode', isMonitoringMode);
+
     next();
   }),
 );
@@ -749,6 +752,53 @@ router.get(
 
     envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
+
+    BU.CLI(weatherTrendRows);
+    // 분석 레포트
+    // TODO: 특정 시점 순간의 search 값 필요
+    const selectedSearchDate = _.last(weatherTrendRows).group_date;
+
+    const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
+      row => row.group_date === selectedSearchDate,
+    );
+
+    const systemList = _.chain(generalAnalysisRows)
+      .filter(row => row.group_date === selectedSearchDate)
+      .map(row => {
+        const {
+          install_place: ip,
+          serial_number: sn,
+          avg_water_level: waterLevel,
+          avg_module_rear_temp: moduleTemp,
+          t_power_kw: powerKw,
+          preWaterModuleTemp: preModuleTemp,
+          preWaterPowerKw: prePowerKw,
+        } = row;
+
+        return {
+          name: `${ip} ${sn}`,
+          waterLevel,
+          moduleTemp,
+          powerKw,
+          preModuleTemp,
+          prePowerKw,
+          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
+          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
+        };
+      })
+      .value();
+
+    // _(weatherTrendRows).find(row => row.group_date === selectedSearchDate)
+
+    const analysisReport = {
+      envInfo: {
+        solar,
+        outdoorTemp,
+      },
+      systemList,
+    };
+
+    _.set(req.locals, 'analysisReport', analysisReport);
 
     res.render('./UPSAS/analysis/abnormalCondition', req.locals);
   }),
