@@ -100,11 +100,11 @@
         </div>
         <%- include("./addCommand.ejs") %>
         <!-- Content -->
-        <div class="container_row flex_dir_col" id="content">
+        <div id="controlContent">
           <!-- Svg Map -->
-          <div class="default_area pt_1rem" id="structure">
+          <div class="hidden" id="structure">
             <div class="zoom_box" id="panzoomBox">
-              <!-- panzoom -->
+              <!-- panzoom button-->
               <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
                 <span class="glyphicon glyphicon-zoom-in"></span> 확대
               </button>
@@ -115,17 +115,17 @@
                 <span class="glyphicon glyphicon-refresh"></span> 초기화
               </button>
             </div>
-            <!-- canvas -->
+            <!-- SVG canvas -->
             <div class="svg_area" id="canvas"></div>
           </div>
-          <!-- Table -->
-          <div class="container_row hidden" id="operStatusTable">
-            <div class="mr_1rem">
+          <!-- Tables -->
+          <div id="operStatusTable">
+            <div class="container_row">
               <p class="table_desc_area">
                 명령 목록 - 갱신시간 &nbsp;<span id="cmdUpdateDate"></span>
               </p>
               <div class="panel table-responsive default_area">
-                <table id="cmdTableBody" class="table table-bordered number_table noHover">
+                <table id="cmdTableBody" class="table table-bordered number_table  noHover">
                   <thead>
                     <tr>
                       <th data-field="wrapCmdFormat">명령 형식</th>
@@ -136,11 +136,26 @@
                       <th data-field="wrapCmdCancel">명령 취소</th>
                     </tr>
                   </thead>
-                  <tbody></tbody>
+                  <tbody id="cmdTableBodyDom">
+                    <script id="cmdTableTemplate" type="template">
+                      {{#> defaultCmdTemplate}}
+                      {{/defaultCmdTemplate}}
+                      {{}}
+                      <tr>
+                        <td class="">{{ wrapCmdFormat }}</td>
+                        <td class="">{{ wrapCmdType }}</td>
+                        <td class="">{{ wrapCmdStep }}</td>
+                        <td class="">{{ wrapCmdId }}</td>
+                        <td class="">{{ wrapCmdName }}</td>
+                        <td class=""><button class="btn btn-primary" name="reqCancelCmd">취소</button></td>
+                      </tr>
+                      {{}}
+                    </script>
+                  </tbody>
                 </table>
               </div>
             </div>
-            <div class="mr_1rem">
+            <div class="container_row">
               <p class="table_desc_area">
                 장치 상태 정보 목록 - 갱신시간 &nbsp;<span id="nodeUpdateDate"></span>
               </p>
@@ -154,7 +169,18 @@
                       <th data-field="d">데이터</th>
                     </tr>
                   </thead>
-                  <tbody></tbody>
+                  <tbody id="nodeTableBodyDom">
+                    <script id="nodeTableTemplate" type="template">
+                      {{#currNodeList}}
+                      <tr>
+                        <td class="">{{ ntn }}</td>
+                        <td class="">{{ ni }}</td>
+                        <td class="">{{ pnl }}</td>
+                        <td class="">{{ d }}</td>
+                      </tr>
+                      {{/currNodeList}}
+                    </script>
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -199,7 +225,6 @@
 
       // 명령 요청 결과 Alert
       socket.on('resultExecCommand', function(message) {
-        // console.log(message);
         document.getElementById('resultExecCommand').innerText = message;
       });
 
@@ -289,15 +314,19 @@
 
         _.forEach(wsNodeList, function(wsNodeInfo) {
           // SVG draw map
-          // showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
           // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
           var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
           foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
         });
 
-        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
-          data: currNodeList,
-        });
+        // FIXME: htmlTemplate을 가져온후 Handlebars로 compile 한다.
+        var nodeTbodyTemplate = document.querySelector('#nodeTableTemplate').innerHTML;
+        var nodeTbodyBindTemplate = Handlebars.compile(nodeTbodyTemplate);
+        var nodeTableBody = nodeTbodyBindTemplate({ currNodeList });
+
+        $('#nodeTableBodyDom').html(nodeTableBody);
+
         // 명령 갱신 시각 반영
         $nodeUpdateDom.html(new Date().toLocaleString());
       });
@@ -311,28 +340,21 @@
         // console.log(commandList);
         currCommandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
-        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
-          data: commandList,
-          columns: [
-            {},
-            {},
-            {},
-            {},
-            {},
-            {
-              field: 'wrapCmdCancel',
-              align: 'center',
-              valign: 'middle',
-              clickToSelect: false,
-              formatter: function(commandList, commandInfo, index) {
-                if (commandInfo.wrapCmdFormat == 'MEASURE') {
-                  return;
-                }
-                return '<button class="btn btn-primary" name="reqCancelCmd">취소</button>';
-              },
-            },
-          ],
+        // htmlTemplate을 가져온후 Handlebars로 compile 한다.
+        var cmdTbodyTemplate = document.querySelector('#cmdTableTemplate').innerHTML;
+        var cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
+
+        Handlebars.registerPatial('defaultCmdTemplate', '<tr><td>no cmd</td></tr>');
+
+        // 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
+        var cmdTableBody = _.map(commandList, function(commandInfo, index) {
+          console.log(commandInfo);
+          return cmdTbodyBindTemplate(false);
         });
+
+        //  리턴받은 html을 target에 innerHTML로 세팅한다.
+        $('#cmdTableBodyDom').html(cmdTableBody);
+
         // 명령 갱신 시각 반영
         $cmdUpdateDom.html(new Date().toLocaleString());
       });
@@ -457,7 +479,7 @@
           });
 
         // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
-        $('#content')
+        $('#controlContent')
           .children('div')
           .each(function(index, domElement) {
             if (domElement.id === viewType) {
