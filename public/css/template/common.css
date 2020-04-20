@@ -497,6 +497,7 @@ _:-ms-input-placeholder,
 .zoom_box {
   display: flex;
   justify-content: center;
+  margin-top: 1rem;
 }
 
 .svg_area {
@@ -1276,6 +1277,10 @@ article.sdv_w_side > p:last-child {
 }
 
 @media all and (max-width: 550px) {
+  /* body {
+    font-size: 10px;
+  } */
+
   .container-fluid {
     padding-left: 0;
   }
