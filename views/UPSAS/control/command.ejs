@@ -21,6 +21,13 @@
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/css/bootstrap-table.min.css" />
     <script src="/js/bootstrap-table.min.js"></script>
+
+    <style>
+      .jbFixed {
+        position: fixed;
+        top: 0px;
+      }
+    </style>
   </head>
 
   <!-- 서버사이드 데이터 정의 -->
@@ -102,14 +109,20 @@
           <div class="" id="structure">
             <div class="zoom_box" id="panzoomBox">
               <!-- panzoom button-->
-              <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
-                <span class="glyphicon glyphicon-zoom-in"></span> 확대
+              <button id="zoomIn" class="btn btn-default btn-sm ">
+                <span class="glyphicon glyphicon-zoom-in"></span>
               </button>
-              <button id="zoomOut" class="btn btn-default btn-sm mr_1rem">
-                <span class="glyphicon glyphicon-zoom-out"></span> 축소
+              <button id="zoomOut" class="btn btn-default btn-sm ">
+                <span class="glyphicon glyphicon-zoom-out"></span>
               </button>
-              <button id="reset" class="btn btn-default btn-sm mr_1rem">
-                <span class="glyphicon glyphicon-refresh"></span> 초기화
+              <button id="reset" class="btn btn-default btn-sm ">
+                <span class="glyphicon glyphicon-refresh"></span>
+              </button>
+              <button id="scrollUp" class="btn btn-default btn-sm ">
+                <span class="glyphicon glyphicon-arrow-up"></span>
+              </button>
+              <button id="monitoring_mode" class="btn btn-warning btn-sm ">
+                <span class="glyphicon glyphicon-fullscreen"></span>
               </button>
             </div>
             <!-- SVG canvas -->
@@ -498,10 +511,25 @@
         startScale: startScale,
       });
 
-      $('#zoomIn').on('click', canvasPanzoom.zoomIn); //확대 버튼 이벤트
-      $('#zoomOut').on('click', canvasPanzoom.zoomOut); // 축소 버튼 이벤트
-      $('#reset').on('click', canvasPanzoom.reset); // 초기화 버튼 이벤트
+      document.getElementById('zoomIn').addEventListener('click', canvasPanzoom.zoomIn);
+      document.getElementById('zoomOut').addEventListener('click', canvasPanzoom.zoomOut);
+      document.getElementById('reset').addEventListener('click', canvasPanzoom.reset);
+      document.getElementById('scrollUp').addEventListener('click', () => {
+        document.documentElement.scrollTop = 0;
+      });
       canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
+
+      // TODO: 판줌 영역 고정
+      $(document).ready(() => {
+        const testoffSet = $('#panzoomBox').offset();
+        $(window).scroll(function() {
+          if ($(document).scrollTop() > testoffSet.top) {
+            $('#panzoomBox').addClass('jbFixed');
+          } else {
+            $('#panzoomBox').removeClass('jbFixed');
+          }
+        });
+      });
     </script>
 
     <!-- FIXME: 추후 삭제 처리  -->
@@ -519,10 +547,23 @@
       if (user.user_id === 'vip') {
         vipInit();
       }
-      // var sensor = SVG.get('#svgCanvas').select('rect[name="sensor"]');
-      // var text = SVG.get('#svgCanvas').select('text[name="text"]');
-      // sensor.front();
-      // text.front();
+
+      document.querySelector('#monitoring_mode').addEventListener('click', () => {
+        $('.container_row').toggleClass('hidden');
+        $('.container-fluid_st').toggleClass('hidden');
+        $('#wrap > header').toggleClass('hidden');
+        $('#wrap > footer').toggleClass('hidden');
+
+        $('#monitoring_mode')
+          .children()
+          .toggleClass('glyphicon-fullscreen');
+        $('#monitoring_mode')
+          .children()
+          .toggleClass('glyphicon-remove');
+
+        $('.svg_area').height(window.innerHeight);
+        window.dispatchEvent(new Event('resize'));
+      });
     </script>
   </body>
 </html>
