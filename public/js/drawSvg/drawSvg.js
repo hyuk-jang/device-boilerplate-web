@@ -61,7 +61,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
   name = isKorText ? defInfo.name : defInfo.id;
 
   /** @type {mTextStyleInfo} */
-  const { fontSize, color } = _.find(svgModelResourceList, {
+  const { fontSize, color, transform } = _.find(svgModelResourceList, {
     id: defInfo.resourceId,
   }).textStyleInfo;
 
@@ -97,7 +97,7 @@ function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
     // 공통 옵션
     .leading(0.6)
     .move(x + width / 2, y + height / 2)
-    .font({ anchor: 'middle', weight: 'bold' })
+    .font({ anchor: 'middle', weight: 'bold', transform, 'pointer-events': 'none' })
     .dy(-8);
 }
 
@@ -416,76 +416,6 @@ function isSensor(nDefId) {
 }
 
 /**
- * 데이터 단위 찾기
- * @param {string} nDefId 단위를 가져올  nodeDefInfoId
- */
-function getDataUnit(nDefId) {
-  /** @type {mDeviceMap} */
-  const realMap = map;
-
-  // FIXME: 모바일에서 맵이 안보이는 증상 발견
-  // const foundUnit = _.find(realMap.setInfo.nodeStructureList, nodeStructureInfo =>
-  //   _.map(nodeStructureInfo.defList, 'target_prefix').includes(
-  //     _.replace(nDefId, /(?<=_)[0-9]+/g, '').substring(
-  //       nDefId,
-  //       _.replace(nDefId, /(?<=_)[0-9]+/g, '').length - 1,
-  //     ),
-  //   ),
-  // );
-
-  // FIXME: DV_NODE에서 찾아버림
-  return _.chain(simpleNodes)
-    .find({ nId: nDefId })
-    .get('du', '')
-    .value();
-  // return _.get(_.find(simpleNodes, { nId: nDefId }), 'du', '');
-
-  // const foundUnit = _.find(realMap.setInfo.nodeStructureList, nodeStructureInfo =>
-  //   _.map(nodeStructureInfo.defList, 'target_prefix').includes(_.replace(nDefId, /[_\d]/g, '')),
-  // );
-
-  // if (_.isUndefined(foundUnit)) return false;
-  // return foundUnit.data_unit;
-}
-
-/**
- *  config의 변경된 노드 <tspan> 속성을 가져온다
- * @param {config} config
- * @param {string} nodeDefId
- */
-function applyConfigTspanEle(config, nodeDefId) {
-  let nodeTspanEle;
-  if (_.isUndefined(nodeDefId)) {
-    nodeTspanEle = config.allNodeTspanEleInfo;
-  } else {
-    const foundSingleNodeTspanInfo = _.find(config.singleNodeTspanEleList, {
-      nodeId: nodeDefId,
-    });
-    if (_.isUndefined(foundSingleNodeTspanInfo)) return false;
-    nodeTspanEle = foundSingleNodeTspanInfo;
-  }
-
-  return nodeTspanEle;
-}
-
-/**
- * config의 변경된 text style 속성을 가져온다.
- * @param {config} config
- * @param {string} targetId
- */
-function applyConfigTextStyle(config, targetId) {
-  let foundTextStyleInfo;
-  if (_.isUndefined(targetId)) {
-    foundTextStyleInfo = config.allTextStyleInfo;
-  } else {
-    foundTextStyleInfo = _.find(config.singleTextStyleList, { targetId });
-    if (_.isUndefined(foundTextStyleInfo)) return false;
-  }
-
-  return foundTextStyleInfo;
-}
-
-/**
  * 데이터가 true값인지 false값인지 구분한다.
  * @param {string} data
  */
@@ -578,7 +508,7 @@ function showNodeData(nodeDefId, data = '') {
 
     SVG.get(`#${nodeDefId}_data`)
       .clear()
-      .tspan(data);
+      .text(data);
     SVG.get(`#${nodeDefId}_unit`)
       .clear()
       .text(dataUnit);
@@ -607,7 +537,11 @@ function bindingClickNodeEvent(socket) {
       svgNodeInfo.defList.forEach(nodeDefInfo => {
         // 그려진 SVG 노드 객체에 클릭 이벤트 바인딩
         SVG.get(`#${nodeDefInfo.id}`).click(() => {
-          const nodeData = SVG.get(`#${nodeDefInfo.id}_data`).node.innerHTML;
+          const nodeData = SVG.get(`#${nodeDefInfo.id}_data`)
+            .text()
+            .trim();
+
+          //데이터 상태 체크
           const dataStatus = checkTrueFalseData(nodeData);
 
           if (_.isUndefined(nodeData)) return alert('장치 상태 미식별');
@@ -625,7 +559,7 @@ function bindingClickNodeEvent(socket) {
       });
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return false;
   }
 }

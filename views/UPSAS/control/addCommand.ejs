@@ -7,7 +7,7 @@
 <!-- 제어 명령 -->
 <div class="container_row flex_dir_col default_search_area">
   <div class="search_area">
-    <div class="search_box search_range_box">
+    <div class="search_box">
       <span class="search_title">명령 형식</span>
       <select class="form-control" id="cmdFormatSel">
         <option value="SINGLE">단일 제어</option>
@@ -19,15 +19,15 @@
 
     <!-- 단일 제어 명령 -->
     <div class="search_area" name="cmdCore" data-cmd-core="SINGLE">
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">장치 타입</span>
         <select class="form-control" id="deviceCateSel"> </select>
       </div>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">장치 목록</span>
         <select class="form-control" id="deviceInfoSel"> </select>
       </div>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">제어 형식</span>
         <select class="form-control" id="singleControlValue">
           <option value="1">Open / On</option>
@@ -38,7 +38,7 @@
 
     <!-- 설정 제어 명령 -->
     <div class="search_area" name="cmdCore" data-cmd-core="SET" hidden>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">명령 종류</span>
         <select class="form-control" id="setCmdSelList"></select>
       </div>
@@ -46,11 +46,11 @@
 
     <!-- 흐름 제어 명령 -->
     <div class="search_area" name="cmdCore" data-cmd-core="FLOW" hidden>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">시작지</span>
         <select class="form-control" id="flowCmdSrcPlaceSel"> </select>
       </div>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">도착지</span>
         <select class="form-control" id="flowCmdDestPlaceSel"> </select>
       </div>
@@ -58,13 +58,13 @@
 
     <!-- 시나리오 명령 -->
     <div class="search_area" name="cmdCore" data-cmd-core="SCENARIO" hidden>
-      <div class="search_box search_range_box">
+      <div class="search_box">
         <span class="search_title">시나리오</span>
         <select class="form-control" id="scenarioCmdSelList"> </select>
       </div>
     </div>
 
-    <div class="search_box search_range_box">
+    <div class="search_box">
       <span class="search_title">제한 시간(초)</span>
       <div class="search_body">
         <input type="text" class="input_tre" id="limitTimeSec" placeholder="Infinity" />
@@ -108,19 +108,19 @@
         <option value="1">Yes</option>
       </select>
     </div>
-    <div class="search_box search_range_box">
+    <div class="search_box">
       <span class="search_title">장소 타입</span>
       <select class="form-control" name="placeTypeSel">
         <option value="all">모두</option>
       </select>
     </div>
-    <div class="search_box search_range_box">
+    <div class="search_box">
       <span class="search_title">장소</span>
       <select class="form-control" name="placeNameSel">
         <option value="all">모두</option>
       </select>
     </div>
-    <div class="search_box search_range_box">
+    <div class="search_box">
       <span class="search_title">센서</span>
       <select class="form-control" name="sensorNameSel"> </select>
     </div>
