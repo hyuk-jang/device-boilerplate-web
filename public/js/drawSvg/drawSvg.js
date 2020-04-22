@@ -2,10 +2,6 @@ const TRUE_DATA = '1';
 const FALSE_DATA = '0';
 const ERROR_DATA = '-1';
 
-// map에 그려진 모든 text 리스트 전역
-/** @type {{nodeId: string, nodeName: '', text: textElement}[]} */
-const writtenTextList = [];
-
 /**
  * 장치 상태에 따른 svg 장치색 변경
  * @param {string} nDefId
@@ -56,125 +52,53 @@ function changeNodeStatusColor(nDefId, data) {
  * @param {mSvgModelResource} resourceInfo 장치, 노드의 resource id, type, elemetDrawInfo[width,height,radius,...] 정보
  */
 function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
-  const { width, height, radius } = resourceInfo.elementDrawInfo; // 텍스트가 그려질 공간 크기 또는 투명도
-  const [x1, y1, x2, y2] = defInfo.point; // 텍스트 위치
-  let naming; // defInfo.name: 한글, defInfo.id: 영문
-  let [textX, textY, textColor, textSize, leading, anchor] = [0, 0, '', 0, '', '']; // 텍스트 스타일, 위치 초기값
+  const { svgModelResourceList } = map.drawInfo.frame;
+  const { width, height } = resourceInfo.elementDrawInfo; // 텍스트가 그려질 공간 크기 또는 투명도
+  const [x, y] = defInfo.point; // 텍스트 위치
+  let name; // defInfo.name: 한글, defInfo.id: 영문
 
-  // 토글의 true, false 값에 대한 한/영문 이름 정의
-  naming = isKorText ? defInfo.name : defInfo.id;
+  // 최초로 그릴 때 한/영문 이름 정의
+  name = isKorText ? defInfo.name : defInfo.id;
 
-  // svgPositionList를 검색하여 장치인지 센서인지 구분
-  let foundSvgInfo = _.find(map.drawInfo.positionInfo.svgNodeList, svgNodeInfo =>
-    _.map(svgNodeInfo.defList, 'id').includes(defInfo.id),
-  );
-  if (_.isUndefined(foundSvgInfo)) {
-    foundSvgInfo = _.find(map.drawInfo.positionInfo.svgPlaceList, svgNodeInfo =>
-      _.map(svgNodeInfo.defList, 'id').includes(defInfo.id),
-    );
-    if (_.isUndefined(foundSvgInfo)) return false;
-  }
-
-  // 텍스트 색, 크기, 미세한 위치 기본값 조정  , 0: 장치, 1: 센서, -1: 미분류
-  if (foundSvgInfo.is_sensor === 1 || foundSvgInfo.is_sensor === 2) {
-    textColor = 'black';
-    anchor = 'middle';
-    textSize = 11;
-    leading = '1.1rem';
-  } else if (foundSvgInfo.is_sensor === 0) {
-    textColor = 'black';
-    anchor = 'middle';
-    textSize = '2em';
-    leading = '1.1rem';
-  } else if (foundSvgInfo.is_sensor === -1) {
-    textColor = 'black';
-    anchor = 'middle';
-    textSize = 11;
-    leading = '1.1rem';
-  } else {
-    textColor = 'black';
-    anchor = 'middle';
-    textSize = 25;
-    leading = '1.1rem';
-  }
-
-  // 사각형, 패턴 형식일 때 위치값 조정
-  if (
-    resourceInfo.type === 'rect' ||
-    resourceInfo.type === 'pattern' ||
-    resourceInfo.type === 'image'
-  ) {
-    textX = x1 + width / 2;
-    textY = y1 + height / 2;
-
-    // 줄 형식 형식일 때 위치값 조정
-  } else if (resourceInfo.type === 'line') {
-    if (x1 === x2) {
-      textX = x1;
-      textY = y1 - (y1 - y2) / 2;
-    } else {
-      textX = x1 + (x2 - x1) / 2;
-      textY = y1;
-    }
-
-    // 원 형식일 때 위치값 조정
-  } else if (resourceInfo.type === 'circle') {
-    textX = x1 + radius / 2;
-    textY = y1 + radius / 2;
-
-    // 마름모 형식일 때 위치값 조정
-  } else if (resourceInfo.type === 'polygon') {
-    textX = x1 + width;
-    textY = y1 + height;
-  }
-
-  /** @type {mSvgModelResource} */
-  const foundSvgModelResourceInfo = _.find(map.drawInfo.frame.svgModelResourceList, {
+  /** @type {mTextStyleInfo} */
+  const { fontSize, color } = _.find(svgModelResourceList, {
     id: defInfo.resourceId,
-  });
-  if (foundSvgModelResourceInfo.textStyleInfo) {
-    textColor = foundSvgModelResourceInfo.textStyleInfo.color;
-    textSize = foundSvgModelResourceInfo.textStyleInfo.fontSize;
-    leading = foundSvgModelResourceInfo.textStyleInfo.leading;
-    transform = foundSvgModelResourceInfo.textStyleInfo.transform;
-  }
+  }).textStyleInfo;
 
   // 제외 할 텍스트 찾기
-  checkHidableText(defInfo.id) ? (naming = '') : '';
+  checkHidableText(defInfo.id) ? (name = '') : '';
 
   // 텍스트 그리기
-  const svgText = svgCanvas
-    .text(naming)
-    .move(textX, textY)
-    .attr({
-      id: `${defInfo.id}_text`,
-      class: 'node_title',
-    });
-  // svgText
-  //   .move(textX, textY)
-  //   .font({
-  //     fill: textColor,
-  //     size: textSize,
-  //     anchor,
-  //     leading,
-  //     weight: 'bold',
-  //   })
-  //   .attr({
-  //     'pointer-events': 'none', // text 커서 모양 설정
-  //     id: `${defInfo.id}_text`,
-  //     name: 'text',
-  //     transform,
-  //   });
-
-  // 그려진 svg 텍스트의 정보 수집
-  const drawedNodeInfo = {
-    id: defInfo.id,
-    name: defInfo.name,
-    textX,
-    textY,
-    text: svgText,
-  };
-  writtenTextList.push(drawedNodeInfo);
+  svgCanvas
+    .text(text => {
+      // 이름
+      text
+        .tspan(name)
+        .attr({
+          id: `${defInfo.id}_title`,
+        })
+        .font({ fill: color, size: fontSize });
+      // 데이터 공간
+      text
+        .tspan(' ')
+        .newLine()
+        .font({ size: '0.5em', fill: '#7675ff' })
+        .attr({
+          id: `${defInfo.id}_data`,
+        });
+      // 단위 공간
+      text
+        .tspan('')
+        .attr({
+          id: `${defInfo.id}_unit`,
+        })
+        .font({ size: '0.5em' });
+    })
+    // 공통 옵션
+    .leading(0.6)
+    .move(x + width / 2, y + height / 2)
+    .font({ anchor: 'middle', weight: 'bold' })
+    .dy(-8);
 }
 
 /**
@@ -641,27 +565,23 @@ function drawSvgBasePlace(documentId, isKorText = true) {
  */
 function showNodeData(nodeDefId, data = '') {
   try {
-    const nodeName = _.find(writtenTextList, { id: nodeDefId }).name;
-    let dataUnit = getDataUnit(nodeDefId);
+    const nodePrefix = nodeDefId.substring(nodeDefId.length - 4, nodeDefId - 1);
+
+    const dataUnit = _(map.setInfo.nodeStructureList)
+      .filter({
+        defList: [{ target_prefix: nodePrefix }],
+      })
+      .head().data_unit;
 
     // default Text가 숨겨진 상태이면 데이터 표시 생략
     if (checkHidableText(nodeDefId)) return false;
 
-    // 데이터 단위 정의 FIXME: 삭제 가능한지 판단 후 코드 삭제
-    dataUnit = data === '' || _.isNull(dataUnit) ? '' : dataUnit;
-
-    // text에 data, 단위를 추가후 재배치
-    SVG.get(`#${nodeDefId}_text`).text(text => {
-      text
-        .tspan(nodeName)
-        .attr({ id: `${nodeDefId}_title` })
-        .dy('0.7rem');
-      text
-        .tspan(data)
-        .newLine()
-        .attr({ id: `${nodeDefId}_data`, class: 'node_data' });
-      text.tspan(dataUnit);
-    });
+    SVG.get(`#${nodeDefId}_data`)
+      .clear()
+      .tspan(data);
+    SVG.get(`#${nodeDefId}_unit`)
+      .clear()
+      .text(dataUnit);
 
     // 데이터 값에 따른 상태 색 변경
     changeNodeStatusColor(nodeDefId, data);

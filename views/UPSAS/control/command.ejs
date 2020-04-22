@@ -102,7 +102,7 @@
         <!-- Content -->
         <div id="controlContent">
           <!-- Svg Map -->
-          <div class="hidden" id="structure">
+          <div class="" id="structure">
             <div class="zoom_box" id="panzoomBox">
               <!-- panzoom button-->
               <button id="zoomIn" class="btn btn-default btn-sm mr_1rem">
@@ -119,7 +119,7 @@
             <div class="svg_area" id="canvas"></div>
           </div>
           <!-- Tables -->
-          <div id="operStatusTable">
+          <div class="hidden" id="operStatusTable">
             <div class="container_row">
               <p class="table_desc_area">
                 명령 목록 - 갱신시간 &nbsp;<span id="cmdUpdateDate"></span>
@@ -233,11 +233,9 @@
       socket.on('updateIsApiClientConn', function(isConn) {
         isApiClientConn = isConn;
 
-        var connStatus = isApiClientConn === true ? 'Connected' : 'Disconnected';
         var connStatusImg =
           isApiClientConn === true ? '/image/connection.png' : '/image/disconnection.png';
 
-        document.getElementById('updateIsApiClientConnDiv').innerText = connStatus;
         document.getElementById('updateIsApiClientConnImg').setAttribute('src', connStatusImg);
       });
 
@@ -344,11 +342,8 @@
         var cmdTbodyTemplate = document.querySelector('#cmdTableTemplate').innerHTML;
         var cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
 
-        Handlebars.registerPatial('defaultCmdTemplate', '<tr><td>no cmd</td></tr>');
-
         // 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
         var cmdTableBody = _.map(commandList, function(commandInfo, index) {
-          console.log(commandInfo);
           return cmdTbodyBindTemplate(false);
         });
 
