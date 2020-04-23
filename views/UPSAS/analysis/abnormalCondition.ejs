@@ -48,11 +48,11 @@
                 <input class="input_tre" id="regressionK" name="subSearch" type="text" />
               </div>
             </div>
-            <div class="search_box search_category_box">
+            <div class="search_box ">
               <span id="subCategoryName" class="search_title">인버터</span>
               <select id="subSelectBoxDom" class="form-control"> </select>
             </div>
-            <div class="search_box search_range_box">
+            <div class="search_box ">
               <span class="search_title">조회기간</span>
               <select id="searchType" class="form-control">
                 <option value="days">일일</option>
@@ -61,7 +61,7 @@
                 <option value="range">기간선택</option>
               </select>
             </div>
-            <div class="search_box search_interval_box">
+            <div class="search_box ">
               <span class="search_title">조회간격</span>
               <select id="searchInterval" class="form-control">
                 <option value="min">1분</option>
@@ -103,19 +103,36 @@
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>발전 예측 분석</header>
-              <div id="predictionRate" class="component_piece_body p_column_rem"></div>
+              <div id="predictionRate" class="component_piece_body p_0"></div>
             </article>
           </div>
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>환경 데이터 분석</header>
-              <div id="envData" class="component_piece_body p_column_rem"></div>
+              <div id="envData" class="component_piece_body p_0"></div>
             </article>
           </div>
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>이상 상태 분석</header>
-              <div id="" class="component_piece_body p_column_rem"></div>
+              <div id="" class="component_piece_body">
+                <article class="component_ele_status">
+                  <header>시스템 A</header>
+                  <p class="m_05rem">정상 운영</p>
+                </article>
+                <article class="component_ele_status">
+                  <header>시스템 A</header>
+                  <p class="m_05rem">정상 운영</p>
+                </article>
+                <article class="component_ele_status">
+                  <header>시스템 A</header>
+                  <p class="m_05rem">정상 운영</p>
+                </article>
+                <article class="component_ele_status">
+                  <header>시스템 A</header>
+                  <p class="m_05rem">정상 운영</p>
+                </article>
+              </div>
             </article>
           </div>
         </div>
@@ -135,22 +152,138 @@
 
       $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
 
-      var searchRange = <%- JSON.stringify(searchRange) %>;
+      const searchRange = <%- JSON.stringify(searchRange) %>;
 
-      var regressionInfo = <%- JSON.stringify(regressionInfo) %>;
+      const regressionInfo = <%- JSON.stringify(regressionInfo) %>;
 
-      var chartInfo =  <%- JSON.stringify(chartInfo) %>;
+      const chartInfo =  <%- JSON.stringify(chartInfo) %>;
 
-      var analysisReport =  <%- JSON.stringify(analysisReport) %>;
+      const analysisReport =  <%- JSON.stringify(analysisReport) %>;
 
-      console.log(analysisReport)
-
-      var mainFontSize = 15;
-      var subFontSize = 13;
+      const mainFontSize = 15;
+      const subFontSize = 13;
       setDomElementValueWithJson(document.getElementById('searchArea'), regressionInfo, 'value', 'id')
     </script>
 
     <script src="/js/contents/report/search.js"></script>
+
+    <script>
+      // 발전 예측 분석 옵션
+      const predictPowerOpions = [
+        {
+          key: 'powerKw',
+          name: '실제발전',
+          valueSuffix: ' kW',
+        },
+        {
+          key: 'prePowerKw',
+          name: '예측발전',
+          valueSuffix: ' kW',
+        },
+      ];
+
+      // 환경 분석 옵션
+      const predictEnvOpions = [
+        {
+          key: 'brineTemp',
+          name: '수온',
+          valueSuffix: ' ˚C',
+        },
+        {
+          key: 'moduleTemp',
+          name: '모듈온도',
+          valueSuffix: ' ˚C',
+        },
+        {
+          key: 'waterLevel',
+          name: '수위',
+          valueSuffix: ' ˚C',
+          yAxis: 1,
+        },
+      ];
+
+      // 발전 예측 분석 차트
+      makeColumnChart({
+        domId: 'predictionRate',
+        xAxis: {
+          categories: _.map(analysisReport.systemList, 'name'),
+        },
+        yAxis: [
+          {
+            min: 0,
+            title: {
+              text: '발전량',
+            },
+            labels: {
+              format: '{value} kW',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+        ],
+        series: predictPowerOpions.map(option => {
+          const { key, name, valueSuffix } = option;
+          return {
+            name,
+            data: _.map(analysisReport.systemList, key),
+            tooltip: {
+              valueSuffix,
+            },
+          };
+        }),
+      });
+
+      // 환경 분석 차트
+      makeColumnChart({
+        domId: 'envData',
+        xAxis: {
+          categories: _.map(analysisReport.systemList, 'name'),
+        },
+        yAxis: [
+          {
+            min: 0,
+            title: {
+              text: '온도',
+            },
+            labels: {
+              format: '{value} ˚C',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+          },
+          {
+            // Secondary yAxis
+            min: 0,
+            title: {
+              text: '수위',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            labels: {
+              format: '{value} cm',
+              style: {
+                color: Highcharts.getOptions().colors[1],
+              },
+            },
+            opposite: true,
+          },
+        ],
+        series: predictEnvOpions.map(option => {
+          const { key, name, valueSuffix, yAxis = 0 } = option;
+          return {
+            name,
+            data: _.map(analysisReport.systemList, key),
+            yAxis,
+            tooltip: {
+              valueSuffix,
+            },
+          };
+        }),
+      });
+    </script>
 
     <!-- 출력 트렌드 1 Negative Area Chart -->
     <script>
@@ -338,7 +471,7 @@
 
     <script>
       // 초기 시작시 라디오 체크버튼 클릭처리
-      // var subCategory = _.get(trendInfo, 'subCategory');
+      // const subCategory = _.get(trendInfo, 'subCategory');
 
       checkSelectBoxOption('searchInterval', searchRange.searchInterval);
       checkSelectBoxOption('searchType', searchRange.searchType);
@@ -350,11 +483,13 @@
       // 검색 클릭 시
       document.querySelector('#searchBtn').addEventListener('click', function(event) {
         // searchRange 형태 만듬
-        var searchValue = getSearchValue();
+        const searchValue = getSearchValue();
 
         if (_.isEmpty(searchValue)) return false;
 
-        var subCategoryId = document.querySelector('#subSelectBoxDom option:checked').value.trim();
+        const subCategoryId = document
+          .querySelector('#subSelectBoxDom option:checked')
+          .value.trim();
         // searchValue = Object.assign(searchValue, { subCategoryId: subCategoryId.trim() });
 
         // 보정계수 검색
@@ -362,7 +497,7 @@
           searchValue[domElement.id] = domElement.value;
         });
         // 쿼리스트링 생성
-        var queryString = _.map(searchValue, function(value, key) {
+        const queryString = _.map(searchValue, function(value, key) {
           return key + '=' + value;
         }).join('&');
 

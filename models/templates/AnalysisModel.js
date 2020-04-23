@@ -352,7 +352,7 @@ module.exports = class extends BiModule {
       SELECT
               power_tbl.inverter_seq, power_tbl.target_id, power_tbl.target_name, power_tbl.target_category, power_tbl.install_place, power_tbl.serial_number,
               power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
-              saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp,
+              saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp, saltern_tbl.avg_brine_temp,
               saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
               wdd_tbl.avg_temp, wdd_tbl.avg_reh, wdd_tbl.avg_horizontal_solar, wdd_tbl.total_horizontal_solar,
               wdd_tbl.avg_inclined_solar, wdd_tbl.total_inclined_solar, wdd_tbl.avg_ws, wdd_tbl.avg_uv
@@ -498,6 +498,7 @@ module.exports = class extends BiModule {
  * @property {number} avg_water_level
  * @property {number} avg_salinity
  * @property {number} avg_module_rear_temp
+ * @property {number} avg_brine_temp
  * @property {number} module_efficiency
  * @property {number} module_square
  * @property {number} module_power

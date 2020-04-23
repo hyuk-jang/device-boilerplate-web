@@ -753,7 +753,7 @@ router.get(
     envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
 
-    BU.CLI(weatherTrendRows);
+    // BU.CLI(weatherTrendRows);
     // 분석 레포트
     // TODO: 특정 시점 순간의 search 값 필요
     const selectedSearchDate = _.last(weatherTrendRows).group_date;
@@ -770,6 +770,7 @@ router.get(
           serial_number: sn,
           avg_water_level: waterLevel,
           avg_module_rear_temp: moduleTemp,
+          avg_brine_temp: brineTemp,
           t_power_kw: powerKw,
           preWaterModuleTemp: preModuleTemp,
           preWaterPowerKw: prePowerKw,
@@ -777,11 +778,12 @@ router.get(
 
         return {
           name: `${ip} ${sn}`,
-          waterLevel,
-          moduleTemp,
-          powerKw,
-          preModuleTemp,
-          prePowerKw,
+          waterLevel: _.round(waterLevel, 2),
+          moduleTemp: _.round(moduleTemp, 2),
+          brineTemp: _.round(brineTemp, 2),
+          powerKw: _.round(powerKw, 2),
+          preModuleTemp: _.round(preModuleTemp, 2),
+          prePowerKw: _.round(prePowerKw, 2),
           repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
           repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
         };
@@ -797,6 +799,8 @@ router.get(
       },
       systemList,
     };
+
+    // BU.CLI(analysisReport);
 
     _.set(req.locals, 'analysisReport', analysisReport);
 
