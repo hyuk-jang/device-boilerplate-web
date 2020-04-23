@@ -7,7 +7,7 @@
 
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
     <script src="/js/svg/svg.js"></script>
-    <script src="/js/svg/svg.filter.js"></script>
+    <!-- <script src="/js/svg/svg.filter.js"></script> -->
     <script src="/js/panzoom.min.js"></script>
 
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
@@ -21,13 +21,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/css/bootstrap-table.min.css" />
     <script src="/js/bootstrap-table.min.js"></script>
-
-    <style>
-      .jbFixed {
-        position: fixed;
-        top: 0px;
-      }
-    </style>
   </head>
 
   <!-- 서버사이드 데이터 정의 -->
@@ -107,7 +100,7 @@
         <div id="controlContent">
           <!-- Svg Map -->
           <div class="" id="structure">
-            <div class="zoom_box" id="panzoomBox">
+            <div class="map_control_box" id="mapControlBox">
               <!-- panzoom button-->
               <button id="zoomIn" class="btn btn-default btn-sm ">
                 <span class="glyphicon glyphicon-zoom-in"></span>
@@ -181,14 +174,12 @@
                   </thead>
                   <tbody id="nodeTableBodyDom">
                     <script id="nodeTableTemplate" type="template">
-                      {{#currNodeList}}
                       <tr>
                         <td class="">{{ ntn }}</td>
                         <td class="">{{ ni }}</td>
                         <td class="">{{ pnl }}</td>
                         <td class="">{{ d }}</td>
                       </tr>
-                      {{/currNodeList}}
                     </script>
                   </tbody>
                 </table>
@@ -500,7 +491,7 @@
       bindingClickNodeEvent(socket, 'control');
     </script>
 
-    <!-- panzoom 세팅 -->
+    <!-- panzoom & 맵 제어 박스 세팅 -->
     <script>
       var filter = 'win16|win32|win64|mac|macintel';
       var canvas = document.getElementById('svgCanvas');
@@ -519,35 +510,18 @@
       });
       canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
 
-      // TODO: 판줌 영역 고정
+      // 맵 제어 박스 스크롤에 반응하여 상단 고정
       $(document).ready(() => {
-        const testoffSet = $('#panzoomBox').offset();
-        $(window).scroll(function() {
-          if ($(document).scrollTop() > testoffSet.top) {
-            $('#panzoomBox').addClass('jbFixed');
-          } else {
-            $('#panzoomBox').removeClass('jbFixed');
-          }
+        const mCBoxOffset = $('#mapControlBox').offset();
+
+        $(window).scroll(() => {
+          $(document).scrollTop() > mCBoxOffset.top
+            ? $('#mapControlBox').css({ position: 'fixed', top: '0px' })
+            : $('#mapControlBox').css({ position: '', top: '' });
         });
       });
-    </script>
 
-    <!-- FIXME: 추후 삭제 처리  -->
-    <script>
-      changeLang();
-    </script>
-
-    <!-- 검색 관련 js 모음 -->
-    <script src="/js/contents/report/search.js"></script>
-
-    <!-- FIXME: VIP Mode -->
-    <script src="/js/drawSvg/vipFunc.js"></script>
-    <script>
-      // FIXME: VIP 모드
-      if (user.user_id === 'vip') {
-        vipInit();
-      }
-
+      // 모니터링 버튼 이벤트
       document.querySelector('#monitoring_mode').addEventListener('click', () => {
         $('.container_row').toggleClass('hidden');
         $('.container-fluid_st').toggleClass('hidden');
@@ -564,6 +538,23 @@
         $('.svg_area').height(window.innerHeight);
         window.dispatchEvent(new Event('resize'));
       });
+    </script>
+
+    <!-- FIXME: 추후 삭제 처리  -->
+    <script>
+      // changeLang();
+    </script>
+
+    <!-- 검색 관련 js 모음 -->
+    <script src="/js/contents/report/search.js"></script>
+
+    <!-- FIXME: VIP Mode -->
+    <!-- <script src="/js/drawSvg/vipFunc.js"></script> -->
+    <script>
+      // // FIXME: VIP 모드
+      // if (user.user_id === 'vip') {
+      //   vipInit();
+      // }
     </script>
   </body>
 </html>

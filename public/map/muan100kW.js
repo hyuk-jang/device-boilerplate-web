@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-var
 var map = {
   drawInfo: {
     frame: {
