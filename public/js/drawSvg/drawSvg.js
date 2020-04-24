@@ -151,11 +151,11 @@ function executeCommand(socket, controlType, nodeId) {
     //   goalDataList: [],
     // },
   };
-  SVG(`#${nodeId}`)
-    .animate(500)
-    .ease('<>')
-    .attr({ stroke: '#e74c3c' })
-    .loop(true, true);
+  // SVG(`#${nodeId}`)
+  //   .animate(500)
+  //   .ease('<>')
+  //   .attr({ stroke: '#e74c3c' })
+  //   .loop(true, true);
 
   socket.emit('executeCommand', reqCmdInfo);
 }
@@ -422,7 +422,7 @@ function drawSvgBasePlace(documentId, isKorText = true) {
           const { type, elementDrawInfo } = _.find(realMap.drawInfo.frame.svgModelResourceList, {
             id: resourceId,
           });
-
+          console.log(id);
           // 장소에 맞는 도형을 찾아 그린다.
           drawSvgElement(svgCanvas, type, point, elementDrawInfo, id);
           // 그려진 장소 위에 해당 장소의 이름 그리기
@@ -454,8 +454,8 @@ function showNodeData(nodeId, data = '') {
     changeNodeColor(nodeId, data);
 
     // if (SVG(`#${nodeId}_data`).node.innerHTML !== data) {
-    console.log(data);
-    SVG(`#${nodeId}`);
+    // console.log(data);
+    // SVG(`#${nodeId}`);
     // .animate()
     // .attr({ stroke: '#000000' })
     // .loop(true, true);
@@ -531,3 +531,5 @@ function changeLang() {
   //TODO: 현재 그려진 TEXT 상태 확인 (한글 or 영문)
   const currLang = SVG('svgCanvas').attr().lang;
 }
+
+function setZIndex() {}
