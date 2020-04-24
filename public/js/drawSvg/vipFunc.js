@@ -2,7 +2,7 @@
  * vip default img setting
  */
 function vipInit() {
-  var svgCanvas = SVG.get('#svgCanvas');
+  var svgCanvas = SVG('#svgCanvas');
   console.log(svgCanvas);
 
   // 저수지 물결
@@ -101,119 +101,119 @@ function vipInit() {
 
 // reset 모든 animation default 값으로 초기화
 function resetWave() {
-  SVG.get('#resorviorWave')
+  SVG('#resorviorWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#normalEvaporationAWave')
+  SVG('#normalEvaporationAWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#normalEvaporationBWave')
+  SVG('#normalEvaporationBWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#brineWarehouseAWave')
+  SVG('#brineWarehouseAWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#moduleWave')
+  SVG('#moduleWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#brineWarehouseBWave')
+  SVG('#brineWarehouseBWave')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0.2 });
 
-  SVG.get('#rainModeWaterfull')
+  SVG('#rainModeWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#normalEvaAwaterfull')
+  SVG('#normalEvaAwaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#normalEvaBWaterfull')
+  SVG('#normalEvaBWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#brineWHAWaterfull')
+  SVG('#brineWHAWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#normalCrystalWaterfull')
+  SVG('#normalCrystalWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#systemAWaterfull')
+  SVG('#systemAWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#systemBWaterfull')
+  SVG('#systemBWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#systemCWaterfull')
+  SVG('#systemCWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#systemDWaterfull')
+  SVG('#systemDWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#normalCrystalWaterfull')
+  SVG('#normalCrystalWaterfull')
     .animate({
       duraton: 1000,
       when: 'now',
     })
     .attr({ opacity: 0 });
 
-  SVG.get('#brineWHBWaterfull')
+  SVG('#brineWHBWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
@@ -225,42 +225,42 @@ function resetWave() {
 
 // rain mode
 function startRainMode(isTrue) {
-  SVG.get('#rainModeWaterfull')
+  SVG('#rainModeWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#brineWarehouseAWave')
+  SVG('#brineWarehouseAWave')
     .animate({
       duration: 6000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 0.5 : 0.2 });
 
-  SVG.get('#brineWarehouseBWave')
+  SVG('#brineWarehouseBWave')
     .animate({
       duration: 6000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 0.5 : 0.2 });
 
-  SVG.get('#normalEvaporationAWave')
+  SVG('#normalEvaporationAWave')
     .animate({
       duration: 9000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 0 : 0.2 });
 
-  SVG.get('#normalEvaporationBWave')
+  SVG('#normalEvaporationBWave')
     .animate({
       duration: 9000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 0 : 0.2 });
 
-  SVG.get('#moduleWave')
+  SVG('#moduleWave')
     .animate({
       duration: 9000,
       when: 'now',
@@ -270,7 +270,7 @@ function startRainMode(isTrue) {
 
 // 저수지 > 증발지 1 흐름 표현
 function flowToNormalEvaporationA(isTrue) {
-  SVG.get('#normalEvaAwaterfull')
+  SVG('#normalEvaAwaterfull')
     .move(1146, 30)
     .animate({
       duration: 1000,
@@ -278,7 +278,7 @@ function flowToNormalEvaporationA(isTrue) {
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#normalEvaporationAWave')
+  SVG('#normalEvaporationAWave')
     .animate({
       duration: 9000,
       when: 'now',
@@ -288,14 +288,14 @@ function flowToNormalEvaporationA(isTrue) {
 
 // 증발지1 > 증발지2  흐름 표현
 function flowToNormalEvaporationB(isTrue) {
-  SVG.get('#normalEvaBWaterfull')
+  SVG('#normalEvaBWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#normalEvaporationBWave')
+  SVG('#normalEvaporationBWave')
     .animate({
       duration: 9000,
       when: 'now',
@@ -305,14 +305,14 @@ function flowToNormalEvaporationB(isTrue) {
 
 // 증발지2 > 해주1  흐름 표현
 function flowToBrineWarehouseA(isTrue) {
-  SVG.get('#brineWHAWaterfull')
+  SVG('#brineWHAWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#brineWarehouseAWave')
+  SVG('#brineWarehouseAWave')
     .animate({
       duration: 1000,
       when: 'now',
@@ -322,35 +322,35 @@ function flowToBrineWarehouseA(isTrue) {
 
 // 해주1 > 모듈  흐름 표현
 function flowToModule(isTrue) {
-  SVG.get('#systemAWaterfull')
+  SVG('#systemAWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#systemBWaterfull')
+  SVG('#systemBWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#systemCWaterfull')
+  SVG('#systemCWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#systemDWaterfull')
+  SVG('#systemDWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#moduleWave')
+  SVG('#moduleWave')
     .animate({
       duration: 9000,
       when: 'now',
@@ -360,7 +360,7 @@ function flowToModule(isTrue) {
 
 // 모듈 > 결정지  흐름 표현
 function flowToNormalCrystal(isTrue) {
-  SVG.get('#normalCrystalWaterfull')
+  SVG('#normalCrystalWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
@@ -370,14 +370,14 @@ function flowToNormalCrystal(isTrue) {
 
 // 결정지 > 해주2  흐름 표현
 function flowToBrineWarehouseB(isTrue) {
-  SVG.get('#brineWHBWaterfull')
+  SVG('#brineWHBWaterfull')
     .animate({
       duration: 1000,
       when: 'now',
     })
     .attr({ opacity: isTrue ? 1 : 0 });
 
-  SVG.get('#brineWarehouseBWave')
+  SVG('#brineWarehouseBWave')
     .animate({
       duration: 9000,
       when: 'now',
