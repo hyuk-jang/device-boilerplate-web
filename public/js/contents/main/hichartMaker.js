@@ -387,7 +387,8 @@ function makeColumnChart(chartOption) {
   Highcharts.chart(chartOption.domId, {
     chart: {
       type: 'column',
-      spacingRight: 25,
+      // spacingRight: 25,
+      marginTop: 30,
     },
     title: {
       text: _.get(chartOption, 'title.text', ''),

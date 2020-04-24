@@ -336,8 +336,10 @@
       });
 
       // 명령 관련 갱신 반영
+      var currCommandList = [];
       socket.on('updateCommand', function(commandList) {
-        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+        // console.log(commandList);
+        currCommandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
         // cmdList Handlebars compile
         var cmdTbodyTemplate = $('#cmdTableTemplate').html();
@@ -406,7 +408,7 @@
 
       // 서버로 명령 실행 요청
       // $('button[name="reqControlCmd"]').on('click', function(event) {
-      $('#testRequestCmdBtn').on('click', function(event) {
+      $('#reqCommandBtn').on('click', function(event) {
         var reqCmdInfo = makeControlCommand(this);
 
         // FIXME: 명령을 정상적으로 요청하였을 경우 요청하였다는 메시지 출력
@@ -422,12 +424,12 @@
 
       // 서버로 명령 취소 요청
       $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', function() {
-        var reqCmdInfo = makeControlCommand(this);
-        reqCmdInfo.cmdType = 'CANCEL';
+        var cmdIndex = $(this)
+          .parentsUntil('tr')
+          .parent()
+          .data('index');
 
-        !_.isEmpty(reqCmdInfo) &&
-          socket.emit('executeCommand', reqCmdInfo) &&
-          $('#cmdGoalArea').html('');
+        socket.emit('cancelCommand', currCommandList[cmdIndex]) && $('#cmdGoalArea').html('');
       });
 
       // FIXME: TEXT 종료 후 삭제

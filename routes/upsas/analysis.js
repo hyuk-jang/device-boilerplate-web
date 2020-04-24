@@ -11,6 +11,7 @@ const defaultDom = require('../../models/domMaker/defaultDom');
 
 const commonUtil = require('../../models/templates/common.util');
 
+const reportDom = require('../../models/domMaker/reportDom');
 const salternDom = require('../../models/domMaker/salternDom');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
@@ -33,14 +34,28 @@ const subCategoryList = [
     subCategory: 'prediction',
     btnName: '발전분석',
   },
+  {
+    subCategory: 'loosReduction',
+    btnName: '손실저하 요인분석',
+  },
+  {
+    subCategory: 'abnormalCondition',
+    btnName: '이상상태 요인분석',
+  },
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
-const colorTable2 = ['blue', 'purple', 'gray', 'white'];
+const colorTable2 = ['blue', 'purple', 'gray', 'orange'];
 
-// trend middleware
+// analysis middleware
 router.get(
-  ['/', '/:siteId', '/:siteId/:subCategory'],
+  [
+    '/',
+    '/:siteId',
+    '/:siteId/:subCategory',
+    '/:siteId/:subCategory/:subCategoryId',
+    '/:siteId/:subCategory/:subCategoryId/:finalCategory',
+  ],
   asyncHandler(async (req, res, next) => {
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
@@ -50,10 +65,14 @@ router.get(
     const subCategoryDom = defaultDom.makeSubCategoryDom(subCategory, subCategoryList);
     _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
+    const isMonitoringMode = req.user.user_id === 'vip' ? 1 : 0;
+    _.set(req, 'locals.isMonitoringMode', isMonitoringMode);
+
     next();
   }),
 );
 
+// 효율 분석
 router.get(
   ['/', '/:siteId', '/:siteId/efficiency'],
   asyncHandler(async (req, res) => {
@@ -70,10 +89,10 @@ router.get(
     // ----------------- 금일 발전 효율 트렌드
     // 1. 금일 검색 구간 정의
     let dailySearchRange = analysisModel.createSearchRange({
-      // FIXME: 1일전 테스트
-      strStartDate: moment()
-        .subtract(4, 'day')
-        .format('YYYY-MM-DD'),
+      // FIXME: 날짜 변경 시 수정 (기본값 1)
+      // strStartDate: moment()
+      //   .subtract(11, 'day')
+      //   .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
     });
@@ -115,7 +134,9 @@ router.get(
     // console.time('금일 환경 변화 추이');
     // ----------------- 금일 환경 변화 추이
     // 1. 비교군 모듈 온도, 수온 구함
+    // console.time('getEnvReport');
     let envReportRows = await analysisModel.getEnvReport(dailySearchRange);
+    // console.timeEnd('getEnvReport');
 
     // 2. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
     let envModuleTempChart = _(envReportRows)
@@ -164,6 +185,7 @@ router.get(
     const prevSearchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
+      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
         .subtract(3, 'day')
         .format('YYYY-MM-DD'),
@@ -322,7 +344,7 @@ router.get(
       row => row.group_date === maxPeakEfficiencyInfo.group_date,
     );
     // 6. 순간 데이터 목록(발전, 환경, 기상) 중에서 날짜가 동일한 객체끼리 병합
-    const maxPeakDataList = _.map(maxPeakPowerRows, (powerRow, index) => {
+    const maxPeakDataList = _.map(maxPeakPowerRows, powerRow => {
       const envRow = maxPeakEnvRows.find(
         row => row.inverter_seq === powerRow.inverter_seq && row.group_date === powerRow.group_date,
       );
@@ -345,8 +367,9 @@ router.get(
   }),
 );
 
+// 발전 분석
 router.get(
-  ['/', '/:siteId', '/:siteId/:prediction'],
+  ['/:siteId/prediction'],
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { mainWhere, siteId },
@@ -366,9 +389,9 @@ router.get(
 
     // 1. 검색 구간 정의
     let searchRange = analysisModel.createSearchRange({
-      // FIXME: 1일전 테스트
+      // FIXME: 1일전 테스트, 서비스시 제거
       // strStartDate: moment()
-      //   .subtract(1, 'day')
+      //   .subtract(11, 'day')
       //   .format('YYYY-MM-DD'),
       searchType: 'days',
       searchInterval: 'min10',
@@ -385,14 +408,15 @@ router.get(
     // 3. 발전량 레포트 추출
     let powerTrendRows = await analysisModel.getInverterTrend(searchRange, inverterSeqList);
 
-    // 3. 발전 시작 및 종료 시간 구함
+    // 4. 발전 시작 및 종료 시간 구함
     const { sDate, eDate } = analysisModel.getStartEndDate(powerTrendRows);
     searchRange.strStartDate = sDate;
     searchRange.strEndDate = eDate;
 
-    // 4. 기상 데이터 추출
+    // 5. 기상 데이터 추출
     let weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
-    // 5. 인버터 목록에 따라 발전량 차트 생성,
+
+    // 6. 인버터 목록에 따라 발전량 차트 생성,
     let gPowerTrendRows = _.groupBy(powerTrendRows, 'inverter_seq');
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
@@ -405,7 +429,7 @@ router.get(
       };
     });
 
-    // 6. 기상-일사량 데이터 차트에 삽입
+    // 7. 기상-일사량 데이터 차트에 삽입
     let weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
       {
         dataKey: 'avg_solar',
@@ -472,6 +496,7 @@ router.get(
     searchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'min10',
+      // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
       strStartDate: moment()
         .subtract(3, 'day')
         .format('YYYY-MM-DD'),
@@ -565,10 +590,221 @@ router.get(
   }),
 );
 
+// 손실 저하 요인 분석
 router.get(
-  '/main/:id',
+  ['/:siteId/loosReduction'],
   asyncHandler(async (req, res) => {
-    res.render('./UPSAS/main/index', req.locals);
+    res.render('./UPSAS/analysis/loosReduction', req.locals);
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/:siteId/abnormalCondition', '/:siteId/abnormalCondition/:subCategoryId'],
+  asyncHandler(async (req, res) => {
+    const {
+      mainInfo: { mainWhere, siteId, subCategoryId },
+      viewPowerProfileRows,
+      searchRange,
+    } = req.locals;
+
+    // BU.CLI(subCategoryId);
+
+    /** @type {V_PW_PROFILE[]} */
+    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
+
+    /** @type {WeatherModel} */
+    const weatherModel = global.app.get('weatherModel');
+
+    /** @type {AnalysisModel} */
+    const analysisModel = global.app.get('analysisModel');
+
+    // 인버터 사이트 목록 돔 추가
+    const inverterSiteDom = reportDom.makeInverterSiteDom(
+      powerProfileRows,
+      subCategoryId,
+      'cnt_target_name',
+    );
+
+    _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
+
+    // ----------------- 금일 발전 효율 트렌드
+
+    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
+
+    // 인버터 Seq 목록
+    const inverterSeqList = _(powerProfileRows)
+      .filter(inverterWhere)
+      .map('inverter_seq')
+      .value();
+
+    /** @type {PW_INVERTER[]} */
+    const inverterRows = await analysisModel.getTable('PW_INVERTER', {
+      inverter_seq: inverterSeqList,
+    });
+
+    // 1. 검색 구간 정의
+    // const searchRange = analysisModel.createSearchRange({
+    //   searchType: 'range',
+    //   searchInterval: 'min10',
+    //   // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
+    //   strStartDate: moment('2020-04-08').format('YYYY-MM-DD'),
+    //   strEndDate: moment('2020-04-13').format('YYYY-MM-DD'),
+    // });
+
+    const generalAnalysisRows = await analysisModel
+      .getGeneralReport(searchRange, siteId)
+      .filter(row => inverterSeqList.includes(row.inverter_seq));
+    // BU.CLIN(generalAnalysisRows);
+
+    const {
+      regressionB1 = 0.945,
+      regressionB2 = 10.93,
+      regressionB3 = -0.19,
+      regressionK = 0.9,
+    } = req.query;
+
+    const regressionInfo = {
+      regressionB1,
+      regressionB2,
+      regressionB3,
+      regressionK,
+    };
+
+    _.set(req, 'locals.regressionInfo', regressionInfo);
+
+    // 발전량 예측 정제
+    analysisModel.refineGeneralAnalysis(generalAnalysisRows, regressionInfo);
+
+    const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
+
+    //
+
+    let powerChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 발전량`,
+        color: colorTable2[index],
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.t_power_kw,
+        ]),
+      };
+    });
+
+    const predictPowerChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 예측 발전량`,
+        color: colorTable2[index],
+        dashStyle: 'ShortDot',
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.preWaterPowerKw,
+        ]),
+      };
+    });
+
+    // 5. 기상 데이터 추출
+    const weatherTrendRows = await weatherModel.getWeatherTrend(searchRange, siteId);
+
+    // 7. 기상-일사량 데이터 차트에 삽입
+    const weatherCharts = analysisModel.makeChartData(weatherTrendRows, [
+      {
+        dataKey: 'avg_solar',
+        name: '일사량',
+        yAxis: 1,
+        color: 'red',
+        // dashStyle: 'ShortDash',
+      },
+      {
+        dataKey: 'avg_temp',
+        name: '기온',
+        yAxis: 2,
+        color: 'green',
+        // dashStyle: 'ShortDash',
+      },
+    ]);
+
+    powerChartData = powerChartData.concat(...predictPowerChartData, weatherCharts);
+    _.set(req.locals, 'chartInfo.dailyPowerData', powerChartData);
+
+    let envChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 모듈 온도`,
+        color: colorTable2[index],
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.avg_module_rear_temp,
+        ]),
+      };
+    });
+
+    const predictEnvChartData = inverterRows.map((invRow, index) => {
+      return {
+        name: `${invRow.install_place} ${invRow.serial_number} 예측 모듈 온도`,
+        color: colorTable2[index],
+        dashStyle: 'ShortDot',
+        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+          commonUtil.convertDateToUTC(row.group_date),
+          row.preWaterModuleTemp,
+        ]),
+      };
+    });
+
+    envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
+    _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
+
+    // BU.CLI(weatherTrendRows);
+    // 분석 레포트
+    // TODO: 특정 시점 순간의 search 값 필요
+    const selectedSearchDate = _.last(weatherTrendRows).group_date;
+
+    const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
+      row => row.group_date === selectedSearchDate,
+    );
+
+    const systemList = _.chain(generalAnalysisRows)
+      .filter(row => row.group_date === selectedSearchDate)
+      .map(row => {
+        const {
+          install_place: ip,
+          serial_number: sn,
+          avg_water_level: waterLevel,
+          avg_module_rear_temp: moduleTemp,
+          avg_brine_temp: brineTemp,
+          t_power_kw: powerKw,
+          preWaterModuleTemp: preModuleTemp,
+          preWaterPowerKw: prePowerKw,
+        } = row;
+
+        return {
+          name: `${ip} ${sn}`,
+          waterLevel: _.round(waterLevel, 2),
+          moduleTemp: _.round(moduleTemp, 2),
+          brineTemp: _.round(brineTemp, 2),
+          powerKw: _.round(powerKw, 2),
+          preModuleTemp: _.round(preModuleTemp, 2),
+          prePowerKw: _.round(prePowerKw, 2),
+          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
+          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
+        };
+      })
+      .value();
+
+    // _(weatherTrendRows).find(row => row.group_date === selectedSearchDate)
+
+    const analysisReport = {
+      envInfo: {
+        solar,
+        outdoorTemp,
+      },
+      systemList,
+    };
+
+    // BU.CLI(analysisReport);
+
+    _.set(req.locals, 'analysisReport', analysisReport);
+
+    res.render('./UPSAS/analysis/abnormalCondition', req.locals);
   }),
 );
 

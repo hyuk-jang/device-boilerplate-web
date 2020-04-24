@@ -435,21 +435,20 @@ class ApiServer extends AbstApiServer {
   compareNodeList(msInfo, fieldNodeList) {
     try {
       /** @type {nodeInfo[]} */
-      const renewalList = [];
-      // 수신 받은 노드 리스트를 순회
-      _.forEach(fieldNodeList, wsNodeInfo => {
+      const renewalList = fieldNodeList.reduce((updatedList, wsNodeInfo) => {
         const { nri: nodeRealId, d: data } = wsNodeInfo;
         const msNodeInfo = _.find(msInfo.msDataInfo.nodeList, {
           node_real_id: nodeRealId,
         });
 
-        // 데이터가 없는 객체이거나 동일 데이터일 경우 중지
-        if (_.isEmpty(msNodeInfo) || _.isEqual(data, msNodeInfo.data)) return false;
-
-        // 데이터가 서로 다르다면 갱신된 데이터
-        msNodeInfo.data = data;
-        renewalList.push(msNodeInfo);
-      });
+        // 객체이거나 동일 데이터가 아닐 경우
+        if (msNodeInfo !== undefined && data !== msNodeInfo.data) {
+          // 데이터가 서로 다르다면 갱신된 데이터
+          msNodeInfo.data = data;
+          updatedList.push(msNodeInfo);
+        }
+        return updatedList;
+      }, []);
 
       // 업데이트 내역이 있다면 전송
       if (renewalList.length) {

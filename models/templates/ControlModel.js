@@ -21,6 +21,36 @@ class ControlModel extends BM {
   }
 
   /**
+   * 제어 이벤트를 명령 형식으로 변환하여 반환
+   * @param {Object} where
+   */
+  async getCmdHistory(where) {
+    /** @type {DV_CONTROL_CMD_HISTORY[]} */
+    const controlCmdHistoryRows = await this.getTable('dv_control_cmd_history', where);
+
+    return controlCmdHistoryRows.map(row => {
+      const {
+        cmd_uuid: wrapCmdUUID,
+        cmd_format: wrapCmdFormat,
+        cmd_type: wrapCmdType,
+        cmd_id: wrapCmdId,
+        cmd_name: wrapCmdName,
+      } = row;
+
+      /** @type {contractCmdInfo} */
+      const convertInfo = {
+        wrapCmdFormat,
+        wrapCmdId,
+        wrapCmdName,
+        wrapCmdStep: '',
+        wrapCmdType,
+        wrapCmdUUID,
+      };
+      return convertInfo;
+    });
+  }
+
+  /**
    * DBS에서 새로이 수행한 명령을 제어 이력 관리 테이블에 반영
    * @param {msFieldInfo} msFieldInfo
    * @param {contractCmdInfo[]} contractCmdList

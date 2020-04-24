@@ -105,6 +105,125 @@ module.exports = class extends BiModule {
     return { sDate, eDate };
   }
 
+  /**
+   *
+   * @param {Object} angleInfo
+   * @param {number=} angleInfo.angle 알고싶은 각도. Default 30도.
+   * @param {string} angleInfo.measureDate 계측 날짜
+   */
+  getSolarReduceRate(angleInfo) {
+    const { angle = 30, measureDate } = angleInfo;
+    const solarReduceList = [
+      { a30: 104.2, a0: 72.41 },
+      { a30: 113.06, a0: 86.49 },
+      { a30: 142.23, a0: 123.57 },
+      { a30: 153.5, a0: 149.11 },
+      { a30: 155.78, a0: 163.97 },
+      { a30: 135.95, a0: 147.61 },
+      { a30: 130.71, a0: 139.99 },
+      { a30: 148.48, a0: 150.29 },
+      { a30: 135.97, a0: 125.12 },
+      { a30: 142.97, a0: 114.2 },
+      { a30: 107.04, a0: 76.98 },
+      { a30: 92.8, a0: 63.6 },
+    ];
+
+    const { a0, a30 } = solarReduceList[BU.convertTextToDate(measureDate).getMonth()];
+
+    switch (angle) {
+      // 수평 일사량 대비 30도 일 경우 일사량 감소율
+      case 30:
+        return a30 / a0;
+      default:
+        return 1;
+    }
+  }
+
+  /**
+   * 수심에 따른 광량 감소
+   * @param {number} waterLevel
+   */
+  getWaterLevelReduceRate(waterLevel) {
+    let waterLevelReduceRate = 1;
+    switch (waterLevel) {
+      case 2:
+        waterLevelReduceRate = 0.9554;
+        break;
+      default:
+        waterLevelReduceRate = 0.9554;
+        break;
+    }
+    return waterLevelReduceRate;
+  }
+
+  /**
+   *
+   * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRows
+   * @param {Object} regressionAnalysisInfo 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB1 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB2 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionB3 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.regressionK 보정계수 K
+   */
+  refineGeneralAnalysis(generalAnalysisRows, regressionAnalysisInfo = {}) {
+    const {
+      regressionB1 = 0.945,
+      regressionB2 = 10.93,
+      regressionB3 = -0.19,
+      regressionK = 0.9,
+    } = regressionAnalysisInfo;
+    const betaRef = 0.0025;
+    const tRef = 25;
+
+    const dustReduceRate = 0.95;
+
+    generalAnalysisRows.forEach(row => {
+      const {
+        avg_temp: outdoorTemp,
+        group_date: groupDate,
+        module_efficiency: moduleEff,
+        module_square: moduleSquare,
+      } = row;
+
+      let {
+        avg_horizontal_solar: horizontalSolar,
+        // avg_inclined_solar: inclinedSolar,
+      } = row;
+      // kW로 변환
+      horizontalSolar = (horizontalSolar * regressionK) / 1000;
+
+      // 수중 모듈 온도 예측 치
+      const preWaterModuleTemp =
+        regressionB1 * outdoorTemp + regressionB2 * horizontalSolar + regressionB3;
+      // 수중 태양광 발전 효율 예측
+      const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
+      // 수중 태양광 발전량 예측
+      const preWaterPowerKw =
+        (preWaterPowerEff * horizontalSolar * this.getWaterLevelReduceRate() * moduleSquare) / 100;
+
+      // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
+
+      // 육상 모듈 온도 예측 치
+      const preEarthModuleTemp =
+        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        34 * horizontalSolar;
+      // 육상 태양광 발전 효율 예측
+      const preEarthPowerEff =
+        moduleEff * (1 - betaRef * (outdoorTemp + 34 * horizontalSolar - tRef));
+      // 육상 태양광 발전량 예측
+      const preEarthPowerKw =
+        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        34 * horizontalSolar;
+
+      row.preWaterModuleTemp = preWaterModuleTemp;
+      row.preEarthModuleTemp = preEarthModuleTemp;
+      row.preWaterPowerEff = preWaterPowerEff;
+      row.preWaterPowerKw = preWaterPowerKw;
+      row.preEarthPowerEff = preEarthPowerEff;
+      row.preEarthPowerKw = preEarthPowerKw;
+    });
+  }
+
   /* ****************************************************
    ********                 SQL
    **************************************************** */
@@ -113,12 +232,13 @@ module.exports = class extends BiModule {
    * 인버터 차트 반환
    * @param {searchRange} searchRange
    * @param {string=} effType 검색 조건. target_category or inverter_seq
+   * @param {number[]=} inverterSeqList 인버터 seq 목록
    * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, peak_power_eff: number, group_date: string}[]>}
    * @example
    * effType: target_category = 육상 0도, 육상 30도, 수중 0도
    * effType: inverter_seq = 육상 0도(A~B), 육상 30도(A~B), 수중 0도(A~D)
    */
-  getPowerEffReport(searchRange, effType = 'target_category') {
+  getPowerEffReport(searchRange, effType = 'target_category', inverterSeqList = []) {
     const { selectGroupDate, selectViewDate } = this.convertSearchRangeToDBFormat(
       searchRange,
       'writedate',
@@ -151,9 +271,10 @@ module.exports = class extends BiModule {
             * 
           FROM pw_inverter inv
           WHERE inv.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
+          ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
           ) inv_tbl
         ON inv_tbl.inverter_seq = inv_data.inverter_seq
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
          AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
         GROUP BY ${effType}, group_date, inverter_seq
         ) final
@@ -203,7 +324,7 @@ module.exports = class extends BiModule {
           ${_.isNumber(mainSeq) ? `WHERE rp.main_seq = ${mysql.escape(mainSeq)}` : ''}
           ) sub_tbl
          ON sub_tbl.place_seq = ssd.place_seq
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
          AND ssd.place_seq IN (sub_tbl.place_seq)
          AND sub_tbl.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
         GROUP BY sub_tbl.${effType}, group_date
@@ -211,4 +332,189 @@ module.exports = class extends BiModule {
 
     return this.db.single(sql, null, false);
   }
+
+  /**
+   * 발전 예측에 필요한 데이터 가져옴
+   * @param {searchRange} searchRange
+   * @param {number=} mainSeq
+   * @return {V_GENERAL_ANALYSIS[]}
+   */
+  getGeneralReport(searchRange, mainSeq) {
+    const {
+      selectGroupDate,
+      selectViewDate,
+      firstGroupByFormat,
+      groupByFormat,
+    } = this.convertSearchRangeToDBFormat(searchRange, 'writedate');
+
+    const sql = `
+    
+      SELECT
+              power_tbl.inverter_seq, power_tbl.target_id, power_tbl.target_name, power_tbl.target_category, power_tbl.install_place, power_tbl.serial_number,
+              power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
+              saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp, saltern_tbl.avg_brine_temp,
+              saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
+              wdd_tbl.avg_temp, wdd_tbl.avg_reh, wdd_tbl.avg_horizontal_solar, wdd_tbl.total_horizontal_solar,
+              wdd_tbl.avg_inclined_solar, wdd_tbl.total_inclined_solar, wdd_tbl.avg_ws, wdd_tbl.avg_uv
+      FROM
+        (
+          SELECT
+                inverter_seq, target_id, target_name, serial_number, target_category, install_place, chart_sort_rank,
+                SUM(amount) t_amount,
+                SUM(avg_power_kw) AS t_power_kw,
+                SUM(avg_power_kw) / SUM(amount) * 100 AS avg_power_eff,
+                MAX(peak_power_eff) AS peak_power_eff,
+                SUM(interval_power_cp_kwh) AS t_interval_power_cp_kwh,
+                SUM(interval_power_cp_kwh) / SUM(amount) * 100 AS t_interval_power_eff,
+                group_date
+          FROM
+            (
+              SELECT
+                    inv_tbl.inverter_seq, target_id, target_name, serial_number, target_category, install_place, amount, chart_sort_rank,
+                    inv_data.writedate,
+                    AVG(inv_data.power_kw) AS avg_power_kw,
+                    ROUND(MAX(inv_data.power_kw) / amount * 100, 3) AS peak_power_eff,
+                    MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
+                    ${selectViewDate},
+                    ${selectGroupDate}
+              FROM pw_inverter_data inv_data
+              JOIN
+                (
+                  SELECT
+                      rp.main_seq,
+                      inv.*
+                  FROM pw_relation_power rp
+                  JOIN pw_inverter inv
+                  ON inv.inverter_seq = rp.inverter_seq
+                  ${mainSeq !== null ? ` WHERE rp.main_seq = ${mainSeq}` : ''}
+                ) inv_tbl
+              ON inv_tbl.inverter_seq = inv_data.inverter_seq
+              WHERE writedate >= "${searchRange.strStartDate}" 
+               AND writedate < "${searchRange.strEndDate}"
+               AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
+              GROUP BY inverter_seq, group_date
+            ) final
+          GROUP BY inverter_seq, group_date
+        ) power_tbl
+      LEFT JOIN 
+        (
+          SELECT
+              sub_tbl.main_seq,
+              ssd.place_seq, sub_tbl.inverter_seq,
+              module_efficiency, module_square, module_power, module_count,
+              ROUND(AVG(ssd.water_level), 2)  AS avg_water_level,
+              ROUND(AVG(ssd.salinity), 2) AS avg_salinity,
+              ROUND(AVG(ssd.module_rear_temp), 2) AS avg_module_rear_temp,
+              ROUND(AVG(ssd.brine_temp), 2) AS avg_brine_temp,
+              ${selectViewDate},
+              ${selectGroupDate}
+          FROM saltern_sensor_data ssd
+          JOIN
+            (
+              SELECT
+                    rp.main_seq,
+                    sr.place_seq, sr.inverter_seq,
+                    SUM(sr.module_max_power) / SUM(sr.module_square) / 10 AS module_efficiency,
+                    AVG(sr.module_square) * SUM(sr.module_count) AS module_square,
+                    SUM(sr.module_max_power) / SUM(sr.module_square) / 10 * AVG(sr.module_square) * SUM(sr.module_count) / 100 AS module_power,
+                    SUM(sr.module_count) AS module_count
+              FROM seb_relation sr
+              JOIN pw_relation_power rp
+              ON rp.inverter_seq = sr.inverter_seq
+              JOIN pw_inverter inv
+              ON inv.inverter_seq = sr.inverter_seq
+              JOIN main
+              ON main.main_seq = rp.main_seq
+              ${mainSeq !== null ? ` WHERE main.main_seq = ${mainSeq}` : ''}
+              GROUP BY sr.inverter_seq
+            ) sub_tbl
+          ON sub_tbl.place_seq = ssd.place_seq
+          WHERE writedate >= "${searchRange.strStartDate}" 
+           AND writedate < "${searchRange.strEndDate}"
+           AND ssd.place_seq IN (sub_tbl.place_seq)
+          GROUP BY sub_tbl.inverter_seq, group_date
+        ) saltern_tbl
+      ON power_tbl.inverter_seq = saltern_tbl.inverter_seq AND power_tbl.group_date = saltern_tbl.group_date
+      LEFT JOIN 
+        (
+          SELECT
+                main_seq,
+                ROUND(AVG(avg_sm_infrared), 2) AS avg_sm_infrared,
+                ROUND(AVG(avg_temp), 2) AS avg_temp,
+                ROUND(AVG(avg_reh), 2) AS avg_reh,
+                ROUND(AVG(avg_horizontal_solar), 2) AS avg_horizontal_solar,
+                ROUND(SUM(avg_horizontal_solar), 2) AS total_horizontal_solar,
+                ROUND(AVG(avg_inclined_solar), 2) AS avg_inclined_solar,
+                ROUND(SUM(avg_inclined_solar) * 1.17, 2) AS total_inclined_solar,
+                ROUND(AVG(avg_ws), 2) AS avg_ws,
+                ROUND(AVG(avg_uv), 0) AS avg_uv,
+                group_date
+          FROM
+            (
+              SELECT
+                    writedate,
+                    main_seq,
+                    AVG(sm_infrared) AS avg_sm_infrared,
+                    AVG(temp) AS avg_temp,
+                    AVG(reh) AS avg_reh,
+                    AVG(solar) AS avg_horizontal_solar,
+                    AVG(inclined_solar) AS avg_inclined_solar,
+                    AVG(ws) AS avg_ws,
+                    AVG(uv) AS avg_uv,
+                    COUNT(*) AS first_count,
+                    ${selectViewDate},
+                    ${selectGroupDate}
+              FROM weather_device_data
+              WHERE writedate >= "${searchRange.strStartDate}" 
+               AND writedate < "${searchRange.strEndDate}"
+              GROUP BY ${firstGroupByFormat}, main_seq
+            ) AS result_wdd
+          GROUP BY ${groupByFormat}, main_seq
+        ) wdd_tbl
+      ON wdd_tbl.group_date = saltern_tbl.group_date AND wdd_tbl.main_seq = saltern_tbl.main_seq
+      ORDER BY power_tbl.inverter_seq, power_tbl.group_date 
+    `;
+
+    return this.db.single(sql, null, false);
+  }
 };
+
+/**
+ * @desc VIEW TABLE
+ * @typedef {Object} V_GENERAL_ANALYSIS
+ * @property {number} inverter_seq 인버터 정보 시퀀스
+ * @property {string} target_id 인버터 id
+ * @property {string} target_name 인버터 명
+ * @property {string} target_category 장치 카테고리
+ * @property {string} install_place 설치 장소
+ * @property {string} serial_number 고유 코드
+ * @property {string} group_date
+ * @property {number} t_amount
+ * @property {number} t_power_kw
+ * @property {number} avg_power_eff
+ * @property {number} peak_power_eff
+ * @property {number} t_interval_power_cp_kwh
+ * @property {number} t_interval_power_eff
+ * @property {number} avg_water_level
+ * @property {number} avg_salinity
+ * @property {number} avg_module_rear_temp
+ * @property {number} avg_brine_temp
+ * @property {number} module_efficiency
+ * @property {number} module_square
+ * @property {number} module_power
+ * @property {number} module_count
+ * @property {number} avg_temp
+ * @property {number} avg_reh
+ * @property {number} avg_horizontal_solar
+ * @property {number} total_horizontal_solar
+ * @property {number} avg_inclined_solar
+ * @property {number} total_inclined_solar
+ * @property {number} avg_ws
+ * @property {number} avg_uv
+ * @property {number} preWaterModuleTemp 수중 모듈온도 예측치
+ * @property {number} preEarthModuleTemp 육상 모듈온도 예측치
+ * @property {number} preWaterPowerEff 온도에 따른 발전 효율
+ * @property {number} preEarthPowerEff 온도에 따른 발전 효율
+ * @property {number} preWaterPowerKw 발전량 예측
+ * @property {number} preEarthPowerKw 발전량 예측
+ */

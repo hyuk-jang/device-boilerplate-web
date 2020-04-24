@@ -102,7 +102,7 @@ class Control {
     const placeRelationList = await this.controlModel.getTable('v_dv_place_relation');
 
     /** @type {DV_CONTROL_CMD_HISTORY[]} */
-    const controlCmdHistoryRows = await this.controlModel.getTable('dv_control_cmd_history', {
+    const controlCmdHistoryRows = await this.controlModel.getCmdHistory({
       end_date: null,
     });
 
