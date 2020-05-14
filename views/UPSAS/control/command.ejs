@@ -141,7 +141,7 @@
                     <script id="cmdTableTemplate" type="template">
                       {{#if commandList}}
                         {{#each commandList}}
-                        <tr>
+                        <tr data-index={{@index}}>
                           <td class="text-center">{{ wrapCmdFormat }}</td>
                           <td class="text-center">{{ wrapCmdType }}</td>
                           <td class="text-center">{{ wrapCmdStep }}</td>
@@ -338,7 +338,7 @@
       // 명령 관련 갱신 반영
       var currCommandList = [];
       socket.on('updateCommand', function(commandList) {
-        // console.log(commandList);
+        console.log(commandList);
         currCommandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
         // cmdList Handlebars compile
@@ -423,11 +423,18 @@
       });
 
       // 서버로 명령 취소 요청
-      $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', function() {
-        var cmdIndex = $(this)
+      $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
+        var cmdIndex = $('button[name="reqCancelCmd"]')
           .parentsUntil('tr')
           .parent()
           .data('index');
+
+        console.log(
+          $('button[name="reqCancelCmd"]')
+            .parentsUntil('tr')
+            .parent()
+            .data('index'),
+        );
 
         socket.emit('cancelCommand', currCommandList[cmdIndex]) && $('#cmdGoalArea').html('');
       });
@@ -554,6 +561,7 @@
       if (user.user_id === 'vip') {
         vipInit();
       }
+      SVG.find('image').backward();
     </script>
   </body>
 </html>

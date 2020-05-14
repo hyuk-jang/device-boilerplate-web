@@ -23,10 +23,10 @@ function changeNodeColor(nodeId, data) {
     });
 
     // node가 장소, 장비, 센서 인지 구분하기 위한 노드 정보 찾기
+    // 0: 장치, 1: 센서, -1: 미분류
     const { is_sensor: isSensor } = _.find(positionInfo.svgNodeList, {
       defList: [{ id: nodeId }],
     });
-    // 0: 장치, 1: 센서, -1: 미분류
     const dataStatus = checkTrueFalseData(data); // 데이터의 상태
     const nodeElement = SVG(`#${nodeId}`);
 
@@ -35,8 +35,10 @@ function changeNodeColor(nodeId, data) {
       nodeElement.fill(elementDrawInfo.color[0]);
     } else if (dataStatus === TRUE_DATA && isSensor === 0) {
       nodeElement.fill(elementDrawInfo.color[1]);
-    } else {
+    } else if (dataStatus === ERROR_DATA && isSensor === 0) {
       nodeElement.fill(elementDrawInfo.color[2]);
+    } else {
+      nodeElement.fill(elementDrawInfo.color);
     }
   } catch (error) {
     return false;
@@ -166,29 +168,29 @@ function executeCommand(socket, controlType, nodeId) {
  * @param {string} svgDrawType rect, polygon, circle, line ...
  * @param {Object} point point[]
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
- * @param {string} defId 그려지는 svg 도형에 주어줄 장소 또는 노드의 defInfo.id 값
+ * @param {string} id 그려지는 svg 도형에 주어줄 장소 또는 노드의 defInfo.id 값
  */
-function drawSvgElement(svgCanvas, svgDrawType, point, elementDrawInfo, defId) {
+function drawSvgElement(svgCanvas, svgDrawType, point, elementDrawInfo, id, className) {
   switch (svgDrawType.toString()) {
     case 'rect':
-      drawSvgRect(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgRect(svgCanvas, point, elementDrawInfo, id, className);
       break;
     case 'image':
-      drawSvgImage(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgImage(svgCanvas, point, elementDrawInfo, id, className);
       break;
     case 'line':
-      drawSvgLine(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgLine(svgCanvas, point, elementDrawInfo, id, className);
       break;
     case 'circle':
-      drawSvgCircle(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgCircle(svgCanvas, point, elementDrawInfo, id, className);
 
       break;
     case 'polygon':
-      drawSvgPolygon(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgPolygon(svgCanvas, point, elementDrawInfo, id, className);
 
       break;
     case 'pattern':
-      drawSvgPattern(svgCanvas, point, elementDrawInfo, defId);
+      drawSvgPattern(svgCanvas, point, elementDrawInfo, id, className);
 
       break;
     default:
@@ -203,7 +205,7 @@ function drawSvgElement(svgCanvas, svgDrawType, point, elementDrawInfo, defId) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color, opactiy}
  * @param {string} id 그려지는 svg 도형에 주어줄 id 값
  */
-function drawSvgRect(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgRect(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { width, height, radius = 1, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
@@ -216,6 +218,7 @@ function drawSvgRect(svgCanvas, point, elementDrawInfo, id) {
     .move(x, y)
     .radius(radius)
     .attr({
+      class: className,
       id,
       radius,
       opacity,
@@ -230,7 +233,7 @@ function drawSvgRect(svgCanvas, point, elementDrawInfo, id) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
  * @param {string} id 그려지는 svg 도형에 주어줄 id 값
  */
-function drawSvgLine(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgLine(svgCanvas, point, elementDrawInfo, id, className) {
   const [x1, y1, x2, y2] = point;
   const { width, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
@@ -242,6 +245,7 @@ function drawSvgLine(svgCanvas, point, elementDrawInfo, id) {
     .line(x1, y1, x2, y2)
     .stroke({ color: color[0], width, opacity })
     .attr({
+      class: className,
       id,
     });
 }
@@ -253,7 +257,7 @@ function drawSvgLine(svgCanvas, point, elementDrawInfo, id) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
  * @param {string} id 그려지는 svg 도형에 주어줄 id 값
  */
-function drawSvgCircle(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgCircle(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { radius, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
@@ -266,6 +270,7 @@ function drawSvgCircle(svgCanvas, point, elementDrawInfo, id) {
     .move(x, y)
     .stroke('black')
     .attr({
+      class: className,
       id,
       opacity,
     });
@@ -278,7 +283,7 @@ function drawSvgCircle(svgCanvas, point, elementDrawInfo, id) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
  * @param {string} id 그려지는 svg 도형에 주어줄 id 값
  */
-function drawSvgPolygon(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgPolygon(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { width, height, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
@@ -294,6 +299,7 @@ function drawSvgPolygon(svgCanvas, point, elementDrawInfo, id) {
     .move(x, y)
     .stroke('black')
     .attr({
+      class: className,
       id,
       opacity,
     });
@@ -306,7 +312,7 @@ function drawSvgPolygon(svgCanvas, point, elementDrawInfo, id) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
  * @param {string} id 그려지는 svg 도형에 주어줄 id값
  */
-function drawSvgPattern(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgPattern(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { width, height, radius = 1, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
@@ -348,7 +354,7 @@ function drawSvgPattern(svgCanvas, point, elementDrawInfo, id) {
  * @param {mElementDrawInfo} elementDrawInfo {width, height, radius, color}
  * @param {string} id 그려지는 svg 도형에 주어줄 id값
  */
-function drawSvgImage(svgCanvas, point, elementDrawInfo, id) {
+function drawSvgImage(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { width, height, imgUrl, radius = 1, opacity = 1 } = elementDrawInfo;
 
@@ -382,6 +388,14 @@ function checkTrueFalseData(data) {
     result = ERROR_DATA;
   }
   return result;
+}
+
+/** TODO: zIndex 재정의 */
+function redefineZIndex() {
+  // SVG.find('.place').back();
+  SVG.find('.device').front();
+  SVG.find('.sensor').front();
+  SVG.find('text').front();
 }
 
 /**
@@ -422,14 +436,36 @@ function drawSvgBasePlace(documentId, isKorText = true) {
           const { type, elementDrawInfo } = _.find(realMap.drawInfo.frame.svgModelResourceList, {
             id: resourceId,
           });
-          console.log(id);
+
+          const { is_sensor: isSensor } = _.find(placeNodeList, {
+            defList: [{ id }],
+          });
+
+          let className;
+          switch (isSensor) {
+            case 0:
+              className = 'device';
+              break;
+            case 1:
+              className = 'sensor';
+              break;
+            case -1:
+              className = 'unknown';
+              break;
+            default:
+              className = 'place';
+              break;
+          }
+
           // 장소에 맞는 도형을 찾아 그린다.
-          drawSvgElement(svgCanvas, type, point, elementDrawInfo, id);
+          drawSvgElement(svgCanvas, type, point, elementDrawInfo, id, className);
           // 그려진 장소 위에 해당 장소의 이름 그리기
           writeSvgText(svgCanvas, defInfo, { type, elementDrawInfo }, isKorText);
         });
       });
     });
+
+    redefineZIndex();
   } catch (error) {
     // console.log(error);
     return false;
@@ -531,5 +567,3 @@ function changeLang() {
   //TODO: 현재 그려진 TEXT 상태 확인 (한글 or 영문)
   const currLang = SVG('svgCanvas').attr().lang;
 }
-
-function setZIndex() {}
