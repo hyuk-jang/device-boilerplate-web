@@ -3,7 +3,6 @@
  */
 function vipInit() {
   var svgCanvas = SVG('#svgCanvas');
-  console.log(svgCanvas);
 
   // 저수지 물결
   svgCanvas
