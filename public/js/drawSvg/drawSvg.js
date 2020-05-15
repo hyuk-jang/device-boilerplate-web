@@ -482,20 +482,14 @@ function showNodeData(nodeId, data = '') {
   try {
     const nodePrefix = nodeId.substring(nodeId.length - 4, nodeId - 1);
 
-    const { data_unit: dataUnit } = _.find(map.setInfo.nodeStructureList, {
+    let { data_unit: dataUnit } = _.find(map.setInfo.nodeStructureList, {
       defList: [{ target_prefix: nodePrefix }],
     });
 
+    dataUnit = data === '' ? '' : dataUnit;
+
     // 데이터 값에 따른 상태 색 변경
     changeNodeColor(nodeId, data);
-
-    // if (SVG(`#${nodeId}_data`).node.innerHTML !== data) {
-    // console.log(data);
-    // SVG(`#${nodeId}`);
-    // .animate()
-    // .attr({ stroke: '#000000' })
-    // .loop(true, true);
-    // }
 
     // default Text가 숨겨진 상태이면 데이터 표시 생략
     if (checkHidableText(nodeId)) return false;
