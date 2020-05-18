@@ -350,7 +350,7 @@ class Solar2WayDP extends DeviceProtocol {
    * @return {blockTableInfo}
    */
   get blockFarmSensor() {
-    console.trace('blockFarmSensor');
+    // console.trace('blockFarmSensor');
     return {
       blockTableName: 'farm_sensor_data',
       baseTableInfo: {
@@ -376,16 +376,19 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.inclinedSolar,
                   toKey: 'inclined_solar',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.horizontalSolar,
                   toKey: 'pv_under_solar',
                   mixColor: '#fab005',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.pvUnderlyingSolar,
                   toKey: 'pv_under_solar',
                   mixColor: '#4c6ef5',
+                  toFixed: 4,
                 },
               ],
               yTitle: '일사량',
@@ -402,6 +405,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.lux,
                   toKey: 'lux',
+                  toFixed: 4,
                 },
               ],
               yTitle: '조도',
@@ -418,6 +422,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilWaterValue,
                   toKey: 'soil_ec',
+                  toFixed: 4,
                 },
               ],
               yTitle: '토양 EC',
@@ -435,11 +440,13 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilTemperature,
                   toKey: 'soil_temp',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.outsideAirTemperature,
                   toKey: 'oa_temp',
                   mixColor: '#5c940d',
+                  toFixed: 4,
                 },
               ],
               yTitle: '온도',
@@ -457,11 +464,13 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilReh,
                   toKey: 'soil_reh',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.outsideAirReh,
                   toKey: 'oa_reh',
                   mixColor: '#d9480f',
+                  toFixed: 4,
                 },
               ],
               yTitle: '습도',
@@ -478,6 +487,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.windSpeed,
                   toKey: 'oa_ws',
+                  toFixed: 4,
                 },
               ],
               yTitle: '풍속',
@@ -493,6 +503,7 @@ class Solar2WayDP extends DeviceProtocol {
               blockConfigList: [
                 {
                   fromKey: BASE_FARM_KEY.co2,
+                  toFixed: 4,
                 },
               ],
               yTitle: 'co2',
@@ -509,6 +520,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.r1,
                   toKey: 'oa_r1',
+                  toFixed: 4,
                 },
               ],
               yTitle: '강우량',
@@ -525,6 +537,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.isRain,
                   toKey: 'oa_is_rain',
+                  toFixed: 4,
                 },
               ],
               yTitle: '강우 감지 여부',
@@ -565,6 +578,7 @@ class Solar2WayDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.powerGridKw,
                   toKey: 'power_kw',
                   convertName: '',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'kW',
@@ -583,6 +597,7 @@ class Solar2WayDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.pvVol,
                   toKey: 'pv_v',
                   convertName: '전압',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'V',
@@ -594,6 +609,7 @@ class Solar2WayDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.pvAmp,
                   toKey: 'pv_a',
                   convertName: '전류',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'A',
@@ -612,18 +628,21 @@ class Solar2WayDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.gridRsVol,
                   toKey: 'grid_rs_v',
                   convertName: 'RS 전압',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridStVol,
                   toKey: 'grid_st_v',
                   convertName: 'ST 전압',
                   mixColor: '#eeeeee',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTrVol,
                   toKey: 'grid_tr_v',
                   convertName: 'TR 전압',
                   mixColor: '#dddddd',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'V',
@@ -635,16 +654,19 @@ class Solar2WayDP extends DeviceProtocol {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
                   convertName: 'R 전류',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridSAmp,
                   toKey: 'grid_s_a',
                   convertName: 'S 전류',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTAmp,
                   toKey: 'grid_t_a',
                   convertName: 'T 전류',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'A',
@@ -684,7 +706,7 @@ class Solar2WayDP extends DeviceProtocol {
                   convertName: '',
                   calcType: this.CALC_TYPE.MAX,
                   calculate: 0.001,
-                  toFixed: 3,
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'MWh',

@@ -426,15 +426,18 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.inclinedSolar,
                   toKey: 'inclined_solar',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.horizontalSolar,
                   toKey: 'pv_under_solar',
+                  toFixed: 4,
                   mixColor: '#fab005',
                 },
                 {
                   fromKey: BASE_FARM_KEY.pvUnderlyingSolar,
                   toKey: 'pv_under_solar',
+                  toFixed: 4,
                   mixColor: '#4c6ef5',
                 },
               ],
@@ -452,6 +455,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.lux,
                   toKey: 'lux',
+                  toFixed: 4,
                 },
               ],
               yTitle: '조도',
@@ -468,6 +472,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilWaterValue,
                   toKey: 'soil_ec',
+                  toFixed: 4,
                 },
               ],
               yTitle: '토양 EC',
@@ -485,10 +490,12 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilTemperature,
                   toKey: 'soil_temp',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.outsideAirTemperature,
                   toKey: 'oa_temp',
+                  toFixed: 4,
                   mixColor: '#5c940d',
                 },
               ],
@@ -507,10 +514,12 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.soilReh,
                   toKey: 'soil_reh',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_FARM_KEY.outsideAirReh,
                   toKey: 'oa_reh',
+                  toFixed: 4,
                   mixColor: '#d9480f',
                 },
               ],
@@ -528,6 +537,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.windSpeed,
                   toKey: 'oa_ws',
+                  toFixed: 4,
                 },
               ],
               yTitle: '풍속',
@@ -543,6 +553,7 @@ class FarmParallelDP extends DeviceProtocol {
               blockConfigList: [
                 {
                   fromKey: BASE_FARM_KEY.co2,
+                  toFixed: 4,
                 },
               ],
               yTitle: 'co2',
@@ -559,6 +570,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.r1,
                   toKey: 'oa_r1',
+                  toFixed: 4,
                 },
               ],
               yTitle: '강우량',
@@ -575,6 +587,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_FARM_KEY.isRain,
                   toKey: 'oa_is_rain',
+                  toFixed: 4,
                 },
               ],
               yTitle: '강우 감지 여부',
@@ -614,6 +627,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerGridKw,
                   toKey: 'power_kw',
+                  toFixed: 4,
                   convertName: '',
                 },
               ],
@@ -632,6 +646,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.pvVol,
                   toKey: 'pv_v',
+                  toFixed: 4,
                   convertName: '전압',
                 },
               ],
@@ -643,6 +658,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.pvAmp,
                   toKey: 'pv_a',
+                  toFixed: 4,
                   convertName: '전류',
                 },
               ],
@@ -661,17 +677,20 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRsVol,
                   toKey: 'grid_rs_v',
+                  toFixed: 4,
                   convertName: 'RS 전압',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridStVol,
                   toKey: 'grid_st_v',
+                  toFixed: 4,
                   convertName: 'ST 전압',
                   mixColor: '#eeeeee',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTrVol,
                   toKey: 'grid_tr_v',
+                  toFixed: 4,
                   convertName: 'TR 전압',
                   mixColor: '#dddddd',
                 },
@@ -684,16 +703,19 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
+                  toFixed: 4,
                   convertName: 'R 전류',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridSAmp,
                   toKey: 'grid_s_a',
+                  toFixed: 4,
                   convertName: 'S 전류',
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTAmp,
                   toKey: 'grid_t_a',
+                  toFixed: 4,
                   convertName: 'T 전류',
                 },
               ],
@@ -711,6 +733,7 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerCpKwh,
                   toKey: 'power_cp_kwh',
+                  toFixed: 4,
                   convertKey: 'interval_power_cp_kwh',
                   convertName: '',
                   calcType: this.CALC_TYPE.INTERVAL_MAX,
@@ -734,7 +757,7 @@ class FarmParallelDP extends DeviceProtocol {
                   convertName: '',
                   calcType: this.CALC_TYPE.MAX,
                   calculate: 0.001,
-                  toFixed: 3,
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'MWh',
