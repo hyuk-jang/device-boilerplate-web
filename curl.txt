@@ -1,0 +1,10 @@
+curl -X POST -H "Authorization: key=AAAAauDVtyM:APA91bEObUiFPfcUIUql9Rqqmlnmdp1CGLg05iJ80AgnVdNUaSFPYsz93Q9nWeeehi-1opio45WyMo4HDcQ-0tVoK0ucPksPxMd4NaUJMvtZ8_nndbcLYCL-87WB808t2AM97Evzz35K" -H "Content-Type: application/json"    -d '{
+  "data": {
+    "notification": {
+        "title": "Device Error",
+        "body": "WD 005 Error",
+        "icon": "/ab-logo.png",
+    }
+  },
+  "to": "fvD8zXLKDa4:APA91bFWda6y8N8sdThLo_X096jFRnCRz1uj8N1GCEWCtJnrXcO6t8M63FnDvNp_CBSJLYpQjfbgAXmEWZQ5O5AprmL5m5hmqoBY8K66nu8-pb7E1A_Zs01C0eNE4d-_fTSWbwNqRWiX"
+}' https://fcm.googleapis.com/fcm/send
