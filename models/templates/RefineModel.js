@@ -264,8 +264,6 @@ class RefineModel extends BiModule {
     // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
     const blockDataRowsGroup = commonUtil.extPerfectRows(baseToKey, dataRows, strGroupDateList);
 
-    // BU.CLIN(blockDataRowsGroup);
-
     // block 목록만큼의 동적 차트 생성
     const refinedDomChart = blockChartList.map(blockChartInfo => {
       // Chart Dom을 생성하기 위한 옵션 선언
@@ -286,8 +284,7 @@ class RefineModel extends BiModule {
         // 실제 Block Chart 목록을 돌면서 의미있는 차트 정보 생성
         blockConfigList.forEach(blockConfig => {
           // convertKey가 없을 경우 toKey로 대체
-          const { fromKey, toKey, convertKey = toKey, mixColor = '' } = blockConfig;
-          const { convertName } = blockConfig;
+          const { fromKey, toKey, convertKey = toKey, convertName, mixColor = '' } = blockConfig;
 
           // 현재 Dom 정보에서 표현해줄 chart line 갯수를 뽑아내기 위하여 group 처리된 목록을 순회
           _.forEach(blockDataRowsGroup, (blockDataRows, groupSeq) => {
@@ -423,31 +420,59 @@ class RefineModel extends BiModule {
           return convertKey;
         })
         .map(calcInfo => {
-          const { toKey, convertKey = toKey, calcType, calculate, toFixed = 1 } = calcInfo;
+          const {
+            expressionInfo,
+            toKey,
+            convertKey = toKey,
+            calcType,
+            scale,
+            toFixed = 1,
+          } = calcInfo;
           const { AVG, INTERVAL_MAX, MAX, MIN } = deviceProtocol.CALC_TYPE;
 
           let dynamicSql = '';
-          switch (calcType) {
-            case INTERVAL_MAX:
-              dynamicSql = `MAX(${toKey}) - MIN(${toKey})`;
-              break;
-            case MAX:
-              dynamicSql = `MAX(${toKey})`;
-              break;
-            case MIN:
-              dynamicSql = `MIN(${toKey})`;
-              break;
-            case AVG:
-            default:
-              dynamicSql = `AVG(${toKey})`;
-              break;
+
+          if (typeof expressionInfo === 'object') {
+            const queryTemplate = _.template('<%= expression %> AS <%= columnId %>');
+            const { columnId, scale: expScale, toFixed: expToFixed = 1 } = expressionInfo;
+            let { firstExpression } = expressionInfo;
+
+            if (_.isNumber(expScale)) {
+              firstExpression = `(${firstExpression}) * ${expScale}`;
+            }
+            if (_.isNumber(expToFixed)) {
+              firstExpression = `ROUND(${firstExpression}, ${expToFixed})`;
+            }
+
+            dynamicSql = queryTemplate({
+              expression: firstExpression,
+              columnId,
+            });
+            // BU.CLI(dynamicSql);
+          } else {
+            switch (calcType) {
+              case INTERVAL_MAX:
+                dynamicSql = `MAX(${toKey}) - MIN(${toKey})`;
+                break;
+              case MAX:
+                dynamicSql = `MAX(${toKey})`;
+                break;
+              case MIN:
+                dynamicSql = `MIN(${toKey})`;
+                break;
+              case AVG:
+              default:
+                dynamicSql = `AVG(${toKey})`;
+                break;
+            }
+
+            if (_.isNumber(scale) && scale !== 1) {
+              dynamicSql = `ROUND((${dynamicSql}) * ${scale}, ${toFixed}) AS ${convertKey}`;
+            } else {
+              dynamicSql = `ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
+            }
           }
 
-          if (_.isNumber(calculate) && calculate !== 1) {
-            dynamicSql = `ROUND((${dynamicSql}) * ${calculate}, ${toFixed}) AS ${convertKey}`;
-          } else {
-            dynamicSql = `ROUND(${dynamicSql}, ${toFixed}) AS ${convertKey}`;
-          }
           return dynamicSql;
         })
         .value();
@@ -484,6 +509,7 @@ class RefineModel extends BiModule {
         dataRows,
       };
     } catch (error) {
+      // BU.CLI(error);
       return [];
     }
   }

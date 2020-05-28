@@ -54,7 +54,7 @@
  * @typedef {Object} dbTableDynamicSqlConfig 레포트 메뉴를 구성하기 위한 가이드라인
  * @property {string} fromColumnId Table 컬럼 ID
  * @property {string=} toColumnId default: fromColumnId, 변환 후 Table 컬럼 ID.
- * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @property {number=} scale 데이터 곱셈 배율. default: 1
  * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
  * @property {string=} calcType 데이터 가공 값, 기본 AVG
  * @example
@@ -103,10 +103,11 @@
  * @property {string} toKey table Column
  * @property {string=} convertKey default: toKey
  * @property {string=} convertName default: Place Relation Node Def Name
- * @property {number=} calculate 데이터 곱셈 배율. default: 1
+ * @property {number=} scale 데이터 곱셈 배율. default: 1
  * @property {number=} toFixed 가공을 통해 나온 값의 소수점 처리 자리 수. default: 1
  * @property {string=} calcType 데이터 가공 값, 기본 AVG
  * @property {string=} mixColor 원 색에 조합할 색상
+ * @property {expressionInfo=} expressionInfo 원 색에 조합할 색상
  * @example
  * calcType AVG 평균 = 합산 평균 default
  * calcType SUB 평균 = 구간 Max - Min

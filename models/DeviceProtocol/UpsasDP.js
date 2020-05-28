@@ -789,6 +789,103 @@ class UpsasDP extends DeviceProtocol {
             },
           ],
         },
+        {
+          domId: 'connector_power_chart',
+          title: '전력',
+          chartOptionList: [
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh1,
+                  toKey: 'p_ch_1',
+                  convertName: '1CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_1) * AVG(v_ch_1)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_1',
+                  },
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh2,
+                  toKey: 'p_ch_2',
+                  convertName: '2CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_2) * AVG(v_ch_2)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_2',
+                  },
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh3,
+                  toKey: 'p_ch_3',
+                  convertName: '3CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_3) * AVG(v_ch_3)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_3',
+                  },
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh4,
+                  toKey: 'p_ch_4',
+                  convertName: '4CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_4) * AVG(v_ch_4)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_4',
+                  },
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh5,
+                  toKey: 'p_ch_5',
+                  convertName: '5CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_5) * AVG(v_ch_5)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_5',
+                  },
+                },
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh6,
+                  toKey: 'p_ch_6',
+                  convertName: '6CH 전력',
+                  expressionInfo: {
+                    firstExpression: 'AVG(a_ch_6) * AVG(v_ch_6)',
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_ch_6',
+                  },
+                },
+              ],
+              // dataUnit: 'A',
+              yTitle: '전력 (kW)',
+            },
+            {
+              blockConfigList: [
+                {
+                  fromKey: BASE_SENSOR_KEY.volCh6,
+                  toKey: 'p_total',
+                  mixColor: '#eeeeee',
+                  convertName: '총합 전력',
+                  expressionInfo: {
+                    firstExpression: `(AVG(a_ch_1) + AVG(a_ch_2) + AVG(a_ch_3) + AVG(a_ch_4)+ AVG(a_ch_5) + AVG(a_ch_6))
+                     * (AVG(v_ch_1) + AVG(v_ch_2) + AVG(v_ch_3) + AVG(v_ch_4) + AVG(v_ch_5) + AVG(v_ch_6)) / 6`,
+                    scale: 0.001,
+                    toFixed: 5,
+                    columnId: 'p_total',
+                  },
+                },
+              ],
+              // dataUnit: 'A',
+              yTitle: '전력 (kW)',
+            },
+          ],
+        },
       ],
     };
   }
@@ -950,7 +1047,7 @@ class UpsasDP extends DeviceProtocol {
                   convertKey: 'max_power_cp_mwh',
                   convertName: '',
                   calcType: this.CALC_TYPE.MAX,
-                  calculate: 0.001,
+                  scale: 0.001,
                   toFixed: 4,
                 },
               ],

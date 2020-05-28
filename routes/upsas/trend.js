@@ -94,7 +94,7 @@ router.get(
   }),
 );
 
-/** 인버터 트렌드 */
+/**  공통 트렌드 */
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {

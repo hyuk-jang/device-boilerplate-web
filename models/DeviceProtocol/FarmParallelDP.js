@@ -756,7 +756,7 @@ class FarmParallelDP extends DeviceProtocol {
                   convertKey: 'max_power_cp_mwh',
                   convertName: '',
                   calcType: this.CALC_TYPE.MAX,
-                  calculate: 0.001,
+                  scale: 0.001,
                   toFixed: 4,
                 },
               ],
