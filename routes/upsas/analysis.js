@@ -659,7 +659,7 @@ router.get(
 
     const {
       regressionB1 = 0.945,
-      regressionB2 = 10.93,
+      regressionB2 = 11.2,
       regressionB3 = -0.19,
       regressionK = 0.9,
     } = req.query;

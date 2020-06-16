@@ -168,7 +168,7 @@ module.exports = class extends BiModule {
   refineGeneralAnalysis(generalAnalysisRows, regressionAnalysisInfo = {}) {
     const {
       regressionB1 = 0.945,
-      regressionB2 = 10.93,
+      regressionB2 = 11.2,
       regressionB3 = -0.19,
       regressionK = 0.9,
     } = regressionAnalysisInfo;
@@ -180,6 +180,7 @@ module.exports = class extends BiModule {
     generalAnalysisRows.forEach(row => {
       const {
         avg_temp: outdoorTemp,
+        avg_water_level: waterLevel,
         group_date: groupDate,
         module_efficiency: moduleEff,
         module_square: moduleSquare,
@@ -195,11 +196,15 @@ module.exports = class extends BiModule {
       // 수중 모듈 온도 예측 치
       const preWaterModuleTemp =
         regressionB1 * outdoorTemp + regressionB2 * horizontalSolar + regressionB3;
+
+      // 수위에 따른 모듈 효율 감소
+      const reduceWaterLevle = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
+
       // 수중 태양광 발전 효율 예측
       const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
       // 수중 태양광 발전량 예측
       const preWaterPowerKw =
-        (preWaterPowerEff * horizontalSolar * this.getWaterLevelReduceRate() * moduleSquare) / 100;
+        (preWaterPowerEff * horizontalSolar * reduceWaterLevle * moduleSquare) / 100;
 
       // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
 
