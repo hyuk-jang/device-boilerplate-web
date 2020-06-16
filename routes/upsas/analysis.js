@@ -39,7 +39,7 @@ const subCategoryList = [
     btnName: '손실저하 요인분석',
   },
   {
-    subCategory: 'abnormalCondition',
+    subCategory: 'powerPrediction',
     btnName: '이상상태 요인분석',
   },
 ];
@@ -422,7 +422,7 @@ router.get(
       return {
         name: `${invRow.install_place} ${invRow.serial_number}`,
         color: colorTable1[index],
-        data: gPowerTrendRows[invRow.inverter_seq.toString()].map(row => [
+        data: _.get(gPowerTrendRows, invRow.inverter_seq.toString(), []).map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.avg_power_kw,
         ]),
@@ -600,7 +600,7 @@ router.get(
 
 // 이상상태 요인 분석
 router.get(
-  ['/:siteId/abnormalCondition', '/:siteId/abnormalCondition/:subCategoryId'],
+  ['/:siteId/powerPrediction', '/:siteId/powerPrediction/:subCategoryId'],
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { mainWhere, siteId, subCategoryId },
@@ -678,13 +678,11 @@ router.get(
 
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 
-    //
-
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 발전량`,
         color: colorTable2[index],
-        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+        data: _.get(gGeneralAnalysisRows, invRow.inverter_seq.toString(), []).map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.t_power_kw,
         ]),
@@ -696,7 +694,7 @@ router.get(
         name: `${invRow.install_place} ${invRow.serial_number} 예측 발전량`,
         color: colorTable2[index],
         dashStyle: 'ShortDot',
-        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+        data: _.get(gGeneralAnalysisRows, invRow.inverter_seq.toString(), []).map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.preWaterPowerKw,
         ]),
@@ -731,7 +729,7 @@ router.get(
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 모듈 온도`,
         color: colorTable2[index],
-        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+        data: _.get(gGeneralAnalysisRows, invRow.inverter_seq.toString(), []).map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.avg_module_rear_temp,
         ]),
@@ -743,7 +741,7 @@ router.get(
         name: `${invRow.install_place} ${invRow.serial_number} 예측 모듈 온도`,
         color: colorTable2[index],
         dashStyle: 'ShortDot',
-        data: gGeneralAnalysisRows[invRow.inverter_seq.toString()].map(row => [
+        data: _.get(gGeneralAnalysisRows, invRow.inverter_seq.toString(), []).map(row => [
           commonUtil.convertDateToUTC(row.group_date),
           row.preWaterModuleTemp,
         ]),
@@ -756,11 +754,7 @@ router.get(
     // BU.CLI(weatherTrendRows);
     // 분석 레포트
     // TODO: 특정 시점 순간의 search 값 필요
-    const selectedSearchDate = _.last(weatherTrendRows).group_date;
-
-    const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
-      row => row.group_date === selectedSearchDate,
-    );
+    const selectedSearchDate = _.get(_.last(weatherTrendRows), 'group_date');
 
     const systemList = _.chain(generalAnalysisRows)
       .filter(row => row.group_date === selectedSearchDate)
@@ -790,21 +784,36 @@ router.get(
       })
       .value();
 
-    // _(weatherTrendRows).find(row => row.group_date === selectedSearchDate)
+    let analysisReport = {};
 
-    const analysisReport = {
-      envInfo: {
-        solar,
-        outdoorTemp,
-      },
-      systemList,
-    };
+    try {
+      const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
+        row => row.group_date === selectedSearchDate,
+      );
+      analysisReport = {
+        envInfo: {
+          solar,
+          outdoorTemp,
+        },
+        systemList,
+      };
+    } catch (error) {
+      analysisReport = {
+        envInfo: {
+          solar: null,
+          outdoorTemp: null,
+        },
+        systemList,
+      };
+    }
+
+    // _(weatherTrendRows).find(row => row.group_date === selectedSearchDate)
 
     // BU.CLI(analysisReport);
 
     _.set(req.locals, 'analysisReport', analysisReport);
 
-    res.render('./UPSAS/analysis/abnormalCondition', req.locals);
+    res.render('./UPSAS/analysis/powerPrediction', req.locals);
   }),
 );
 

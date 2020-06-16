@@ -220,12 +220,12 @@ module.exports = class extends BiModule {
         0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
         34 * horizontalSolar;
 
-      row.preWaterModuleTemp = preWaterModuleTemp;
-      row.preEarthModuleTemp = preEarthModuleTemp;
-      row.preWaterPowerEff = preWaterPowerEff;
-      row.preWaterPowerKw = preWaterPowerKw;
-      row.preEarthPowerEff = preEarthPowerEff;
-      row.preEarthPowerKw = preEarthPowerKw;
+      row.preWaterModuleTemp = _.round(preWaterModuleTemp, 4);
+      row.preEarthModuleTemp = _.round(preEarthModuleTemp, 4);
+      row.preWaterPowerEff = _.round(preWaterPowerEff, 4);
+      row.preWaterPowerKw = _.round(preWaterPowerKw, 4);
+      row.preEarthPowerEff = _.round(preEarthPowerEff, 4);
+      row.preEarthPowerKw = _.round(preEarthPowerKw, 4);
     });
   }
 
@@ -366,11 +366,11 @@ module.exports = class extends BiModule {
           SELECT
                 inverter_seq, target_id, target_name, serial_number, target_category, install_place, chart_sort_rank,
                 SUM(amount) t_amount,
-                SUM(avg_power_kw) AS t_power_kw,
-                SUM(avg_power_kw) / SUM(amount) * 100 AS avg_power_eff,
+                ROUND(SUM(avg_power_kw), 4)  AS t_power_kw,
+                ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 4) AS avg_power_eff,
                 MAX(peak_power_eff) AS peak_power_eff,
-                SUM(interval_power_cp_kwh) AS t_interval_power_cp_kwh,
-                SUM(interval_power_cp_kwh) / SUM(amount) * 100 AS t_interval_power_eff,
+                ROUND(SUM(interval_power_cp_kwh), 4) AS t_interval_power_cp_kwh,
+                ROUND(SUM(interval_power_cp_kwh) / SUM(amount) * 100, 4) AS t_interval_power_eff,
                 group_date
           FROM
             (
