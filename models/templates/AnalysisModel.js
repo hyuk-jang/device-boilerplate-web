@@ -182,6 +182,7 @@ module.exports = class extends BiModule {
         avg_temp: outdoorTemp,
         avg_water_level: waterLevel,
         group_date: groupDate,
+        add_reduce_rate: addReduceRate = 1,
         module_efficiency: moduleEff,
         module_square: moduleSquare,
       } = row;
@@ -198,13 +199,18 @@ module.exports = class extends BiModule {
         regressionB1 * outdoorTemp + regressionB2 * horizontalSolar + regressionB3;
 
       // 수위에 따른 모듈 효율 감소
-      const reduceWaterLevle = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
+      const reduceWaterLevel = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
 
       // 수중 태양광 발전 효율 예측
       const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
       // 수중 태양광 발전량 예측
       const preWaterPowerKw =
-        (preWaterPowerEff * horizontalSolar * reduceWaterLevle * moduleSquare) / 100;
+        (preWaterPowerEff *
+          horizontalSolar *
+          reduceWaterLevel *
+          (1 - addReduceRate / 100) *
+          moduleSquare) /
+        100;
 
       // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
 
@@ -356,9 +362,9 @@ module.exports = class extends BiModule {
     
       SELECT
               power_tbl.inverter_seq, power_tbl.target_id, power_tbl.target_name, power_tbl.target_category, power_tbl.install_place, power_tbl.serial_number,
-              power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
+              power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_factor, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
               saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp, saltern_tbl.avg_brine_temp,
-              saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
+              saltern_tbl.add_reduce_rate, saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
               wdd_tbl.avg_temp, wdd_tbl.avg_reh, wdd_tbl.avg_horizontal_solar, wdd_tbl.total_horizontal_solar,
               wdd_tbl.avg_inclined_solar, wdd_tbl.total_inclined_solar, wdd_tbl.avg_ws, wdd_tbl.avg_uv
       FROM
@@ -367,6 +373,7 @@ module.exports = class extends BiModule {
                 inverter_seq, target_id, target_name, serial_number, target_category, install_place, chart_sort_rank,
                 SUM(amount) t_amount,
                 ROUND(SUM(avg_power_kw), 4)  AS t_power_kw,
+                ROUND(SUM(avg_power_kw) / SUM(avg_pv_kw) * 100, 4)  AS avg_power_factor,
                 ROUND(SUM(avg_power_kw) / SUM(amount) * 100, 4) AS avg_power_eff,
                 MAX(peak_power_eff) AS peak_power_eff,
                 ROUND(SUM(interval_power_cp_kwh), 4) AS t_interval_power_cp_kwh,
@@ -377,6 +384,7 @@ module.exports = class extends BiModule {
               SELECT
                     inv_tbl.inverter_seq, target_id, target_name, serial_number, target_category, install_place, amount, chart_sort_rank,
                     inv_data.writedate,
+                    AVG(inv_data.pv_kw) AS avg_pv_kw,
                     AVG(inv_data.power_kw) AS avg_power_kw,
                     ROUND(MAX(inv_data.power_kw) / amount * 100, 3) AS peak_power_eff,
                     MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
@@ -406,7 +414,7 @@ module.exports = class extends BiModule {
           SELECT
               sub_tbl.main_seq,
               ssd.place_seq, sub_tbl.inverter_seq,
-              module_efficiency, module_square, module_power, module_count,
+              add_reduce_rate, module_efficiency, module_square, module_power, module_count,
               ROUND(AVG(ssd.water_level), 2)  AS avg_water_level,
               ROUND(AVG(ssd.salinity), 2) AS avg_salinity,
               ROUND(AVG(ssd.module_rear_temp), 2) AS avg_module_rear_temp,
@@ -419,6 +427,7 @@ module.exports = class extends BiModule {
               SELECT
                     rp.main_seq,
                     sr.place_seq, sr.inverter_seq,
+                    AVG(sr.add_reduce_rate) AS add_reduce_rate,
                     SUM(sr.module_max_power) / SUM(sr.module_square) / 10 AS module_efficiency,
                     AVG(sr.module_square) * SUM(sr.module_count) AS module_square,
                     SUM(sr.module_max_power) / SUM(sr.module_square) / 10 * AVG(sr.module_square) * SUM(sr.module_count) / 100 AS module_power,
@@ -496,6 +505,7 @@ module.exports = class extends BiModule {
  * @property {string} group_date
  * @property {number} t_amount
  * @property {number} t_power_kw
+ * @property {number} avg_power_factor
  * @property {number} avg_power_eff
  * @property {number} peak_power_eff
  * @property {number} t_interval_power_cp_kwh
@@ -504,6 +514,7 @@ module.exports = class extends BiModule {
  * @property {number} avg_salinity
  * @property {number} avg_module_rear_temp
  * @property {number} avg_brine_temp
+ * @property {number} add_reduce_rate
  * @property {number} module_efficiency
  * @property {number} module_square
  * @property {number} module_power

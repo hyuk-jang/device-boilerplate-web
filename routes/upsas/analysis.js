@@ -598,7 +598,7 @@ router.get(
   }),
 );
 
-// 이상상태 요인 분석
+// 발전 예측 및 손실 저하 분석
 router.get(
   ['/:siteId/powerPrediction', '/:siteId/powerPrediction/:subCategoryId'],
   asyncHandler(async (req, res) => {

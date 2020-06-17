@@ -43,7 +43,7 @@
               </div>
             </div>
             <div class="search_box ">
-              <span class="search_title">보정계수 K</span>
+              <span class="search_title">손실 계수 K</span>
               <div class="search_body">
                 <input class="input_tre" id="regressionK" name="subSearch" type="text" />
               </div>
@@ -99,7 +99,7 @@
             </div>
           </div>
         </div>
-        <div class="container_row ">
+        <!-- <div class="container_row ">
           <div class="component_piece_box">
             <article class="component_piece_area">
               <header>발전 예측 분석</header>
@@ -135,11 +135,54 @@
               </div>
             </article>
           </div>
-        </div>
+        </div> -->
         <div class="container_row flex_dir_col">
           <div id="divDomArea" class="flex_box">
             <div class="lineChart_box default_area" id="section_1"></div>
             <div class="lineChart_box default_area" id="section_2"></div>
+          </div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">측정시간 &nbsp; <span id="measureTime"> </span></p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <colgroup>
+                <col width="5%" />
+                <col width="10%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th rowspan="2">번호</th>
+                  <th rowspan="2">시간</th>
+                  <th colspan="5">발전 예측</th>
+                  <th colspan="4">손실 저하 요인</th>
+                  <th rowspan="2">잔여 오차율(%)</th>
+                </tr>
+                <tr>
+                  <th>모듈 온도 손실(%)</th>
+                  <th>수위 손실(%)</th>
+                  <th>예측 발전량(kW)</th>
+                  <th>실측 발전량(kW)</th>
+                  <th>오차율(%)</th>
+
+                  <th>인버터 운전 손실(%)</th>
+                  <th>모듈 노후화 손실(%)</th>
+                  <th>어레이 미스매치 손실(%)</th>
+                  <th>손실 계수(%)</th>
+                </tr>
+              </thead>
+              <tbody id="inverterStatus"></tbody>
+            </table>
           </div>
         </div>
       </div>
