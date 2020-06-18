@@ -713,13 +713,13 @@ router.get(
         color: 'red',
         // dashStyle: 'ShortDash',
       },
-      {
-        dataKey: 'avg_temp',
-        name: '기온',
-        yAxis: 2,
-        color: 'green',
-        // dashStyle: 'ShortDash',
-      },
+      // {
+      //   dataKey: 'avg_temp',
+      //   name: '기온',
+      //   yAxis: 2,
+      //   color: 'green',
+      //   // dashStyle: 'ShortDash',
+      // },
     ]);
 
     powerChartData = powerChartData.concat(...predictPowerChartData, weatherCharts);

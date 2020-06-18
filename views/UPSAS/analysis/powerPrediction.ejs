@@ -245,87 +245,87 @@
         },
       ];
 
-      // 발전 예측 분석 차트
-      makeColumnChart({
-        domId: 'predictionRate',
-        xAxis: {
-          categories: _.map(analysisReport.systemList, 'name'),
-        },
-        yAxis: [
-          {
-            min: 0,
-            title: {
-              text: '발전량',
-            },
-            labels: {
-              format: '{value} kW',
-              style: {
-                color: Highcharts.getOptions().colors[1],
-              },
-            },
-          },
-        ],
-        series: predictPowerOpions.map(option => {
-          const { key, name, valueSuffix } = option;
-          return {
-            name,
-            data: _.map(analysisReport.systemList, key),
-            tooltip: {
-              valueSuffix,
-            },
-          };
-        }),
-      });
+      // // 발전 예측 분석 차트
+      // makeColumnChart({
+      //   domId: 'predictionRate',
+      //   xAxis: {
+      //     categories: _.map(analysisReport.systemList, 'name'),
+      //   },
+      //   yAxis: [
+      //     {
+      //       min: 0,
+      //       title: {
+      //         text: '발전량',
+      //       },
+      //       labels: {
+      //         format: '{value} kW',
+      //         style: {
+      //           color: Highcharts.getOptions().colors[1],
+      //         },
+      //       },
+      //     },
+      //   ],
+      //   series: predictPowerOpions.map(option => {
+      //     const { key, name, valueSuffix } = option;
+      //     return {
+      //       name,
+      //       data: _.map(analysisReport.systemList, key),
+      //       tooltip: {
+      //         valueSuffix,
+      //       },
+      //     };
+      //   }),
+      // });
 
-      // 환경 분석 차트
-      makeColumnChart({
-        domId: 'envData',
-        xAxis: {
-          categories: _.map(analysisReport.systemList, 'name'),
-        },
-        yAxis: [
-          {
-            min: 0,
-            title: {
-              text: '온도',
-            },
-            labels: {
-              format: '{value} ˚C',
-              style: {
-                color: Highcharts.getOptions().colors[1],
-              },
-            },
-          },
-          {
-            // Secondary yAxis
-            min: 0,
-            title: {
-              text: '수위',
-              style: {
-                color: Highcharts.getOptions().colors[1],
-              },
-            },
-            labels: {
-              format: '{value} cm',
-              style: {
-                color: Highcharts.getOptions().colors[1],
-              },
-            },
-            opposite: true,
-          },
-        ],
-        series: predictEnvOpions.map(option => {
-          const { key, name, valueSuffix, yAxis = 0 } = option;
-          return {
-            name,
-            data: _.map(analysisReport.systemList, key),
-            yAxis,
-            tooltip: {
-              valueSuffix,
-            },
-          };
-        }),
-      });
+      // // 환경 분석 차트
+      // makeColumnChart({
+      //   domId: 'envData',
+      //   xAxis: {
+      //     categories: _.map(analysisReport.systemList, 'name'),
+      //   },
+      //   yAxis: [
+      //     {
+      //       min: 0,
+      //       title: {
+      //         text: '온도',
+      //       },
+      //       labels: {
+      //         format: '{value} ˚C',
+      //         style: {
+      //           color: Highcharts.getOptions().colors[1],
+      //         },
+      //       },
+      //     },
+      //     {
+      //       // Secondary yAxis
+      //       min: 0,
+      //       title: {
+      //         text: '수위',
+      //         style: {
+      //           color: Highcharts.getOptions().colors[1],
+      //         },
+      //       },
+      //       labels: {
+      //         format: '{value} cm',
+      //         style: {
+      //           color: Highcharts.getOptions().colors[1],
+      //         },
+      //       },
+      //       opposite: true,
+      //     },
+      //   ],
+      //   series: predictEnvOpions.map(option => {
+      //     const { key, name, valueSuffix, yAxis = 0 } = option;
+      //     return {
+      //       name,
+      //       data: _.map(analysisReport.systemList, key),
+      //       yAxis,
+      //       tooltip: {
+      //         valueSuffix,
+      //       },
+      //     };
+      //   }),
+      // });
     </script>
 
     <!-- 출력 트렌드 1 Negative Area Chart -->
@@ -389,21 +389,21 @@
               },
               opposite: true,
             },
-            {
-              title: {
-                text: '기온 (˚C)',
-                style: {
-                  fontSize: mainFontSize,
-                  color: Highcharts.getOptions().colors[10],
-                },
-              },
-              labels: {
-                style: {
-                  fontSize: subFontSize,
-                },
-              },
-              opposite: true,
-            },
+            // {
+            //   title: {
+            //     text: '기온 (˚C)',
+            //     style: {
+            //       fontSize: mainFontSize,
+            //       color: Highcharts.getOptions().colors[10],
+            //     },
+            //   },
+            //   labels: {
+            //     style: {
+            //       fontSize: subFontSize,
+            //     },
+            //   },
+            //   opposite: true,
+            // },
           ],
           plotOptions: {
             series: {
@@ -480,21 +480,21 @@
               },
               opposite: true,
             },
-            {
-              title: {
-                text: '기온 (˚C)',
-                style: {
-                  fontSize: mainFontSize,
-                  color: Highcharts.getOptions().colors[10],
-                },
-              },
-              labels: {
-                style: {
-                  fontSize: subFontSize,
-                },
-              },
-              opposite: true,
-            },
+            // {
+            //   title: {
+            //     text: '기온 (˚C)',
+            //     style: {
+            //       fontSize: mainFontSize,
+            //       color: Highcharts.getOptions().colors[10],
+            //     },
+            //   },
+            //   labels: {
+            //     style: {
+            //       fontSize: subFontSize,
+            //     },
+            //   },
+            //   opposite: true,
+            // },
           ],
           plotOptions: {
             series: {
