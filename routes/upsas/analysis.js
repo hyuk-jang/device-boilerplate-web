@@ -40,7 +40,7 @@ const subCategoryList = [
   },
   {
     subCategory: 'powerPrediction',
-    btnName: '이상상태 요인분석',
+    btnName: '발전 예측 및 분석',
   },
 ];
 
@@ -675,6 +675,8 @@ router.get(
 
     // 발전량 예측 정제
     analysisModel.refineGeneralAnalysis(generalAnalysisRows, regressionInfo);
+
+    BU.CLI(generalAnalysisRows);
 
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 

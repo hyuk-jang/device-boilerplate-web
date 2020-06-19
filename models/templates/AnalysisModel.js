@@ -111,9 +111,9 @@ module.exports = class extends BiModule {
    * @param {number=} angleInfo.angle 알고싶은 각도. Default 30도.
    * @param {string} angleInfo.measureDate 계측 날짜
    */
-  getSolarReduceRate(angleInfo) {
+  getSolarLossRate(angleInfo) {
     const { angle = 30, measureDate } = angleInfo;
-    const solarReduceList = [
+    const solarLossList = [
       { a30: 104.2, a0: 72.41 },
       { a30: 113.06, a0: 86.49 },
       { a30: 142.23, a0: 123.57 },
@@ -128,7 +128,7 @@ module.exports = class extends BiModule {
       { a30: 92.8, a0: 63.6 },
     ];
 
-    const { a0, a30 } = solarReduceList[BU.convertTextToDate(measureDate).getMonth()];
+    const { a0, a30 } = solarLossList[BU.convertTextToDate(measureDate).getMonth()];
 
     switch (angle) {
       // 수평 일사량 대비 30도 일 경우 일사량 감소율
@@ -143,17 +143,17 @@ module.exports = class extends BiModule {
    * 수심에 따른 광량 감소
    * @param {number} waterLevel
    */
-  getWaterLevelReduceRate(waterLevel) {
-    let waterLevelReduceRate = 1;
+  getWaterLevelLossRate(waterLevel) {
+    let waterLevelLossRate = 1;
     switch (waterLevel) {
       case 2:
-        waterLevelReduceRate = 0.9554;
+        waterLevelLossRate = 0.9554;
         break;
       default:
-        waterLevelReduceRate = 0.9554;
+        waterLevelLossRate = 0.9554;
         break;
     }
-    return waterLevelReduceRate;
+    return waterLevelLossRate;
   }
 
   /**
@@ -175,15 +175,18 @@ module.exports = class extends BiModule {
     const betaRef = 0.0025;
     const tRef = 25;
 
-    const dustReduceRate = 0.95;
+    const dustLossRate = 0.95;
 
     generalAnalysisRows.forEach(row => {
       const {
         avg_temp: outdoorTemp,
         avg_water_level: waterLevel,
         group_date: groupDate,
-        add_reduce_rate: addReduceRate = 1,
+        // 추가 손실률(0~1) 0: 손실률 0%, 1: 손실률 100%
+        add_loss_rate: addLossRate = 0,
+        // 표준 모듈 효율(%)
         module_efficiency: moduleEff,
+        // 모듈 총 면적
         module_square: moduleSquare,
       } = row;
 
@@ -199,16 +202,20 @@ module.exports = class extends BiModule {
         regressionB1 * outdoorTemp + regressionB2 * horizontalSolar + regressionB3;
 
       // 수위에 따른 모듈 효율 감소
-      const reduceWaterLevel = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
+      const lossWaterLevel = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
 
       // 수중 태양광 발전 효율 예측
       const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
+
+      // 모듈 온도 손시률
+      // const lossModuleTemp = preWaterPowerEff / moduleEff * 100;
+
       // 수중 태양광 발전량 예측
       const preWaterPowerKw =
         (preWaterPowerEff *
           horizontalSolar *
-          reduceWaterLevel *
-          (1 - addReduceRate / 100) *
+          lossWaterLevel *
+          (1 - addLossRate / 100) *
           moduleSquare) /
         100;
 
@@ -216,15 +223,18 @@ module.exports = class extends BiModule {
 
       // 육상 모듈 온도 예측 치
       const preEarthModuleTemp =
-        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
         34 * horizontalSolar;
       // 육상 태양광 발전 효율 예측
       const preEarthPowerEff =
         moduleEff * (1 - betaRef * (outdoorTemp + 34 * horizontalSolar - tRef));
       // 육상 태양광 발전량 예측
       const preEarthPowerKw =
-        0.98 * outdoorTemp * this.getSolarReduceRate({ measureDate: groupDate }) +
+        0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
         34 * horizontalSolar;
+
+      row.lossWaterLevel = _.round((1 - lossWaterLevel) * 100, 4);
+      row.lossModuleTemp = _.round((1 - preWaterPowerEff / moduleEff) * 100, 4);
 
       row.preWaterModuleTemp = _.round(preWaterModuleTemp, 4);
       row.preEarthModuleTemp = _.round(preEarthModuleTemp, 4);
@@ -364,7 +374,7 @@ module.exports = class extends BiModule {
               power_tbl.inverter_seq, power_tbl.target_id, power_tbl.target_name, power_tbl.target_category, power_tbl.install_place, power_tbl.serial_number,
               power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_factor, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
               saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp, saltern_tbl.avg_brine_temp,
-              saltern_tbl.add_reduce_rate, saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
+              saltern_tbl.add_loss_rate, saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
               wdd_tbl.avg_temp, wdd_tbl.avg_reh, wdd_tbl.avg_horizontal_solar, wdd_tbl.total_horizontal_solar,
               wdd_tbl.avg_inclined_solar, wdd_tbl.total_inclined_solar, wdd_tbl.avg_ws, wdd_tbl.avg_uv
       FROM
@@ -414,7 +424,7 @@ module.exports = class extends BiModule {
           SELECT
               sub_tbl.main_seq,
               ssd.place_seq, sub_tbl.inverter_seq,
-              add_reduce_rate, module_efficiency, module_square, module_power, module_count,
+              add_loss_rate, module_efficiency, module_square, module_power, module_count,
               ROUND(AVG(ssd.water_level), 2)  AS avg_water_level,
               ROUND(AVG(ssd.salinity), 2) AS avg_salinity,
               ROUND(AVG(ssd.module_rear_temp), 2) AS avg_module_rear_temp,
@@ -427,7 +437,7 @@ module.exports = class extends BiModule {
               SELECT
                     rp.main_seq,
                     sr.place_seq, sr.inverter_seq,
-                    AVG(sr.add_reduce_rate) AS add_reduce_rate,
+                    AVG(sr.add_loss_rate) AS add_loss_rate,
                     SUM(sr.module_max_power) / SUM(sr.module_square) / 10 AS module_efficiency,
                     AVG(sr.module_square) * SUM(sr.module_count) AS module_square,
                     SUM(sr.module_max_power) / SUM(sr.module_square) / 10 * AVG(sr.module_square) * SUM(sr.module_count) / 100 AS module_power,
@@ -514,7 +524,7 @@ module.exports = class extends BiModule {
  * @property {number} avg_salinity
  * @property {number} avg_module_rear_temp
  * @property {number} avg_brine_temp
- * @property {number} add_reduce_rate
+ * @property {number} add_loss_rate
  * @property {number} module_efficiency
  * @property {number} module_square
  * @property {number} module_power

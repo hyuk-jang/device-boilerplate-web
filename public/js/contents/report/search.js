@@ -43,13 +43,13 @@ function applySearchType(value) {
   let viewMode = 0;
   let sliceEndIndex = 10;
 
-  if (checkedSearchType === 'range') {
-    $('#strEndDateInputValue').show();
-    $('#between-start-end').show();
-  } else {
-    $('#strEndDateInputValue').hide();
-    $('#between-start-end').hide();
-  }
+  // if (checkedSearchType === 'range') {
+  //   $('#strEndDateInputValue').show();
+  //   $('#between-start-end').show();
+  // } else {
+  //   $('#strEndDateInputValue').hide();
+  //   $('#between-start-end').hide();
+  // }
 
   if (checkedSearchType === 'years') {
     viewMode = 2;
@@ -61,8 +61,8 @@ function applySearchType(value) {
     viewMode = 0;
     sliceEndIndex = 10;
   } else if (checkedSearchType === 'range') {
-    makeDatePicker(endDateDom, 0);
     endDateDom.value = endDate.toISOString().substring(0, sliceEndIndex);
+    makeDatePicker(endDateDom, 0);
   } else {
     viewMode = 0;
     sliceEndIndex = 10;
