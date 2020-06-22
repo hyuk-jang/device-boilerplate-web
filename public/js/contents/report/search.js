@@ -43,13 +43,13 @@ function applySearchType(value) {
   let viewMode = 0;
   let sliceEndIndex = 10;
 
-  // if (checkedSearchType === 'range') {
-  //   $('#strEndDateInputValue').show();
-  //   $('#between-start-end').show();
-  // } else {
-  //   $('#strEndDateInputValue').hide();
-  //   $('#between-start-end').hide();
-  // }
+  if (checkedSearchType === 'range') {
+    $('#strEndDateInputValue').show();
+    $('#between-start-end').show();
+  } else {
+    $('#strEndDateInputValue').hide();
+    $('#between-start-end').hide();
+  }
 
   if (checkedSearchType === 'years') {
     viewMode = 2;

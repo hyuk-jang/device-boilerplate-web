@@ -34,10 +34,10 @@ const subCategoryList = [
     subCategory: 'prediction',
     btnName: '발전분석',
   },
-  {
-    subCategory: 'loosReduction',
-    btnName: '손실저하 요인분석',
-  },
+  // {
+  //   subCategory: 'loosReduction',
+  //   btnName: '손실저하 요인분석',
+  // },
   {
     subCategory: 'powerPrediction',
     btnName: '발전 예측 및 분석',
@@ -676,9 +676,105 @@ router.get(
     // 발전량 예측 정제
     analysisModel.refineGeneralAnalysis(generalAnalysisRows, regressionInfo);
 
-    BU.CLI(generalAnalysisRows);
+    // BU.CLI(generalAnalysisRows);
 
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
+
+    const lossAnalysisRows = _.chain(generalAnalysisRows)
+      .groupBy('group_date')
+      .map((rows, gDate) => {
+        // 모듈온도 손실
+        const lossModuleTempRate = _.meanBy(rows, 'lossModuleTempRate');
+        // 수위 손실
+        const lossWaterLevelRate = _.meanBy(rows, 'lossWaterLevelRate');
+        // 예측 모듈 온도
+        const preWaterModuleTemp = _.meanBy(rows, 'preWaterModuleTemp');
+        // 예측 발전
+        const prePower = _.sumBy(rows, 'preWaterPowerKw');
+        // 실측 발전
+        const realPower = _.sumBy(rows, 't_power_kw');
+        // 발전 비율
+        const powerRatio = _.meanBy(rows, 'avg_power_ratio');
+        // 오차율
+        const lossRate = (1 - realPower / prePower) * 100;
+
+        // 일사량
+        const avgSolar = _.meanBy(rows, 'avg_horizontal_solar');
+        // 수위
+        const avgWaterLevel = _.meanBy(rows, 'avg_water_level');
+        // 모듈 온도
+        const avgModuleTemp = _.meanBy(rows, 'avg_module_rear_temp');
+        // 수온
+        const avgBrineTemp = _.meanBy(rows, 'avg_brine_temp');
+
+        // 인버터 운전 손실
+        const lossInvRate = 100 - _.meanBy(rows, 'avg_power_factor');
+        // 모듈 노후화 손실
+        const lossAgingRate = 0.36;
+        // 어레이 미스매치 손실
+        const lossMissMatchRate = 2;
+        // 잔여 손실률
+        const lossPointRate =
+          (1 - regressionK) * 100 - lossInvRate - lossAgingRate - lossMissMatchRate;
+        // 손실 오차율
+        const remainLossRate = lossRate - (1 - regressionK) * 100;
+
+        const isOccurLoss = _.isNaN(lossRate);
+
+        const returnInfo = {
+          // 모듈온도 손실
+          lossModuleTempRate,
+          // 수위 손실
+          lossWaterLevelRate,
+          // 예측 모듈 온도
+          preWaterModuleTemp,
+          // 예측 발전
+          prePower,
+          // 실측 발전
+          realPower,
+          // 발전 비율
+          powerRatio,
+          // 손실률
+          lossRate: isOccurLoss ? 0 : lossRate,
+          // 일사량
+          avgSolar,
+          // 수위
+          avgWaterLevel,
+          // 모듈 온도
+          avgModuleTemp,
+          // 모듈 온도 오차
+          moduleTempLoss: avgModuleTemp - preWaterModuleTemp,
+          // 수온
+          avgBrineTemp,
+
+          // 인버터 운전 손실
+          lossInvRate: isOccurLoss ? 0 : lossInvRate,
+          // 모듈 노후화 손실
+          lossAgingRate: isOccurLoss ? 0 : lossAgingRate,
+          // 어레이 미스매치 손실
+          lossMissMatchRate: isOccurLoss ? 0 : lossMissMatchRate,
+          // 손실 계수
+          lossPointRate: isOccurLoss ? 0 : lossPointRate,
+          // 잔여 손실
+          remainLossRate: isOccurLoss ? 0 : remainLossRate,
+        };
+        // 숫자 소수점 처리
+        _.forEach(returnInfo, (v, k) => {
+          returnInfo[k] = _.isNaN(v) ? v : _.round(v, 2);
+        });
+        // 날짜 병합
+        Object.assign(returnInfo, { gDate });
+
+        return returnInfo;
+      })
+      .filter(row => {
+        // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
+        return row.avgSolar > 100 || row.powerRatio > 1;
+      })
+      .value();
+
+    // BU.CLI(lossAnalysisRows);
+    _.set(req.locals, 'lossAnalysisRows', lossAnalysisRows);
 
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
@@ -750,7 +846,7 @@ router.get(
       };
     });
 
-    envChartData = envChartData.concat(...predictEnvChartData, weatherCharts);
+    envChartData = envChartData.concat(...predictEnvChartData);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
 
     // BU.CLI(weatherTrendRows);
