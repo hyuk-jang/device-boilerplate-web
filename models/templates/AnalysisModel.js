@@ -170,7 +170,7 @@ module.exports = class extends BiModule {
       regressionB1 = 0.945,
       regressionB2 = 11.2,
       regressionB3 = -0.19,
-      regressionK = 0.9,
+      regressionK = 0.88,
     } = regressionAnalysisInfo;
     const betaRef = 0.0025;
     const tRef = 25;
@@ -204,7 +204,13 @@ module.exports = class extends BiModule {
       // 수위에 따른 모듈 효율 감소
       let lossWaterLevel = 0.0008 * waterLevel ** 2 - 0.023 * waterLevel + 0.9991;
       // const lossWaterLevel = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
+
       lossWaterLevel = lossWaterLevel > 0.99 ? 1 : lossWaterLevel;
+      // lossWaterLevel =
+      //   waterLevel > 2 ? lossWaterLevel + (0.09 - 0.0456 * waterLevel) : lossWaterLevel;
+
+      // const lossCleanliness = 1;
+      const lossCleanliness = waterLevel > 2 ? 1.09 - 0.0456 * waterLevel : 1;
 
       // 수중 태양광 발전 효율 예측
       const preWaterPowerEff = moduleEff * (1 - betaRef * (preWaterModuleTemp - tRef));
@@ -213,6 +219,7 @@ module.exports = class extends BiModule {
       const preWaterPowerKw =
         (preWaterPowerEff *
           horizontalSolar *
+          lossCleanliness *
           lossWaterLevel *
           (1 - addLossRate / 100) *
           moduleSquare) /
@@ -232,7 +239,10 @@ module.exports = class extends BiModule {
         0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
         34 * horizontalSolar;
 
+      // 수위에 따른 손실
       row.lossWaterLevelRate = _.round((1 - lossWaterLevel) * 100, 4);
+      // 청정도 손실
+      row.lossCleanlinessRate = _.round((1 - lossCleanliness) * 100, 4);
       // 모듈 온도 손실률
       row.lossModuleTempRate = _.round((1 - preWaterPowerEff / moduleEff) * 100, 4);
 
@@ -372,7 +382,7 @@ module.exports = class extends BiModule {
     
       SELECT
               power_tbl.inverter_seq, power_tbl.target_id, power_tbl.target_name, power_tbl.target_category, power_tbl.install_place, power_tbl.serial_number,
-              power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_ratio, power_tbl.avg_power_factor, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
+              power_tbl.view_date, power_tbl.group_date, power_tbl.t_amount, power_tbl.t_power_kw, power_tbl.avg_power_ratio, power_tbl.avg_power_factor, power_tbl.avg_power_eff, power_tbl.peak_power_eff, power_tbl.t_interval_power_cp_kwh, power_tbl.t_interval_power_eff,
               saltern_tbl.avg_water_level, saltern_tbl.avg_salinity, saltern_tbl.avg_module_rear_temp, saltern_tbl.avg_brine_temp,
               saltern_tbl.add_loss_rate, saltern_tbl.module_efficiency, saltern_tbl.module_square, saltern_tbl.module_power, saltern_tbl.module_count,
               wdd_tbl.avg_temp, wdd_tbl.avg_reh, wdd_tbl.avg_horizontal_solar, wdd_tbl.total_horizontal_solar,
@@ -389,7 +399,7 @@ module.exports = class extends BiModule {
                 MAX(peak_power_eff) AS peak_power_eff,
                 ROUND(SUM(interval_power_cp_kwh), 4) AS t_interval_power_cp_kwh,
                 ROUND(SUM(interval_power_cp_kwh) / SUM(amount) * 100, 4) AS t_interval_power_eff,
-                group_date
+                view_date, group_date
           FROM
             (
               SELECT
@@ -513,6 +523,7 @@ module.exports = class extends BiModule {
  * @property {string} target_category 장치 카테고리
  * @property {string} install_place 설치 장소
  * @property {string} serial_number 고유 코드
+ * @property {string} view_date
  * @property {string} group_date
  * @property {number} t_amount
  * @property {number} avg_power_ratio 발전비

@@ -8,6 +8,7 @@
     <script src="/js/contents/main/powerPredictor.js"></script>
     <script src="/js/contents/master/mainUtil.js"></script>
     <script src="/js/handlebars.min.js"></script>
+    <script src="/js/common-html/table-to-excel.js"></script>
 
     <!-- <script src="/js/hichart/dark-unica.theme.js"></script> -->
 
@@ -148,9 +149,17 @@
         </div>
         <!-- 손실저하 요인 분석 -->
         <div class="container_row flex_dir_col">
-          <p class="table_desc_area">손실저하 요인 분석</p>
+          <div class="flex flex_jus_bet">
+            <p class="table_desc_area">
+              손실저하 요인 분석
+            </p>
+            <div class="submit_box">
+              <input type="button" class="btn-info" id="downloadExcel" value="다운로드 엑셀" />
+            </div>
+          </div>
+
           <div class="table-responsive default_area">
-            <table class="table table-bordered number_table">
+            <table id="lossAnalysisTable" class="table table-bordered number_table">
               <colgroup>
                 <col width="5%" />
                 <col width="10%" />
@@ -175,9 +184,8 @@
                   <th rowspan="2">번호</th>
                   <th rowspan="2">시간</th>
                   <th colspan="4">발전 예측</th>
-                  <th colspan="6">발전 분석</th>
+                  <th colspan="7">발전 분석</th>
                   <th colspan="4">손실 저하 요인</th>
-                  <th rowspan="2">잔여 오차율(%)</th>
                 </tr>
                 <tr>
                   <th>일사량(W/㎡)</th>
@@ -191,13 +199,12 @@
                   <th>예측 모듈 온도 손실(%)</th>
                   <th>수위(cm)</th>
                   <th>수위 손실(%)</th>
+                  <th>청정도 손실(%)</th>
 
                   <th>인버터 운전 손실(%)</th>
                   <th>모듈 노후화 손실(%)</th>
                   <th>어레이 미스매치 손실(%)</th>
                   <th>기타(%)</th>
-
-                  <th>잔여 손실(%)</th>
                 </tr>
               </thead>
               <tbody id="lossAnalysis">
@@ -217,12 +224,12 @@
                     <td>{{ lossModuleTempRate }}</td>
                     <td>{{ avgWaterLevel }}</td>
                     <td>{{ lossWaterLevelRate }}</td>
+                    <td>{{ lossCleanlinessRate }}</td>
 
                     <td>{{ lossInvRate }}</td>
                     <td>{{ lossAgingRate }}</td>
                     <td>{{ lossMissMatchRate }}</td>
                     <td>{{ lossPointRate }}</td>
-                    <td>{{ remainLossRate }}</td>
                   </tr>
                 </script>
               </tbody>
@@ -235,6 +242,10 @@
     </div>
 
     <script>
+      document.querySelector('#downloadExcel').addEventListener('click', () => {
+        exportTableToExcel('lossAnalysisTable', '손실저하 요인 분석')
+      })
+
       $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
 
       $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);

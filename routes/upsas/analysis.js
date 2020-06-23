@@ -661,7 +661,7 @@ router.get(
       regressionB1 = 0.945,
       regressionB2 = 11.2,
       regressionB3 = -0.19,
-      regressionK = 0.9,
+      regressionK = 0.88,
     } = req.query;
 
     const regressionInfo = {
@@ -681,10 +681,12 @@ router.get(
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 
     const lossAnalysisRows = _.chain(generalAnalysisRows)
-      .groupBy('group_date')
+      .groupBy('view_date')
       .map((rows, gDate) => {
         // 모듈온도 손실
         const lossModuleTempRate = _.meanBy(rows, 'lossModuleTempRate');
+        // 염수 청정도 손실
+        const lossCleanlinessRate = _.meanBy(rows, 'lossCleanlinessRate');
         // 수위 손실
         const lossWaterLevelRate = _.meanBy(rows, 'lossWaterLevelRate');
         // 예측 모듈 온도
@@ -717,7 +719,7 @@ router.get(
         const lossPointRate =
           (1 - regressionK) * 100 - lossInvRate - lossAgingRate - lossMissMatchRate;
         // 손실 오차율
-        const remainLossRate = lossRate - (1 - regressionK) * 100;
+        // const remainLossRate = lossRate - (1 - regressionK) * 100;
 
         const isOccurLoss = _.isNaN(lossRate);
 
@@ -726,6 +728,8 @@ router.get(
           lossModuleTempRate,
           // 수위 손실
           lossWaterLevelRate,
+          // 청정도 손실
+          lossCleanlinessRate,
           // 예측 모듈 온도
           preWaterModuleTemp,
           // 예측 발전
@@ -755,8 +759,6 @@ router.get(
           lossMissMatchRate: isOccurLoss ? 0 : lossMissMatchRate,
           // 손실 계수
           lossPointRate: isOccurLoss ? 0 : lossPointRate,
-          // 잔여 손실
-          remainLossRate: isOccurLoss ? 0 : remainLossRate,
         };
         // 숫자 소수점 처리
         _.forEach(returnInfo, (v, k) => {
@@ -771,6 +773,7 @@ router.get(
         // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
         return row.avgSolar > 100 || row.powerRatio > 1;
       })
+      .sortBy('gDate')
       .value();
 
     // BU.CLI(lossAnalysisRows);
