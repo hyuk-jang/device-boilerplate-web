@@ -160,6 +160,7 @@ module.exports = class extends BiModule {
    *
    * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRows
    * @param {Object} regressionAnalysisInfo 회귀 분석 값
+   * @param {number} regressionAnalysisInfo.setWaterLevel 설정 수위
    * @param {number} regressionAnalysisInfo.regressionB1 회귀 분석 값
    * @param {number} regressionAnalysisInfo.regressionB2 회귀 분석 값
    * @param {number} regressionAnalysisInfo.regressionB3 회귀 분석 값
@@ -167,6 +168,7 @@ module.exports = class extends BiModule {
    */
   refineGeneralAnalysis(generalAnalysisRows, regressionAnalysisInfo = {}) {
     const {
+      setWaterLevel,
       regressionB1 = 0.945,
       regressionB2 = 11.2,
       regressionB3 = -0.19,
@@ -176,8 +178,9 @@ module.exports = class extends BiModule {
     const tRef = 25;
 
     const dustLossRate = 0.95;
-
     generalAnalysisRows.forEach(row => {
+      _.isNumber(setWaterLevel) && (row.avg_water_level = setWaterLevel);
+
       const {
         avg_temp: outdoorTemp,
         avg_water_level: waterLevel,

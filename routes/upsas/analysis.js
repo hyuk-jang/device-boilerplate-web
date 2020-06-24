@@ -658,6 +658,7 @@ router.get(
     // BU.CLIN(generalAnalysisRows);
 
     const {
+      setWaterLevel,
       regressionB1 = 0.945,
       regressionB2 = 11.2,
       regressionB3 = -0.19,
@@ -665,6 +666,7 @@ router.get(
     } = req.query;
 
     const regressionInfo = {
+      setWaterLevel,
       regressionB1,
       regressionB2,
       regressionB3,
