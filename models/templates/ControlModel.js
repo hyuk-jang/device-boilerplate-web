@@ -18,6 +18,44 @@ class ControlModel extends BM {
     super(dbInfo);
 
     this.dbInfo = dbInfo;
+
+    /** @type {{memberSeq: number, cmdUUID: string}[]} */
+    this.reqCmdUserList = [];
+  }
+
+  /**
+   * 사용자가 명령 요청에 성공하였을 경우 저장
+   * @param {number} memberSeq
+   * @param {contractCmdInfo} contractCmdInfo
+   */
+  addReqCmdUser(memberSeq, contractCmdInfo) {
+    const { wrapCmdUUID } = contractCmdInfo;
+
+    this.reqCmdUserList.findIndex(cmdUserInfo => cmdUserInfo.cmdUUID === wrapCmdUUID) < 0 &&
+      this.reqCmdUserList.push({
+        memberSeq,
+        cmdUUID: wrapCmdUUID,
+      });
+  }
+
+  /**
+   * 저장된 명령 사용자 정보가 있을 경우 반환하고 리스트에서 삭제
+   * @param {string} wrapCmdUUID
+   */
+  getReqCmdUserSeq(wrapCmdUUID) {
+    const foundIndex = this.reqCmdUserList.findIndex(
+      cmdUserInfo => cmdUserInfo.cmdUUID === wrapCmdUUID,
+    );
+    // 사용자 명령 정보가 없을 경우 기본값은 null
+    if (foundIndex < 0) {
+      return null;
+    }
+    // 사용자 Seq 추출
+    const { memberSeq } = this.reqCmdUserList[foundIndex];
+    // 메모리에서 사용자 명령 정보 제거
+    _.pullAt(this.reqCmdUserList, foundIndex);
+
+    return memberSeq;
   }
 
   /**
@@ -59,18 +97,11 @@ class ControlModel extends BM {
     if (!contractCmdList.length) return false;
 
     const insertRows = _.map(contractCmdList, cmdInfo => {
-      const {
-        wrapCmdFormat,
-        wrapCmdId,
-        wrapCmdName,
-        wrapCmdType,
-        wrapCmdUUID,
-        member_seq = null,
-      } = cmdInfo;
+      const { wrapCmdFormat, wrapCmdId, wrapCmdName, wrapCmdType, wrapCmdUUID } = cmdInfo;
 
       return {
         main_seq: msFieldInfo.main_seq,
-        member_seq,
+        member_seq: this.getReqCmdUserSeq(wrapCmdUUID),
         cmd_uuid: wrapCmdUUID,
         cmd_format: wrapCmdFormat,
         cmd_id: wrapCmdId,
@@ -109,7 +140,7 @@ class ControlModel extends BM {
    * @param {contractCmdInfo} contractCmdInfo
    * @param {number} memberSeq
    */
-  async updateCmdHistoryUser(contractCmdInfo, memberSeq) {
+  updateCmdHistoryUser(contractCmdInfo, memberSeq) {
     const { wrapCmdUUID } = contractCmdInfo;
     // 사용자가 응답 명령을 처리하는 것은 현재시간을 기준으로 1분 전까지의 명령만 유효
     const sql = `
@@ -118,7 +149,7 @@ class ControlModel extends BM {
             member_seq = ${mysql.escape(memberSeq)}
       WHERE 
             cmd_uuid = ${mysql.escape(wrapCmdUUID)}
-        AND start_date >= DATE_ADD(NOW(), INTERVAL -1 MINUTE)
+        AND start_date >= DATE_ADD(NOW(), INTERVAL -2 MINUTE)
     `;
     return this.db.single(sql, null, false);
   }

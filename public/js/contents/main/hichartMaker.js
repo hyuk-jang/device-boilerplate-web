@@ -560,7 +560,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       plotOptions: {
         spline: {
           marker: {
-            radius: 4,
+            radius: 0,
             lineColor: '#666666',
             lineWidth: 1,
           },

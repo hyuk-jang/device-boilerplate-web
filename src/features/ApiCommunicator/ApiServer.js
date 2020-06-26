@@ -229,12 +229,8 @@ class ApiServer extends AbstApiServer {
         socket.emit('updateAlert', `${contents.wrapCmdName} 명령 수행을 요청하였습니다.`);
 
         // this.dbUpdatorList.push(contents, user.main_seq);
-        setImmediate(() => {
-          this.updateFieldEvent({
-            key: 'responseCommand',
-            args: [contents, user.member_seq],
-          });
-        });
+        // 사용자 명령 요청이 성공하였을 경우 사용자 정보와 명령 ID를 저장
+        this.controlModel.addReqCmdUser(user.member_seq, contents);
       } else if (commandId === MODE) {
         console.log(fieldData);
         socket.emit('updateAlert', '제어모드를 변경하였습니다.');
@@ -335,9 +331,6 @@ class ApiServer extends AbstApiServer {
 
     const { key, args } = updatorInfo;
     switch (key) {
-      case 'responseCommand':
-        await this.controlModel.updateCmdHistoryUser(...args);
-        break;
       case 'currCommand':
         await this.updateControlEvent(...args);
         break;
