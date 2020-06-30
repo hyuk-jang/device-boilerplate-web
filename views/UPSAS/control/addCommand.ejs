@@ -71,6 +71,13 @@
       </div>
     </div>
   </div>
+  <div class="search_box">
+    <span class="search_title">날짜</span>
+    <div class="search_body">
+      <input class="form-control" name="start" id="duration" type="text" readonly />
+    </div>
+    <input type="button" value="테스트" id="clickLimitTime" />
+  </div>
   <div class="container_row command_btn_area">
     <div class="user_box report_category ml_2rem mb_50rem">
       <button type="button" class="btn btn-primary" id="addCmdGoalBtn">
@@ -138,6 +145,25 @@
 
 <!-- 장치 제어 명령 Dom 생성 영역  -->
 <script>
+  var durationPicker = $('#duration').durationPicker({
+    translations: {
+      day: 'day',
+      hour: 'ssshour',
+      minute: 'minute',
+      second: 'second',
+      days: '일',
+      hours: '시',
+      minutes: '분',
+      seconds: '초',
+    },
+    showDays: false,
+    showSeconds: true,
+  });
+
+  console.log(durationPicker);
+
+  document.getElementById('duration').addEventListener('click', function() {});
+
   // console.log(deviceDomList);
   var CF_SINGLE = 'SINGLE';
   var CF_SET = 'SET';

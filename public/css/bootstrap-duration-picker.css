@@ -1,0 +1,13 @@
+.bdp-input input {
+  display: inline-block;
+  margin-bottom: 3px;
+  width: 60px;
+  text-align: center;
+}
+
+.bdp-block {
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
+  padding: 5px 3px;
+}
