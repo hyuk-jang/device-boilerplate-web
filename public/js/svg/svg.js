@@ -12659,4 +12659,3 @@
 
   return SVG$1;
 })();
-//# sourceMappingURL=svg.js.map

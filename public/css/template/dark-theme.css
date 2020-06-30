@@ -188,7 +188,8 @@ footer .footer_copyright > a {
   color: #fff;
 }
 
-.search_box input[type='text'] {
+.search_box input[type='text'],
+.search_box input[type='number'] {
   color: #fff;
   background: #12222f;
   border: 1px solid rgb(204, 204, 204);

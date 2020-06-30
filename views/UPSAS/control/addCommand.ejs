@@ -63,20 +63,37 @@
         <select class="form-control" id="scenarioCmdSelList"> </select>
       </div>
     </div>
-
     <div class="search_box">
-      <span class="search_title">제한 시간(초)</span>
-      <div class="search_body">
-        <input type="text" class="input_tre" id="limitTimeSec" placeholder="Infinity" />
+      <span class="search_title">제한 시간</span>
+      <div class="search_body" id="limitTime">
+        <input
+          type="number"
+          class="input_tre"
+          data-limit-time="hours"
+          min="0"
+          max="1000"
+          placeholder="시"
+        />
+        <span>:</span>
+        <input
+          type="number"
+          class="input_tre"
+          data-limit-time="minutes"
+          min="0"
+          max="59"
+          placeholder="분"
+        />
+        <span>:</span>
+        <input
+          type="number"
+          class="input_tre"
+          data-limit-time="seconds"
+          min="0"
+          max="59"
+          placeholder="초"
+        />
       </div>
     </div>
-  </div>
-  <div class="search_box">
-    <span class="search_title">날짜</span>
-    <div class="search_body">
-      <input class="form-control" name="start" id="duration" type="text" readonly />
-    </div>
-    <input type="button" value="테스트" id="clickLimitTime" />
   </div>
   <div class="container_row command_btn_area">
     <div class="user_box report_category ml_2rem mb_50rem">
@@ -145,25 +162,6 @@
 
 <!-- 장치 제어 명령 Dom 생성 영역  -->
 <script>
-  var durationPicker = $('#duration').durationPicker({
-    translations: {
-      day: 'day',
-      hour: 'ssshour',
-      minute: 'minute',
-      second: 'second',
-      days: '일',
-      hours: '시',
-      minutes: '분',
-      seconds: '초',
-    },
-    showDays: false,
-    showSeconds: true,
-  });
-
-  console.log(durationPicker);
-
-  document.getElementById('duration').addEventListener('click', function() {});
-
   // console.log(deviceDomList);
   var CF_SINGLE = 'SINGLE';
   var CF_SET = 'SET';
@@ -222,23 +220,33 @@
     }
 
     // TODO: 달성 목표 추가 (cmdGoal)
-    // console.log('makeResult', reqCmdInfo);
-    var $limitTimeSec = $('#limitTimeSec');
-    var limitTimeSec = $limitTimeSec.val();
-    // 사용자가 제한 시간을 입력하였을 경우
-    if (limitTimeSec.length) {
-      // 제한 시간에 문자가 들어있을 경우
-      if (/[a-z]/.test(limitTimeSec)) {
-        alert('제한시간에 문자는 입력할 수 없습니다.');
-        return $limitTimeSec.focus();
-      }
-      // 제한시간이 0초 이하일 경우
-      else if (_.toNumber(limitTimeSec) <= 0) {
-        alert('제한시간에 0을 초과하는 수를 입력하세요.');
-        return $limitTimeSec.focus();
-      }
-      reqCmdInfo.cmdGoal.limitTimeSec = _.toNumber(limitTimeSec);
-    }
+    var limitTimeSec = _.chain(document.getElementById('limitTime'))
+      .get('children', [])
+      .filter(limitEleDom => typeof limitEleDom.dataset.limitTime === 'string')
+      .reduce((totalSec, limitEleDom) => {
+        let multiplyScale = 0;
+        switch (limitEleDom.dataset.limitTime) {
+          case 'hours':
+            multiplyScale = 60 * 60;
+            break;
+          case 'minutes':
+            multiplyScale = 60;
+            break;
+          case 'seconds':
+            multiplyScale = 1;
+            break;
+          default:
+            multiplyScale = 0;
+            break;
+        }
+        return totalSec + _.toNumber(limitEleDom.value) * multiplyScale;
+      }, 0)
+      .thru(limitTimeSec => {
+        // 제한 시간이 0초를 넘어설 경우 목표에 정의
+        if (limitTimeSec > 0) {
+          reqCmdInfo.cmdGoal.limitTimeSec = limitTimeSec;
+        }
+      });
 
     var isError = 0;
     // 달성 목표 체크
