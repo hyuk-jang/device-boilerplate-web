@@ -57,7 +57,7 @@
       <%- include("../master/header.ejs") %>
       <!--메인-->
       <div class="container_body ">
-        <div class="container_row mb_50rem">
+        <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
           <div class="command_status">
             <img id="updateIsApiClientConnImg" src="" />
@@ -79,18 +79,6 @@
               />
             </div>
           </div>
-        </div>
-        <!-- 명령 상태, 결과 -->
-        <div class="container-fluid_st">
-          <p class="">
-            시스템 구동 모드:
-            <span
-              id="operationSystem"
-              data-algorithm-id=""
-              data-algorithm-name=""
-              data-cmd-strategy=""
-            ></span>
-          </p>
         </div>
         <!-- 구동 모드 -->
         <div class="container_row default_search_area">
@@ -270,9 +258,6 @@
       socket.on('updateMode', function(modeInfo) {
         currModeInfo = modeInfo;
 
-        // 현재 수행중인 구동 모드 View
-        var operationSystemDom = document.getElementById('operationSystem');
-
         // 현재 수행 중인 알고리즘 ID 가 존재하지 않을 경우
         if (currModeInfo.algorithmId === undefined) return false;
 
@@ -284,14 +269,16 @@
         // 구동 모드 목록 중에 해당 값이 존재하지 않을 경우
         if (_.isEmpty(operConfig)) return false;
 
-        // 데이터셋을 돌면서 값 세팅
-        for (const key in operationSystemDom.dataset) {
-          if (operationSystemDom.dataset.hasOwnProperty(key)) {
-            operationSystemDom.dataset[key] = operConfig[key];
-          }
-        }
-        // input Value 갱신
-        operationSystemDom.innerText = operConfig.algorithmName;
+        // // 현재 수행중인 구동 모드 View
+        // var operationSystemDom = document.getElementById('operationSystem');
+        // // 데이터셋을 돌면서 값 세팅
+        // for (const key in operationSystemDom.dataset) {
+        //   if (operationSystemDom.dataset.hasOwnProperty(key)) {
+        //     operationSystemDom.dataset[key] = operConfig[key];
+        //   }
+        // }
+        // // input Value 갱신
+        // operationSystemDom.innerText = operConfig.algorithmName;
 
         // 구동 모드 설정 목록이 없다면 종료
         if (_.isEmpty(currModeInfo.operationConfigList)) return false;
@@ -579,3 +566,16 @@
     </script>
   </body>
 </html>
+
+<!-- 명령 상태, 결과 -->
+<!-- <div class="container-fluid_st">
+          <p class="">
+            시스템 구동 모드:
+            <span
+              id="operationSystem"
+              data-algorithm-id=""
+              data-algorithm-name=""
+              data-cmd-strategy=""
+            ></span>
+          </p>
+        </div> -->

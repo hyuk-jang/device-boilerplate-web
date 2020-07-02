@@ -11,7 +11,7 @@ const defaultDom = require('../../models/domMaker/defaultDom');
 const controlDom = require('../../models/domMaker/controlDom');
 
 const DEFAULT_CATEGORY = 'command';
-const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
+const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
 /** @type {setCategoryInfo[]} */
 const subCategoryList = [
