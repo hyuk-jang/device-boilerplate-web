@@ -241,12 +241,11 @@
         }
         return totalSec + _.toNumber(limitEleDom.value) * multiplyScale;
       }, 0)
-      .thru(limitTimeSec => {
-        // 제한 시간이 0초를 넘어설 경우 목표에 정의
-        if (limitTimeSec > 0) {
-          reqCmdInfo.cmdGoal.limitTimeSec = limitTimeSec;
-        }
-      });
+      .value();
+
+    limitTimeSec > 0 && _.set(reqCmdInfo, 'cmdGoal.limitTimeSec', limitTimeSec);
+
+    console.log('limitTimeSec', reqCmdInfo);
 
     var isError = 0;
     // 달성 목표 체크
