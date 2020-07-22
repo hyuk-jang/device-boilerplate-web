@@ -34,13 +34,13 @@ const subCategoryList = [
     subCategory: 'prediction',
     btnName: '발전분석',
   },
-  // {
-  //   subCategory: 'loosReduction',
-  //   btnName: '손실저하 요인분석',
-  // },
   {
     subCategory: 'powerPrediction',
     btnName: '발전 예측 및 분석',
+  },
+  {
+    subCategory: 'abnormalFactor',
+    btnName: '이상상태 요인 분석',
   },
 ];
 
@@ -58,7 +58,6 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     // req.param 값 비구조화 할당
-    const { siteId } = req.locals.mainInfo;
     const { subCategory = DEFAULT_CATEGORY } = req.params;
 
     // 선택된 subCategoryDom 정의
@@ -590,14 +589,6 @@ router.get(
   }),
 );
 
-// 손실 저하 요인 분석
-router.get(
-  ['/:siteId/loosReduction'],
-  asyncHandler(async (req, res) => {
-    res.render('./UPSAS/analysis/loosReduction', req.locals);
-  }),
-);
-
 // 발전 예측 및 손실 저하 분석
 router.get(
   ['/:siteId/powerPrediction', '/:siteId/powerPrediction/:subCategoryId'],
@@ -917,6 +908,14 @@ router.get(
     _.set(req.locals, 'analysisReport', analysisReport);
 
     res.render('./UPSAS/analysis/powerPrediction', req.locals);
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/:siteId/abnormalFactor'],
+  asyncHandler(async (req, res) => {
+    res.render('./UPSAS/analysis/abnormalFactor', req.locals);
   }),
 );
 
