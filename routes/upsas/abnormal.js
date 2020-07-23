@@ -22,7 +22,7 @@ const mType = {
   WATER_0: 'water0angle',
 };
 
-const DEFAULT_CATEGORY = 'efficiency';
+const DEFAULT_CATEGORY = 'outline';
 
 /** @type {setCategoryInfo[]} */
 const subCategoryList = [
@@ -31,12 +31,12 @@ const subCategoryList = [
     btnName: '종합',
   },
   {
-    subCategory: 'serialModule',
-    btnName: '직렬 모듈 이상',
+    subCategory: 'serialModulePower',
+    btnName: '직렬 모듈 간 출력 이상',
   },
   {
     subCategory: 'inverterPower',
-    btnName: '인버터 출력',
+    btnName: '인버터 출력 이상',
   },
   {
     subCategory: 'inverterFault',
@@ -62,6 +62,30 @@ router.get(
     _.set(req, 'locals.dom.subCategoryDom', subCategoryDom);
 
     next();
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/', '/:siteId/outline'],
+  asyncHandler(async (req, res) => {
+    res.render('./UPSAS/abnormal/outline', req.locals);
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/:siteId/serialModulePower'],
+  asyncHandler(async (req, res) => {
+    res.render('./UPSAS/abnormal/serialModulePower', req.locals);
+  }),
+);
+
+// 이상상태 요인 분석
+router.get(
+  ['/:siteId/inverterPower'],
+  asyncHandler(async (req, res) => {
+    res.render('./UPSAS/abnormal/inverterPower', req.locals);
   }),
 );
 

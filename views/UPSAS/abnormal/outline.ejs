@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+
+    <!-- 발전 예측 관련 -->
+    <script src="/js/contents/main/powerPredictor.js"></script>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/handlebars.min.js"></script>
+    <script src="/js/common-html/table-to-excel.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+
+        <div class="container_row flex_jus_end default_search_area mt0">
+          <div class="search_area" id="searchArea">
+            <div class="search_box ">
+              <span class="search_title">조회기간</span>
+              <select id="searchType" class="form-control">
+                <option value="days">일일</option>
+                <option value="months">월간</option>
+                <option value="years">년간</option>
+                <option value="range">기간선택</option>
+              </select>
+            </div>
+            <div class="search_box">
+              <span class="search_title">날짜</span>
+              <div class="search_body">
+                <input
+                  class="input_tre"
+                  name="start"
+                  id="strStartDateInputValue"
+                  type="text"
+                  readonly
+                />
+                <span id="between-start-end" hidden>~</span>
+                <input
+                  class="input_tre"
+                  name="end"
+                  id="strEndDateInputValue"
+                  type="text"
+                  readonly
+                  hidden
+                />
+              </div>
+            </div>
+            <div class="submit_box">
+              <button type="button" class="btn btn-primary" id="searchBtn">
+                검색
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 손실저하 요인 분석 -->
+        <div class="flex flex_jus_bet">
+          <p class="table_desc_area">
+            어레이 출력 이상
+          </p>
+          <div class="submit_box">
+            <input type="button" class="btn-info" id="downloadExcel" value="다운로드 엑셀" />
+          </div>
+        </div>
+        <div class="container_row">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>직렬 모듈 이상</header>
+              <div class="component_piece_body table-responsive default_area">
+                <table id="" class="table table-bordered">
+                  <colgroup>
+                    <col width="7%" />
+                    <col width="7%" />
+                    <col width="7%" />
+                    <col width="10%" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>직렬 모듈 명</th>
+                      <th>분석 표본 수</th>
+                      <th>이상 표본 수</th>
+                      <th>이상 표본 오차율(%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lossAnalysis">
+                    <tr>
+                      <td>시스템 A-1-2CH</td>
+                      <td>5</td>
+                      <td>3</td>
+                      <td>78.5</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>인버터 이상</header>
+              <div id="section_4" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+
+          <div class="table-responsive default_area">
+            <table id="lossAnalysisTable" class="table table-bordered">
+              <colgroup>
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>직렬 모듈 명</th>
+                  <th>분석 표본 수</th>
+                  <th>이상 표본 수</th>
+                  <th>이상 표본 오차율(%)</th>
+                </tr>
+              </thead>
+              <tbody id="lossAnalysis">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+    </script>
+  </body>
+</html>

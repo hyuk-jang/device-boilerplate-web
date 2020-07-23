@@ -10,6 +10,7 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const control = require('./control');
 const status = require('./status');
+const abnormal = require('./abnormal');
 const analysis = require('./analysis');
 const trend = require('./trend');
 const report = require('./report');
@@ -163,6 +164,10 @@ router.get(
         name: '계측현황',
       },
       {
+        href: 'abnormal',
+        name: '이상상태',
+      },
+      {
         href: 'analysis',
         name: '데이터분석',
       },
@@ -227,6 +232,7 @@ router.use('/', main);
 router.use('/control', control);
 router.use('/tta_status', status);
 router.use('/status', status);
+router.use('/abnormal', abnormal);
 router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);

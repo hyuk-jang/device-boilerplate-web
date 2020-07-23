@@ -38,10 +38,6 @@ const subCategoryList = [
     subCategory: 'powerPrediction',
     btnName: '발전 예측 및 분석',
   },
-  {
-    subCategory: 'abnormalFactor',
-    btnName: '이상상태 요인 분석',
-  },
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
@@ -908,14 +904,6 @@ router.get(
     _.set(req.locals, 'analysisReport', analysisReport);
 
     res.render('./UPSAS/analysis/powerPrediction', req.locals);
-  }),
-);
-
-// 이상상태 요인 분석
-router.get(
-  ['/:siteId/abnormalFactor'],
-  asyncHandler(async (req, res) => {
-    res.render('./UPSAS/analysis/abnormalFactor', req.locals);
   }),
 );
 

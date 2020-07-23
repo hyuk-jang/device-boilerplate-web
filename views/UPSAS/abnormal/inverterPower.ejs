@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %> <%- include("../master/excel.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <link href="/css/spinner.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <%- include("../master/spinner.ejs") %>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <%- include("../../master/searchReport.ejs") %>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            인버터 출력 이상 종합 분석
+          </p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <thead id="tableHeaderDom">
+                <tr>
+                  <th style="width: 10%">인버터</th>
+                  <th style="width: 15%">관련 장소</th>
+                  <th>예측 발전량(kW)</th>
+                  <th>실측 발전량(kW)</th>
+                  <th>발전량 오차율(%)</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyDom">
+                <tr>
+                  <td class="text-center">시스템 A</td>
+                  <td class="text-center">수중 증발지 1, 2</td>
+                  <td>1.2</td>
+                  <td>459.3</td>
+                  <td>1.3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="paginationDom" class="table_pagenation"></div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            직렬 모듈 간 출력 이상 차트 분석
+          </p>
+          <article id="divDomArea" class="flex_box">
+            <div class="lineChart_box default_area"></div>
+          </article>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+    <script>
+      $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      // 초기 시작시 라디오 체크버튼 클릭처리
+      var searchRange = <%- JSON.stringify(searchRange) %>;
+
+      $('#subCategoryName').html(subCategoryName);
+    </script>
+
+    <script src="/js/contents/report/search.js"></script>
+
+    <!-- 기본 데이터 세팅 -->
+    <script>
+      checkSelectBoxOption('searchInterval', searchRange.searchInterval);
+      checkSelectBoxOption('searchType', searchRange.searchType);
+      checkSelectBoxOption('searchOption', searchRange.searchOption);
+
+      // 검색 타입에 따라 적용
+      applySearchType(searchRange.searchType);
+    </script>
+  </body>
+</html>
