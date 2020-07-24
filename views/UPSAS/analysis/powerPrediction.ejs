@@ -116,48 +116,148 @@
           </div>
         </div>
 
-        <!-- <div class="container_row ">
-          <div class="component_piece_box">
-            <article class="component_piece_area">
-              <header>발전 예측 분석</header>
-              <div id="predictionRate" class="component_piece_body p_0"></div>
-            </article>
-          </div>
-          <div class="component_piece_box">
-            <article class="component_piece_area">
-              <header>환경 데이터 분석</header>
-              <div id="envData" class="component_piece_body p_0"></div>
-            </article>
-          </div>
-          <div class="component_piece_box">
-            <article class="component_piece_area">
-              <header>이상 상태 분석</header>
-              <div id="" class="component_piece_body">
-                <article class="component_ele_status">
-                  <header>시스템 A</header>
-                  <p class="m_05rem">정상 운영</p>
-                </article>
-                <article class="component_ele_status">
-                  <header>시스템 A</header>
-                  <p class="m_05rem">정상 운영</p>
-                </article>
-                <article class="component_ele_status">
-                  <header>시스템 A</header>
-                  <p class="m_05rem">정상 운영</p>
-                </article>
-                <article class="component_ele_status">
-                  <header>시스템 A</header>
-                  <p class="m_05rem">정상 운영</p>
-                </article>
-              </div>
-            </article>
-          </div>
-        </div> -->
-        <div class="container_row flex_dir_col">
+        <div class="container_row flex_dir_col ">
           <div id="divDomArea" class="flex_box">
             <div class="lineChart_box default_area" id="section_1"></div>
             <div class="lineChart_box default_area" id="section_2"></div>
           </div>
+        </div>
+        <!-- 이상 상태 요인 분석 -->
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            이상 상태 요인 분석
+          </p>
+          <div class="table-responsive default_area">
+            <table id="" class="table table-bordered number_table">
+              <colgroup>
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="7%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>이상 요인</th>
+                  <th>모집단</th>
+                  <th>분석 표본 수</th>
+                  <th>이상 표본 수</th>
+                  <th>이상 표본 오차율(%)</th>
+                </tr>
+              </thead>
+              <tbody id="">
+                <tr>
+                  <td>직렬 모듈 간 출력 이상</td>
+                  <td>시스템 A-1-3CH 의 출력 비율이 85% 수준입니다.</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- 직렬 모듈 간 출력 이상 -->
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            직렬 모듈 간 출력 이상
+          </p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <thead id="tableHeaderDom">
+                <tr>
+                  <th rowspan="2" style="width: 10%">접속반</th>
+                  <th rowspan="2" style="width: 15%">관련 장소</th>
+                  <th colspan="2">1 CH</th>
+                  <th colspan="2">2 CH</th>
+                  <th colspan="2">3 CH</th>
+                  <th colspan="2">4 CH</th>
+                  <th colspan="2">5 CH</th>
+                  <th colspan="2">6 CH</th>
+                </tr>
+                <tr>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                  <th>출력 (kW)</th>
+                  <th>출력비 (%)</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyDom">
+                <tr>
+                  <td class="text-center">시스템 A</td>
+                  <td class="text-center">수중 증발지 1, 2</td>
+                  <td>1.2</td>
+                  <td>459.3</td>
+                  <td>1.3</td>
+                  <td>459.5</td>
+                  <td>1.4</td>
+                  <td>459.5</td>
+                  <td>1.5</td>
+                  <td>459.5</td>
+                  <td>1.5</td>
+                  <td>459.3</td>
+                  <td>1.5</td>
+                  <td>459.3</td>
+                </tr>
+                <tr>
+                  <td class="text-center">시스템 B</td>
+                  <td class="text-center">수중 증발지 3, 4</td>
+                  <td>1.5</td>
+                  <td>477.1</td>
+                  <td>1.5</td>
+                  <td>477.1</td>
+                  <td>1.5</td>
+                  <td>477.1</td>
+                  <td>1.6</td>
+                  <td>477.1</td>
+                  <td>1.3</td>
+                  <td>477.1</td>
+                  <td>1.5</td>
+                  <td>477.1</td>
+                </tr>
+                <tr>
+                  <td class="text-center">시스템 C</td>
+                  <td class="text-center">수중 증발지 5, 6</td>
+                  <td>1.4</td>
+                  <td>478.8</td>
+                  <td>1.4</td>
+                  <td>478.8</td>
+                  <td>1.5</td>
+                  <td>478.8</td>
+                  <td>1.4</td>
+                  <td>478.8</td>
+                  <td>1.5</td>
+                  <td>478.8</td>
+                  <td>1.4</td>
+                  <td>478.8</td>
+                </tr>
+                <tr>
+                  <td class="text-center">시스템 D</td>
+                  <td class="text-center">수중 증발지 7, 8</td>
+                  <td>1.5</td>
+                  <td>472.2</td>
+                  <td>1.3</td>
+                  <td>472.2</td>
+                  <td>1.4</td>
+                  <td>472.2</td>
+                  <td>1.5</td>
+                  <td>472.2</td>
+                  <td>1.4</td>
+                  <td>472.2</td>
+                  <td>1.4</td>
+                  <td>472.2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="paginationDom" class="table_pagenation"></div>
         </div>
         <!-- 손실저하 요인 분석 -->
         <div class="container_row flex_dir_col">
@@ -228,7 +328,7 @@
                     <td>{{ avgSolar }}</td>
                     <td>{{ prePower }}</td>
                     <td>{{ realPower }}</td>
-                    <td>{{ lossRate }}</td>
+                    <td class="{{ powerAbnormalClass }}">{{ lossRate }}</td>
 
                     <td>{{ preWaterModuleTemp }}</td>
                     <td>{{ avgModuleTemp }}</td>
@@ -285,8 +385,28 @@
       //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
       var firstRowNum = 0;
       var tableBody = _.map(lossAnalysisRows, function(reportRow, index) {
+        var inverterAbnormalStatusCss = '';
+        if (reportRow.inverterAbnormalStatus)
+          switch (reportRow.inverterAbnormalStatus) {
+            case 0:
+              inverterAbnormalStatusCss = 'color_white';
+              break;
+            case 1:
+              inverterAbnormalStatusCss = 'color_yellow';
+              break;
+            case 2:
+              inverterAbnormalStatusCss = 'color_red';
+              break;
+            default:
+              inverterAbnormalStatusCss = 'color_white';
+              break;
+          }
+
         var rowNumber = firstRowNum + index + 1;
-        Object.assign(reportRow, { rowNumber: rowNumber });
+        Object.assign(reportRow, {
+          rowNumber: rowNumber,
+          powerAbnormalClass: inverterAbnormalStatusCss,
+        });
 
         return commentBindTemplate(reportRow);
       });
@@ -662,15 +782,8 @@
       function drawAllChart() {
         drawSection1Chart();
         drawSection2Chart();
-        // drawSection3Chart();
-        // drawSection4Chart();
       }
       drawAllChart();
-
-      $(document).ready(function() {
-        // FIXME: 1분에 한번씩 갱신 시연
-        // setInterval(drawAllChart, 1000 * 10);
-      });
     </script>
   </body>
 </html>

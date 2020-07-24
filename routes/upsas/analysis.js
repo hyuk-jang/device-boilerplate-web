@@ -595,8 +595,6 @@ router.get(
       searchRange,
     } = req.locals;
 
-    // BU.CLI(subCategoryId);
-
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
 
@@ -615,13 +613,9 @@ router.get(
 
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
-    // ----------------- 금일 발전 효율 트렌드
-
-    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
-
     // 인버터 Seq 목록
     const inverterSeqList = _(powerProfileRows)
-      .filter(inverterWhere)
+      .filter(_.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null)
       .map('inverter_seq')
       .value();
 
@@ -630,19 +624,9 @@ router.get(
       inverter_seq: inverterSeqList,
     });
 
-    // 1. 검색 구간 정의
-    // const searchRange = analysisModel.createSearchRange({
-    //   searchType: 'range',
-    //   searchInterval: 'min10',
-    //   // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
-    //   strStartDate: moment('2020-04-08').format('YYYY-MM-DD'),
-    //   strEndDate: moment('2020-04-13').format('YYYY-MM-DD'),
-    // });
-
     const generalAnalysisRows = await analysisModel
       .getGeneralReport(searchRange, siteId)
       .filter(row => inverterSeqList.includes(row.inverter_seq));
-    // BU.CLIN(generalAnalysisRows);
 
     const {
       setWaterLevel,
@@ -665,109 +649,18 @@ router.get(
     // 발전량 예측 정제
     analysisModel.refineGeneralAnalysis(generalAnalysisRows, regressionInfo);
 
-    // BU.CLI(generalAnalysisRows);
-
+    // 인버터 별로 그루핑
     const gGeneralAnalysisRows = _.groupBy(generalAnalysisRows, 'inverter_seq');
 
-    const lossAnalysisRows = _.chain(generalAnalysisRows)
-      .groupBy('view_date')
-      .map((rows, gDate) => {
-        // 모듈온도 손실
-        const lossModuleTempRate = _.meanBy(rows, 'lossModuleTempRate');
-        // 염수 청정도 손실
-        const lossCleanlinessRate = _.meanBy(rows, 'lossCleanlinessRate');
-        // 수위 손실
-        const lossWaterLevelRate = _.meanBy(rows, 'lossWaterLevelRate');
-        // 예측 모듈 온도
-        const preWaterModuleTemp = _.meanBy(rows, 'preWaterModuleTemp');
-        // 예측 발전
-        const prePower = _.sumBy(rows, 'preWaterPowerKw');
-        // 실측 발전
-        const realPower = _.sumBy(rows, 't_power_kw');
-        // 발전 비율
-        const powerRatio = _.meanBy(rows, 'avg_power_ratio');
-        // 오차율
-        const lossRate = (1 - realPower / prePower) * 100;
+    // 손실저하 요인 분석 Table Rows 생성
+    const lossAnalysisRows = analysisModel.makeLossAnalysisReport(
+      generalAnalysisRows,
+      regressionInfo.regressionK,
+    );
 
-        // 일사량
-        const avgSolar = _.meanBy(rows, 'avg_horizontal_solar');
-        // 수위
-        const avgWaterLevel = _.meanBy(rows, 'avg_water_level');
-        // 모듈 온도
-        const avgModuleTemp = _.meanBy(rows, 'avg_module_rear_temp');
-        // 수온
-        const avgBrineTemp = _.meanBy(rows, 'avg_brine_temp');
-
-        // 인버터 운전 손실
-        const lossInvRate = 100 - _.meanBy(rows, 'avg_power_factor');
-        // 모듈 노후화 손실
-        const lossAgingRate = 0.36;
-        // 어레이 미스매치 손실
-        const lossMissMatchRate = 2;
-        // 잔여 손실률
-        const lossPointRate =
-          (1 - regressionK) * 100 - lossInvRate - lossAgingRate - lossMissMatchRate;
-        // 손실 오차율
-        // const remainLossRate = lossRate - (1 - regressionK) * 100;
-
-        const isOccurLoss = _.isNaN(lossRate);
-
-        const returnInfo = {
-          // 모듈온도 손실
-          lossModuleTempRate,
-          // 수위 손실
-          lossWaterLevelRate,
-          // 청정도 손실
-          lossCleanlinessRate,
-          // 예측 모듈 온도
-          preWaterModuleTemp,
-          // 예측 발전
-          prePower,
-          // 실측 발전
-          realPower,
-          // 발전 비율
-          powerRatio,
-          // 손실률
-          lossRate: isOccurLoss ? 0 : lossRate,
-          // 일사량
-          avgSolar,
-          // 수위
-          avgWaterLevel,
-          // 모듈 온도
-          avgModuleTemp,
-          // 모듈 온도 오차
-          moduleTempLoss: avgModuleTemp - preWaterModuleTemp,
-          // 수온
-          avgBrineTemp,
-
-          // 인버터 운전 손실
-          lossInvRate: isOccurLoss ? 0 : lossInvRate,
-          // 모듈 노후화 손실
-          lossAgingRate: isOccurLoss ? 0 : lossAgingRate,
-          // 어레이 미스매치 손실
-          lossMissMatchRate: isOccurLoss ? 0 : lossMissMatchRate,
-          // 손실 계수
-          lossPointRate: isOccurLoss ? 0 : lossPointRate,
-        };
-        // 숫자 소수점 처리
-        _.forEach(returnInfo, (v, k) => {
-          returnInfo[k] = _.isNaN(v) ? v : _.round(v, 2);
-        });
-        // 날짜 병합
-        Object.assign(returnInfo, { gDate });
-
-        return returnInfo;
-      })
-      .filter(row => {
-        // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
-        return row.avgSolar > 100 || row.powerRatio > 1;
-      })
-      .sortBy('gDate')
-      .value();
-
-    // BU.CLI(lossAnalysisRows);
     _.set(req.locals, 'lossAnalysisRows', lossAnalysisRows);
 
+    // 실측 발전량 차트 생성
     let powerChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 발전량`,
@@ -779,6 +672,7 @@ router.get(
       };
     });
 
+    // 예측 발전량 차트 생성
     const predictPowerChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 예측 발전량`,
@@ -801,20 +695,13 @@ router.get(
         name: '일사량',
         yAxis: 1,
         color: 'red',
-        // dashStyle: 'ShortDash',
       },
-      // {
-      //   dataKey: 'avg_temp',
-      //   name: '기온',
-      //   yAxis: 2,
-      //   color: 'green',
-      //   // dashStyle: 'ShortDash',
-      // },
     ]);
 
     powerChartData = powerChartData.concat(...predictPowerChartData, weatherCharts);
     _.set(req.locals, 'chartInfo.dailyPowerData', powerChartData);
 
+    // 모듈 온도 차트 생성
     let envChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 모듈 온도`,
@@ -826,6 +713,7 @@ router.get(
       };
     });
 
+    // 예측 모듈 온도 차트 생성
     const predictEnvChartData = inverterRows.map((invRow, index) => {
       return {
         name: `${invRow.install_place} ${invRow.serial_number} 예측 모듈 온도`,
@@ -841,67 +729,24 @@ router.get(
     envChartData = envChartData.concat(...predictEnvChartData);
     _.set(req.locals, 'chartInfo.dailyEnvChart', envChartData);
 
-    // BU.CLI(weatherTrendRows);
-    // 분석 레포트
-    // TODO: 특정 시점 순간의 search 값 필요
-    const selectedSearchDate = _.get(_.last(weatherTrendRows), 'group_date');
-
-    const systemList = _.chain(generalAnalysisRows)
-      .filter(row => row.group_date === selectedSearchDate)
-      .map(row => {
-        const {
-          install_place: ip,
-          serial_number: sn,
-          avg_water_level: waterLevel,
-          avg_module_rear_temp: moduleTemp,
-          avg_brine_temp: brineTemp,
-          t_power_kw: powerKw,
-          preWaterModuleTemp: preModuleTemp,
-          preWaterPowerKw: prePowerKw,
-        } = row;
-
-        return {
-          name: `${ip} ${sn}`,
-          waterLevel: _.round(waterLevel, 2),
-          moduleTemp: _.round(moduleTemp, 2),
-          brineTemp: _.round(brineTemp, 2),
-          powerKw: _.round(powerKw, 2),
-          preModuleTemp: _.round(preModuleTemp, 2),
-          prePowerKw: _.round(prePowerKw, 2),
-          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
-          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
-        };
-      })
-      .value();
-
-    let analysisReport = {};
-
-    try {
-      const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
-        row => row.group_date === selectedSearchDate,
-      );
-      analysisReport = {
-        envInfo: {
-          solar,
-          outdoorTemp,
-        },
-        systemList,
-      };
-    } catch (error) {
-      analysisReport = {
-        envInfo: {
-          solar: null,
-          outdoorTemp: null,
-        },
-        systemList,
-      };
-    }
-
-    // _(weatherTrendRows).find(row => row.group_date === selectedSearchDate)
-
-    // BU.CLI(analysisReport);
+    // 발전 분석 레포트
+    const analysisReport = analysisModel.makeAnalysisReport({
+      generalAnalysisRows,
+      weatherTrendRows,
+    });
 
     _.set(req.locals, 'analysisReport', analysisReport);
+
+    // TODO: 인버터 출력 이상
+    // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
+
+    // TODO: 직렬 모듈 간 출력 이상
+    // 시간 11:00 ~ 14:00 이전, 일사량 700 이상, 출력비 90% 이하 --> 출력 이상
+
+    // FIXME: '인버터 결함' 메뉴 신설 및 일사량 100 이상, 인버터 Fault --> 발전 이상
+
+    // TODO: 이상상태 요인 종합 분석
+    // 출력 이상 별 이상 요인 분석
 
     res.render('./UPSAS/analysis/powerPrediction', req.locals);
   }),

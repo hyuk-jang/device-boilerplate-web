@@ -12,6 +12,12 @@ const commonUtil = require('./common.util');
 const webUtil = require('./web.util');
 const excelUtil = require('./excel.util');
 
+const abnormalStatus = {
+  NORMAL: 0,
+  CAUTION: 1,
+  WARNING: 2,
+};
+
 module.exports = class extends BiModule {
   /** @param {dbInfo} dbInfo */
   constructor(dbInfo) {
@@ -256,6 +262,193 @@ module.exports = class extends BiModule {
       row.preEarthPowerEff = _.round(preEarthPowerEff, 4);
       row.preEarthPowerKw = _.round(preEarthPowerKw, 4);
     });
+  }
+
+  /**
+   * 손실저하 요인 분석 Table Rows 생성
+   * @param {V_GENERAL_ANALYSIS} generalAnalysisRows
+   * @param {number} regressionK 보정계수 K
+   */
+  makeLossAnalysisReport(generalAnalysisRows, regressionK) {
+    return _.chain(generalAnalysisRows)
+      .groupBy('view_date')
+      .map((rows, gDate) => {
+        // 모듈온도 손실
+        const lossModuleTempRate = _.meanBy(rows, 'lossModuleTempRate');
+        // 염수 청정도 손실
+        const lossCleanlinessRate = _.meanBy(rows, 'lossCleanlinessRate');
+        // 수위 손실
+        const lossWaterLevelRate = _.meanBy(rows, 'lossWaterLevelRate');
+        // 예측 모듈 온도
+        const preWaterModuleTemp = _.meanBy(rows, 'preWaterModuleTemp');
+        // 예측 발전
+        const prePower = _.sumBy(rows, 'preWaterPowerKw');
+        // 실측 발전
+        const realPower = _.sumBy(rows, 't_power_kw');
+        // 발전 비율
+        const powerRatio = _.meanBy(rows, 'avg_power_ratio');
+        // 오차율
+        const lossRate = (1 - realPower / prePower) * 100;
+
+        // 일사량
+        const avgSolar = _.meanBy(rows, 'avg_horizontal_solar');
+        // 수위
+        const avgWaterLevel = _.meanBy(rows, 'avg_water_level');
+        // 모듈 온도
+        const avgModuleTemp = _.meanBy(rows, 'avg_module_rear_temp');
+        // 수온
+        const avgBrineTemp = _.meanBy(rows, 'avg_brine_temp');
+
+        // 인버터 운전 손실
+        const lossInvRate = 100 - _.meanBy(rows, 'avg_power_factor');
+        // 모듈 노후화 손실
+        const lossAgingRate = 0.36;
+        // 어레이 미스매치 손실
+        const lossMissMatchRate = 2;
+        // 잔여 손실률
+        const lossPointRate =
+          (1 - regressionK) * 100 - lossInvRate - lossAgingRate - lossMissMatchRate;
+        // 손실 오차율
+        // const remainLossRate = lossRate - (1 - regressionK) * 100;
+
+        const isOccurLoss = _.isNaN(lossRate);
+
+        // TODO: 인버터 출력 이상
+        // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
+
+        // 0: 정상(흰색), 1: 주의(노랑색), 2: 경고(빨간색)
+        let inverterAbnormalStatus = abnormalStatus.NORMAL;
+
+        if (avgSolar > 500 && avgWaterLevel > 1) {
+          if (lossRate > 20) {
+            inverterAbnormalStatus = abnormalStatus.WARNING;
+          } else if (lossRate > 10) {
+            inverterAbnormalStatus = abnormalStatus.CAUTION;
+          }
+        }
+
+        const returnInfo = {
+          // 모듈온도 손실
+          lossModuleTempRate,
+          // 수위 손실
+          lossWaterLevelRate,
+          // 청정도 손실
+          lossCleanlinessRate,
+          // 예측 모듈 온도
+          preWaterModuleTemp,
+          // 예측 발전
+          prePower,
+          // 실측 발전
+          realPower,
+          // 발전 비율
+          powerRatio,
+          // 손실률
+          lossRate: isOccurLoss ? 0 : lossRate,
+          // 일사량
+          avgSolar,
+          // 수위
+          avgWaterLevel,
+          // 모듈 온도
+          avgModuleTemp,
+          // 모듈 온도 오차
+          moduleTempLoss: avgModuleTemp - preWaterModuleTemp,
+          // 수온
+          avgBrineTemp,
+
+          // 인버터 운전 손실
+          lossInvRate: isOccurLoss ? 0 : lossInvRate,
+          // 모듈 노후화 손실
+          lossAgingRate: isOccurLoss ? 0 : lossAgingRate,
+          // 어레이 미스매치 손실
+          lossMissMatchRate: isOccurLoss ? 0 : lossMissMatchRate,
+          // 손실 계수
+          lossPointRate: isOccurLoss ? 0 : lossPointRate,
+          // 인버터 출력 이상 상태
+          inverterAbnormalStatus,
+        };
+        // 숫자 소수점 처리
+        _.forEach(returnInfo, (v, k) => {
+          returnInfo[k] = _.isNaN(v) ? v : _.round(v, 2);
+        });
+        // 날짜 병합
+        Object.assign(returnInfo, { gDate });
+
+        return returnInfo;
+      })
+      .filter(row => {
+        // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
+        return row.avgSolar > 100 || row.powerRatio > 1;
+      })
+      .sortBy('gDate')
+      .value();
+  }
+
+  /**
+   * 발전 분석 개요
+   * @param {Object} summaryInfo
+   * @param {V_GENERAL_ANALYSIS} summaryInfo.generalAnalysisRows
+   * @param {Object} summaryInfo.weatherTrendRows
+   */
+  makeAnalysisReport(summaryInfo) {
+    const { generalAnalysisRows, weatherTrendRows } = summaryInfo;
+    // TODO: 특정 시점 순간의 search 값 필요
+    const selectedSearchDate = _.get(_.last(weatherTrendRows), 'group_date');
+
+    const systemList = _.chain(generalAnalysisRows)
+      .filter(row => row.group_date === selectedSearchDate)
+      .map(row => {
+        const {
+          install_place: ip,
+          serial_number: sn,
+          avg_water_level: waterLevel,
+          avg_module_rear_temp: moduleTemp,
+          avg_brine_temp: brineTemp,
+          t_power_kw: powerKw,
+          preWaterModuleTemp: preModuleTemp,
+          preWaterPowerKw: prePowerKw,
+        } = row;
+
+        return {
+          name: `${ip} ${sn}`,
+          waterLevel: _.round(waterLevel, 2),
+          moduleTemp: _.round(moduleTemp, 2),
+          brineTemp: _.round(brineTemp, 2),
+          powerKw: _.round(powerKw, 2),
+          // Predict
+          preModuleTemp: _.round(preModuleTemp, 2),
+          prePowerKw: _.round(prePowerKw, 2),
+          //
+          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
+          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
+        };
+      })
+      .value();
+
+    let analysisReport = {};
+
+    //
+    try {
+      const { avg_temp: outdoorTemp, avg_solar: solar } = weatherTrendRows.find(
+        row => row.group_date === selectedSearchDate,
+      );
+      analysisReport = {
+        envInfo: {
+          solar,
+          outdoorTemp,
+        },
+        systemList,
+      };
+    } catch (error) {
+      analysisReport = {
+        envInfo: {
+          solar: null,
+          outdoorTemp: null,
+        },
+        systemList,
+      };
+    }
+
+    return analysisReport;
   }
 
   /* ****************************************************

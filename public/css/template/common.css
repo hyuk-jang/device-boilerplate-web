@@ -831,6 +831,14 @@ article.sdv_w_side > p:last-child {
 /***************************************/
 /**************** Color ****************/
 /***************************************/
+.color_white {
+  color: white;
+}
+
+.color_yellow {
+  color: yellow;
+}
+
 .color_green {
   color: #38be55;
 }
