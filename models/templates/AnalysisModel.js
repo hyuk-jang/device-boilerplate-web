@@ -197,6 +197,8 @@ module.exports = class extends BiModule {
         module_efficiency: moduleEff,
         // 모듈 총 면적
         module_square: moduleSquare,
+        // 실측 발전량
+        t_power_kw: realPower,
       } = row;
 
       let {
@@ -234,6 +236,9 @@ module.exports = class extends BiModule {
           moduleSquare) /
         100;
 
+      // 오차율
+      const waterPowerlossRate = (1 - realPower / preWaterPowerKw) * 100;
+
       // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
 
       // 육상 모듈 온도 예측 치
@@ -254,6 +259,9 @@ module.exports = class extends BiModule {
       row.lossCleanlinessRate = _.round((1 - lossCleanliness) * 100, 4);
       // 모듈 온도 손실률
       row.lossModuleTempRate = _.round((1 - preWaterPowerEff / moduleEff) * 100, 4);
+
+      // 수중 태양광 발전 오차율
+      row.waterPowerlossRate = waterPowerlossRate;
 
       row.preWaterModuleTemp = _.round(preWaterModuleTemp, 4);
       row.preEarthModuleTemp = _.round(preEarthModuleTemp, 4);
@@ -314,11 +322,11 @@ module.exports = class extends BiModule {
         const isOccurLoss = _.isNaN(lossRate);
 
         // TODO: 인버터 출력 이상
-        // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
 
         // 0: 정상(흰색), 1: 주의(노랑색), 2: 경고(빨간색)
         let inverterAbnormalStatus = abnormalStatus.NORMAL;
 
+        // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
         if (avgSolar > 500 && avgWaterLevel > 1) {
           if (lossRate > 20) {
             inverterAbnormalStatus = abnormalStatus.WARNING;
@@ -750,6 +758,7 @@ module.exports = class extends BiModule {
  * @property {number} preEarthModuleTemp 육상 모듈온도 예측치
  * @property {number} preWaterPowerEff 온도에 따른 발전 효율
  * @property {number} preEarthPowerEff 온도에 따른 발전 효율
- * @property {number} preWaterPowerKw 발전량 예측
+ * @property {number} preWaterPowerKw 수중태양광 발전량 예측
+ * @property {number} waterPowerlossRate 수중태양광 발전량 오차율
  * @property {number} preEarthPowerKw 발전량 예측
  */

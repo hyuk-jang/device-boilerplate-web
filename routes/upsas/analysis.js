@@ -737,8 +737,113 @@ router.get(
 
     _.set(req.locals, 'analysisReport', analysisReport);
 
+    // 이상 상태 요인 분석 조건
+    const condi = {
+      UP: 1,
+      DOWN: 0,
+    };
+
+    const condiImpRank = {
+      NONE: -1,
+      TOTAL: 0,
+      ABNORMAL: 1,
+    };
+
+    const abnormalCondition = {
+      // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
+      inverter: [
+        {
+          key: 'avg_horizontal_solar',
+          name: '일사량',
+          threshold: 500,
+          condition: condi.UP,
+          impRank: condiImpRank.TOTAL,
+        },
+        {
+          key: 'avg_water_level',
+          name: '수위',
+          threshold: 1,
+          condition: condi.UP,
+          impRank: condiImpRank.TOTAL,
+        },
+        {
+          key: 'waterPowerlossRate',
+          name: '수중태양광 오차율',
+          threshold: 10,
+          condition: condi.UP,
+          impRank: condiImpRank.ABNORMAL,
+        },
+      ],
+      // 시간 11:00 ~ 14:00 이전, 일사량 700 이상, 출력비 90% 이하 --> 출력 이상
+      serialModule: [
+        {
+          key: 'avgSolar',
+          name: '일사량',
+          threshold: 700,
+          condition: condi.UP,
+        },
+        {
+          key: 'gDate',
+          name: '시작시간',
+          threshold: 11,
+          condition: condi.UP,
+        },
+        {
+          key: 'gDate',
+          name: '종료시간',
+          threshold: 13,
+          condition: condi.DOWN,
+        },
+      ],
+    };
+
+    // const abnormals = [];
+
     // TODO: 인버터 출력 이상
     // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
+    const { inverter: invAbnormals } = abnormalCondition;
+
+    // 이상 조건에 맞는 function 생성
+    const isSampleCondition = (abnormals, rowData, condiRank = condiImpRank.NONE) => {
+      const result = _.filter(abnormals, { impRank: condiRank }).every(abnormalInfo => {
+        const { condition, key, threshold } = abnormalInfo;
+
+        return condition === condi.UP ? rowData[key] >= threshold : rowData[key] <= threshold;
+      });
+
+      return result;
+    };
+    // 1. 그루핑 인버터 별로 순회
+    const resultInvAbnormalList = _.map(gGeneralAnalysisRows, (rows, inverterSeq) => {
+      // 인버터 항목 별로 데이터 유효성 검증 카운팅 (totalSample, abnormalSample)
+      const resultSample = rows.reduce(
+        (resultSampleInfo, row, index) => {
+          resultSampleInfo.totalData += 1;
+
+          // 표본 검출 식에 부합되는 표본 추출
+          const isTotalSample = isSampleCondition(invAbnormals, row, condiImpRank.TOTAL);
+
+          if (isTotalSample) {
+            // 검색 표본 수 1 증가
+            resultSampleInfo.totalSample += 1;
+            // 조건에 부합하고 오차 조건에 부합할 경우
+            if (isSampleCondition(invAbnormals, row, condiImpRank.ABNORMAL)) {
+              resultSampleInfo.abnormalSample += 1;
+            }
+          }
+          return resultSampleInfo;
+        },
+        { totalData: 0, totalSample: 0, abnormalSample: 0 },
+      );
+
+      return Object.assign(resultSample, { inverterSeq });
+    });
+    // 2. 인버터 목록 별로 오차율을 제외한 표본 수, 오차율 적용 표본 수,  계산
+
+    // 3. 오차율 적용 표본수가 전체 표본의 20% 이상일 경우 주의, 40 % 이상일 경우 이상 확인
+    _.map(gGeneralAnalysisRows, (rows, inverterSeq) => {});
+
+    // gGeneralAnalysisRows 순회하면서 각 인버터 출력 이상 점검
 
     // TODO: 직렬 모듈 간 출력 이상
     // 시간 11:00 ~ 14:00 이전, 일사량 700 이상, 출력비 90% 이하 --> 출력 이상
