@@ -123,43 +123,79 @@
           </div>
         </div>
         <!-- 이상 상태 요인 분석 -->
-        <div class="container_row flex_dir_col">
-          <p class="table_desc_area">
-            이상 상태 요인 분석
-          </p>
-          <div class="table-responsive default_area">
-            <table id="" class="table table-bordered number_table">
-              <colgroup>
-                <col width="7%" />
-                <col width="7%" />
-                <col width="7%" />
-                <col width="7%" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>이상 요인</th>
-                  <th>모집단</th>
-                  <th>분석 표본 수</th>
-                  <th>이상 표본 수</th>
-                  <th>이상 표본 오차율(%)</th>
-                </tr>
-              </thead>
-              <tbody id="">
-                <tr>
-                  <td>직렬 모듈 간 출력 이상</td>
-                  <td>시스템 A-1-3CH 의 출력 비율이 85% 수준입니다.</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="container_row">
+          <div class="component_piece_box flex_15">
+            <article class="component_piece_area">
+              <header>인버터 출력 이상</header>
+              <section class="component_piece_body">
+                <h5>
+                  <span>측정 조건:</span>
+                  <span class="color_yellow">일사량 > 500 W/㎡</span>
+                  <span>,</span>
+                  <span class="color_green">수위 > 1cm</span>
+                </h5>
+                <div class="default_area text-center">
+                  <table class="table table-bordered ">
+                    <thead id="">
+                      <th>번호</th>
+                      <th>인버터</th>
+                      <th>손실률 (%)</th>
+                      <th>비고</th>
+                    </thead>
+                    <tbody id="invAbnormalBody">
+                      <script id="invAbnormalBodyTemplate" type="template">
+                        <tr>
+                          <td>{{ rowNumber }}</td>
+                          <td>{{ targetName }}</td>
+                          <td>{{ lossRate }}</td>
+                          <td class="{{ powerAbnormalClass }}">{{ powerAbnormalTxt }}</td>
+                        </tr>
+                      </script>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </article>
+          </div>
+          <div class="component_piece_box flex_15">
+            <article class="component_piece_area">
+              <header>직렬 모듈 간 출력 이상</header>
+              <section class="component_piece_body">
+                <h5>
+                  <span>측정 조건:</span>
+                  <span class="color_yellow">일사량 > 700 W/㎡</span>
+                  <span>,</span>
+                  <span class="color_green">11:00 < 시간 < 14:00</span>
+                </h5>
+                <div class="default_area text-center">
+                  <table class="table table-bordered ">
+                    <thead id="">
+                      <th>번호</th>
+                      <th>직렬모듈</th>
+                      <th>출력비율 (%)</th>
+                      <th>비고</th>
+                    </thead>
+                    <tbody id="smAbnormalBody">
+                      <script id="smAbnormalBodyTemplate" type="template">
+                        <tr>
+                          <td>{{ rowNumber }}</td>
+                          <td>{{ targetName }}</td>
+                          <td>{{ outputRate }}</td>
+                          <td class="{{ smAbnormalClass }}">{{ smAbnormalTxt }}</td>
+                        </tr>
+                      </script>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </article>
           </div>
         </div>
+
         <!-- 직렬 모듈 간 출력 이상 -->
         <div class="container_row flex_dir_col">
           <p class="table_desc_area">
-            직렬 모듈 간 출력 이상
+            직렬 모듈 간 출력 분석
           </p>
           <div class="table-responsive default_area">
             <table class="table table-bordered number_table">
@@ -372,6 +408,9 @@
 
       const lossAnalysisRows = <%- JSON.stringify(lossAnalysisRows) %>;
 
+      // 인버터 출력 이상
+      const resultInvAbnormalList = <%- JSON.stringify(abnormalInfo.resultInvAbnormalList) %>;
+
       const mainFontSize = 15;
       const subFontSize = 13;
       setDomElementValueWithJson(document.getElementById('searchArea'), regressionInfo, 'value', 'id')
@@ -429,6 +468,51 @@
       //         .prop('selected', true);
       //   });
       // }
+    </script>
+
+    <!-- 인버터 출력 이상 개요 -->
+    <script>
+      // 인버터 출력 이상이 있을 경우
+      var commentTemplate = document.querySelector('#invAbnormalBodyTemplate').innerHTML;
+      var commentBindTemplate = Handlebars.compile(commentTemplate);
+
+      console.log(resultInvAbnormalList);
+      //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
+      var firstRowNum = 0;
+      var tableBody = _.map(resultInvAbnormalList, function(abnormalInfo, index) {
+        var inverterAbnormalStatusCss = '';
+        var inverterAbnormalStatusTxt = '';
+        switch (abnormalInfo.abnormalCode) {
+          case 0:
+            inverterAbnormalStatusCss = 'color_white';
+            inverterAbnormalStatusTxt = '정상';
+            break;
+          case 1:
+            inverterAbnormalStatusCss = 'color_yellow';
+            inverterAbnormalStatusTxt = '주의';
+            break;
+          case 2:
+            inverterAbnormalStatusCss = 'color_red';
+            inverterAbnormalStatusTxt = '이상';
+            break;
+          default:
+            inverterAbnormalStatusCss = 'color_white';
+            inverterAbnormalStatusTxt = '정상';
+            break;
+        }
+        var rowNumber = firstRowNum + index + 1;
+        Object.assign(abnormalInfo, {
+          rowNumber: rowNumber,
+          powerAbnormalClass: inverterAbnormalStatusCss,
+          powerAbnormalTxt: inverterAbnormalStatusTxt,
+        });
+
+        return commentBindTemplate(abnormalInfo);
+      });
+
+      // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
+      var commentUl = document.querySelector('#invAbnormalBody');
+      $('#invAbnormalBody').html(tableBody);
     </script>
 
     <script src="/js/contents/report/search.js"></script>

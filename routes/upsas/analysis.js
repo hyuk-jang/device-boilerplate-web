@@ -813,40 +813,118 @@ router.get(
 
       return result;
     };
+
+    const abnormalStatus = {
+      NORMAL: 0,
+      CAUTION: 1,
+      WARNING: 2,
+    };
+
     // 1. 그루핑 인버터 별로 순회
     const resultInvAbnormalList = _.map(gGeneralAnalysisRows, (rows, inverterSeq) => {
       // 인버터 항목 별로 데이터 유효성 검증 카운팅 (totalSample, abnormalSample)
       const resultSample = rows.reduce(
-        (resultSampleInfo, row, index) => {
-          resultSampleInfo.totalData += 1;
+        (resultSampleInfo, row) => {
+          resultSampleInfo.totalDataCnt += 1;
 
           // 표본 검출 식에 부합되는 표본 추출
           const isTotalSample = isSampleCondition(invAbnormals, row, condiImpRank.TOTAL);
 
           if (isTotalSample) {
             // 검색 표본 수 1 증가
-            resultSampleInfo.totalSample += 1;
+            resultSampleInfo.totalSampleCnt += 1;
+            resultSampleInfo.lossRates.push(row.waterPowerlossRate);
             // 조건에 부합하고 오차 조건에 부합할 경우
             if (isSampleCondition(invAbnormals, row, condiImpRank.ABNORMAL)) {
-              resultSampleInfo.abnormalSample += 1;
+              resultSampleInfo.abnormalSampleCnt += 1;
             }
           }
           return resultSampleInfo;
         },
-        { totalData: 0, totalSample: 0, abnormalSample: 0 },
+        { lossRates: [], totalDataCnt: 0, totalSampleCnt: 0, abnormalSampleCnt: 0 },
       );
+      // 조건에 부합하는 표본 중 이상이 발생한 표본의 백분율을 구함
+      const { abnormalSampleCnt, totalSampleCnt } = resultSample;
 
-      return Object.assign(resultSample, { inverterSeq });
+      // 이상 분표율
+      const abnormalRate = _.round((abnormalSampleCnt / totalSampleCnt) * 100, 1);
+
+      // 손실률
+      const lossRate = _.round(_.mean(resultSample.lossRates), 1);
+
+      /** @type {V_PW_PROFILE} */
+      const powerProfile = _.find(viewPowerProfileRows, { inverter_seq: Number(inverterSeq) });
+
+      let abnormalCode = abnormalStatus.NORMAL;
+
+      // 3. 손실률 10% 이상일 경우 '주의', 20 % 이상일 경우 '경고'
+      if (lossRate >= 10) {
+        abnormalCode = abnormalStatus.CAUTION;
+      } else if (abnormalRate >= 20) {
+        abnormalCode = abnormalStatus.WARNING;
+      }
+
+      return Object.assign(resultSample, {
+        abnormalRate,
+        abnormalCode,
+        lossRate,
+        targetName: powerProfile.inverterName,
+      });
     });
-    // 2. 인버터 목록 별로 오차율을 제외한 표본 수, 오차율 적용 표본 수,  계산
+    // 이상 상태가 아닌 것은 제외
 
-    // 3. 오차율 적용 표본수가 전체 표본의 20% 이상일 경우 주의, 40 % 이상일 경우 이상 확인
-    _.map(gGeneralAnalysisRows, (rows, inverterSeq) => {});
-
-    // gGeneralAnalysisRows 순회하면서 각 인버터 출력 이상 점검
+    _.set(req, 'locals.abnormalInfo.resultInvAbnormalList', resultInvAbnormalList);
 
     // TODO: 직렬 모듈 간 출력 이상
-    // 시간 11:00 ~ 14:00 이전, 일사량 700 이상, 출력비 90% 이하 --> 출력 이상
+    /** @type {RefineModel} */
+    const refineModel = global.app.get('refineModel');
+
+    const { subCategory } = req.locals.mainInfo;
+
+    const deviceProtocol = new DeviceProtocol();
+
+    const connectSeqList = _(viewPowerProfileRows)
+      .filter(mainWhere)
+      .map('connect_seq');
+
+    const { dbTableInfo, domTableColConfigs } = deviceProtocol.getBlockChart('connector');
+
+    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
+    const blockTrendViews = deviceProtocol.getBlockChart('connector');
+    const {
+      baseTableInfo: { fromToKeyTableList, placeKey },
+      blockChartList,
+    } = blockTrendViews;
+
+    // mainWhere 맞는 V_DV_PLACE_RELATION 목록 가져옴
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const viewPlaceRelationRows = await refineModel.getTable('V_DV_PLACE_RELATION', mainWhere);
+
+    // 접속반 동적 Data Block Rows 결과 요청
+    const { viewPlaceRows, baseTableRows, dataRows } = await refineModel.getDynamicBlockRows(
+      searchRange,
+      'connector',
+      siteId,
+      // 11:00 < 시간 < 14:00
+      'DATE_FORMAT("writedate","%H") > 10 AND DATE_FORMAT("writedate","%H") < 14',
+    );
+
+    _(dataRows)
+      // 일사량 700 이상이 아닌 값 제거
+      .reject(row => {
+        BU.convertTextToDate(_.get(row, 'group_date'));
+      });
+    // 전류, 전압, 전력 평균 치 계산
+
+    // 추출 데이터 순회하면서 SEB_RELATION에서 정의한 CH 별로 전류 상대 비율 계산 (p_ratio_ch_1)
+
+    // 출력비 90% 이하 --> 출력 이상
+
+    // 기간 검색 조회 조건에 맞는 접속반 데이터 추출
+
+    // 접속반 별로 그루핑
+
+    // seb_relation를 순회하면서
 
     // FIXME: '인버터 결함' 메뉴 신설 및 일사량 100 이상, 인버터 Fault --> 발전 이상
 

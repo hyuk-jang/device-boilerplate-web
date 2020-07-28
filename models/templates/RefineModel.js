@@ -369,8 +369,9 @@ class RefineModel extends BiModule {
    * @param {searchRange} searchRange
    * @param {string} blockId Block Id
    * @param {number=} mainSeq
+   * @param {string=} addQuery
    */
-  async getDynamicBlockRows(searchRange, blockId, mainSeq) {
+  async getDynamicBlockRows(searchRange, blockId, mainSeq, addQuery = '') {
     try {
       const deviceProtocol = new DeviceProtocol();
       // mainWhere 추출
@@ -494,7 +495,8 @@ class RefineModel extends BiModule {
                   ${dynamicSelectQuery.join(',\n\t\t')},
                   COUNT(*) AS row_count
           FROM ${blockTableName}
-          WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+          WHERE writedate>= "${searchRange.strStartDate}" AND writedate<"${searchRange.strEndDate}"
+          ${addQuery.length ? ` AND ${addQuery}` : ''}
           ${sqlBlockWhere}
           GROUP BY ${firstGroupByFormat}, ${mainSelectQuery}
           ORDER BY ${mainSelectQuery}, writedate
@@ -510,7 +512,7 @@ class RefineModel extends BiModule {
       };
     } catch (error) {
       // BU.CLI(error);
-      return [];
+      return {};
     }
   }
 }
