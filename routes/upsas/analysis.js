@@ -774,32 +774,9 @@ router.get(
           impRank: condiImpRank.ABNORMAL,
         },
       ],
-      // 시간 11:00 ~ 14:00 이전, 일사량 700 이상, 출력비 90% 이하 --> 출력 이상
-      serialModule: [
-        {
-          key: 'avgSolar',
-          name: '일사량',
-          threshold: 700,
-          condition: condi.UP,
-        },
-        {
-          key: 'gDate',
-          name: '시작시간',
-          threshold: 11,
-          condition: condi.UP,
-        },
-        {
-          key: 'gDate',
-          name: '종료시간',
-          threshold: 13,
-          condition: condi.DOWN,
-        },
-      ],
     };
 
-    // const abnormals = [];
-
-    // TODO: 인버터 출력 이상
+    /** *********** 인버터 출력 이상 ************ */
     // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
     const { inverter: invAbnormals } = abnormalCondition;
 
@@ -875,56 +852,140 @@ router.get(
 
     _.set(req, 'locals.abnormalInfo.resultInvAbnormalList', resultInvAbnormalList);
 
-    // TODO: 직렬 모듈 간 출력 이상
+    // FIXME: 직렬 모듈 간 출력 이상 (확장 고려하지 않음)
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
 
-    const { subCategory } = req.locals.mainInfo;
-
-    const deviceProtocol = new DeviceProtocol();
-
-    const connectSeqList = _(viewPowerProfileRows)
-      .filter(mainWhere)
-      .map('connect_seq');
-
-    const { dbTableInfo, domTableColConfigs } = deviceProtocol.getBlockChart('connector');
-
-    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
-    const blockTrendViews = deviceProtocol.getBlockChart('connector');
-    const {
-      baseTableInfo: { fromToKeyTableList, placeKey },
-      blockChartList,
-    } = blockTrendViews;
-
-    // mainWhere 맞는 V_DV_PLACE_RELATION 목록 가져옴
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await refineModel.getTable('V_DV_PLACE_RELATION', mainWhere);
-
     // 접속반 동적 Data Block Rows 결과 요청
-    const { viewPlaceRows, baseTableRows, dataRows } = await refineModel.getDynamicBlockRows(
+    const { dataRows } = await refineModel.getDynamicBlockRows(
       searchRange,
       'connector',
       siteId,
       // 11:00 < 시간 < 14:00
-      'DATE_FORMAT("writedate","%H") > 10 AND DATE_FORMAT("writedate","%H") < 14',
+      'DATE_FORMAT(writedate,"%H") > 10 AND DATE_FORMAT(writedate,"%H") < 14',
     );
 
-    _(dataRows)
+    // 7월 9일 접속반 수리 후 직렬 모듈 출력 비율 (보정계수 CF: 최종 출력에 곱함)
+    const smPowerCorrectionFactors = [
+      {
+        connect_seq: 1,
+        powerList: [3.14905, 3.20618, 3.32102, 3.60305, 3.44786, 3.52664],
+        correctionFactors: [],
+      },
+      {
+        connect_seq: 2,
+        powerList: [3.0779, 3.10621, 3.21509, 3.67203, 3.17296, 3.23082],
+        correctionFactors: [],
+      },
+      {
+        connect_seq: 3,
+        powerList: [3.08601, 3.0566, 3.4065, 3.2593, 3.35817, 3.35252],
+        correctionFactors: [],
+      },
+      {
+        connect_seq: 4,
+        powerList: [3.33578, 3.19695, 3.38519, 3.43784, 3.26321, 3.07895],
+        correctionFactors: [],
+      },
+    ];
+    // 직렬 모듈 간 출력 보정 계수를 구함
+    smPowerCorrectionFactors.forEach(smPowerCorrectionFactorInfo => {
+      const { powerList } = smPowerCorrectionFactorInfo;
+      // 수중 증발지는 1개당 3채널이므로 3개씩 끊어서 부여
+      const firstMaxPower = _.max(powerList.slice(0, 3));
+      const secondMaxPower = _.max(powerList.slice(4));
+
+      smPowerCorrectionFactorInfo.correctionFactors = powerList.map((power, index) => {
+        const maxPower = index < 3 ? firstMaxPower : secondMaxPower;
+        return maxPower / power;
+      });
+    });
+
+    const resultSmAbnormalList = _.chain(dataRows)
       // 일사량 700 이상이 아닌 값 제거
       .reject(row => {
-        BU.convertTextToDate(_.get(row, 'group_date'));
-      });
-    // 전류, 전압, 전력 평균 치 계산
+        return _.chain(generalAnalysisRows)
+          .find({ group_date: row.group_date })
+          .get('avg_horizontal_solar', 0)
+          .thru(solar => solar < 700)
+          .value();
+      })
+      // 접속반 별로 그루핑
+      .groupBy('connector_seq')
+      // 전류, 전압, 전력 평균 치 계산
+      .map((rows, connectSeq) => {
+        const power1Ch = _(rows)
+          .map('p_ch_1')
+          .mean();
+        const power2Ch = _(rows)
+          .map('p_ch_2')
+          .mean();
+        const power3Ch = _(rows)
+          .map('p_ch_3')
+          .mean();
+        const power4Ch = _(rows)
+          .map('p_ch_4')
+          .mean();
+        const power5Ch = _(rows)
+          .map('p_ch_5')
+          .mean();
+        const power6Ch = _(rows)
+          .map('p_ch_6')
+          .mean();
 
-    // 추출 데이터 순회하면서 SEB_RELATION에서 정의한 CH 별로 전류 상대 비율 계산 (p_ratio_ch_1)
+        // 접속반 출력 보정계수 가져옴
+        const { correctionFactors } = _.find(smPowerCorrectionFactors, {
+          connect_seq: Number(connectSeq),
+        });
 
-    // 출력비 90% 이하 --> 출력 이상
+        const powerList = [power1Ch, power2Ch, power3Ch, power4Ch, power5Ch, power6Ch];
+        // FIXME: 탄력적 직렬 모듈 출력 보정
+        const correctionPowerList = powerList.map((p, idx) => p * correctionFactors[idx]);
 
-    // 기간 검색 조회 조건에 맞는 접속반 데이터 추출
+        const firstSectionMaxPower = _.max([power1Ch, power2Ch, power3Ch]);
+        const secondSectionMaxPower = _.max([power4Ch, power5Ch, power6Ch]);
 
-    // 접속반 별로 그루핑
+        const smPowerList = correctionPowerList.map((power, index) => {
+          const maxPower = index < 3 ? firstSectionMaxPower : secondSectionMaxPower;
+          const powerRate = (power / maxPower) * 100;
 
-    // seb_relation를 순회하면서
+          const powerCh = index + 1;
+          let abnormalCode = abnormalStatus.NORMAL;
+          let abnormalTxt = '정상';
+          let abnormalStatusCss = 'color_white';
+
+          if (powerRate < 80) {
+            abnormalCode = abnormalStatus.WARNING;
+            abnormalTxt = '이상';
+            abnormalStatusCss = 'color_red';
+          } else if (powerRate < 90) {
+            abnormalCode = abnormalStatus.CAUTION;
+            abnormalTxt = '주의';
+            abnormalStatusCss = 'color_yellow';
+          }
+
+          return {
+            powerCh,
+            power: _.round(power, 1),
+            powerRate: _.round(powerRate, 1),
+            abnormalCode,
+            abnormalTxt,
+            abnormalStatusCss,
+          };
+        });
+
+        const systemName = powerProfileRows.find(row => row.connector_seq === Number(connectSeq))
+          .cnt_target_name;
+
+        return {
+          systemName,
+          smPowerList,
+        };
+      })
+      // 추출 데이터 순회하면서 SEB_RELATION에서 정의한 CH 별로 전류 상대 비율 계산 (p_ratio_ch_1)
+      .value();
+
+    _.set(req, 'locals.abnormalInfo.resultSmAbnormalList', resultSmAbnormalList);
 
     // FIXME: '인버터 결함' 메뉴 신설 및 일사량 100 이상, 인버터 Fault --> 발전 이상
 
