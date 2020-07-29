@@ -879,7 +879,7 @@ router.get(
       },
       {
         connect_seq: 3,
-        powerList: [3.08601, 3.0566, 3.4065, 3.2593, 3.35817, 3.35252],
+        powerList: [3.08601, 3.0566, 3.4065, 1, 1, 1],
         correctionFactors: [],
       },
       {
@@ -893,7 +893,7 @@ router.get(
       const { powerList } = smPowerCorrectionFactorInfo;
       // 수중 증발지는 1개당 3채널이므로 3개씩 끊어서 부여
       const firstMaxPower = _.max(powerList.slice(0, 3));
-      const secondMaxPower = _.max(powerList.slice(4));
+      const secondMaxPower = _.max(powerList.slice(3));
 
       smPowerCorrectionFactorInfo.correctionFactors = powerList.map((power, index) => {
         const maxPower = index < 3 ? firstMaxPower : secondMaxPower;
@@ -942,8 +942,11 @@ router.get(
         // FIXME: 탄력적 직렬 모듈 출력 보정
         const correctionPowerList = powerList.map((p, idx) => p * correctionFactors[idx]);
 
-        const firstSectionMaxPower = _.max([power1Ch, power2Ch, power3Ch]);
-        const secondSectionMaxPower = _.max([power4Ch, power5Ch, power6Ch]);
+        const firstSectionMaxPower = _.max(correctionPowerList.slice(0, 3));
+        const secondSectionMaxPower = _.max(correctionPowerList.slice(3));
+
+        // const firstSectionMaxPower = _.max([power1Ch, power2Ch, power3Ch]);
+        // const secondSectionMaxPower = _.max([power4Ch, power5Ch, power6Ch]);
 
         const smPowerList = correctionPowerList.map((power, index) => {
           const maxPower = index < 3 ? firstSectionMaxPower : secondSectionMaxPower;
