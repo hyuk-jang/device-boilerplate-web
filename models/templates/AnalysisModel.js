@@ -214,13 +214,9 @@ module.exports = class extends BiModule {
 
       // 수위에 따른 모듈 효율 감소
       let lossWaterLevel = 0.0008 * waterLevel ** 2 - 0.023 * waterLevel + 0.9991;
-      // const lossWaterLevel = 0.98 ** waterLevel - 0.004977 * preWaterModuleTemp + 0.0767;
 
       lossWaterLevel = lossWaterLevel > 0.99 ? 1 : lossWaterLevel;
-      // lossWaterLevel =
-      //   waterLevel > 2 ? lossWaterLevel + (0.09 - 0.0456 * waterLevel) : lossWaterLevel;
 
-      // const lossCleanliness = 1;
       const lossCleanliness = waterLevel > 2 ? 1.09 - 0.0456 * waterLevel : 1;
 
       // 수중 태양광 발전 효율 예측
@@ -238,8 +234,6 @@ module.exports = class extends BiModule {
 
       // 오차율
       const waterPowerlossRate = (1 - realPower / preWaterPowerKw) * 100;
-
-      // BU.CLIS(preWaterModuleTemp, preWaterPowerEff, preWaterPowerKw);
 
       // 육상 모듈 온도 예측 치
       const preEarthModuleTemp =
@@ -316,12 +310,8 @@ module.exports = class extends BiModule {
         // 잔여 손실률
         const lossPointRate =
           (1 - regressionK) * 100 - lossInvRate - lossAgingRate - lossMissMatchRate;
-        // 손실 오차율
-        // const remainLossRate = lossRate - (1 - regressionK) * 100;
-
+        // 손실 발생 유무
         const isOccurLoss = _.isNaN(lossRate);
-
-        // TODO: 인버터 출력 이상
 
         // 0: 정상(흰색), 1: 주의(노랑색), 2: 경고(빨간색)
         let inverterAbnormalStatus = abnormalStatus.NORMAL;

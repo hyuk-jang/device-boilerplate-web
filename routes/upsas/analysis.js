@@ -177,16 +177,23 @@ router.get(
     // console.time('지난 3일 효율 분석');
     // ----------------- 지난 3일 효율 분석
     // 1. 지난 3일 Search Range 정의
+    const baseStrDate = '2020-07-03';
     const prevSearchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
-      strStartDate: moment()
+      strStartDate: moment(baseStrDate)
         .subtract(3, 'day')
         .format('YYYY-MM-DD'),
-      strEndDate: moment()
+      strEndDate: moment(baseStrDate)
         .subtract(1, 'day')
         .format('YYYY-MM-DD'),
+      // strStartDate: moment()
+      //   .subtract(3, 'day')
+      //   .format('YYYY-MM-DD'),
+      // strEndDate: moment()
+      //   .subtract(1, 'day')
+      //   .format('YYYY-MM-DD'),
     });
 
     // 2. 지난 3일동안의 발전 효율 구함 (1일 합산)
@@ -202,12 +209,13 @@ router.get(
     _.set(req.locals, 'chartInfo.prevRangePowerEffChart', prevRangePowerEffChart);
     // console.timeEnd('지난 3일 효율 분석');
 
-    // console.time('최대 발전 효율 차트 생성');
-    // ----------------- 최대 발전 효율 차트 생성
-    // 1. 수중태양광 발전 효율이 가장 높게 나온 날의 발전 효율 트렌드 구함
+    // console.time('피크 전력 차트 생성');
+    // ----------------- 피크 전력 차트 생성
+    // 1. 수중태양광 피크 전력이 가장 높게 나온 날의 발전 효율 트렌드 구함
     const maxDailyPowerEff = _.maxBy(prevPowerEffRows, row => {
       return row.target_category === mType.WATER_0 && row.t_interval_power_eff;
     });
+
     // 2. 해당 날의 Search Range 생성
     dailySearchRange = analysisModel.createSearchRange({
       searchType: 'days',
@@ -215,11 +223,11 @@ router.get(
       strStartDate: moment(maxDailyPowerEff.group_date),
     });
 
-    // 3. 발전 효율 데이터 구함
+    // 3. 피크 전력 데이터 구함
     // console.time('getPowerEffReport');
     dailyPowerEffRows = await analysisModel.getPowerEffReport(dailySearchRange);
     // console.timeEnd('getPowerEffReport');
-    // 4. 발전 효율이 시작 및 종료 시간 구함
+    // 4. 피크 전력이 시작 및 종료 시간 구함
     const { sDate: sMaxDate, eDate: eMaxDate } = analysisModel.getStartEndDate(dailyPowerEffRows);
     dailySearchRange.strStartDate = sMaxDate;
     dailySearchRange.strEndDate = eMaxDate;
@@ -234,7 +242,7 @@ router.get(
     });
     // 6. 기상 계측 정보 구함
     weatherDeviceRows = await weatherModel.getWeatherTrend(dailySearchRange, siteId);
-    // 7. 최대 발전효율 일사량 차트 데이터 생성
+    // 7. 피크 전력 일사량 차트 데이터 생성
     weatherCharts = analysisModel.makeChartData(weatherDeviceRows, [
       {
         dataKey: 'avg_solar',
@@ -244,7 +252,7 @@ router.get(
         dashStyle: 'ShortDash',
       },
     ]);
-    // 8. 최대 발전 효율 차트(발전량, 일사량) 병합
+    // 8. 피크 전력 차트(발전량, 일사량) 병합
     dailyPowerChart = moduleEfficiencyChart.concat(weatherCharts);
 
     // 9. req 객체에 차트 정보 및 검색 구간 정보 할당
@@ -776,6 +784,24 @@ router.get(
       ],
     };
 
+    // const abnormalOption = {
+    //   NORMAL: {
+    //     abnormalCode: 0,
+    //     abnormalTxt: '정상',
+    //     abnormalClass: 'color_white',
+    //   },
+    //   CAUTION: {
+    //     abnormalCode: 1,
+    //     abnormalTxt: '주의',
+    //     abnormalClass: 'color_yellow',
+    //   },
+    //   WARNING: {
+    //     abnormalCode: 2,
+    //     abnormalTxt: '정상',
+    //     abnormalClass: 'color_red',
+    //   },
+    // };
+
     /** *********** 인버터 출력 이상 ************ */
     // 일사량 500, 수위 1cm 이상, 발전량 오차율 10% 이상 --> 출력 이상
     const { inverter: invAbnormals } = abnormalCondition;
@@ -835,10 +861,10 @@ router.get(
       let abnormalCode = abnormalStatus.NORMAL;
 
       // 3. 손실률 10% 이상일 경우 '주의', 20 % 이상일 경우 '경고'
-      if (lossRate >= 10) {
-        abnormalCode = abnormalStatus.CAUTION;
-      } else if (abnormalRate >= 20) {
+      if (lossRate >= 20) {
         abnormalCode = abnormalStatus.WARNING;
+      } else if (lossRate >= 10) {
+        abnormalCode = abnormalStatus.CAUTION;
       }
 
       return Object.assign(resultSample, {
@@ -865,41 +891,48 @@ router.get(
       'DATE_FORMAT(writedate,"%H") > 10 AND DATE_FORMAT(writedate,"%H") < 14',
     );
 
-    // 7월 9일 접속반 수리 후 직렬 모듈 출력 비율 (보정계수 CF: 최종 출력에 곱함)
+    // powerList >>> 7월 3일 접속반 수리 후 직렬 모듈 출력 (보정계수 CF: 최종 출력에 곱함)
+    // correctionFactors >> 접속반 수리 전 CF 값
     const smPowerCorrectionFactors = [
       {
         connect_seq: 1,
         powerList: [3.14905, 3.20618, 3.32102, 3.60305, 3.44786, 3.52664],
-        correctionFactors: [],
+        correctionFactors: [1, 1.091205008, 1.002042691, 1, 1.137727653, 1.14592685],
       },
       {
         connect_seq: 2,
         powerList: [3.0779, 3.10621, 3.21509, 3.67203, 3.17296, 3.23082],
-        correctionFactors: [],
+        correctionFactors: [1.006446436, 1.050119695, 1, 1, 1.200593341, 1.195742863],
       },
       {
         connect_seq: 3,
         powerList: [3.08601, 3.0566, 3.4065, 1, 1, 1],
-        correctionFactors: [],
+        correctionFactors: [1.134012605, 1.10022687, 1, 1, 1.045678874, 1.288405729],
       },
       {
         connect_seq: 4,
         powerList: [3.33578, 3.19695, 3.38519, 3.43784, 3.26321, 3.07895],
-        correctionFactors: [],
+        correctionFactors: [1, 1.093602146, 1.009609306, 1, 1.124762257, 1.138987325],
       },
     ];
-    // 직렬 모듈 간 출력 보정 계수를 구함
-    smPowerCorrectionFactors.forEach(smPowerCorrectionFactorInfo => {
-      const { powerList } = smPowerCorrectionFactorInfo;
-      // 수중 증발지는 1개당 3채널이므로 3개씩 끊어서 부여
-      const firstMaxPower = _.max(powerList.slice(0, 3));
-      const secondMaxPower = _.max(powerList.slice(3));
 
-      smPowerCorrectionFactorInfo.correctionFactors = powerList.map((power, index) => {
-        const maxPower = index < 3 ? firstMaxPower : secondMaxPower;
-        return maxPower / power;
+    // 시작일이 접속반 수리 이후라면 보정계수 재계산
+
+    const mStartDate = moment(BU.convertTextToDate(searchRange.strStartDate));
+    if (mStartDate.format('YYYY-MM') > '2020-06') {
+      // 직렬 모듈 간 출력 보정 계수를 구함
+      smPowerCorrectionFactors.forEach(smPowerCorrectionFactorInfo => {
+        const { powerList } = smPowerCorrectionFactorInfo;
+        // 수중 증발지는 1개당 3채널이므로 3개씩 끊어서 부여
+        const firstMaxPower = _.max(powerList.slice(0, 3));
+        const secondMaxPower = _.max(powerList.slice(3));
+
+        smPowerCorrectionFactorInfo.correctionFactors = powerList.map((power, index) => {
+          const maxPower = index < 3 ? firstMaxPower : secondMaxPower;
+          return maxPower / power;
+        });
       });
-    });
+    }
 
     const resultSmAbnormalList = _.chain(dataRows)
       // 일사량 700 이상이 아닌 값 제거
@@ -939,15 +972,12 @@ router.get(
         });
 
         const powerList = [power1Ch, power2Ch, power3Ch, power4Ch, power5Ch, power6Ch];
-        // FIXME: 탄력적 직렬 모듈 출력 보정
+        // 탄력적 직렬 모듈 출력 보정
         const correctionPowerList = powerList.map((p, idx) => p * correctionFactors[idx]);
 
         const firstSectionMaxPower = _.max(correctionPowerList.slice(0, 3));
         const secondSectionMaxPower = _.max(correctionPowerList.slice(3));
-
-        // const firstSectionMaxPower = _.max([power1Ch, power2Ch, power3Ch]);
-        // const secondSectionMaxPower = _.max([power4Ch, power5Ch, power6Ch]);
-
+        // 직렬 모듈 이상 분석
         const smPowerList = correctionPowerList.map((power, index) => {
           const maxPower = index < 3 ? firstSectionMaxPower : secondSectionMaxPower;
           const powerRate = (power / maxPower) * 100;
@@ -969,7 +999,7 @@ router.get(
 
           return {
             powerCh,
-            power: _.round(power, 1),
+            power: _.round(power, 2),
             powerRate: _.round(powerRate, 1),
             abnormalCode,
             abnormalTxt,

@@ -176,6 +176,9 @@
                       <th>비고</th>
                     </thead>
                     <tbody id="smAbnormalBody">
+                      <tr>
+                        <td colspan="4">이상 없음</td>
+                      </tr>
                       <script id="smAbnormalBodyTemplate" type="template">
                         <tr>
                           <td>{{ rowNumber }}</td>
@@ -225,6 +228,9 @@
                 </tr>
               </thead>
               <tbody id="smBody">
+                <tr>
+                  <td class="text-center" colspan="13">조건 충족 데이터 없음</td>
+                </tr>
                 <script id="smBodyTemplate" type="template">
                   <tr>
                     <td class="text-center">{{ systemName }}</td>
@@ -242,69 +248,6 @@
                     <td class="{{ abnormalCss6Ch }}">{{ powerRate6Ch }}</td>
                   </tr>
                 </script>
-                <tr>
-                  <td class="text-center">시스템 A</td>
-                  <td>1.2</td>
-                  <td>459.3</td>
-                  <td>1.3</td>
-                  <td>459.5</td>
-                  <td>1.4</td>
-                  <td>459.5</td>
-                  <td>1.5</td>
-                  <td>459.5</td>
-                  <td>1.5</td>
-                  <td>459.3</td>
-                  <td>1.5</td>
-                  <td>459.3</td>
-                </tr>
-                <tr>
-                  <td class="text-center">시스템 B</td>
-                  <td class="text-center">수중 증발지 3, 4</td>
-                  <td>1.5</td>
-                  <td>477.1</td>
-                  <td>1.5</td>
-                  <td>477.1</td>
-                  <td>1.5</td>
-                  <td>477.1</td>
-                  <td>1.6</td>
-                  <td>477.1</td>
-                  <td>1.3</td>
-                  <td>477.1</td>
-                  <td>1.5</td>
-                  <td>477.1</td>
-                </tr>
-                <tr>
-                  <td class="text-center">시스템 C</td>
-                  <td class="text-center">수중 증발지 5, 6</td>
-                  <td>1.4</td>
-                  <td>478.8</td>
-                  <td>1.4</td>
-                  <td>478.8</td>
-                  <td>1.5</td>
-                  <td>478.8</td>
-                  <td>1.4</td>
-                  <td>478.8</td>
-                  <td>1.5</td>
-                  <td>478.8</td>
-                  <td>1.4</td>
-                  <td>478.8</td>
-                </tr>
-                <tr>
-                  <td class="text-center">시스템 D</td>
-                  <td class="text-center">수중 증발지 7, 8</td>
-                  <td>1.5</td>
-                  <td>472.2</td>
-                  <td>1.3</td>
-                  <td>472.2</td>
-                  <td>1.4</td>
-                  <td>472.2</td>
-                  <td>1.5</td>
-                  <td>472.2</td>
-                  <td>1.4</td>
-                  <td>472.2</td>
-                  <td>1.4</td>
-                  <td>472.2</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -520,24 +463,25 @@
       var smAbnormalBindTemplate = Handlebars.compile(smAbnormalTemplate);
 
       //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
-      var firstRowNum = 0;
-      var tableBody = _(resultSmAbnormalList)
-        .map((abnormalInfo, index) => {
-          const { systemName, smPowerList } = abnormalInfo;
+      if (resultSmAbnormalList.length) {
+        var tableBody = _(resultSmAbnormalList)
+          .map((abnormalInfo, index) => {
+            const { systemName, smPowerList } = abnormalInfo;
 
-          return _.chain(smPowerList)
-            .reject(smInfo => {
-              return smInfo.abnormalCode === 0;
-            })
-            .map(smInfo => Object.assign({ rowNumber: firstRowNum++, systemName }, smInfo))
-            .value();
-        })
-        .flatten()
-        .map(smAbnormalBindTemplate)
-        .value();
+            return _.chain(smPowerList)
+              .reject(smInfo => {
+                return smInfo.abnormalCode === 0;
+              })
+              .map(smInfo => Object.assign({ rowNumber: index++, systemName }, smInfo))
+              .value();
+          })
+          .flatten()
+          .map(smAbnormalBindTemplate)
+          .value();
 
-      // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
-      $('#smAbnormalBody').html(tableBody);
+        // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
+        $('#smAbnormalBody').html(tableBody);
+      }
     </script>
 
     <!-- 직렬 모듈간 출력 분석 -->
@@ -546,27 +490,28 @@
       var smBindTemplate = Handlebars.compile(smTemplate);
 
       //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
-      var firstRowNum = 0;
-      var tableBody = _.map(resultSmAbnormalList, (abnormalInfo, index) => {
-        const { systemName, smPowerList } = abnormalInfo;
+      if (resultSmAbnormalList.length) {
+        var tableBody = _.map(resultSmAbnormalList, (abnormalInfo, index) => {
+          const { systemName, smPowerList } = abnormalInfo;
 
-        const smAbnormalReport = smPowerList.reduce(
-          (abnormalInfo, smPowerInfo, rIndex) => {
-            const { powerCh, power, powerRate, abnormalStatusCss } = smPowerInfo;
-            _.set(abnormalInfo, `power${powerCh}Ch`, power);
-            _.set(abnormalInfo, `powerRate${powerCh}Ch`, powerRate);
-            _.set(abnormalInfo, `abnormalCss${powerCh}Ch`, abnormalStatusCss);
+          const smAbnormalReport = smPowerList.reduce(
+            (abnormalInfo, smPowerInfo, rIndex) => {
+              const { powerCh, power, powerRate, abnormalStatusCss } = smPowerInfo;
+              _.set(abnormalInfo, `power${powerCh}Ch`, power);
+              _.set(abnormalInfo, `powerRate${powerCh}Ch`, powerRate);
+              _.set(abnormalInfo, `abnormalCss${powerCh}Ch`, abnormalStatusCss);
 
-            return abnormalInfo;
-          },
-          { systemName },
-        );
+              return abnormalInfo;
+            },
+            { systemName },
+          );
 
-        return smBindTemplate(smAbnormalReport);
-      });
+          return smBindTemplate(smAbnormalReport);
+        });
 
-      // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
-      $('#smBody').html(tableBody);
+        // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
+        $('#smBody').html(tableBody);
+      }
     </script>
 
     <script src="/js/contents/report/search.js"></script>
@@ -605,88 +550,6 @@
           yAxis: 1,
         },
       ];
-
-      // // 발전 예측 분석 차트
-      // makeColumnChart({
-      //   domId: 'predictionRate',
-      //   xAxis: {
-      //     categories: _.map(analysisReport.systemList, 'name'),
-      //   },
-      //   yAxis: [
-      //     {
-      //       min: 0,
-      //       title: {
-      //         text: '발전량',
-      //       },
-      //       labels: {
-      //         format: '{value} kW',
-      //         style: {
-      //           color: Highcharts.getOptions().colors[1],
-      //         },
-      //       },
-      //     },
-      //   ],
-      //   series: predictPowerOpions.map(option => {
-      //     const { key, name, valueSuffix } = option;
-      //     return {
-      //       name,
-      //       data: _.map(analysisReport.systemList, key),
-      //       tooltip: {
-      //         valueSuffix,
-      //       },
-      //     };
-      //   }),
-      // });
-
-      // // 환경 분석 차트
-      // makeColumnChart({
-      //   domId: 'envData',
-      //   xAxis: {
-      //     categories: _.map(analysisReport.systemList, 'name'),
-      //   },
-      //   yAxis: [
-      //     {
-      //       min: 0,
-      //       title: {
-      //         text: '온도',
-      //       },
-      //       labels: {
-      //         format: '{value} ˚C',
-      //         style: {
-      //           color: Highcharts.getOptions().colors[1],
-      //         },
-      //       },
-      //     },
-      //     {
-      //       // Secondary yAxis
-      //       min: 0,
-      //       title: {
-      //         text: '수위',
-      //         style: {
-      //           color: Highcharts.getOptions().colors[1],
-      //         },
-      //       },
-      //       labels: {
-      //         format: '{value} cm',
-      //         style: {
-      //           color: Highcharts.getOptions().colors[1],
-      //         },
-      //       },
-      //       opposite: true,
-      //     },
-      //   ],
-      //   series: predictEnvOpions.map(option => {
-      //     const { key, name, valueSuffix, yAxis = 0 } = option;
-      //     return {
-      //       name,
-      //       data: _.map(analysisReport.systemList, key),
-      //       yAxis,
-      //       tooltip: {
-      //         valueSuffix,
-      //       },
-      //     };
-      //   }),
-      // });
     </script>
 
     <!-- 출력 트렌드 1 Negative Area Chart -->
@@ -750,21 +613,6 @@
               },
               opposite: true,
             },
-            // {
-            //   title: {
-            //     text: '기온 (˚C)',
-            //     style: {
-            //       fontSize: mainFontSize,
-            //       color: Highcharts.getOptions().colors[10],
-            //     },
-            //   },
-            //   labels: {
-            //     style: {
-            //       fontSize: subFontSize,
-            //     },
-            //   },
-            //   opposite: true,
-            // },
           ],
           plotOptions: {
             series: {
@@ -826,36 +674,6 @@
                 },
               },
             },
-            // {
-            //   title: {
-            //     text: '일사량 (W/㎡)',
-            //     style: {
-            //       fontSize: mainFontSize,
-            //       color: Highcharts.getOptions().colors[10],
-            //     },
-            //   },
-            //   labels: {
-            //     style: {
-            //       fontSize: subFontSize,
-            //     },
-            //   },
-            //   opposite: true,
-            // },
-            // {
-            //   title: {
-            //     text: '기온 (˚C)',
-            //     style: {
-            //       fontSize: mainFontSize,
-            //       color: Highcharts.getOptions().colors[10],
-            //     },
-            //   },
-            //   labels: {
-            //     style: {
-            //       fontSize: subFontSize,
-            //     },
-            //   },
-            //   opposite: true,
-            // },
           ],
           plotOptions: {
             series: {
@@ -874,9 +692,6 @@
     </script>
 
     <script>
-      // 초기 시작시 라디오 체크버튼 클릭처리
-      // const subCategory = _.get(trendInfo, 'subCategory');
-
       checkSelectBoxOption('searchInterval', searchRange.searchInterval);
       checkSelectBoxOption('searchType', searchRange.searchType);
       checkSelectBoxOption('searchOption', searchRange.searchOption);

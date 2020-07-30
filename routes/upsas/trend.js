@@ -171,7 +171,7 @@ router.get(
     const acLineChart = _.head(madeLineChartList);
 
     acLineChart.yAxis.push({
-      yTitle: '일사량(W/m²)/기온(℃)',
+      yTitle: '일사량(W/m²)',
       // dataUnit: 'W/m²',
     });
 
@@ -193,15 +193,15 @@ router.get(
             yAxis: 1,
             data: _.map(dataRows, 'avg_solar'),
           },
-          {
-            name: `${siteInfo.m_name} 기온`,
-            // tooltip: {
-            //   valueSuffix: ' ℃',
-            // },
-            color: BU.blendColors('#7157c4', '#ffce61', (index + 1) / 10),
-            yAxis: 0,
-            data: _.map(dataRows, 'avg_temp'),
-          },
+          //   {
+          //     name: `${siteInfo.m_name} 기온`,
+          //     // tooltip: {
+          //     //   valueSuffix: ' ℃',
+          //     // },
+          //     color: BU.blendColors('#7157c4', '#ffce61', (index + 1) / 10),
+          //     yAxis: 0,
+          //     data: _.map(dataRows, 'avg_temp'),
+          //   },
         ]);
       }
     });
