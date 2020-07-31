@@ -458,7 +458,7 @@ module.exports = class extends BiModule {
    * @param {searchRange} searchRange
    * @param {string=} effType 검색 조건. target_category or inverter_seq
    * @param {number[]=} inverterSeqList 인버터 seq 목록
-   * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, t_interval_power_eff: number, peak_power_eff: number, group_date: string}[]>}
+   * @return {Promise.<{inverter_seq: number, target_category: string, install_place: string, chart_sort_rank: number, t_amount: number, t_power_kw: number, t_interval_power_cp_kwh: number, powerTime: number, peak_power_eff: number, group_date: string}[]>}
    * @example
    * effType: target_category = 육상 0도, 육상 30도, 수중 0도
    * effType: inverter_seq = 육상 0도(A~B), 육상 30도(A~B), 수중 0도(A~D)
@@ -477,7 +477,7 @@ module.exports = class extends BiModule {
             SUM(avg_power_kw) / SUM(amount) * 100 AS avg_power_eff,
             MAX(peak_power_eff) AS peak_power_eff,            
             SUM(interval_power_cp_kwh) AS t_interval_power_cp_kwh,
-            SUM(interval_power_cp_kwh) / SUM(amount) * 100 AS t_interval_power_eff,
+            SUM(interval_power_cp_kwh) / SUM(amount) AS powerTime,
             group_date
       FROM
         (

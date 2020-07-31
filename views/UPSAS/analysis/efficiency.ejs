@@ -42,6 +42,12 @@
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
+          <div class="component_piece_box flex_15">
+            <article class="component_piece_area">
+              <header>최근 3일 발전 시간</header>
+              <div id="prev_3days_power_time" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
         </div>
         <div class="container_row">
           <div class="component_piece_box flex_3">
@@ -452,6 +458,78 @@
           },
         });
       }
+
+      function drawPrev3DaysPowerTime() {
+        Highcharts.chart('prev_3days_power_time', {
+          chart: {
+            type: 'column',
+            zoomType: 'xy',
+            marginLeft: 45,
+            marginTop: 35,
+          },
+          title: {
+            text: '',
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%e',
+              week: '%m-%e',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            crosshair: true,
+            labels: {
+              // x: 50,
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              tickInterval: 1,
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -35,
+                y: -15,
+                text: '발전 시간',
+                min: 0,
+                // max: 100,
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+          ],
+          tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat:
+              '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+              '<td style="padding:0"><b>{point.y:.2f} </b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true,
+          },
+          plotOptions: {},
+          series: chartInfo.prevRangePowerTimeChart,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
     </script>
 
     <!-- 금일 온도 트렌드 -->
@@ -768,6 +846,7 @@
         drawRtPowerEff();
         drawRtEnvEff();
         drawPrev3DaysEff();
+        drawPrev3DaysPowerTime();
         drawPeakPowerEff();
         drawPeakEnvEff();
       }

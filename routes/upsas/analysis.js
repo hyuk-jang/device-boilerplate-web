@@ -177,7 +177,7 @@ router.get(
     // console.time('지난 3일 효율 분석');
     // ----------------- 지난 3일 효율 분석
     // 1. 지난 3일 Search Range 정의
-    const baseStrDate = '2020-07-03';
+    const baseStrDate = '2020-07-04';
     const prevSearchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
@@ -197,7 +197,12 @@ router.get(
     });
 
     // 2. 지난 3일동안의 발전 효율 구함 (1일 합산)
-    const prevPowerEffRows = await analysisModel.getPowerEffReport(prevSearchRange);
+    const prevPowerEffRows = await analysisModel.getPowerEffReport(prevSearchRange, undefined, [
+      4,
+      5,
+      8,
+      9,
+    ]);
 
     // 3. 구간 발전량을 데이터 Key 로 하여 모듈 효율 분석
     const prevRangePowerEffChart = analysisModel.makePowerEfficiencyChart(prevPowerEffRows, {
@@ -207,13 +212,22 @@ router.get(
 
     // 4. req 객체에 할당
     _.set(req.locals, 'chartInfo.prevRangePowerEffChart', prevRangePowerEffChart);
+
+    // 3. 구간 발전량을 데이터 Key 로 하여 모듈 효율 분석
+    const prevRangePowerTimeChart = analysisModel.makePowerEfficiencyChart(prevPowerEffRows, {
+      dataKey: 'powerTime',
+      colorTable: colorTable1,
+    });
+
+    // 4. req 객체에 할당
+    _.set(req.locals, 'chartInfo.prevRangePowerTimeChart', prevRangePowerTimeChart);
     // console.timeEnd('지난 3일 효율 분석');
 
     // console.time('피크 전력 차트 생성');
     // ----------------- 피크 전력 차트 생성
-    // 1. 수중태양광 피크 전력이 가장 높게 나온 날의 발전 효율 트렌드 구함
+    // 1. 수중태양광 출력 효율이 가장 높게 나온 날의 발전 효율 트렌드 구함
     const maxDailyPowerEff = _.maxBy(prevPowerEffRows, row => {
-      return row.target_category === mType.WATER_0 && row.t_interval_power_eff;
+      return row.target_category === mType.WATER_0 && row.powerTime;
     });
 
     // 2. 해당 날의 Search Range 생성
