@@ -281,6 +281,13 @@
         var optionTemplate = Handlebars.compile(
           '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
         );
+
+        // FIXME: 동계 모드 추가
+        currModeInfo.operationConfigList.push({
+          algorithmId: 'winterMode',
+          algorithmName: '동계 모드',
+        });
+
         // select option 동적 생성
         var optionDomList = _.map(currModeInfo.operationConfigList, function(oConfig) {
           // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
@@ -327,7 +334,7 @@
       // 명령 관련 갱신 반영
       var currCommandList = [];
       socket.on('updateCommand', function(commandList) {
-        console.log(commandList);
+        // console.log(commandList);
         currCommandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
         // cmdList Handlebars compile
@@ -418,12 +425,12 @@
           .parent()
           .data('index');
 
-        console.log(
-          $('button[name="reqCancelCmd"]')
-            .parentsUntil('tr')
-            .parent()
-            .data('index'),
-        );
+        // console.log(
+        //   $('button[name="reqCancelCmd"]')
+        //     .parentsUntil('tr')
+        //     .parent()
+        //     .data('index'),
+        // );
 
         socket.emit('cancelCommand', currCommandList[cmdIndex]) && $('#cmdGoalArea').html('');
       });
