@@ -405,6 +405,12 @@
       // 서버로 명령 실행 요청
       // $('button[name="reqControlCmd"]').on('click', function(event) {
       $('#reqCommandBtn').on('click', function(event) {
+        // FIXME: 동계모드 임시
+        // var modeId = $('#operationModeSel option:selected').val();
+        // if ('winterMode' === modeId) {
+        //   return alert('동계모드에서는 제어를 할 수 없습니다.');
+        // }
+
         var reqCmdInfo = makeControlCommand(this);
 
         // FIXME: 명령을 정상적으로 요청하였을 경우 요청하였다는 메시지 출력
@@ -453,6 +459,8 @@
     <script>
       $('#changeOperationModeBtn').on('click', function() {
         var selectedAlgorithmId = $('#operationModeSel option:selected').val();
+        // var modeName = $('#operationModeSel option:selected').text();
+        // alert('운영 모드(' + modeName + ')를 변경하였습니다.');
 
         // 제어 모드 변경 요청
         socket.emit('changeOperationMode', selectedAlgorithmId);
