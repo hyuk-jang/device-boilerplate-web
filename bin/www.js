@@ -128,12 +128,12 @@ function onListening() {
   debug(`Listening on ${bind}`);
 }
 
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err) => {
   BU.CLI(err);
   console.log('uncaughtException. Node NOT Exiting...');
 });
 
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
   BU.CLI(err);
   console.log('unhandledRejection. Node NOT Exiting...');
 });

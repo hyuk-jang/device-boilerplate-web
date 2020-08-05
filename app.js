@@ -96,6 +96,24 @@ app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        'stackpath.bootstrapcdn.com',
+        'use.fontawesome.com',
+        'fonts.googleapis.com',
+        'fonts.gstatic.com',
+      ],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'stackpath.bootstrapcdn.com'],
+      objectSrc: ["'self'"],
+      upgradeInsecureRequests: [],
+    },
+  }),
+);
+
 // app.use(
 //   helmet.contentSecurityPolicy({
 //     directives: {

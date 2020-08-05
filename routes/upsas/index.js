@@ -110,7 +110,7 @@ router.get(
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
     let totalSiteAmount = 0;
-    const siteList = mainRows.map(mainRow => {
+    const siteList = mainRows.map((mainRow) => {
       const { name: mainName, main_seq: mainSeq, power_amount: pAmount = 0 } = mainRow;
 
       // const totalAmount = _.chain(viewPowerProfileRows)
@@ -164,10 +164,6 @@ router.get(
         name: '계측현황',
       },
       {
-        href: 'abnormal',
-        name: '이상상태',
-      },
-      {
         href: 'analysis',
         name: '데이터분석',
       },
@@ -215,9 +211,7 @@ router.get(
 
     // 해당 지역 위치값 정보 TODO:
     const powerPredictionInfo = await powerModel.getPowerPrediction(
-      moment()
-        .add(2, 'days')
-        .format('YYYY-MM-DD'),
+      moment().add(2, 'days').format('YYYY-MM-DD'),
       mainRow.weather_location_seq,
     );
     // BU.CLI(powerPredictionInfo);
@@ -232,7 +226,6 @@ router.use('/', main);
 router.use('/control', control);
 router.use('/tta_status', status);
 router.use('/status', status);
-router.use('/abnormal', abnormal);
 router.use('/analysis', analysis);
 router.use('/trend', trend);
 router.use('/report', report);

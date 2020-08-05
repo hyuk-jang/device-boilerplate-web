@@ -42,7 +42,7 @@ router.get(
 
     /** @type {MAIN} */
     const mainList = await biAuth.getTable('MAIN', whereInfo);
-    const placeList = _.map(mainList, mainInfo => {
+    const placeList = _.map(mainList, (mainInfo) => {
       return { name: mainInfo.name, mainSeq: mainInfo.main_seq };
     });
     // BU.CLI(placeList);
@@ -78,7 +78,7 @@ router.get('/login', (req, res) => {
       );
     }
   } else {
-    // BU.CLI('DEV_AUTO_AUTH false')
+    BU.CLI('DEV_AUTO_AUTH false', SITE_HEADER);
     return res.render(`./${SITE_HEADER}login.ejs`, {
       message: req.flash('error'),
       projectSourceInfo,
@@ -98,7 +98,7 @@ router.post(
 router.get('/logout', (req, res) => {
   req.logOut();
 
-  req.session.save(err => {
+  req.session.save((err) => {
     if (err) {
       console.log('logout error');
     }
@@ -154,7 +154,7 @@ router.post(
 
     const memberInfo = _.pick(req.body, memberPickList);
     // 모든 데이터가 입력이 되었는지 확인
-    const isOk = _.every(memberInfo, value => _.isString(value) && value.length);
+    const isOk = _.every(memberInfo, (value) => _.isString(value) && value.length);
     // 이상이 있을 경우 Back
     if (!isOk) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다!'));

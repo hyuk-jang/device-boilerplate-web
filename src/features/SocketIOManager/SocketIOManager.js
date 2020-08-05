@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { BU } = require('base-util-jh');
 
-const uuidv4 = require('uuid/v4');
+const uuid = require('uuid');
 const SocketIO = require('socket.io');
 
 const net = require('net');
@@ -172,7 +172,7 @@ class SocketIOManager extends AbstSocketIOManager {
           /** @type {defaultFormatToRequest} */
           const defaultFormatToRequestInfo = {
             commandId: transmitToServerCT.MODE,
-            uuid: uuidv4(),
+            uuid: uuid.v4(),
             contents: algorithmId,
           };
           // BU.log(defaultFormatToRequestInfo);

@@ -3,7 +3,7 @@
   <head>
     <title></title>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8;" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--Jquery 3 CDN -->
     <script src="/js/jquery-3.4.1.min.js"></script>
@@ -12,22 +12,11 @@
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <!--Fontawesome CDN-->
-    <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-      integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
-      crossorigin="anonymous"
-    />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" />
 
     <!--Custom styles-->
     <link rel="stylesheet" type="text/css" href="/css/template/login.css" />
@@ -35,11 +24,11 @@
   </head>
 
   <body>
-    <div class="container " >
+    <div class="container">
       <div class="d-flex justify-content-center h-100">
-        <div class="card"  id ="loginArea">
+        <div class="card" id="loginArea">
           <div class="card-header">
-            <h3 id="projectName" ></h3>
+            <h3 id="projectName"></h3>
           </div>
           <div class="card-body">
             <form action="/auth/login" method="post">
@@ -47,7 +36,13 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-user"></i></span>
                 </div>
-                <input type="text" autocomplete="off" class="form-control" placeholder="아이디" name="userid" />
+                <input
+                  type="text"
+                  autocomplete="off"
+                  class="form-control"
+                  placeholder="아이디"
+                  name="userid"
+                />
               </div>
               <div class="input-group form-group">
                 <div class="input-group-prepend">
@@ -75,13 +70,14 @@
                 <input
                   type="button"
                   value="회원가입"
-                  class="btn float-right login_btn "
+                  class="btn float-right login_btn"
                   onclick="location.href='/auth/join'"
                 />
               </div>
             </form>
           </div>
         </div>
+      </div>
     </div>
   </body>
 </html>
@@ -96,27 +92,24 @@
 </script>
 
 <script>
- 
-
   if (message.length) {
     $('#textErrorMessage').html(message);
   }
 
-  $(document).ready(function(){
+  $(document).ready(function () {
     // BG Path가 존재할 경우 명시
-    if(typeof projectName === 'string' && projectName.length) {
+    if (typeof projectName === 'string' && projectName.length) {
       document.getElementById('projectName').innerHTML = projectName;
       document.querySelector('title').innerHTML = projectName + ' : 로그인';
     }
 
-    if(typeof loginBG === 'string' && loginBG.length) {
+    if (typeof loginBG === 'string' && loginBG.length) {
       document.body.style.backgroundImage = 'url(../../image/bg/' + loginBG + ')';
     }
 
+    $('#signUpArea').hide();
+  });
 
-    $('#signUpArea').hide()
-  })
-  
   function loginPress(event) {
     if (event.keyCode == 13) {
       login();
@@ -141,23 +134,22 @@
     form1.submit();
   }
 
-  function showSignUpArea(){
-    $('#loginArea').hide()
-    $('#signUpArea').fadeIn()
+  function showSignUpArea() {
+    $('#loginArea').hide();
+    $('#signUpArea').fadeIn();
   }
 
-  function cancelSignUp(){
-    $('#signUpArea').hide()
-    $('#loginArea').fadeIn()
+  function cancelSignUp() {
+    $('#signUpArea').hide();
+    $('#loginArea').fadeIn();
   }
 
   function signUp() {
-    var form = document.querySelector('#testSignUp')
-    var userid  = form.userid.value
-    var password  = form.password.value
-    var name = ''
-    
+    var form = document.querySelector('#testSignUp');
+    var userid = form.userid.value;
+    var password = form.password.value;
+    var name = '';
+
     form.submit();
   }
-
 </script>

@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const cron = require('cron');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const base64Img = require('base64-img');
 const { FFMpeg } = require('rtsp-ffmpeg');
 
@@ -60,7 +60,7 @@ class ToIMG extends AbstRtspManager {
           stream.stop();
 
           // DB와 이미지 명으로 설정할 이름 생성
-          const fileName = uuid();
+          const fileName = uuid.v4();
 
           // Buffer To Base64 변환
           const base64 = data.toString('base64');
