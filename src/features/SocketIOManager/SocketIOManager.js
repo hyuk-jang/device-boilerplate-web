@@ -279,7 +279,7 @@ class SocketIOManager extends AbstSocketIOManager {
       /** @type {defaultFormatToRequest} */
       const defaultFormatToRequestInfo = {
         commandId: transmitToServerCT.COMMAND,
-        uuid: uuidv4(),
+        uuid: uuid.v4(),
         contents: executeCmdInfo,
       };
 

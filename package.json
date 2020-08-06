@@ -22,7 +22,7 @@
     "fix-styles": "prettier-stylelint --write 'public/**/*.{css,scss}' "
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.158",
+    "@types/lodash": "^4.14.159",
     "docdash": "^1.2.0",
     "eslint": "^7.6.0",
     "eslint-config-airbnb": "^18.2.0",
@@ -66,7 +66,7 @@
     "socket.io": "^2.3.0",
     "split": "^1.0.1",
     "uuid": "^8.3.0",
-    "weather-cast": "^0.2.3",
+    "weather-cast": "^0.2.4",
     "ws": "^7.3.1",
     "xlsx": "^0.16.5",
     "xss": "^1.0.8"

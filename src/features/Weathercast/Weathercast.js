@@ -1,7 +1,7 @@
 const _ = require('lodash');
-const { BU } = require('base-util-jh');
 const { BM } = require('base-model-jh');
 
+// const Weathercast = require('weather-cast');
 const Weathercast = require('weather-cast');
 const AbstWeathercast = require('./AbstWeathercast');
 
@@ -12,7 +12,6 @@ module.exports = class extends AbstWeathercast {
    * @param {dbInfo} dbInfo
    */
   async init(dbInfo) {
-    // BU.CLI(this.dbInfo);
     const biModule = new BM(dbInfo);
     const sql = `
     select wl.* from (
@@ -34,7 +33,6 @@ module.exports = class extends AbstWeathercast {
         locationSeq: _.get(currentItem, 'weather_location_seq'),
       };
 
-      // BU.CLI(config);
       const weathercast = new Weathercast(config);
       weathercast.init();
     });

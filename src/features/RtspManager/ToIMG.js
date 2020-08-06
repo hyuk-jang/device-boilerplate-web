@@ -98,28 +98,22 @@ class ToIMG extends AbstRtspManager {
    * @param {string} rtspUrl RTSP URL
    */
   runSnapshotCron(rtspUrl) {
-    BU.CLI('runSnapshotScheduler');
-    try {
-      if (this.cronScheduler !== null) {
-        BU.CLI('Stop');
-        this.cronScheduler.stop();
-      }
-
-      // BU.CLI(this.config.inquiryIntervalSecond)
-      // 1분마다 요청
-      this.cronScheduler = new cron.CronJob(
-        '*/10 * * * *',
-        () => {
-          this.runSnapshotScheduler(rtspUrl);
-        },
-        null,
-        true,
-      );
-
-      return true;
-    } catch (error) {
-      throw error;
+    if (this.cronScheduler !== null) {
+      this.cronScheduler.stop();
     }
+
+    // BU.CLI(this.config.inquiryIntervalSecond)
+    // 1분마다 요청
+    this.cronScheduler = new cron.CronJob(
+      '*/10 * * * *',
+      () => {
+        this.runSnapshotScheduler(rtspUrl);
+      },
+      null,
+      true,
+    );
+
+    return true;
   }
 
   /**
@@ -127,7 +121,6 @@ class ToIMG extends AbstRtspManager {
    * @param {string} rtspUrl RTSP URL
    */
   snapshot(rtspUrl) {
-    BU.CLI('snapshot', rtspUrl);
     const stream = new FFMpeg({ input: rtspUrl, resolution: '640X480', rate: 1, quality: 3 });
 
     // stream.on('data',)
@@ -137,8 +130,6 @@ class ToIMG extends AbstRtspManager {
     let index = 0;
 
     stream.on('data', data => {
-      BU.CLI(data.length);
-
       stream.stop();
 
       // stream.stop();

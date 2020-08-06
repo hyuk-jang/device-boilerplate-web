@@ -121,18 +121,14 @@ class ApiServer extends AbstApiServer {
    * @return {msInfo}
    */
   findMainStorage(fieldClient) {
-    try {
-      const foundMainStorage = _.find(this.mainStorageList, msInfo =>
-        _.isEqual(msInfo.msClient, fieldClient),
-      );
-      // 해당 객체가 있을 경우만 처리
-      if (!foundMainStorage) {
-        throw new Error(`${fieldClient.remoteAddress}는 등록되지 않은 Client 입니다.`);
-      }
-      return foundMainStorage;
-    } catch (error) {
-      throw error;
+    const foundMainStorage = _.find(this.mainStorageList, msInfo =>
+      _.isEqual(msInfo.msClient, fieldClient),
+    );
+    // 해당 객체가 있을 경우만 처리
+    if (!foundMainStorage) {
+      throw new Error(`${fieldClient.remoteAddress}는 등록되지 않은 Client 입니다.`);
     }
+    return foundMainStorage;
   }
 
   /**
@@ -426,38 +422,33 @@ class ApiServer extends AbstApiServer {
    * @param {wsNodeInfo[]} fieldNodeList
    */
   compareNodeList(msInfo, fieldNodeList) {
-    try {
-      /** @type {nodeInfo[]} */
-      const renewalList = fieldNodeList.reduce((updatedList, wsNodeInfo) => {
-        const { nri: nodeRealId, d: data } = wsNodeInfo;
-        const msNodeInfo = _.find(msInfo.msDataInfo.nodeList, {
-          node_real_id: nodeRealId,
-        });
+    /** @type {nodeInfo[]} */
+    const renewalList = fieldNodeList.reduce((updatedList, wsNodeInfo) => {
+      const { nri: nodeRealId, d: data } = wsNodeInfo;
+      const msNodeInfo = _.find(msInfo.msDataInfo.nodeList, {
+        node_real_id: nodeRealId,
+      });
 
-        // 객체이거나 동일 데이터가 아닐 경우
-        if (msNodeInfo !== undefined && data !== msNodeInfo.data) {
-          // 데이터가 서로 다르다면 갱신된 데이터
-          msNodeInfo.data = data;
-          updatedList.push(msNodeInfo);
-        }
-        return updatedList;
-      }, []);
-
-      // 업데이트 내역이 있다면 전송
-      if (renewalList.length) {
-        // Observer가 해당 메소드를 가지고 있다면 전송
-        this.observers.forEach(observer => {
-          if (_.get(observer, 'updateNodeList')) {
-            observer.updateNodeList(msInfo, renewalList);
-          }
-        });
+      // 객체이거나 동일 데이터가 아닐 경우
+      if (msNodeInfo !== undefined && data !== msNodeInfo.data) {
+        // 데이터가 서로 다르다면 갱신된 데이터
+        msNodeInfo.data = data;
+        updatedList.push(msNodeInfo);
       }
+      return updatedList;
+    }, []);
 
-      return renewalList;
-    } catch (error) {
-      BU.CLI(error);
-      throw error;
+    // 업데이트 내역이 있다면 전송
+    if (renewalList.length) {
+      // Observer가 해당 메소드를 가지고 있다면 전송
+      this.observers.forEach(observer => {
+        if (_.get(observer, 'updateNodeList')) {
+          observer.updateNodeList(msInfo, renewalList);
+        }
+      });
     }
+
+    return renewalList;
   }
 
   /**
@@ -466,28 +457,23 @@ class ApiServer extends AbstApiServer {
    * @param {contractCmdInfo[]} fieldCmdList
    */
   async compareCommandList(msInfo, fieldCmdList = []) {
-    // BU.CLI(updatedFieldContractCmdList);
-    try {
-      // Data Logger에서 보내온 List를 전부 적용해버림
-      this.updateFieldEvent({
-        key: 'currCommand',
-        args: [msInfo, fieldCmdList],
-      });
+    // Data Logger에서 보내온 List를 전부 적용해버림
+    this.updateFieldEvent({
+      key: 'currCommand',
+      args: [msInfo, fieldCmdList],
+    });
 
-      //  현재 수행 중인 명령 갱신
-      msInfo.msDataInfo.contractCmdList = fieldCmdList;
+    //  현재 수행 중인 명령 갱신
+    msInfo.msDataInfo.contractCmdList = fieldCmdList;
 
-      // Observer가 해당 메소드를 가지고 있다면 전송
-      this.observers.forEach(observer => {
-        if (_.get(observer, 'updateContractCmdList')) {
-          observer.updateContractCmdList(msInfo);
-        }
-      });
+    // Observer가 해당 메소드를 가지고 있다면 전송
+    this.observers.forEach(observer => {
+      if (_.get(observer, 'updateContractCmdList')) {
+        observer.updateContractCmdList(msInfo);
+      }
+    });
 
-      return msInfo.msDataInfo.contractCmdList;
-    } catch (error) {
-      throw error;
-    }
+    return msInfo.msDataInfo.contractCmdList;
   }
 }
 module.exports = ApiServer;

@@ -2,7 +2,6 @@ const _ = require('lodash');
 
 const { BU } = require('base-util-jh');
 
-const { BM } = require('base-model-jh');
 const ControlModel = require('../models/templates/ControlModel');
 
 const AbstApiServer = require('./features/ApiCommunicator/AbstApiServer');
@@ -20,11 +19,7 @@ const {
 // class Control extends EventEmitter {
 class Control {
   constructor(config = {}) {
-    // super();
-
     const { dbInfo } = config;
-
-    // BU.CLI(dbInfo);
 
     /** @type {dbInfo} */
     this.dbInfo = dbInfo;
@@ -94,10 +89,7 @@ class Control {
     /** @type {nodeInfo[]} */
     const nodeList = await this.controlModel.getTable('v_dv_node');
 
-    // // 장소 단위로 묶을 장소 목록을 가져옴
-    // /** @type {V_DV_PLACE[]} */
-    // const placeList = await this.controlModel.getTable('v_dv_place');
-
+    // 장소 단위로 묶을 장소 목록을 가져옴
     /** @type {V_DV_PLACE_RELATION[]} */
     const placeRelationList = await this.controlModel.getTable('v_dv_place_relation');
 
@@ -199,7 +191,6 @@ class Control {
    */
   convertNodesToWsNodes(nodeList, pickInfo = wsNodePickKey.FOR_BROWSER) {
     return _.map(nodeList, nodeInfo => {
-      // BU.CLI(nodeInfo)
       return _.reduce(
         pickInfo,
         (result, value, key) => {
@@ -229,7 +220,6 @@ class Control {
       isSubmitAPI === 1 ? _.filter(placeRelationRows, { is_submit_api: 1 }) : placeRelationRows;
 
     return _.map(placeRelRows, nodeInfo => {
-      // BU.CLI(nodeInfo)
       return _.reduce(
         pickInfo,
         (result, value, key) => {
