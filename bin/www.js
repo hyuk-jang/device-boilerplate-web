@@ -59,8 +59,8 @@ server.listen(port, () => {
   operationController();
   console.log(`Server ${port} is Listening`);
 });
-// 최대 5분 기다림.
-server.timeout = 1000 * 60 * 5;
+// 최대 60분 기다림.
+server.timeout = 1000 * 60 * 60;
 server.on('error', onError);
 server.on('listening', onListening);
 
@@ -128,12 +128,12 @@ function onListening() {
   debug(`Listening on ${bind}`);
 }
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   BU.CLI(err);
   console.log('uncaughtException. Node NOT Exiting...');
 });
 
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', err => {
   BU.CLI(err);
   console.log('unhandledRejection. Node NOT Exiting...');
 });
