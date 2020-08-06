@@ -78,7 +78,7 @@ router.get('/login', (req, res) => {
       );
     }
   } else {
-    BU.CLI('DEV_AUTO_AUTH false', SITE_HEADER);
+    // BU.CLI('DEV_AUTO_AUTH false', SITE_HEADER);
     return res.render(`./${SITE_HEADER}login.ejs`, {
       message: req.flash('error'),
       projectSourceInfo,
