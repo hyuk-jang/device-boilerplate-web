@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+
+    <!-- toggle library -->
+    <script src="/js/bootstrap-toggle.min.js"></script>
+    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
+
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+  </head>
+  <!-- 서버사이드 데이터 정의 -->
+  <script>
+    // 서브 카테고리 Dom
+    var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
+    // 세션 ID
+    var sessionID = <%- JSON.stringify(sessionID) %>;
+    // 로그인 사용자 정보
+    var user = <%- JSON.stringify(user) %>;
+  </script>
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body ">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <!-- Content -->
+        <div class="container_row flex_dir_col">
+          <!-- tableContent -->
+          <div class="flex_jus_center rtsp_container">
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class=" panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">명령 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="cmdUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="cmdTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="wrapCmdFormat">명령 형식</th>
+                      <th data-field="wrapCmdType">명령 타입</th>
+                      <th data-field="wrapCmdStep">명령 단계</th>
+                      <th data-field="wrapCmdId">명령 ID</th>
+                      <th data-field="wrapCmdName">명령 이름</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div id="contents" class="row_st_line min_h_780 command_status_view">
+              <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">장치 상태 정보 목록</div>
+                <div class="panel-body">
+                  갱신 시간:
+                  <span id="nodeUpdateDate"></span>
+                </div>
+                <!-- Table -->
+                <table id="nodeTableBody" class="table">
+                  <thead>
+                    <tr>
+                      <th data-field="ntn">장치 명</th>
+                      <th data-field="ni">장치 ID</th>
+                      <th data-field="pnl">관련 장소</th>
+                      <th data-field="d">데이터</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <!-- Default Setting -->
+    <script>
+      $('#subCategoryDom').html(subCategoryDom);
+
+      // 명령 목록을 보여줄 돔
+      var $cmdTableDom;
+      var $cmdUpdateDom;
+      // 노드 상태를 보여줄 돔
+      var $nodeTableDom;
+      var $nodeUpdateDom;
+      //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
+      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
+        $cmdTableDom = $('#' + cmdTableDomId);
+        $cmdUpdateDom = $('#' + cmdUpdateDomId);
+        $nodeTableDom = $('#' + nodeTableDomId);
+        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      }
+
+      // 테이블 ID 정의
+      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+    </script>
+
+    <!-- Socket.IO 이벤트 바인딩 -->
+    <script>
+      var socket = io();
+
+      // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
+      socket.emit('certifySocket', {
+        sessionID: sessionID,
+        sessionUserInfo: user,
+      });
+
+      // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+      var currNodeList = [];
+      // 갱신 노드 반영
+      socket.on('updateNode', function(wsNodeList) {
+        // console.log(wsNodeList);
+        var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
+
+        _.forEach(wsNodeList, function(wsNodeInfo) {
+          // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
+          var foundIndex = _.findIndex(currNodeList, { ni: wsNodeInfo.ni });
+          foundIndex < 0 ? currNodeList.push(wsNodeInfo) : (currNodeList[foundIndex] = wsNodeInfo);
+        });
+
+        $nodeTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: currNodeList,
+        });
+        // 명령 갱신 시각 반영
+        $nodeUpdateDom.html(new Date().toLocaleString());
+      });
+
+      // 명령 관련 갱신 반영
+      socket.on('updateCommand', function(commandList) {
+        console.log('updateCommand', commandList);
+        var commandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
+
+        $cmdTableDom.bootstrapTable('destroy').bootstrapTable({
+          data: commandList,
+        });
+        // 명령 갱신 시각 반영
+        $cmdUpdateDom.html(new Date().toLocaleString());
+      });
+    </script>
+    <!-- 검색 관련 js 모음 -->
+    <script src="/js/contents/report/search.js"></script>
+  </body>
+</html>

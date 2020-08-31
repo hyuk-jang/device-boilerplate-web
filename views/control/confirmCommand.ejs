@@ -1,0 +1,24 @@
+<div id="dialog-dynamic" title="" style="display: none;"></div>
+<script id="dialog-dynamic-template" type="template">
+  <p>{{ confirmMsg }}</p>
+  {{#if isSetValue}}
+  <p>{{ setMsg }} <input type="number" min="{{ min }}" max="{{ max }}" name="" placeholder="{{ min }} ~ {{ max }}" id="dialog-dynamic-input" class="ui-widget-content ui-corner-all" /></p>
+  {{/if}}
+</script>
+
+<script>
+  function showDynamicDialog(title, buttonFn) {
+    $('#dialog-dynamic').dialog({
+      width: 300,
+      modal: true,
+      title,
+      open: function () {
+        $('.ui-widget-overlay').bind('click', function () {
+          $('#dialog-dynamic').dialog('close');
+        });
+      },
+      closeText: 'Close',
+      buttons: buttonFn,
+    });
+  }
+</script>

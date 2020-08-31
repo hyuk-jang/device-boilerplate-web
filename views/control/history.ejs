@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("../master/head.ejs") %>
+    <script src="/js/handlebars.js"></script>
+  </head>
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <div class="container_row flex_dir_col">
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table ">
+              <colgroup>
+                <!-- <col width="0%" /> -->
+              </colgroup>
+              <thead id="tableHeaderDom">
+                <tr>
+                  <th>번호</th>
+                  <th>사이트</th>
+                  <th>회원 이름</th>
+                  <th>명령 형식</th>
+                  <th>명령 ID</th>
+                  <th>명령 이름</th>
+                  <th>실행 시각</th>
+                  <th>완료 시각</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyDom">
+                <script id="bodyTemplate" type="template">
+                  <tr>
+                    <td class="text-center">{{ rowsNumber }}</td>
+                    <td class="text-center">{{ siteName }}</td>
+                    <td class="text-center">{{ memberName }}</td>
+                    <td class="text-center">{{ cmd_format }}</td>
+                    <td class="text-center">{{ cmd_id }}</td>
+                    <td class="text-center">{{ cmd_name }}</td>
+                    <td class="text-center">{{ start_date }}</td>
+                    <td class="text-center">{{ end_date }}</td>
+                  </tr>
+                </script>
+              </tbody>
+            </table>
+          </div>
+          <div id="paginationDom" class="table_pagenation"></div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+  </body>
+
+  <script>
+    var reportRows = <%- JSON.stringify(reportRows) %>;
+    var paginationInfo = <%- JSON.stringify(paginationInfo) %>;
+
+    var firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
+
+    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+  </script>
+
+  <script>
+    //2. htmlTemplate을 가져온후 Handlebars로 compile 한다.
+    var commentTemplate = document.querySelector('#bodyTemplate').innerHTML;
+    var commentBindTemplate = Handlebars.compile(commentTemplate);
+
+    //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
+    var tableBody = _.map(reportRows, function(reportRow, index) {
+      var rowNumber = firstRowNum + index + 1;
+      Object.assign(reportRow, { rowsNumber: rowNumber });
+      reportRow.is_deleted = reportRow.is_deleted === 0 ? 'X' : 'O';
+      reportRow.is_account_lock = reportRow.is_account_lock === 0 ? 'X' : 'O';
+
+      return commentBindTemplate(reportRow);
+    });
+
+    // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
+    var commentUl = document.querySelector('#tableBodyDom');
+    $('#tableBodyDom').html(tableBody);
+  </script>
+
+  <!-- 검색 관련 js 모음 -->
+  <script src="/js/contents/report/search.js"></script>
+</html>

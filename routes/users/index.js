@@ -156,6 +156,10 @@ router.get(
         name: '메인',
       },
       {
+        href: 'control',
+        name: '제어',
+      },
+      {
         href: 'inverter',
         name: '인버터',
       },
