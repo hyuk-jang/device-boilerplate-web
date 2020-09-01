@@ -11,9 +11,6 @@
       <span class="search_title">명령 형식</span>
       <select class="form-control" id="cmdFormatSel">
         <option value="SINGLE">단일 제어</option>
-        <option value="SET">설정 제어</option>
-        <option value="FLOW">흐름 제어</option>
-        <option value="SCENARIO">시나리오</option>
       </select>
     </div>
 
@@ -25,7 +22,7 @@
       </div>
       <div class="search_box">
         <span class="search_title">장치 목록</span>
-        <select class="form-control" id="deviceInfoSel"> </select>
+        <select class="form-control" id="deviceListSel"> </select>
       </div>
       <div class="search_box">
         <span class="search_title">제어 형식</span>
@@ -63,7 +60,8 @@
         <select class="form-control" id="scenarioCmdSelList"> </select>
       </div>
     </div>
-    <div class="search_box">
+
+    <div class="search_box mr_05rem">
       <span class="search_title">제한 시간</span>
       <div class="search_body" id="limitTime">
         <input
@@ -95,14 +93,15 @@
       </div>
     </div>
   </div>
-  <div class="container_row command_btn_area">
-    <div class="user_box report_category ml_2rem mb_50rem">
+
+  <div class="search_box flex_jus_bet flex_dir_row m_05rem">
+    <div class="user_box ml_2rem mr_05rem">
       <button type="button" class="btn btn-primary" id="addCmdGoalBtn">
         목표 추가
       </button>
     </div>
-    <div class="user_box report_category mr_2rem mb_50rem">
-      <button type="button" class="btn btn-success" id="reqCommandBtn">
+    <div class="user_box mr_05rem">
+      <button type="button" class="btn btn-success mw_7rem" id="reqCommandBtn">
         실행
       </button>
     </div>
@@ -115,7 +114,7 @@
 <!-- FIXME: 템플릿 코드 최종버젼에서는 script 로 이동(IE 호환 문제) -->
 <script type="text/template" id="cmdGoalTemplate">
   <div class="search_area">
-    <div class="search_box ">
+    <div class="search_box mw_2rem">
       <button name="deleteCmdGoal" class="btn btn-danger">×</button>
     </div>
     <div class="search_box mw_7rem">
@@ -141,7 +140,7 @@
       <span class="search_title">센서</span>
       <select class="form-control" name="sensorNameSel"> </select>
     </div>
-    <div class="search_box w_15per mw_10rem">
+    <div class="search_box mw_10rem">
       <span class="search_title">달성 목표치</span>
       <div class="search_body">
         <input type="text" class="input_tre" name="goalValue" placeholder="없음" />
@@ -157,52 +156,41 @@
     </div>
   </div>
 </script>
-<!-- 명령 목표 -->
-<!-- <div id="cmdGoalArea" class="container_row flex_jus_end default_search_area"></div> -->
 
 <!-- 장치 제어 명령 Dom 생성 영역  -->
 <script>
-  // console.log(deviceDomList);
-  var CF_SINGLE = 'SINGLE';
-  var CF_SET = 'SET';
-  var CF_FLOW = 'FLOW';
-  var CF_SCENARIO = 'SCENARIO';
-
-  // 설정 명령 목록
-  var setCmdList = controlInfo.setCmdList;
-  // 흐름 명령 목록
-  var flowCmdList = controlInfo.flowCmdList;
-  // 시나리오 명령 목록
-  // var scenarioCmdList = controlInfo.scenarioCmdList;
-  var scenarioCmdList = [
-    {
-      cmdId: 'normalFlowScenario',
-      cmdName: '소금 생산',
-    },
-    {
-      cmdId: 'VIP',
-      cmdName: '소금 생산(VIP)',
-    },
-    {
-      cmdId: 'rainEvacuation',
-      cmdName: '우천 대피',
-    },
-    {
-      cmdId: 'rainRelease',
-      cmdName: '우천 퇴수',
-    },
-    {
-      cmdId: 'rainRestore',
-      cmdName: '우천 복원',
-    },
-    {
-      cmdId: 'rainMode',
-      cmdName: '우천 모드',
-    },
-  ];
+  // Handlebars Template Library 사용 (EJS 문법 충돌로 인한 lodash Template 사용 불가)
+  const optionTemplate = Handlebars.compile(
+    '<option value="{{ optionId }}">{{ optionValue }}</option>',
+  );
 
   // 명령 Select Dom Template
-  var cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
+  const cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
+
+  // console.log(deviceDomList);
+  const CF_SINGLE = 'SINGLE';
+  const CF_SET = 'SET';
+  const CF_FLOW = 'FLOW';
+  const CF_SCENARIO = 'SCENARIO';
+
+  const { setCmdList = [], flowCmdList = [], scenarioCmdList = [] } = controlInfo;
+
+  function initCmdFormatSel() {
+    const $cmdFormatSel = $('#cmdFormatSel');
+
+    if (setCmdList.length) {
+      $cmdFormatSel.append(optionTemplate({ optionId: CF_SET, optionValue: '설정 제어' }));
+    }
+
+    if (flowCmdList.length) {
+      $cmdFormatSel.append(optionTemplate({ optionId: CF_FLOW, optionValue: '흐름 제어' }));
+    }
+
+    if (scenarioCmdList.length) {
+      $cmdFormatSel.append(optionTemplate({ optionId: CF_SCENARIO, optionValue: '시나리오' }));
+    }
+  }
+  initCmdFormatSel();
 
   // TODO: DBS에 명령을 요청할 공통 형식
   function makeControlCommand(reqCmdBtn) {
@@ -222,7 +210,7 @@
         break;
       case CF_SINGLE:
         // 제어 노드 ID 추가
-        _.set(reqCmdInfo, 'nodeId', $('#deviceInfoSel').val());
+        _.set(reqCmdInfo, 'nodeId', $('#deviceListSel').val());
         // 제어 값 추가
         _.set(reqCmdInfo, 'singleControlType', $('#singleControlValue').val());
         // NOTE: 차후 제어 설정 값 있을 경우 추가
@@ -313,65 +301,64 @@
   }
 
   /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
-  function setInitControlDom(cmdFormat) {
-    // console.log('setInitControlDom', cmdFormat);
-    switch (cmdFormat) {
-      case CF_SET:
-        // 설정 돔 설정
-        $('div[name="cmdCore"]').find('data');
-        $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
-        break;
-      case CF_SINGLE:
-      default:
-        // 단일 명령 돔 설정
-        $('#deviceCateSel').html(_.map(deviceDomList, 'category'));
-        // handleDeviceCategory() 실행 시킴
-        $('#deviceCateSel').trigger('change');
-        break;
-    }
+  function initAddControlChangeEvent() {
+    // 명령 형식 선택 이벤트
+    $('#cmdFormatSel').on('change', function () {
+      var cmdFormat = this.value; // 선택된 명령 형식
+
+      $('div[name="cmdCore"]').each(function (index, cmdCoreDom) {
+        $(cmdCoreDom).data('cmd-core') === cmdFormat
+          ? $(cmdCoreDom).fadeIn()
+          : $(cmdCoreDom).hide();
+      });
+    });
+
+    // 단일 제어
+    // Single 제어 장치 타입 선택시 이벤트
+    $('#deviceCateSel').on('change', function (event) {
+      // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
+      $('#deviceListSel').html(_.find(deviceDomList, { type: this.value }).list);
+    });
+
     // 단일 명령 돔 설정
     $('#deviceCateSel').html(_.map(deviceDomList, 'category'));
     // handleDeviceCategory() 실행 시킴
     $('#deviceCateSel').trigger('change');
+
+    // 설정 제어
+    // 설정 돔 설정
+    $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
+
+    // Flow 제어 배수지 선택시 이벤트 >>> 급수지 목록 변경
+    $('#flowCmdSrcPlaceSel').on('change', function (event) {
+      // Flow Cmd: 급수지 목록 설정
+      const flowCmdInfo = _.find(flowCmdList, { cmdId: this.value });
+
+      if (flowCmdInfo === undefined) return false;
+
+      $('#flowCmdDestPlaceSel').html(flowCmdInfo.destList.map(cmdTemplate));
+    });
 
     // 흐름 명령 배수지 Dom 생성
     $('#flowCmdSrcPlaceSel').html(_.map(flowCmdList, cmdTemplate));
     // 흐름 명령 급수지 Dom 생성. handleFlowSrcPlace() 실행 시킴
     $('#flowCmdSrcPlaceSel').trigger('change');
 
-    // 설정 돔 설정
-    $('#setCmdSelList').html(_.map(setCmdList, cmdTemplate));
-
     // 시나리오 돔 설정
     $('#scenarioCmdSelList').html(_.map(scenarioCmdList, cmdTemplate));
-  }
 
-  // Single 제어 장치 타입 선택시 이벤트
-  $('#deviceCateSel').on('change', function (event) {
-    // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
-    $('#deviceInfoSel').html(_.find(deviceDomList, { type: this.value }).list);
-  });
+    // 서버로 명령 실행 요청
+    $('#reqCommandBtn').on('click', function (event) {
+      const reqCmdInfo = makeControlCommand(this);
 
-  // Flow 제어 배수지 선택시 이벤트 >>> 급수지 목록 변경
-  $('#flowCmdSrcPlaceSel').on('change', function (event) {
-    // Flow Cmd: 급수지 목록 설정
-    const flowCmdInfo = _.find(flowCmdList, { cmdId: this.value });
-
-    if (flowCmdInfo === undefined) return false;
-
-    $('#flowCmdDestPlaceSel').html(flowCmdInfo.destList.map(cmdTemplate));
-  });
-
-  setInitControlDom();
-
-  // 명령 형식 선택 이벤트
-  $('#cmdFormatSel').on('change', function () {
-    var cmdFormat = this.value; // 선택된 명령 형식
-
-    $('div[name="cmdCore"]').each(function (index, cmdCoreDom) {
-      $(cmdCoreDom).data('cmd-core') === cmdFormat ? $(cmdCoreDom).fadeIn() : $(cmdCoreDom).hide();
+      // FIXME: 명령을 정상적으로 요청하였을 경우 요청하였다는 메시지 출력
+      !_.isEmpty(reqCmdInfo) &&
+        socket &&
+        socket.emit('executeCommand', reqCmdInfo) &&
+        $('#cmdGoalArea').html('');
     });
-  });
+  }
+  initAddControlChangeEvent();
 </script>
 
 <!-- 목표 추가 데이터 정의 및 Event Binding -->
@@ -443,10 +430,6 @@
   //   pdti: 'normalEvaporationBlock',
   // };
 
-  // Handlebars Template Library 사용 (EJS 문법 충돌로 인한 lodash Template 사용 불가)
-  var optionTemplate = Handlebars.compile(
-    '<option value="{{ optionId }}">{{ optionValue }}</option>',
-  );
   // Select Option에서 '모두' 값 추가할 경우 사용될 Format
   var defaultSelOption = {
     optionId: 'all',

@@ -70,18 +70,6 @@ router.get(
     /** @type {V_DV_NODE[]} */
     const nodeRows = await biModule.getTable('v_dv_node', mainWhere);
 
-    // FIXME: drawSvg 데이터 단위를 그리기 위하여 임시로 넣어둠
-    const simpleNodes = nodeRows.reduce((storage, nodeRow) => {
-      if (nodeRow.is_submit_api === 1) {
-        storage.push({
-          nId: nodeRow.node_id,
-          du: nodeRow.data_unit,
-        });
-      }
-      return storage;
-    }, []);
-    req.locals.simpleNodes = simpleNodes;
-
     // 장치 카테고리 별 Dom 생성
     const deviceDomList = controlDom.makeNodeDom(nodeRows);
 

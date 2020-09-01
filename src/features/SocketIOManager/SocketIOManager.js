@@ -90,7 +90,7 @@ class SocketIOManager extends AbstSocketIOManager {
         try {
           /** @type {wsGenerateControlCmdAPI} */
           const {
-            cmdFormat: WCF,
+            cmdFormat: WCF = reqWCF.SINGLE,
             // 기본 값은 명령 요청
             cmdType: WCT = reqWCT.CONTROL,
             cmdId: WCI,
@@ -121,7 +121,6 @@ class SocketIOManager extends AbstSocketIOManager {
               controlCmdInfo.NI = NI;
               controlCmdInfo.SCT = _.isString(SCT) ? Number(SCT) : SCT;
               controlCmdInfo.CSV = _.isString(CSV) ? Number(CSV) : CSV;
-              isCommandError = _.includes(reqDCT, controlCmdInfo.SCT) ? 0 : 1;
               break;
             case reqWCF.FLOW:
               // 출발지와 도착지가 있을 경우 에러 해제
@@ -137,6 +136,8 @@ class SocketIOManager extends AbstSocketIOManager {
           if (isCommandError) {
             throw new Error('요청한 명령 형식이 맞지 않습니다. 관리자에게 문의하십시오.');
           }
+
+          // BU.CLI(controlCmdInfo);
 
           this.reqExecuteCommand(socket, controlCmdInfo);
         } catch (error) {

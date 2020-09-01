@@ -654,8 +654,12 @@ article.sdv_w_side > p:last-child {
 .search_area {
   display: flex;
   justify-content: flex-end;
-  padding: 1rem;
+  padding: 0.5rem;
   flex-flow: row wrap;
+}
+
+.search_area .search_area {
+  padding: 0rem;
 }
 
 .search_box {
@@ -983,6 +987,14 @@ article.sdv_w_side > p:last-child {
   min-width: 10rem;
 }
 
+.mw_11rem {
+  min-width: 12rem;
+}
+
+.mw_12rem {
+  min-width: 12rem;
+}
+
 .ml0 {
   margin-left: 0;
 }
@@ -1009,6 +1021,10 @@ article.sdv_w_side > p:last-child {
 
 .mt_2rem {
   margin-top: 2rem;
+}
+
+.mr_05rem {
+  margin-right: 0.5rem;
 }
 
 .mr_1rem {
@@ -1171,6 +1187,7 @@ article.sdv_w_side > p:last-child {
   }
 
   .container_row {
+    width: auto;
     margin: 1px;
     display: flex;
     flex-direction: column;
@@ -1234,7 +1251,7 @@ article.sdv_w_side > p:last-child {
 
   .report_category {
     /* text-indent: 1rem; */
-    margin-right: 3rem;
+    margin-right: 2rem;
   }
 
   .command_status {
@@ -1244,12 +1261,16 @@ article.sdv_w_side > p:last-child {
 
   .command_btn_area {
     flex-direction: row;
-    margin: 1rem;
+    margin: 0.5rem;
   }
 
   .search_area {
     padding: 0.5rem;
   }
+
+  /* .search_area .search_area {
+    padding: 0rem;
+  } */
 
   .default_search_area {
     /* margin-top: 1rem; */

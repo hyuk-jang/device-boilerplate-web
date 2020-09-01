@@ -1,0 +1,64 @@
+<script src="/js/panzoom.min.js"></script>
+<div class="map_control_box" id="mapControlBox">
+  <!-- panzoom button-->
+  <button id="zoomIn" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-zoom-in"></span>
+  </button>
+  <button id="zoomOut" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-zoom-out"></span>
+  </button>
+  <button id="reset" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-refresh"></span>
+  </button>
+  <button id="scrollUp" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-arrow-up"></span>
+  </button>
+  <button id="monitoring_mode" class="btn btn-warning btn-sm">
+    <span class="glyphicon glyphicon-fullscreen"></span>
+  </button>
+</div>
+
+<!-- panzoom & 맵 제어 박스 세팅 -->
+<script>
+  // 맵 제어 박스 스크롤에 반응하여 상단 고정
+  $(document).ready(() => {
+    var filter = 'win16|win32|win64|mac|macintel';
+    var canvas = document.getElementById('svgCanvas');
+    var startScale = 1;
+
+    var canvasPanzoom = Panzoom(canvas, {
+      cursor: 'default',
+      startScale: startScale,
+    });
+
+    document.getElementById('zoomIn').addEventListener('click', canvasPanzoom.zoomIn);
+    document.getElementById('zoomOut').addEventListener('click', canvasPanzoom.zoomOut);
+    document.getElementById('reset').addEventListener('click', canvasPanzoom.reset);
+    document.getElementById('scrollUp').addEventListener('click', () => {
+      document.documentElement.scrollTop = 0;
+    });
+    canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
+
+    const mCBoxOffset = $('#mapControlBox').offset();
+
+    $(window).scroll(() => {
+      $(document).scrollTop() > mCBoxOffset.top
+        ? $('#mapControlBox').css({ position: 'fixed', top: '0px' })
+        : $('#mapControlBox').css({ position: '', top: '' });
+    });
+  });
+
+  // 모니터링 버튼 이벤트
+  document.querySelector('#monitoring_mode').addEventListener('click', () => {
+    $('.container_row').toggleClass('hidden');
+    $('.container-fluid_st').toggleClass('hidden');
+    $('#wrap > header').toggleClass('hidden');
+    $('#wrap > footer').toggleClass('hidden');
+
+    $('#monitoring_mode').children().toggleClass('glyphicon-fullscreen');
+    $('#monitoring_mode').children().toggleClass('glyphicon-remove');
+
+    // $('.svg_area').height(window.innerHeight);
+    window.dispatchEvent(new Event('resize'));
+  });
+</script>

@@ -122,20 +122,20 @@ function initDrawSvg() {
           nodeName = `${ndName}${nCode ? `_${nCode}` : ''}`;
         }
 
-        // resourceId의 정보가 없다면 placeRelation에 있는지 찾아서 정의
-        if (placeId === undefined) {
-          const psIterator = mdPlaceStorage.values();
+        // 노드를 포함하는 Place Id 목록
+        const placeIdList = [];
 
-          let psInfo = psIterator.next();
+        mdPlaceStorage.forEach(mdPlaceInfo => {
+          const { nodeList: mdPlaceNodeList, placeId: mdPlaceId } = mdPlaceInfo;
+          if (mdPlaceNodeList.includes(nodeId)) {
+            placeIdList.push(mdPlaceId);
 
-          while (!psInfo.done) {
-            if (_.includes(_.get(psInfo.value, 'nodeList', []), nodeId)) {
-              placeId = _.get(psInfo.value, 'placeId');
-              break;
+            // placeId의 정보가 없다면 placeRelation에 있는지 찾아서 정의
+            if (placeId === '' || placeId === undefined) {
+              placeId = mdPlaceId;
             }
-            psInfo = psIterator.next();
           }
-        }
+        });
 
         mdNodeStorage.set(nodeId, {
           ncId,
@@ -145,12 +145,11 @@ function initDrawSvg() {
           nodeData: undefined,
           isSensor,
           dataUnit,
-          placeId,
-          placeNameList: [],
           axisScale,
           moveScale,
           point: [],
-          mdPlaceInfo: mdPlaceStorage.get(placeId),
+          placeIdList,
+          placeNameList: placeIdList.map(pId => mdPlaceStorage.get(pId).placeName),
           svgModelResource: mdMapStorage.get(resourceId),
         });
       });
@@ -222,7 +221,6 @@ function drawSvgPattern(svgCanvas, patternInfo) {
         default:
           break;
       }
-      // add.opacity(opacity);
 
       mX && mY && add.move(mX, mY);
     });
@@ -421,7 +419,7 @@ function showNodeData(nodeId, data = '') {
  * @param {dCmdScenarioInfo=} dCmdScenarioInfo 현재 수행 중인 장치 제어 단계
  */
 function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
-  const { ncId, ndName = '', nodeName, nodeData } = mdNodeInfo;
+  const { ncId, ndName = '', nodeId, nodeName, nodeData } = mdNodeInfo;
 
   const deviceName = `${ndName}(${nodeName})`;
 
@@ -457,11 +455,12 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
 
   // 동적 다이어로그 구성
   const btnFn = confirmList.reduce((btnFnInfo, dConfirmInfo) => {
-    const { enName, krName, controlValue, nextStepInfo } = dConfirmInfo;
+    const { krName, controlValue, nextStepInfo } = dConfirmInfo;
 
     let deviceSetValue = '';
     if (nextStepInfo === undefined) {
       // 다음 스텝이 없으면 즉시 실행
+      // eslint-disable-next-line func-names
       btnFnInfo[krName] = function () {
         const $deviceSetValue = $('#dialog-dynamic-input');
         // 값 입력이 활성화 되어 있으나 사용자의 값 입력에 문제가 있을 경우
@@ -484,10 +483,18 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
         }
 
         $(this).dialog('close');
-
+        console.log('Execute', deviceSetValue, controlValue);
         // TODO: Execute 전송
+        socket &&
+          socket.emit('executeCommand', {
+            cmdFormat: 'SINGLE',
+            nodeId,
+            singleControlType: controlValue,
+            controlSetValue: deviceSetValue,
+          });
       };
     } else {
+      // eslint-disable-next-line func-names
       btnFnInfo[krName] = function () {
         $(this).dialog('close');
         alertDeviceCmdConfirm(mdNodeInfo, nextStepInfo);
@@ -523,7 +530,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
  */
 function drawSvgBasePlace(documentId, isKorText = true) {
   const textLang = isKorText ? 'ko' : 'en';
-  const { backgroundData = '', backgroundPosition = [0, 0] } = backgroundInfo;
+  const { backgroundData = '', backgroundPosition: [bgPosX, bgPosY] = [0, 0] } = backgroundInfo;
 
   const svgCanvas = SVG().addTo(`#${documentId}`).size('100%', '100%');
 
@@ -538,8 +545,22 @@ function drawSvgBasePlace(documentId, isKorText = true) {
   // 브라우저 크기에 반응하기 위한 뷰박스 세팅
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
 
-  // map에 배경의 데이터가 있을경우 배경 이미지 지정
-  svgCanvas.image(backgroundData).move(backgroundPosition[0], backgroundPosition[1]);
+  // 일반 색상으로 표현하고자 할 경우
+  if (backgroundData.length < 8) {
+    const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
+    console.log(backgroundData);
+    svgCanvas
+      .rect(mapWidth, mapHeight)
+      .fill(bgColor)
+      .stroke({
+        width: 1,
+        color: '#ccc',
+      })
+      .opacity(0.1);
+  } else {
+    // map에 배경의 데이터가 있을경우 배경 이미지 지정
+    svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+  }
 
   // Place 그리기
   svgPlaceList.forEach(svgPositionInfo => {
