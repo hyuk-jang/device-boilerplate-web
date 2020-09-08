@@ -8,9 +8,19 @@ var SVG = SVG;
 /** @type {mDeviceMap} */
 const realMap = map;
 
+const BASE = {
+  TXT: {
+    DATA_COLOR: '#0014ff',
+    TITLE_COLOR: '#000',
+    FONT_SIZE: 10,
+    // middle
+    ANCHOR: 'middle',
+  },
+};
+
 const DATA_RANGE = {
-  TRUE: ['OPEN', 'OPENING', 'ON', '1', 'FOLD'],
-  FALSE: ['CLOSE', 'CLOSING', 'OFF', '0', 'UNFOLD'],
+  TRUE: ['OPEN', 'OPENING', 'ON', '1', 'FOLD', 'AUTO'],
+  FALSE: ['CLOSE', 'CLOSING', 'OFF', '0', 'UNFOLD', 'MANUAL '],
 };
 
 const SENSOR_TYPE = {
@@ -243,6 +253,7 @@ function drawSvgElement(svgDrawInfo) {
     ownerInfo,
     ownerInfo: {
       svgModelResource: {
+        id: svgModelId,
         type: svgModelType,
         elementDrawInfo,
         elementDrawInfo: { errColor = 'red', radius = 1, opacity = 1, strokeInfo, patternInfo },
@@ -251,6 +262,9 @@ function drawSvgElement(svgDrawInfo) {
     },
     isShow = true,
   } = svgDrawInfo;
+
+  // console.log(placeId);
+  // console.log(placeIdList);
 
   let {
     color: [defaultColor],
@@ -305,37 +319,78 @@ function drawSvgElement(svgDrawInfo) {
 
   // tSpan을 그리기 위한 SVG 생성 정보
   const {
-    color = '#000',
-    dataColor = '#0014ff',
-    fontSize = 10,
+    isHiddenTitle = false,
+    isTitleWrap = true,
+    color = BASE.TXT.TITLE_COLOR,
+    dataColor: [TXT_DATA_COLOR] = [BASE.TXT.DATA_COLOR],
+    fontSize = BASE.TXT.FONT_SIZE,
     // 행간
     leading = 1.2,
     transform,
     axisScale: [tAxisScaleX, tAxisScaleY] = [0.5, 0.5],
+    anchor = BASE.TXT.ANCHOR,
   } = textStyleInfo;
 
   // 텍스트 그리기
   let textModelDy = 0;
-  svgCanvas
-    .text(text => {
-      // mdNodeInfo|mdPlaceInfo 에 SVG Title 정의
-      ownerInfo.svgEleName = text.tspan(positionName).font({ fill: color, size: fontSize });
 
-      // 데이터 공간
-      if (placeId !== undefined) {
-        textModelDy = -fontSize * 0.7;
-        // mdNodeInfo|mdPlaceInfo 에 SVG Data 정의
-        ownerInfo.svgEleData = text.tspan(' ').newLine().font({ size: fontSize, fill: dataColor });
+  // isTitleWrap을 하지 않을 경우 배경 데이터 공간을 기준으로 [좌: 타이틀, 우: 데이터] text 각각 생성
+  if (!isTitleWrap && !isHiddenTitle && placeId !== undefined) {
+    const yAxis = y1 - fontSize / 2 + svgModelHeight * tAxisScaleY;
 
+    // Title 생성
+    svgCanvas
+      .text(text => {
+        // mdNodeInfo|mdPlaceInfo 에 SVG Title 정의
+        ownerInfo.svgEleName = text.tspan(positionName).font({ fill: color, size: fontSize });
+      })
+      // 공통 옵션
+      // 배경의 좌측 10% 공간에서 시작
+      .move(x1 + svgModelWidth * 0.1, yAxis)
+      // 시작점에서 우측으로 써나감
+      .font({ anchor: 'start', weight: 'bold', transform, 'pointer-events': 'none' });
+
+    textModelDy = fontSize * 0.95;
+
+    svgCanvas
+      .text(text => {
+        ownerInfo.svgEleData = text.tspan(' ').font({ size: fontSize, fill: TXT_DATA_COLOR });
         // mdNodeInfo|mdPlaceInfo 에 SVG Data Unit 정의
         ownerInfo.svgEleDataUnit = text.tspan('').font({ size: fontSize * 0.9 });
-      }
-    })
-    // 공통 옵션
-    .leading(leading)
-    .move(x1 + svgModelWidth * tAxisScaleX, y1 - fontSize / 2 + svgModelHeight * tAxisScaleY)
-    .font({ anchor: 'middle', weight: 'bold', transform, 'pointer-events': 'none' })
-    .dy(textModelDy);
+      })
+      // 공통 옵션
+      .leading(leading)
+      // 배경의 좌측 90% 공간에서 시작
+      .move(x1 + svgModelWidth * 0.9, yAxis)
+      // 시작점에서 우측으로 써나감
+      .font({ anchor: 'end', weight: 'bold', transform, 'pointer-events': 'none' })
+      .dy(textModelDy);
+  } else {
+    svgCanvas
+      .text(text => {
+        // mdNodeInfo|mdPlaceInfo 에 SVG Title 정의
+        if (!isHiddenTitle) {
+          ownerInfo.svgEleName = text.tspan(positionName).font({ fill: color, size: fontSize });
+        }
+
+        // 데이터 공간이 있을 경우
+        if (placeId !== undefined) {
+          textModelDy = -fontSize * 0.7;
+          // mdNodeInfo|mdPlaceInfo 에 SVG Data 정의
+          ownerInfo.svgEleData = text
+            .tspan(' ')
+            .newLine()
+            .font({ size: fontSize, fill: TXT_DATA_COLOR });
+          // mdNodeInfo|mdPlaceInfo 에 SVG Data Unit 정의
+          ownerInfo.svgEleDataUnit = text.tspan('').font({ size: fontSize * 0.9 });
+        }
+      })
+      // 공통 옵션
+      .leading(leading)
+      .move(x1 + svgModelWidth * tAxisScaleX, y1 - fontSize / 2 + svgModelHeight * tAxisScaleY)
+      .font({ anchor, weight: 'bold', transform, 'pointer-events': 'none' })
+      .dy(textModelDy);
+  }
 
   return svgCanvasBgElement;
 }
@@ -357,6 +412,7 @@ function showNodeData(nodeId, data = '') {
           color: [baseColor, actionColor],
           errColor = 'red',
         },
+        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [] } = {},
       },
       svgEleBg,
       svgEleData,
@@ -372,12 +428,19 @@ function showNodeData(nodeId, data = '') {
     // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
     let isValidData = 0;
     let selectedColor = baseColor;
+    let selectedTxtColor = txtBaseColor;
 
     // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
     if (isSensor) {
-      isValidData = typeof data !== 'number' ? 0 : !Number.isNaN(Number(data));
-      if (!isValidData) {
+      if (data === '' || data === undefined) {
         selectedColor = errColor;
+      } else {
+        isValidData = 1;
+
+        // string 형식일 경우에는 dataRange 체크
+        if (typeof data === 'string' && DATA_RANGE.TRUE.includes(data.toUpperCase())) {
+          selectedTxtColor = txtActionColor;
+        }
       }
     } else {
       // node 타입이 Device 일 경우에는 DATA_RANGE 범위 측정. 아닐 경우 에러
@@ -397,7 +460,10 @@ function showNodeData(nodeId, data = '') {
       }
     }
 
+    // 배경 색상 변경
     svgEleBg.fill(selectedColor);
+    // 데이터 색상 변경
+    svgEleData.font({ fill: selectedTxtColor });
     if (isValidData) {
       svgEleData.text(data);
       svgEleDataUnit.text(dataUnit).dx(2);
@@ -419,7 +485,7 @@ function showNodeData(nodeId, data = '') {
  * @param {dCmdScenarioInfo=} dCmdScenarioInfo 현재 수행 중인 장치 제어 단계
  */
 function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
-  const { ncId, ndName = '', nodeId, nodeName, nodeData } = mdNodeInfo;
+  const { ncId, ndName = '', nodeName, nodeData } = mdNodeInfo;
 
   const deviceName = `${ndName}(${nodeName})`;
 
@@ -483,15 +549,9 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
         }
 
         $(this).dialog('close');
-        console.log('Execute', deviceSetValue, controlValue);
+
         // TODO: Execute 전송
-        socket &&
-          socket.emit('executeCommand', {
-            cmdFormat: 'SINGLE',
-            nodeId,
-            singleControlType: controlValue,
-            controlSetValue: deviceSetValue,
-          });
+        console.log('Execute', deviceSetValue, controlValue);
       };
     } else {
       // eslint-disable-next-line func-names

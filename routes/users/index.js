@@ -177,6 +177,14 @@ router.get(
       },
     ];
 
+    // 농가보급형일 경우에만 제어 추가
+    if (process.env.PJ_MAIN_ID === 'HS') {
+      naviList.slice(1, 0, {
+        href: 'control',
+        name: '제어',
+      });
+    }
+
     // 관리자 모드 추가
     if (_.eq(grade, 'admin')) {
       naviList.push({

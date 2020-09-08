@@ -33,7 +33,6 @@ const subCategoryList = [
   // },
 ];
 
-/* middleware. */
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
   asyncHandler(async (req, res, next) => {
