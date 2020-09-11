@@ -5,12 +5,12 @@
 </script>
 
 <!-- 제어 명령 -->
-<div class="container_row flex_dir_col default_search_area">
+<div class="container_row flex_dir_col default_search_area" id="controlCommandArea">
   <div class="search_area">
     <div class="search_box">
       <span class="search_title">명령 형식</span>
       <select class="form-control" id="cmdFormatSel">
-        <option value="SINGLE">단일 제어</option>
+        <!-- <option value="SINGLE">단일 제어</option> -->
       </select>
     </div>
 
@@ -25,11 +25,22 @@
         <select class="form-control" id="deviceListSel"> </select>
       </div>
       <div class="search_box">
-        <span class="search_title">제어 형식</span>
+        <span class="search_title">제어 목록</span>
         <select class="form-control" id="singleControlValue">
           <option value="1">Open / On</option>
           <option value="0">Close / Off</option>
         </select>
+      </div>
+      <div class="search_box" id="controlSetValueArea">
+        <span class="search_title" id="controlSetValueTitle">설정 값!</span>
+        <div class="search_body">
+          <input
+            type="number"
+            class="input_tre w_9rem"
+            id="controlSetValue"
+            placeholder=""
+          />
+        </div>
       </div>
     </div>
 
@@ -54,7 +65,12 @@
     </div>
 
     <!-- 시나리오 명령 -->
-    <div class="search_area" name="cmdCore" data-cmd-core="SCENARIO" style="display: none;">
+    <div
+      class="search_area"
+      name="cmdCore"
+      data-cmd-core="SCENARIO"
+      style="display: none;"
+    >
       <div class="search_box">
         <span class="search_title">시나리오</span>
         <select class="form-control" id="scenarioCmdSelList"> </select>
@@ -66,7 +82,7 @@
       <div class="search_body" id="limitTime">
         <input
           type="number"
-          class="input_tre"
+          class="input_tre w_3rem"
           data-limit-time="hours"
           min="0"
           max="1000"
@@ -75,7 +91,7 @@
         <span>:</span>
         <input
           type="number"
-          class="input_tre"
+          class="input_tre w_3rem"
           data-limit-time="minutes"
           min="0"
           max="59"
@@ -84,7 +100,7 @@
         <span>:</span>
         <input
           type="number"
-          class="input_tre"
+          class="input_tre w_3rem"
           data-limit-time="seconds"
           min="0"
           max="59"
@@ -178,19 +194,62 @@
   function initCmdFormatSel() {
     const $cmdFormatSel = $('#cmdFormatSel');
 
+    // 단일 제어 명령 정의가 존재할 경우
+    if (mdControlIdenStorage.size) {
+      // Node Class Id만 추출
+      const mdControlIdenStorageKeys = mdControlIdenStorage.keys();
+      // Iterator 진행
+      let iteratorKey = mdControlIdenStorageKeys.next();
+
+      while (!iteratorKey.done) {
+        // 현재 NcId 정의
+        const ncId = iteratorKey.value;
+        // Iterator 증가
+        iteratorKey = mdControlIdenStorageKeys.next();
+
+        // Device Map에 정의되어 있는 Node Class Name 조회
+        const foundNcInfo = realMap.setInfo.nodeStructureList.find(ncInfo => {
+          return ncInfo.target_id === ncId;
+        });
+
+        // 존재하지 않을 경우 반영하지 않음
+        if (foundNcInfo === undefined) continue;
+
+        $('#deviceCateSel').append(
+          optionTemplate({
+            optionId: ncId,
+            optionValue: foundNcInfo.target_name,
+          }),
+        );
+      }
+
+      $cmdFormatSel.append(
+        optionTemplate({ optionId: CF_SINGLE, optionValue: '단일 제어' }),
+      );
+    }
+    // 설정 제어 명령이 존재할 경우
     if (setCmdList.length) {
-      $cmdFormatSel.append(optionTemplate({ optionId: CF_SET, optionValue: '설정 제어' }));
+      $cmdFormatSel.append(
+        optionTemplate({ optionId: CF_SET, optionValue: '설정 제어' }),
+      );
     }
-
+    // 흐름 제어 명령이 존재할 경우
     if (flowCmdList.length) {
-      $cmdFormatSel.append(optionTemplate({ optionId: CF_FLOW, optionValue: '흐름 제어' }));
+      $cmdFormatSel.append(
+        optionTemplate({ optionId: CF_FLOW, optionValue: '흐름 제어' }),
+      );
+    }
+    // 시나리오 명령이 존재할 경우
+    if (scenarioCmdList.length) {
+      $cmdFormatSel.append(
+        optionTemplate({ optionId: CF_SCENARIO, optionValue: '시나리오' }),
+      );
     }
 
-    if (scenarioCmdList.length) {
-      $cmdFormatSel.append(optionTemplate({ optionId: CF_SCENARIO, optionValue: '시나리오' }));
-    }
+    // if ($cmdFormatSel.length) {
+    //   $('#controlCommandArea').addClass('hidden');
+    // }
   }
-  initCmdFormatSel();
 
   // TODO: DBS에 명령을 요청할 공통 형식
   function makeControlCommand(reqCmdBtn) {
@@ -274,7 +333,10 @@
 
         var goalRange = $(cmdGoalEle).find('select[name="goalRange"]').first().val();
 
-        var isCompleteClear = $(cmdGoalEle).find('select[name="isCompleteClear"]').first().val();
+        var isCompleteClear = $(cmdGoalEle)
+          .find('select[name="isCompleteClear"]')
+          .first()
+          .val();
 
         // 달성 목표치가 없을 경우 False
         // FIXME: 달성 목표 문자 타입 체크 필요
@@ -300,6 +362,59 @@
     // return reqCmdInfo;
   }
 
+  // 1 Depth >> Change Single Control Device Type
+  // 동적 장치 목록, 제어 목록 구현
+  function changeScdType(ncId) {
+    // 동적 장치 목록
+    $('#deviceListSel').html(
+      mdNodeClassStorage.get(ncId).map(nodeId => {
+        const { nodeName } = mdNodeStorage.get(nodeId);
+
+        return optionTemplate({
+          optionId: nodeId,
+          optionValue: nodeName,
+        });
+      }),
+    );
+
+    // 동적 제어 목록 구성
+    const singleControlValueDomResouce = [];
+    mdControlIdenStorage.get(ncId).forEach((dControlIdenInfo, controlValue) => {
+      singleControlValueDomResouce.push(
+        optionTemplate({
+          optionId: controlValue,
+          optionValue: dControlIdenInfo.krName,
+        }),
+      );
+    });
+    $('#singleControlValue').html(singleControlValueDomResouce);
+    // 장치 타입이 바뀌었으므로 제어 목록 선택된 내용으로 controlSetValue 영역 재구성
+    changeScdCommand(ncId, $('#singleControlValue option:selected').val());
+  }
+
+  // 2 Depth >> Change Single Control Device Command
+  // controlSetValue 영역 동적 구성
+  function changeScdCommand(ncId, controlValue) {
+    const {
+      isSetValue = false,
+      setValueInfo: { max, min, msg } = {},
+    } = mdControlIdenStorage.get(ncId).get(Number(controlValue));
+
+    if (isSetValue) {
+      $('#controlSetValueArea').show();
+      $('#controlSetValueTitle').text(msg);
+      // max와 min이 존재할 경우 placeholder에 입력
+      const placeHolderMsg = min && max ? `${min} ~ ${max}` : '';
+      $('#controlSetValue').attr({
+        placeholder: placeHolderMsg,
+        min,
+        max,
+      });
+    } else {
+      $('#controlSetValueArea').hide();
+    }
+  }
+
   /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
   function initAddControlChangeEvent() {
     // 명령 형식 선택 이벤트
@@ -313,17 +428,17 @@
       });
     });
 
-    // 단일 제어
-    // Single 제어 장치 타입 선택시 이벤트
-    $('#deviceCateSel').on('change', function (event) {
-      // Single Cmd: 제어 장치 타입 변경 시 장치 목록 자동 변경
-      $('#deviceListSel').html(_.find(deviceDomList, { type: this.value }).list);
-    });
+    // FIXME: 단일 제어 동적 구성
 
-    // 단일 명령 돔 설정
-    $('#deviceCateSel').html(_.map(deviceDomList, 'category'));
-    // handleDeviceCategory() 실행 시킴
-    $('#deviceCateSel').trigger('change');
+    // 단일 제어
+    // Single 제어 장치 타입 선택시 이벤트 바인딩
+    $('#deviceCateSel').on('change', function (event) {
+      changeScdType(this.value);
+    });
+    // Single 제어 목록 선택시 이벤트 바인딩
+    $('#singleControlValue').on('change', function (event) {
+      changeScdCommand($('#deviceCateSel option:selected').val(), this.value);
+    });
 
     // 설정 제어
     // 설정 돔 설정
@@ -358,7 +473,17 @@
         $('#cmdGoalArea').html('');
     });
   }
-  initAddControlChangeEvent();
+  // initAddControlChangeEvent();
+
+  // $(window).load(() => {
+  // initCmdFormatSel();
+  // $('#deviceCateSel').trigger('change');
+  // });
+
+  $(document).ready(() => {
+    initCmdFormatSel();
+    $('#deviceCateSel').trigger('change');
+  });
 </script>
 
 <!-- 목표 추가 데이터 정의 및 Event Binding -->
@@ -479,7 +604,10 @@
       .sortBy('pn')
       .unionBy('pn')
       .map(function (placeRelInfo) {
-        return optionTemplate({ optionId: placeRelInfo.pn, optionValue: placeRelInfo.pn });
+        return optionTemplate({
+          optionId: placeRelInfo.pn,
+          optionValue: placeRelInfo.pn,
+        });
       })
       .value();
 
@@ -504,7 +632,10 @@
       .unionBy('ni')
       // .filter('is')
       .map(function (placeRelInfo) {
-        return optionTemplate({ optionId: placeRelInfo.ni, optionValue: placeRelInfo.nn });
+        return optionTemplate({
+          optionId: placeRelInfo.ni,
+          optionValue: placeRelInfo.nn,
+        });
       })
       .value();
 

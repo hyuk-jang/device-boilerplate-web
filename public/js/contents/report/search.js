@@ -1,4 +1,4 @@
-$('#searchType').on('change', function() {
+$('#searchType').on('change', function () {
   applySearchType($(this).val());
 });
 
@@ -6,7 +6,7 @@ $('#searchType').on('change', function() {
 $('#subCategoryDom')
   .children()
   .each((index, dom) => {
-    $(dom).on('click', function() {
+    $(dom).on('click', function () {
       location.href = `${window.location.origin}/${naviId}/${siteId}/${$(this).val()}`;
     });
   });
@@ -131,9 +131,7 @@ function getSearchValue() {
   }
 
   // 내일 일자 추출
-  const tomorrowDay = moment()
-    .add(1, 'day')
-    .format('YYYY-MM-DD');
+  const tomorrowDay = moment().add(1, 'day').format('YYYY-MM-DD');
 
   // 시작 시간이 오늘을 넘어갔을 경우 검색 불가
   if (strStartDateInputValue >= tomorrowDay) {
@@ -146,8 +144,13 @@ function getSearchValue() {
   }
 
   // 조회기간이 년간이고 조회간격을 1분이라고 할 경우 오류
-  if (searchType === 'years' && (searchInterval === 'min' || searchInterval === 'min10')) {
-    return alert('조회기간이 "년간"일 경우 조회간격은 최소 "1시간" 이상으로 검색할 수 있습니다.');
+  if (
+    searchType === 'years' &&
+    (searchInterval === 'min' || searchInterval === 'min10')
+  ) {
+    return alert(
+      '조회기간이 "년간"일 경우 조회간격은 최소 "1시간" 이상으로 검색할 수 있습니다.',
+    );
   }
 
   let strEndDateInputValue = '';
@@ -166,7 +169,9 @@ function getSearchValue() {
 
     // 기간 검색이 100일을 초과할 경우 1분단위로 검색할 수 없음
     if (rangeDiffDay > 100 && searchInterval === 'min') {
-      return alert('기간검색이 100일을 초과할 경우 조회간격을 "1분"으로 검색할 수 없습니다.');
+      return alert(
+        '기간검색이 100일을 초과할 경우 조회간격을 "1분"으로 검색할 수 없습니다.',
+      );
     }
 
     // 기간 검색이 300일을 초과할 경우 10분단위로 검색할 수 없음
@@ -189,6 +194,11 @@ function makeSearchQueryString(searchValue) {
   // 검색 객체가 없다면 빈 문자열 반환
   if (_.isEmpty(searchValue)) return '';
 
-  const { searchType, searchInterval, strStartDateInputValue, strEndDateInputValue } = searchValue;
+  const {
+    searchType,
+    searchInterval,
+    strStartDateInputValue,
+    strEndDateInputValue,
+  } = searchValue;
   return `searchType=${searchType}&searchInterval=${searchInterval}&strStartDateInputValue=${strStartDateInputValue}&strEndDateInputValue=${strEndDateInputValue}`;
 }

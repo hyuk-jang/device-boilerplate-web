@@ -46,7 +46,7 @@
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="container_body">
+      <div class="container_body" id="container_body">
         <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
           <div class="command_status">
@@ -109,7 +109,7 @@
                     <script id="cmdTableTemplate" type="template">
                       {{#if commandList}}
                         {{#each commandList}}
-                        <tr data-index={{@index}}>
+                        <tr data-uuid={{ wrapCmdUUID }}>
                           <td class="text-center">{{ wrapCmdFormat }}</td>
                           <td class="text-center">{{ wrapCmdType }}</td>
                           <td class="text-center">{{ wrapCmdStep }}</td>
@@ -178,148 +178,187 @@
       var $nodeTableDom;
       var $nodeUpdateDom;
       //  자동 갱신될 명령 테이블, 노드 테이블 Dom Id
-      function initControlTableId(cmdTableDomId, cmdUpdateDomId, nodeTableDomId, nodeUpdateDomId) {
-        $cmdTableDom = $('#' + cmdTableDomId);
-        $cmdUpdateDom = $('#' + cmdUpdateDomId);
-        $nodeTableDom = $('#' + nodeTableDomId);
-        $nodeUpdateDom = $('#' + nodeUpdateDomId);
+      function initControlTableId(cmdTblDomId, cmdUpDomId, nodeTblDomId, nodeUpDomId) {
+        $cmdTableDom = $('#' + cmdTblDomId);
+        $cmdUpdateDom = $('#' + cmdUpDomId);
+        $nodeTableDom = $('#' + nodeTblDomId);
+        $nodeUpdateDom = $('#' + nodeUpDomId);
       }
 
       // 테이블 ID 정의
-      initControlTableId('cmdTableBody', 'cmdUpdateDate', 'nodeTableBody', 'nodeUpdateDate');
+      initControlTableId(
+        'cmdTableBody',
+        'cmdUpdateDate',
+        'nodeTableBody',
+        'nodeUpdateDate',
+      );
     </script>
 
     <!-- 제어 및 Socket.IO 이벤트 바인딩 -->
     <script>
       const socket = io();
 
-      // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
-      socket.emit('certifySocket', {
-        sessionID: sessionID,
-        sessionUserInfo: user,
-      });
-
-      // 명령 요청 결과 Alert
-      socket.on('resultExecCommand', message => {
-        document.getElementById('resultExecCommand').innerText = message;
-      });
-
-      // 장치 연결 상태 반영
-      socket.on('updateIsApiClientConn', isConn => {
-        var connStatusImg = isConn === true ? '/image/connection.png' : '/image/disconnection.png';
-
-        document.getElementById('updateIsApiClientConnImg').setAttribute('src', connStatusImg);
-      });
-
-      /**
-       * 구동 모드 변경 처리
-       * @param {Object} modeInfo
-       * @param {string} modeInfo.algorithmId 알고리즘 ID
-       * @param {Object} modeInfo.operationConfigList 간단한 명령 정보
-       * @param {string} modeInfo.operationConfigList.algorithmId 제어 알고리즘 ID (Algorithm ID)
-       * @param {string} modeInfo.operationConfigList.algorithmName 제어 알고리즘 Name
-       * @param {string} modeInfo.operationConfigList.cmdStrategy 명령 전략
-       */
-      socket.on('updateMode', modeInfo => {
-        currModeInfo = modeInfo;
-
-        // modeInfo = {
-        //   algorithmId: 'DEFAULT2',
-        //   operationConfigList: [
-        //     {
-        //       algorithmId: 'DEFAULT',
-        //       algorithmName: 'TEST',
-        //     },
-        //     {
-        //       algorithmId: 'DEFAULT2',
-        //       algorithmName: 'TEST2',
-        //     },
-        //     {
-        //       algorithmId: 'DEFAULT3',
-        //       algorithmName: 'TEST3',
-        //     },
-        //   ],
-        // };
-
-        const { algorithmId = '', operationConfigList = [] } = modeInfo;
-        const operationModeDom = document.getElementById('operationMode');
-        const operationModeSelDom = document.getElementById('operationModeSel');
-        // 구동 중인 모드가 존재한다면 구동 모드 활성화
-        if (operationConfigList.length) {
-          operationModeDom.classList.remove('hidden');
-
-          // 템플릿 정의
-          const optionTemplate = Handlebars.compile(
-            '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
-          );
-
-          // select option 동적 생성
-          const optionDomList = _.map(operationConfigList, oConfig => {
-            // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
-            const selected = oConfig.algorithmId === algorithmId ? 'selected' : '';
-            // 템플릿 적용하여 Dom 생성
-            return optionTemplate({
-              selected,
-              optionId: oConfig.algorithmId,
-              optionValue: oConfig.algorithmName,
-            });
-          });
-          // Select Dom 적용
-          operationModeSelDom.innerHTML = optionDomList;
-        } else {
-          operationModeDom.classList.add('hidden');
-          operationModeSelDom.innerHTML = '';
-        }
-      });
-
-      // 갱신 노드 반영 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
-      socket.on('updateNode', (wsNodeList = []) => {
-        wsNodeList.forEach(wsNodeInfo => {
-          showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+      function bindingSocketEmit() {
+        // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
+        socket.emit('certifySocket', {
+          sessionID: sessionID,
+          sessionUserInfo: user,
         });
 
-        // nodeList Handlebars compile
-        const nodeTbodyTemplate = $('#nodeTableTemplate').html();
-        const nodeTbodyBindTemplate = Handlebars.compile(nodeTbodyTemplate);
-        const nodeTableBody = nodeTbodyBindTemplate({ mdNodeStorage: mdNodeStorage.values() });
+        // 사용자 제어에 의한 Emit
 
-        $('#nodeTableBodyDom > tr ').empty();
-        $('#nodeTableBodyDom').append(nodeTableBody);
+        // 서버로 명령 취소 요청
+        $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
+          const wrapCmdUUID = $('button[name="reqCancelCmd"]')
+            .parentsUntil('tr')
+            .parent()
+            .data('uuid');
 
-        // 노드 정보 갱신 시각 반영
-        $nodeUpdateDom.html(new Date().toLocaleString());
-      });
+          socket.emit('cancelCommand', wrapCmdUUID) && $('#cmdGoalArea').html('');
+        });
 
-      // 명령 관련 갱신 반영
-      let currCommandList = [];
-      socket.on('updateCommand', (commandList = []) => {
-        // console.log(commandList);
-        currCommandList = commandList;
+        // 제어 관리 js 세팅 및 바인딩
+        $('#operationModeSel').on('change', function () {
+          const selectedAlgorithmId = $('#operationModeSel option:selected').val();
+          // var modeName = $('#operationModeSel option:selected').text();
+          // alert('운영 모드(' + modeName + ')를 변경하였습니다.');
 
-        // cmdList Handlebars compile
-        const cmdTbodyTemplate = $('#cmdTableTemplate').html();
-        const cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
-        const cmdTableBody = cmdTbodyBindTemplate({ commandList });
+          // 제어 모드 변경 요청
+          socket.emit('changeOperationMode', selectedAlgorithmId);
+        });
+      }
 
-        //  리턴받은 html을 target에 innerHTML로 세팅한다.
-        $('#cmdTableBodyDom > tr ').empty();
-        $('#cmdTableBodyDom').append(cmdTableBody);
+      function bindingSocketOn() {
+        // 명령 요청 결과 Alert
+        socket.on('resultExecCommand', message => {
+          document.getElementById('resultExecCommand').innerText = message;
+        });
 
-        // 명령 갱신 시각 반영
-        $cmdUpdateDom.html(new Date().toLocaleString());
-      });
+        // 장치 연결 상태 반영
+        socket.on('updateIsApiClientConn', isConn => {
+          var connStatusImg =
+            isConn === true ? '/image/connection.png' : '/image/disconnection.png';
 
-      // 서버로 명령 실행 요청한 결과 알림
-      socket.on('updateAlert', function (message) {
-        alert(message);
-      });
+          document
+            .getElementById('updateIsApiClientConnImg')
+            .setAttribute('src', connStatusImg);
+        });
 
-      // 서버로 명령 취소 요청
-      $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
-        const cmdIndex = $('button[name="reqCancelCmd"]').parentsUntil('tr').parent().data('index');
+        /**
+         * 구동 모드 변경 처리
+         * @param {Object} modeInfo
+         * @param {string} modeInfo.algorithmId 알고리즘 ID
+         * @param {Object} modeInfo.operationConfigList 간단한 명령 정보
+         * @param {string} modeInfo.operationConfigList.algorithmId 제어 알고리즘 ID (Algorithm ID)
+         * @param {string} modeInfo.operationConfigList.algorithmName 제어 알고리즘 Name
+         * @param {string} modeInfo.operationConfigList.cmdStrategy 명령 전략
+         */
+        socket.on('updateMode', modeInfo => {
+          currModeInfo = modeInfo;
 
-        socket.emit('cancelCommand', currCommandList[cmdIndex]) && $('#cmdGoalArea').html('');
-      });
+          // modeInfo = {
+          //   algorithmId: 'DEFAULT2',
+          //   operationConfigList: [
+          //     {
+          //       algorithmId: 'DEFAULT',
+          //       algorithmName: 'TEST',
+          //     },
+          //     {
+          //       algorithmId: 'DEFAULT2',
+          //       algorithmName: 'TEST2',
+          //     },
+          //     {
+          //       algorithmId: 'DEFAULT3',
+          //       algorithmName: 'TEST3',
+          //     },
+          //   ],
+          // };
+
+          const { algorithmId = '', operationConfigList = [] } = modeInfo;
+          const operationModeDom = document.getElementById('operationMode');
+          const operationModeSelDom = document.getElementById('operationModeSel');
+          // 구동 중인 모드가 존재한다면 구동 모드 활성화
+          if (operationConfigList.length > 1) {
+            operationModeDom.classList.remove('hidden');
+
+            // 템플릿 정의
+            const optionTemplate = Handlebars.compile(
+              '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
+            );
+
+            // select option 동적 생성
+            const optionDomList = _.map(operationConfigList, oConfig => {
+              // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
+              const selected = oConfig.algorithmId === algorithmId ? 'selected' : '';
+              // 템플릿 적용하여 Dom 생성
+              return optionTemplate({
+                selected,
+                optionId: oConfig.algorithmId,
+                optionValue: oConfig.algorithmName,
+              });
+            });
+            // Select Dom 적용
+            operationModeSelDom.innerHTML = optionDomList;
+          } else {
+            operationModeDom.classList.add('hidden');
+            operationModeSelDom.innerHTML = '';
+          }
+        });
+
+        // 갱신 노드 반영 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
+        socket.on('updateNode', (wsNodeList = []) => {
+          wsNodeList.forEach(wsNodeInfo => {
+            showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
+          });
+
+          // nodeList Handlebars compile
+          const nodeTbodyTemplate = $('#nodeTableTemplate').html();
+          const nodeTbodyBindTemplate = Handlebars.compile(nodeTbodyTemplate);
+          const nodeTableBody = nodeTbodyBindTemplate({
+            mdNodeStorage: mdNodeStorage.values(),
+          });
+
+          $('#nodeTableBodyDom > tr ').empty();
+          $('#nodeTableBodyDom').append(nodeTableBody);
+
+          // 노드 정보 갱신 시각 반영
+          $nodeUpdateDom.html(new Date().toLocaleString());
+        });
+
+        // 명령 관련 갱신 반영
+        socket.on('updateCommand', (commandList = []) => {
+          // console.log(commandList);
+          // cmdList Handlebars compile
+          const cmdTbodyTemplate = $('#cmdTableTemplate').html();
+          const cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
+          const cmdTableBody = cmdTbodyBindTemplate({ commandList });
+
+          //  리턴받은 html을 target에 innerHTML로 세팅한다.
+          $('#cmdTableBodyDom > tr ').empty();
+          $('#cmdTableBodyDom').append(cmdTableBody);
+
+          // 명령 갱신 시각 반영
+          $cmdUpdateDom.html(new Date().toLocaleString());
+        });
+
+        // 서버로 명령 실행 요청한 결과 알림
+        socket.on('updateAlert', function (message) {
+          alert(message);
+        });
+      }
+
+      // SVG Device click을 통한 제어
+      function reqSingleControl(nodeId, singleControlType, controlSetValue) {
+        socket.emit('executeCommand', {
+          // 기본 값은 명령 요청
+          nodeId,
+          singleControlType,
+          controlSetValue,
+        });
+      }
+
+      bindingSocketEmit();
+      bindingSocketOn();
 
       // FIXME: TEXT 종료 후 삭제
       $(document).ready(function () {
@@ -331,16 +370,6 @@
         // 명령 형식 변경
         $('#cmdFormatSel').val(thisSelectValue).trigger('change');
       });
-
-      // 제어 관리 js 세팅 및 바인딩
-      $('#operationModeSel').on('change', function () {
-        const selectedAlgorithmId = $('#operationModeSel option:selected').val();
-        // var modeName = $('#operationModeSel option:selected').text();
-        // alert('운영 모드(' + modeName + ')를 변경하였습니다.');
-
-        // 제어 모드 변경 요청
-        socket.emit('changeOperationMode', selectedAlgorithmId);
-      });
     </script>
 
     <!-- SVG Map 세팅 -->
@@ -349,14 +378,14 @@
       drawSvgBasePlace('canvas'); // 멥 그리기
 
       // FIXME: TEST 용
-      setTimeout(() => {
-        runSimulator();
-      }, 100);
-
+      // setTimeout(() => {
+      //   runSimulator();
+      // }, 100);
+      console.log(wsPlaceRelList);
       // console.log(mdPlaceStorage);
     </script>
     <!-- 검색 관련 js 모음 -->
-    <script src="/js/contents/report/search.js"></script>
+    <!-- <script src="/js/contents/report/search.js"></script> -->
     <!-- 상단 카테고리 버튼 세팅 -->
     <script>
       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
@@ -387,6 +416,11 @@
               $(`#${domElement.id}`).addClass('hidden');
             }
           });
+      });
+    </script>
+    <script>
+      $(document).ready(() => {
+        $('#container_body').removeClass('hidden');
       });
     </script>
   </body>

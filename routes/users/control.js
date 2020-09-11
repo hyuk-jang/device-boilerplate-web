@@ -82,27 +82,28 @@ router.get(
     /** @type {MainControl} */
     const mainController = global.mainControl;
 
-    const foundMsInfo = _.find(mainController.mainStorageList, msInfo =>
-      _.isEqual(msInfo.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
+    const msInfo = _.find(mainController.mainStorageList, ms =>
+      _.isEqual(ms.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
     );
 
-    if (foundMsInfo) {
+    req.locals.wsPlaceRelList = [];
+    if (msInfo) {
       const wsPlaceRelList = mainController.convertPlaRelsToWsPlaRels({
-        placeRelationRows: foundMsInfo.msDataInfo.placeRelList,
+        placeRelationRows: msInfo.msDataInfo.placeRelList,
         isSubmitAPI: 1,
       });
 
-      // FIXME: 만약 제어 장치도 넣고자 할 경우 EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
-      req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr => _.omit(pr, 'is'));
-    } else {
-      req.locals.wsPlaceRelList = [];
+      // FIXME: 만약 제어 장치도 넣고자 할 경우
+      // EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
+      req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr =>
+        _.omit(pr, 'is'),
+      );
     }
 
     /** @type {mDeviceMap} */
     // const map = JSON.parse(mainRow.map);
-    // // FIXME: VIP일 경우 맵 분기
-    const baseMap = req.user.user_id === 'vip' ? mainMapRow.vip_map : mainRow.map;
-    const baseImgPath = req.user.user_id === 'vip' ? mainMapRow.vip_path : mainMapRow.path;
+    const baseMap = mainRow.map;
+    const baseImgPath = mainMapRow.path;
 
     const map = JSON.parse(baseMap);
     // const map = JSON.parse(mainRow.map);
@@ -115,7 +116,11 @@ router.get(
 
     //  Map 경로 재설정
     if (typeof baseImgPath === 'string') {
-      _.set(map, 'drawInfo.frame.mapInfo.backgroundInfo.backgroundData', `/map/${baseImgPath}`);
+      _.set(
+        map,
+        'drawInfo.frame.mapInfo.backgroundInfo.backgroundData',
+        `/map/${baseImgPath}`,
+      );
     }
     req.locals.map = map;
 
@@ -192,17 +197,24 @@ router.get(
         .value();
 
       // 사이트 이름 추가
-      cmdHistoryInfo.siteName = _.chain(mainRows).find({ main_seq: mainSeq }).get('name').value();
+      cmdHistoryInfo.siteName = _.chain(mainRows)
+        .find({ main_seq: mainSeq })
+        .get('name')
+        .value();
 
       // 명령 타입 한글 표시
-      cmdHistoryInfo.cmd_format = _.chain(cmdFormatBase).find({ key: cf }).get('value', '').value();
+      cmdHistoryInfo.cmd_format = _.chain(cmdFormatBase)
+        .find({ key: cf })
+        .get('value', '')
+        .value();
 
       // 명령 시각 포멧 처리
       cmdHistoryInfo.start_date = moment(sd).format('YYYY-MM-DD HH:mm:ss');
       cmdHistoryInfo.end_date = moment(ed).format('YYYY-MM-DD HH:mm:ss');
 
       // FIXME: null 데이터 - 표시 , 임시 나중에 수정 해야함.
-      _.isNull(cmdHistoryInfo.control_set_value) && _.set(cmdHistoryInfo, 'control_set_value', '-');
+      _.isNull(cmdHistoryInfo.control_set_value) &&
+        _.set(cmdHistoryInfo, 'control_set_value', '-');
     });
 
     _.set(req, 'locals.reportRows', reportRows);

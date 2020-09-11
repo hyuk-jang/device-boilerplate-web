@@ -81,7 +81,9 @@ class SocketIOManager extends AbstSocketIOManager {
       // 연결 해제한 Socket 제거
       socket.on('disconnect', () => {
         _.forEach(this.mainStorageList, msInfo =>
-          _.remove(msInfo.msUserList, msUserInfo => _.isEqual(msUserInfo.socketClient, socket)),
+          _.remove(msInfo.msUserList, msUserInfo =>
+            _.isEqual(msUserInfo.socketClient, socket),
+          ),
         );
       });
 
@@ -146,14 +148,24 @@ class SocketIOManager extends AbstSocketIOManager {
         }
       });
 
-      socket.on('cancelCommand', cancelCmdInfo => {
+      socket.on('cancelCommand', wrapCmdUUID => {
+        const {
+          msDataInfo: { contractCmdList },
+        } = this.findMainStorage(socket);
+
+        const cmdInfo = _.find(contractCmdList, { wrapCmdUUID });
+
+        if (cmdInfo === undefined) {
+          socket.emit('updateAlert', '해당 명령은 존재하지 않습니다.');
+        }
+
         /** @type {contractCmdInfo} */
         const {
           wrapCmdUUID: WCU,
           wrapCmdFormat: WCF,
           wrapCmdId: WCI,
           wrapCmdName: WCN,
-        } = cancelCmdInfo;
+        } = cmdInfo;
 
         /** @type {wsControlCmdAPI} */
         const controlCmdInfo = {
@@ -179,10 +191,6 @@ class SocketIOManager extends AbstSocketIOManager {
           // BU.log(defaultFormatToRequestInfo);
 
           const msInfo = this.findMainStorage(socket);
-
-          if (!msInfo) {
-            throw new Error('관리하는 사이트를 찾을 수 없습니다. 관리자에게 문의하여 주십시오.');
-          }
 
           // 변경할려고 하는 알고리즘이 현재와 같을 경우 실행하지 않음
           if (msInfo.msDataInfo.modeInfo.algorithmId === algorithmId) {
@@ -225,7 +233,10 @@ class SocketIOManager extends AbstSocketIOManager {
             // 1초내에 DBS에서 명령 수행한 결과를 보내주지 않을 경우 에러로 판단
             timer: setTimeout(() => {
               // 요청한 사용자 목록에서 삭제
-              _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
+              _.remove(
+                reqCmdList,
+                reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo,
+              );
               socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
             }, 3000),
           });
@@ -243,10 +254,6 @@ class SocketIOManager extends AbstSocketIOManager {
     try {
       // Main Storage 찾음.
       const msInfo = this.findMainStorage(socket);
-
-      if (!msInfo) {
-        throw new Error('관리하는 사이트를 찾을 수 없습니다. 관리자에게 문의하여 주십시오.');
-      }
 
       const {
         msClient,
@@ -292,7 +299,10 @@ class SocketIOManager extends AbstSocketIOManager {
         // 1초내에 DBS에서 명령 수행한 결과를 보내주지 않을 경우 에러로 판단
         timer: setTimeout(() => {
           // 요청한 사용자 목록에서 삭제
-          _.remove(reqCmdList, reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo);
+          _.remove(
+            reqCmdList,
+            reqCmd => reqCmd.reqCmdInfo === defaultFormatToRequestInfo,
+          );
           socket.emit('updateAlert', '계측시스템에서 아무런 응답이 없습니다.');
         }, 3000),
       });
@@ -329,7 +339,9 @@ class SocketIOManager extends AbstSocketIOManager {
               .map('place_name')
               .value();
             // BU.CLIN(placeNameList);
-            return _.assign(pickNode, { [[nodePickKey.FOR_USER.place_name_list]]: placeNameList });
+            return _.assign(pickNode, {
+              [[nodePickKey.FOR_USER.place_name_list]]: placeNameList,
+            });
           })
           .value();
       })
@@ -343,9 +355,17 @@ class SocketIOManager extends AbstSocketIOManager {
    * @return {msInfo}
    */
   findMainStorage(socket) {
-    return _.find(this.mainStorageList, msInfo =>
+    const foundMsInfo = _.find(this.mainStorageList, msInfo =>
       _.find(msInfo.msUserList, { socketClient: socket }),
     );
+
+    if (foundMsInfo === undefined) {
+      throw new ReferenceError(
+        '관리하는 사이트를 찾을 수 없습니다. 관리자에게 문의하여 주십시오.',
+      );
+    }
+
+    return foundMsInfo;
   }
 
   /**

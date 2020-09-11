@@ -721,7 +721,7 @@ article.sdv_w_side > p:last-child {
 
 .search_box input[type='number'] {
   height: 34px;
-  width: 50px;
+  min-width: 50px;
   border-radius: 3px;
   text-align: center;
 }
@@ -945,6 +945,15 @@ article.sdv_w_side > p:last-child {
 
 .w_7rem {
   width: 7rem;
+}
+.w_8rem {
+  width: 8rem;
+}
+.w_9rem {
+  width: 9rem;
+}
+.w_10rem {
+  width: 10rem;
 }
 
 .mw_1rem {

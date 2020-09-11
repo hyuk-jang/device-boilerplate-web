@@ -100,7 +100,9 @@ module.exports = {
       '<option value="<%= nd_target_id %>"> <%= nd_target_name %></option>',
     );
 
-    const nodeTemplate = _.template('<option value="<%= node_id %>"><%= node_name %></option>');
+    const nodeTemplate = _.template(
+      '<option value="<%= node_id %>"><%= node_name %></option>',
+    );
 
     // 노드 목록에 제어 장치 만 골라 정의
     const filterdNodeList = _(nodeList)
@@ -121,7 +123,9 @@ module.exports = {
     // BU.CLI(deviceInfoList);
     // 노드 목록을 순회하면서 해당 노드에 맞는 장치 카테고리 Dom에 삽입
     filterdNodeList.forEach(nodeInfo => {
-      _.find(deviceDomList, { type: nodeInfo.nd_target_id }).list.push(nodeTemplate(nodeInfo));
+      _.find(deviceDomList, { type: nodeInfo.nd_target_id }).list.push(
+        nodeTemplate(nodeInfo),
+      );
     });
 
     return deviceDomList;
@@ -148,7 +152,9 @@ module.exports = {
       '<option value="<%= pd_target_id %>"> <%= pd_target_name %></option>',
     );
 
-    const placeTemplate = _.template('<option value="<%= place_id %>"><%= place_name %></option>');
+    const placeTemplate = _.template(
+      '<option value="<%= place_id %>"><%= place_name %></option>',
+    );
 
     const placeDomList = _(flowCmdList)
       .map('srcPlaceId')
