@@ -1,9 +1,3 @@
-<!-- 서버사이드 데이터 정의 -->
-<script>
-  // place relation 정보
-  var wsPlaceRelList = <%- JSON.stringify(wsPlaceRelList) %>;
-</script>
-
 <!-- 제어 명령 -->
 <div class="container_row flex_dir_col default_search_area" id="controlCommandArea">
   <div class="search_area">
@@ -183,7 +177,6 @@
   // 명령 Select Dom Template
   const cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
 
-  // console.log(deviceDomList);
   const CF_SINGLE = 'SINGLE';
   const CF_SET = 'SET';
   const CF_FLOW = 'FLOW';
@@ -356,14 +349,10 @@
         }
       });
 
-    // console.log(reqCmdInfo.cmdGoal.goalDataList);
-
     return isError ? {} : reqCmdInfo;
-    // return reqCmdInfo;
   }
 
-  // 1 Depth >> Change Single Control Device Type
-  // 동적 장치 목록, 제어 목록 구현
+  // (1 Depth) 동적 장치 목록, 제어 목록 구현, Change Single Control Device Type
   function changeScdType(ncId) {
     // 동적 장치 목록
     $('#deviceListSel').html(
@@ -392,8 +381,7 @@
     changeScdCommand(ncId, $('#singleControlValue option:selected').val());
   }
 
-  // 2 Depth >> Change Single Control Device Command
-  // controlSetValue 영역 동적 구성
+  // (2 Depth) controlSetValue 영역 동적 구성, Change Single Control Device Command
   function changeScdCommand(ncId, controlValue) {
     const {
       isSetValue = false,
@@ -427,8 +415,6 @@
           : $(cmdCoreDom).hide();
       });
     });
-
-    // FIXME: 단일 제어 동적 구성
 
     // 단일 제어
     // Single 제어 장치 타입 선택시 이벤트 바인딩
@@ -473,173 +459,122 @@
         $('#cmdGoalArea').html('');
     });
   }
-  // initAddControlChangeEvent();
-
-  // $(window).load(() => {
-  // initCmdFormatSel();
-  // $('#deviceCateSel').trigger('change');
-  // });
-
-  $(document).ready(() => {
-    initCmdFormatSel();
-    $('#deviceCateSel').trigger('change');
-  });
+  initAddControlChangeEvent();
 </script>
 
 <!-- 목표 추가 데이터 정의 및 Event Binding -->
 <script>
-  // 장소 타입(대분류)이 변경되었을 경우 장소 Select 목록 변경
-  $(document).on('change', 'select[name="placeTypeSel"]', function () {
+  // (1 Depth) 장소 타입이 변경되었을 경우 >> 장소 구성
+  function changePlaceClass(pcDom) {
+    const pcId = $(pcDom).val();
+
     // 장소명(중분류) Dom 객체 정의
-    var $placeNameSel = $(this)
+    const $placeNameSel = $(pcDom)
       .parentsUntil('div[name="cmdGoalArea"]')
-      .find('select[name="placeNameSel"]')
-      .first();
+      .find('select[name="placeNameSel"]');
 
-    // 장소명(중분류) Select Dom 동적 생성
-    setPlaceNameDom($placeNameSel, this.value);
+    // 기존 Option 삭제
+    $placeNameSel.html('');
 
-    $placeNameSel.trigger('change');
-  });
+    // 템플릿 정의
+    const optionTemplate = Handlebars.compile(
+      '<option data-pc-id = {{ pcId }} data-p-id = {{ pId }} value="{{ pId }}">{{ pName }}</option>',
+    );
 
-  // 장소명(중분류)이 변경되었을 경우 센서 목록 변경
-  $(document).on('change', 'select[name="placeNameSel"]', function () {
-    // 장치명(소분류) Dom 객체 정의
-    var $sensorNameSel = $(this)
+    // 장소 Select Option 추가
+    function appendPlaceNameDom(mdPlaceRelTailInfo) {
+      $placeNameSel.append(optionTemplate(mdPlaceRelTailInfo));
+    }
+
+    // Place Class Id 가 All 이 아닐 경우
+    if (pcId !== 'all') {
+      mdPlaceRelationStorage.get(pcId).mdPlaceRelTailStorage.forEach(appendPlaceNameDom);
+    } else {
+      mdPlaceRelationStorage.forEach(mdPlaceRelHeadInfo => {
+        mdPlaceRelHeadInfo.mdPlaceRelTailStorage.forEach(appendPlaceNameDom);
+      });
+    }
+    // 장소 변경 이벤트 발생
+    $($placeNameSel).trigger('change');
+  }
+
+  // (2 Depth) 장소가 변경되었을 경우 >> 센서 구성
+  function changePlaceName(pDom) {
+    const { pcId, pId } = $(pDom).find('option:selected').data();
+
+    // 장소명(중분류) Dom 객체 정의
+    var $placeNameSel = $(pDom)
       .parentsUntil('div[name="cmdGoalArea"]')
-      .find('select[name="sensorNameSel"]')
-      .first();
+      .find('select[name="sensorNameSel"]');
 
-    // 장치명(소분류) Select Dom 동적 생성
-    setSensorDom($sensorNameSel, this.value);
-  });
+    $placeNameSel.html('');
 
-  // 목표 추가 버튼 클릭 시 달성 목표 Div에 Dom 추가
-  $('#addCmdGoalBtn').on('click', function () {
+    // Place Class Id에 속해있는 Place Id를 가진 저장소가 관리하는 NodeList를 불러와 Option 생성
+    mdPlaceRelationStorage
+      .get(pcId)
+      .mdPlaceRelTailStorage.get(pId)
+      .getNodeList()
+      .forEach(mdNodeInfo => {
+        const { nodeId, nodeName } = mdNodeInfo;
+        $placeNameSel.append(
+          optionTemplate({
+            optionId: nodeId,
+            optionValue: nodeName,
+          }),
+        );
+      });
+  }
+  // 목표 추가 상세 정보(Task) 추가
+  function createCommandGoalDom() {
     // 목표 추가 템플릿을 Dom으로 변경하기 위한 임시 영역에 Dom 생성
-    var tempGoalDiv = $('#tempArea').html($('#cmdGoalTemplate').html());
+    const tempGoalDiv = $('#tempArea').html($('#cmdGoalTemplate').html());
 
     // 장소타입(대분류) Dom 객체 정의
-    var placeSelTypeDom = $(tempGoalDiv).find('select[name="placeTypeSel"]');
-    // 장소명(중분류) Dom 객체 정의
-    var placeNameSelDom = $(tempGoalDiv).find('select[name="placeNameSel"]');
-    // 장치명(소분류) Dom 객체 정의
-    var sensorNameSelDom = $(tempGoalDiv).find('select[name="sensorNameSel"]');
-    // 장소타입(대분류) Select Dom 동적 정의
-    setPlaceTypeDom(placeSelTypeDom);
-    // 장소명(중분류) Select Dom 동적 정의
-    setPlaceNameDom(placeNameSelDom);
-    // 장치명(소분류) Select Dom 동적 정의
-    setSensorDom(sensorNameSelDom);
-    // 장소명(중분류)에 대한 장치명 Filtering 처리가 안되었으므로 이벤트 발생
-    $(placeNameSelDom).trigger('change');
-    // 목표추가 Dom 영역 마지막에 목표추가 Dom 객체 추가
+    const $placeSelTypeDom = $(tempGoalDiv).find('select[name="placeTypeSel"]');
+
+    mdPlaceRelationStorage.forEach(mdPlaceRelHeadInfo => {
+      const { mdPlaceRelTailStorage, pcId, pcName } = mdPlaceRelHeadInfo;
+
+      $placeSelTypeDom.append(
+        optionTemplate({
+          optionId: pcId,
+          optionValue: pcName,
+        }),
+      );
+    });
+
     $('#cmdGoalArea').append(tempGoalDiv.children());
+
+    changePlaceClass($placeSelTypeDom);
+  }
+  // 목표 추가 관련 이벤트 바인딩
+  function initAddCmdGoalEvent() {
+    // 목표 추가 클릭 이벤트 발생 시
+    $('#addCmdGoalBtn').on('click', createCommandGoalDom);
+
+    // 장소 타입(대분류)이 변경되었을 경우 장소 Select 목록 변경
+    $(document).on('change', 'select[name="placeTypeSel"]', function () {
+      changePlaceClass(this);
+    });
+    // 장소(소분류)가 변경되었을 경우
+    $(document).on('change', 'select[name="placeNameSel"]', function () {
+      changePlaceName(this);
+    });
+
+    // 목표 삭제 버튼 클릭 시 해당 목표 삭제
+    $('#cmdGoalArea').on('click', 'button[name="deleteCmdGoal"]', function () {
+      $(this).parentsUntil('#cmdGoalArea').remove();
+    });
+  }
+</script>
+
+<script>
+  $(document).ready(() => {
+    initCmdFormatSel();
+    initAddCmdGoalEvent();
+
+    $('#deviceCateSel').trigger('change');
+
+    $('#addCmdGoalBtn').trigger('click');
   });
-
-  // 목표 삭제 버튼 클릭 시 해당 목표 삭제
-  $('#cmdGoalArea').on('click', 'button[name="deleteCmdGoal"]', function () {
-    $(this).parentsUntil('#cmdGoalArea').remove();
-  });
-
-  // is, ni, nn, pdti, pdtn, pn
-
-  // Tree 구조로 생성. 1 LV: pdtn, 2 LV: 'pn', 3 LV: 'nn'
-  // 장소 타입
-
-  // wsPlaceRelInfo
-  // {
-  //   is: 0,
-  //   ni: 'WD_001',
-  //   nn: '수문 001',
-  //   pdti: 'normalEvaporationBlock',
-  // };
-
-  // Select Option에서 '모두' 값 추가할 경우 사용될 Format
-  var defaultSelOption = {
-    optionId: 'all',
-    optionValue: '모두',
-  };
-
-  // 센서타입이 1이 아닌 인자는 제어 목표 대상에서 제거
-  // console.log(wsPlaceRelList);
-  // Place Define Target Name 으로 그룹
-  var gTypePlaceRelInfo = _.groupBy(wsPlaceRelList, 'pdtn');
-  // Place detail Name 으로 그룹
-  var gNamePlaceRelInfo = _.groupBy(wsPlaceRelList, 'pn');
-
-  /**
-   * 장소 타입(대분류) Select Dom 재정의
-   * @param {HtmlElement} domElement Select Element
-   */
-  function setPlaceTypeDom(domElement) {
-    var optionDomList = _(gTypePlaceRelInfo)
-      .keys()
-      .sort()
-      .map(function (key) {
-        return optionTemplate({ optionId: key, optionValue: key });
-      })
-      .thru(function (domList) {
-        domList.unshift(optionTemplate(defaultSelOption));
-        return domList;
-      })
-      .value();
-    // Html Select Element InnerHtml 값 변경
-    $(domElement).html(optionDomList);
-  }
-
-  /**
-   * 장소타입(대분류)에 따른 장소명(중분류) Select Dom 재정의
-   * @param {HtmlElement} domElement 장소명(중분류) Select Element
-   * @param {string=} placeType 장소타입(대분류) Select Value
-   */
-  function setPlaceNameDom(domElement, placeType) {
-    // placeType gTypePlaceRelInfo.keys 일치하는 인자가 있을 경우 pdtn 그룹내 개체, 아닐 경우 원데이터
-    var placeRelList = _.includes(_.keys(gTypePlaceRelInfo), placeType)
-      ? _.get(gTypePlaceRelInfo, placeType)
-      : wsPlaceRelList;
-
-    // 장소 타입 형식에 맞는 장소 명 Select 생성
-    var optionDomList = _(placeRelList)
-      .sortBy('pn')
-      .unionBy('pn')
-      .map(function (placeRelInfo) {
-        return optionTemplate({
-          optionId: placeRelInfo.pn,
-          optionValue: placeRelInfo.pn,
-        });
-      })
-      .value();
-
-    // Html Select Element InnerHtml 값 변경
-    $(domElement).html(optionDomList);
-  }
-
-  /**
-   * 장소명(중분류)에 따른 장치명(소분류) Select Dom 재정의
-   * @param {HtmlElement} domElement 장소타입(대분류) Select Element
-   * @param {string=} placeName 장소명(중분류) Select Value
-   */
-  function setSensorDom(domElement, placeName) {
-    // placeName이 gNamePlaceRelInfo.keys 일치하는 인자가 있을 경우 pn 그룹내 개체, 아닐 경우 원데이터
-    var placeRelList = _.includes(_.keys(gNamePlaceRelInfo), placeName)
-      ? _.get(gNamePlaceRelInfo, placeName)
-      : wsPlaceRelList;
-
-    // 장소 타입 형식에 맞는 장소 명 Select 생성
-    var optionDomList = _(placeRelList)
-      .sortBy('nn')
-      .unionBy('ni')
-      // .filter('is')
-      .map(function (placeRelInfo) {
-        return optionTemplate({
-          optionId: placeRelInfo.ni,
-          optionValue: placeRelInfo.nn,
-        });
-      })
-      .value();
-
-    // Html Select Element InnerHtml 값 변경
-    $(domElement).html(optionDomList);
-  }
 </script>

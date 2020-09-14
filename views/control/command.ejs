@@ -3,6 +3,7 @@
   <head>
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
+    <!-- 동적 돔 생성을 위한 Library -->
     <script src="/js/handlebars.min.js"></script>
 
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
@@ -11,9 +12,7 @@
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/socket.io/socket.io.js"></script>
 
-    <script src="/js/bootstrap-toggle.min.js"></script>
-    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet" />
-
+    <!-- Custom 제어 Confirm 창 구현을 위한 Library -->
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <script
       src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -21,6 +20,7 @@
       crossorigin="anonymous"
     ></script>
 
+    <!-- 제어 표 구현을 위한 Library -->
     <link rel="stylesheet" href="/css/bootstrap-table.min.css" />
     <script src="/js/bootstrap-table.min.js"></script>
   </head>
@@ -33,8 +33,6 @@
     var map = <%- JSON.stringify(map) %>;
     // 제어 명령 정보
     var controlInfo = <%- JSON.stringify(controlInfo) %>;
-    // 제어 장치 돔 목록([{type: 'gateValue', category: "<option value="pump"> 펌프</option>" list: ['<option value="P_001">펌프 001</option>,...']}, ...])
-    var deviceDomList = <%- JSON.stringify(deviceDomList) %>;
     // 세션 ID
     var sessionID = <%- JSON.stringify(sessionID) %>;
     // 로그인 사용자 정보
@@ -46,7 +44,7 @@
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="container_body" id="container_body">
+      <div class="container_body hidden" id="container_body">
         <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
           <div class="command_status">
@@ -356,8 +354,9 @@
           controlSetValue,
         });
       }
-
+      // Browser >>> Server 이벤트 바인딩
       bindingSocketEmit();
+      // Server >>>  Browser 이벤트 바인딩
       bindingSocketOn();
 
       // FIXME: TEXT 종료 후 삭제
@@ -381,11 +380,10 @@
       // setTimeout(() => {
       //   runSimulator();
       // }, 100);
-      console.log(wsPlaceRelList);
+      // console.log(wsPlaceRelList);
       // console.log(mdPlaceStorage);
     </script>
-    <!-- 검색 관련 js 모음 -->
-    <!-- <script src="/js/contents/report/search.js"></script> -->
+
     <!-- 상단 카테고리 버튼 세팅 -->
     <script>
       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
@@ -421,6 +419,8 @@
     <script>
       $(document).ready(() => {
         $('#container_body').removeClass('hidden');
+
+        // console.dir(mdPlaceStorage);
       });
     </script>
   </body>

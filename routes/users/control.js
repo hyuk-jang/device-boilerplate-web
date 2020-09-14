@@ -66,39 +66,8 @@ router.get(
     /** @type {MAIN_MAP} */
     const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
-    /** @type {V_DV_NODE[]} */
-    const nodeRows = await biModule.getTable('v_dv_node', mainWhere);
-
-    // 장치 카테고리 별 Dom 생성
-    const deviceDomList = controlDom.makeNodeDom(nodeRows);
-
     /** @type {V_DV_PLACE[]} */
     const placeRows = await biModule.getTable('v_dv_place', mainWhere);
-
-    /**
-     * Main Storage List에서 각각의 거점 별 모든 정보를 가지고 있을 객체 정보 목록
-     * @type {msInfo[]} mainStorageList
-     */
-    /** @type {MainControl} */
-    const mainController = global.mainControl;
-
-    const msInfo = _.find(mainController.mainStorageList, ms =>
-      _.isEqual(ms.msFieldInfo.main_seq, _.get(req.user, 'main_seq', null)),
-    );
-
-    req.locals.wsPlaceRelList = [];
-    if (msInfo) {
-      const wsPlaceRelList = mainController.convertPlaRelsToWsPlaRels({
-        placeRelationRows: msInfo.msDataInfo.placeRelList,
-        isSubmitAPI: 1,
-      });
-
-      // FIXME: 만약 제어 장치도 넣고자 할 경우
-      // EJS에서 달성 목표치를 제어할 수 있는 select or input 동적 분기 로직 추가
-      req.locals.wsPlaceRelList = _.filter(wsPlaceRelList, { is: 1 }).map(pr =>
-        _.omit(pr, 'is'),
-      );
-    }
 
     /** @type {mDeviceMap} */
     // const map = JSON.parse(mainRow.map);
@@ -106,7 +75,6 @@ router.get(
     const baseImgPath = mainMapRow.path;
 
     const map = JSON.parse(baseMap);
-    // const map = JSON.parse(mainRow.map);
 
     controlDom.initCommand(map, placeRows);
 
@@ -123,8 +91,6 @@ router.get(
       );
     }
     req.locals.map = map;
-
-    req.locals.deviceDomList = deviceDomList;
 
     res.render('./control/command', req.locals);
   }),
