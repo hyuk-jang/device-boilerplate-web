@@ -1,6 +1,12 @@
 <!-- 제어 명령 -->
 <div class="container_row flex_dir_col default_search_area" id="controlCommandArea">
   <div class="search_area">
+    <!-- <div class="flex flex_end">
+      <button type="button" class="btn btn-info" id="addCmdGoalBtn">
+        목표 추가
+      </button>
+    </div> -->
+
     <div class="search_box">
       <span class="search_title">명령 형식</span>
       <select class="form-control" id="cmdFormatSel">
@@ -26,7 +32,7 @@
         </select>
       </div>
       <div class="search_box" id="controlSetValueArea">
-        <span class="search_title" id="controlSetValueTitle">설정 값!</span>
+        <span class="search_title" id="controlSetValueTitle">설정 값</span>
         <div class="search_body">
           <input
             type="number"
@@ -71,7 +77,7 @@
       </div>
     </div>
 
-    <div class="search_box mr_05rem">
+    <div class="search_box">
       <span class="search_title">제한 시간</span>
       <div class="search_body" id="limitTime">
         <input
@@ -102,17 +108,9 @@
         />
       </div>
     </div>
-  </div>
-
-  <div class="search_box flex_jus_bet flex_dir_row m_05rem">
-    <div class="user_box ml_2rem mr_05rem">
-      <button type="button" class="btn btn-primary" id="addCmdGoalBtn">
-        목표 추가
-      </button>
-    </div>
-    <div class="user_box mr_05rem">
-      <button type="button" class="btn btn-success mw_7rem" id="reqCommandBtn">
-        실행
+    <div class="submit_box">
+      <button type="button" class="btn btn-success" id="reqCommandBtn">
+        제어 요청
       </button>
     </div>
   </div>
@@ -182,7 +180,7 @@
   const CF_FLOW = 'FLOW';
   const CF_SCENARIO = 'SCENARIO';
 
-  const { setCmdList = [], flowCmdList = [], scenarioCmdList = [] } = controlInfo;
+  const { setCmdList = [], flowCmdList = [], scenarioCmdList = [] } = map.controlInfo;
 
   function initCmdFormatSel() {
     const $cmdFormatSel = $('#cmdFormatSel');
@@ -575,6 +573,6 @@
 
     $('#deviceCateSel').trigger('change');
 
-    $('#addCmdGoalBtn').trigger('click');
+    // $('#addCmdGoalBtn').trigger('click');
   });
 </script>

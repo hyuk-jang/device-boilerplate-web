@@ -31,8 +31,6 @@
     var subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
     // Map 정보
     var map = <%- JSON.stringify(map) %>;
-    // 제어 명령 정보
-    var controlInfo = <%- JSON.stringify(controlInfo) %>;
     // 세션 ID
     var sessionID = <%- JSON.stringify(sessionID) %>;
     // 로그인 사용자 정보
@@ -416,11 +414,13 @@
           });
       });
     </script>
+
+    <!-- 검색 관련 js 모음 -->
+    <script src="/js/contents/report/search.js"></script>
+
     <script>
       $(document).ready(() => {
         $('#container_body').removeClass('hidden');
-
-        // console.dir(mdPlaceStorage);
       });
     </script>
   </body>

@@ -66,21 +66,12 @@ router.get(
     /** @type {MAIN_MAP} */
     const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
-    /** @type {V_DV_PLACE[]} */
-    const placeRows = await biModule.getTable('v_dv_place', mainWhere);
-
     /** @type {mDeviceMap} */
     // const map = JSON.parse(mainRow.map);
     const baseMap = mainRow.map;
     const baseImgPath = mainMapRow.path;
 
     const map = JSON.parse(baseMap);
-
-    controlDom.initCommand(map, placeRows);
-
-    // 명령 정보만 따로 저장
-    req.locals.controlInfo = map.controlInfo;
-    delete map.controlInfo;
 
     //  Map 경로 재설정
     if (typeof baseImgPath === 'string') {

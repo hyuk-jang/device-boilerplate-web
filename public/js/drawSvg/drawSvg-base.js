@@ -248,13 +248,11 @@ function initDrawSvg() {
   mdPlaceRelationStorage.forEach(mdPlaceRelHeadInfo => {
     const { pcId, mdPlaceRelTailStorage } = mdPlaceRelHeadInfo;
 
-    mdPlaceRelTailStorage.forEach(mdPlaceRelTailInfo => {
-      const { getNodeList } = mdPlaceRelTailInfo;
-
-      !getNodeList().length &&
-        mdPlaceRelationStorage.has(pcId) &&
-        mdPlaceRelationStorage.delete(pcId);
+    // 장소에 조건을 충족하는 노드가 없을 경우 Map에서 해당 요소 삭제
+    mdPlaceRelTailStorage.forEach((mdPlaceRelTailInfo, pId) => {
+      mdPlaceRelTailInfo.getNodeList().length === 0 && mdPlaceRelTailStorage.delete(pId);
     });
+    mdPlaceRelTailStorage.size === 0 && mdPlaceRelationStorage.delete(pcId);
   });
 
   // 장치 제어 목록 설정

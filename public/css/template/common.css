@@ -667,8 +667,8 @@ article.sdv_w_side > p:last-child {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: 3rem;
-  min-width: 100px;
+  margin-left: 2.5rem;
+  min-width: 90px;
 }
 
 .search_box > .search_title {
@@ -690,17 +690,17 @@ article.sdv_w_side > p:last-child {
 .submit_box {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   margin-left: 3rem;
 }
 
 .submit_box > .btn {
-  width: 8rem;
-  height: 4.5rem;
-  font-size: 2rem;
-  text-align: center;
-  border-radius: 1rem;
+  /* width: 8rem; */
+  /* height: 4rem; */
+  /* font-size: 1.6rem; */
+  /* text-align: center; */
+  /* border-radius: 1rem; */
 
   /* transition: all 0.4s ease; */
 }
@@ -721,7 +721,7 @@ article.sdv_w_side > p:last-child {
 
 .search_box input[type='number'] {
   height: 34px;
-  min-width: 50px;
+  min-width: 45px;
   border-radius: 3px;
   text-align: center;
 }
@@ -1180,6 +1180,10 @@ article.sdv_w_side > p:last-child {
   flex-grow: 2;
 }
 
+.flex_end {
+  align-items: flex-end;
+}
+
 /***************************************/
 /**************** Dynamic Media ****************/
 /***************************************/
@@ -1347,7 +1351,7 @@ article.sdv_w_side > p:last-child {
     margin: 1rem 0;
   }
 
-  .submit_box > .btn {
+  .submit_box .btn {
     width: calc(100% - 5rem);
   }
 
