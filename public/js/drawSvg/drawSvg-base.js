@@ -39,7 +39,7 @@ const {
   },
   setInfo: { nodeStructureList },
   relationInfo: { placeRelationList },
-  configInfo: { deviceCmdList = [] } = {},
+  controlInfo: { singleCmdList = [] } = {},
 } = realMap;
 
 // svgModelResourceList 생성
@@ -256,7 +256,7 @@ function initDrawSvg() {
   });
 
   // 장치 제어 목록 설정
-  deviceCmdList.forEach(deviceCmdInfo => {
+  singleCmdList.forEach(deviceCmdInfo => {
     const { applyDeviceList = [], dCmdScenarioInfo } = deviceCmdInfo;
 
     const dControlValueStorage = initDeviceControlIdentify(dCmdScenarioInfo);
@@ -372,6 +372,7 @@ function drawSvgElement(svgDrawInfo) {
   const bgOption = {
     id: positionId,
     opacity: isShow ? opacity : 0,
+    drawType: svgModelType,
   };
   // placeId가 존재하지 않으면 Node이고 Node의 isSensor가 0이면 Device이므로 Cursor: Pointer 처리
   if (placeId !== undefined) {
@@ -398,8 +399,10 @@ function drawSvgElement(svgDrawInfo) {
     case 'rhombus':
       svgModelWidth = radius * 2;
       svgModelHeight = svgModelWidth;
-      // Rect의 대각선 길이는 Root 2이기 때문에 세팅
-      svgCanvasBgElement = svgCanvas.rect(radius * Math.SQRT2, radius * Math.SQRT2);
+
+      svgCanvasBgElement = svgCanvas.polygon(
+        `${radius}, 0 ${svgModelWidth}, ${radius} ${radius}, ${svgModelHeight} 0, ${radius} `,
+      );
       // 장소일 경우 color사용, Place 위에 그려지는 Node의 초기값은 Error
       defaultColor = placeId === undefined ? defaultColor : errColor;
       break;
@@ -420,16 +423,9 @@ function drawSvgElement(svgDrawInfo) {
       break;
   }
 
-  // 모델 색상, 좌표 이동, 외곽선 굵기, Attr 세팅
-  svgCanvasBgElement !== undefined &&
+  if (svgCanvasBgElement !== undefined) {
     svgCanvasBgElement.move(x1, y1).stroke(strokeInfo).attr(bgOption).fill(defaultColor);
-
-  if (placeId !== undefined && svgModelType === 'rhombus') {
-    // 이미 이전에 Move를 하였기 때문에 Rect와의 시작 포인트에서 추가로 Root2의 소수부분으르 이동
-    const realMove = Math.SQRT2 - 1;
-    svgCanvasBgElement.rotate(45).dx(radius * realMove, radius * realMove);
   }
-  // placeId !== undefined && svgModelType === 'square' && svgCanvasBgElement.rotate(45);
 
   // mdNodeInfo|mdPlaceInfo 에 SVG BG 정의
   ownerInfo.svgEleBg = svgCanvasBgElement;
