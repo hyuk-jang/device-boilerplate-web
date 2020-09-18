@@ -49,7 +49,7 @@ const mdMapStorage = new Map();
 /** @type {Map<string, mdPlaceInfo>} */
 const mdPlaceStorage = new Map();
 
-/** @type {mdPlaceRelHeadStorage} */
+/** @type {Map<string, mdPlaceRelHeadInfo>} key pcId, Map Place Relation Class 관계 */
 const mdPlaceRelationStorage = new Map();
 
 /** @type {Map<string, string[]>} ncId를 기준으로 속해있는 nodeIds  */
@@ -58,19 +58,27 @@ const mdNodeClassStorage = new Map();
 /** @type {Map<string, mdNodeInfo>} nodeId를 기준으로 nodeInfo 정보를 저장할 Map */
 const mdNodeStorage = new Map();
 
-/** @type {Map<string, dCmdScenarioInfo>} node Class Id를 기준으로 명령 정보를 저장할 Map */
+/** @type {Map<string, mSingleMiddleCmdInfo>} node Class Id를 기준으로 명령 정보를 저장할 Map */
 const mdDeviceScenaioStorage = new Map();
 
-/** @type {dControlNodeStorage} node Class Id를 기준으로 단일 제어 Select 영역 구성 필요 정보 */
+/** @type {Map<string, dControlValueStorage>} key:nodeId 단일 제어 Select 영역 구성 필요 정보 */
 const mdControlIdenStorage = new Map();
+
+/** @type {Map<string, mdCmdInfo>} */
+const mCmdStorage = new Map();
 
 /**
  * 장치 제어 식별 Map 생성
- * @param {dCmdScenarioInfo} dCmdScenarioInfo
+ * @param {mSingleMiddleCmdInfo} dCmdScenarioInfo
  * @param {dControlValueStorage=} dControlValueStorage
  */
 function initDeviceControlIdentify(dCmdScenarioInfo, dControlValueStorage = new Map()) {
-  const { confirmList, scenarioMsg, isSetValue, setValueInfo } = dCmdScenarioInfo;
+  const {
+    subCmdList: confirmList,
+    scenarioMsg,
+    isSetValue,
+    setValueInfo,
+  } = dCmdScenarioInfo;
 
   confirmList.forEach(confirmInfo => {
     const { enName, krName, controlValue, nextStepInfo } = confirmInfo;
@@ -257,13 +265,13 @@ function initDrawSvg() {
 
   // 장치 제어 목록 설정
   singleCmdList.forEach(deviceCmdInfo => {
-    const { applyDeviceList = [], dCmdScenarioInfo } = deviceCmdInfo;
+    const { applyDeviceList = [], singleMidCateCmdInfo } = deviceCmdInfo;
 
-    const dControlValueStorage = initDeviceControlIdentify(dCmdScenarioInfo);
+    const dControlValueStorage = initDeviceControlIdentify(singleMidCateCmdInfo);
 
     applyDeviceList.forEach(ncId => {
       // 장치 제어 식별 Map 생성
-      mdDeviceScenaioStorage.set(ncId, dCmdScenarioInfo);
+      mdDeviceScenaioStorage.set(ncId, singleMidCateCmdInfo);
       // Node Class Id 기준으로 해당 식별 Map을 붙여줌
       mdControlIdenStorage.set(ncId, dControlValueStorage);
     });
@@ -538,6 +546,7 @@ function showNodeData(nodeId, data = '') {
       nodeData,
       isSensor,
       dataUnit = '',
+      mdPlaceInfo,
       svgModelResource: {
         elementDrawInfo: {
           color: [baseColor, actionColor],
@@ -549,6 +558,8 @@ function showNodeData(nodeId, data = '') {
       svgEleData,
       svgEleDataUnit,
     } = mdNodeInfo;
+
+    // console.dir(mdNodeInfo);
 
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
     if (nodeData === data) return false;
@@ -613,7 +624,7 @@ function showNodeData(nodeId, data = '') {
 /**
  * Svg Node Device 객체를 선택하여 제어를 하고자 할 경우
  * @param {mdNodeInfo} mdNodeInfo Device Node Id
- * @param {dCmdScenarioInfo=} dCmdScenarioInfo 현재 수행 중인 장치 제어 단계
+ * @param {mSingleMiddleCmdInfo=} dCmdScenarioInfo 현재 수행 중인 장치 제어 단계
  */
 function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
   const { ncId, ndName = '', nodeId, nodeName, nodeData } = mdNodeInfo;
@@ -631,7 +642,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
     scenarioMsg = '제어 동작을 선택하세요.',
     isSetValue = false,
     setValueInfo: { msg = '', min = 0, max = 100 } = {},
-    confirmList = [
+    subCmdList: confirmList = [
       {
         enName: 'On/Open',
         krName: '동작',
