@@ -195,14 +195,6 @@
       const socket = io();
 
       function bindingSocketEmit() {
-        // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
-        socket.emit('certifySocket', {
-          sessionID: sessionID,
-          sessionUserInfo: user,
-        });
-
-        // 사용자 제어에 의한 Emit
-
         // 서버로 명령 취소 요청
         $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
           const wrapCmdUUID = $('button[name="reqCancelCmd"]')
@@ -225,6 +217,14 @@
       }
 
       function bindingSocketOn() {
+        // 인증 요청을 받으면 수행
+        socket.on('authSocket', () => {
+          socket.emit('authSocket', {
+            sessionID: sessionID,
+            sessionUserInfo: user,
+          });
+        });
+
         // 명령 요청 결과 Alert
         socket.on('resultExecCommand', message => {
           document.getElementById('resultExecCommand').innerText = message;

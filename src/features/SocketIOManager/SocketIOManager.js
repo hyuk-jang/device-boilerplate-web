@@ -40,9 +40,13 @@ class SocketIOManager extends AbstSocketIOManager {
     this.io = new SocketIO(httpServer);
 
     this.io.on('connection', socket => {
-      // BU.CLI('connection');
-      // 접속한 Socket 등록
-      socket.on('certifySocket', sessionInfo => {
+      // BU.CLI('connection', socket.id);
+
+      // 인증 요청
+      socket.emit('authSocket');
+
+      // 인증 요청 응답 수신 처리(접속한 Socket 등록)
+      socket.on('authSocket', sessionInfo => {
         /** @type {msUserInfo} */
         const msUser = sessionInfo;
         // 접속한 Socket 정보 정의
@@ -80,6 +84,7 @@ class SocketIOManager extends AbstSocketIOManager {
 
       // 연결 해제한 Socket 제거
       socket.on('disconnect', () => {
+        // BU.log('소켓 해제 발생', socket.id);
         _.forEach(this.mainStorageList, msInfo =>
           _.remove(msInfo.msUserList, msUserInfo =>
             _.isEqual(msUserInfo.socketClient, socket),

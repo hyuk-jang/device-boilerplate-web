@@ -32,7 +32,9 @@ class ApiServer extends AbstApiServer {
     const { EOT, CAN } = protocolConverter;
     const server = net
       .createServer(socket => {
-        console.log(`client is Connected ${apiPort} ===> addressInfo: ${socket.remoteAddress}`);
+        console.log(
+          `client is Connected ${apiPort} ===> addressInfo: ${socket.remoteAddress}`,
+        );
 
         // steram 연결 및 파서 등록
         const stream = socket.pipe(split(EOT));
@@ -205,7 +207,10 @@ class ApiServer extends AbstApiServer {
       } = msInfo;
 
       // 사용자가 요청한 목록 찾음
-      const foundIndex = _.findIndex(reqCmdList, reqCmd => reqCmd.reqCmdInfo.uuid === uuid);
+      const foundIndex = _.findIndex(
+        reqCmdList,
+        reqCmd => reqCmd.reqCmdInfo.uuid === uuid,
+      );
       const reqCmd = reqCmdList[foundIndex];
 
       const { user, socket, timer } = reqCmd;
