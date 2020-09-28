@@ -323,6 +323,7 @@
 
         // 명령 관련 갱신 반영
         socket.on('updateCommand', (commandList = []) => {
+          updateCommand(commandList);
           // console.log(commandList);
           // cmdList Handlebars compile
           const cmdTbodyTemplate = $('#cmdTableTemplate').html();
@@ -352,6 +353,12 @@
           controlSetValue,
         });
       }
+
+      // 명령 요청
+      function reqCommandControl(wsGenerateControlCmdAPI) {
+        socket.emit('executeCommand', wsGenerateControlCmdAPI);
+      }
+
       // Browser >>> Server 이벤트 바인딩
       bindingSocketEmit();
       // Server >>>  Browser 이벤트 바인딩
