@@ -180,8 +180,6 @@
   const CF_FLOW = 'FLOW';
   const CF_SCENARIO = 'SCENARIO';
 
-  const { setCmdList = [], flowCmdList = [], scenarioCmdList = [] } = map.controlInfo;
-
   function initCmdFormatSel() {
     const $cmdFormatSel = $('#cmdFormatSel');
 
@@ -457,7 +455,6 @@
         $('#cmdGoalArea').html('');
     });
   }
-  initAddControlChangeEvent();
 </script>
 
 <!-- 목표 추가 데이터 정의 및 Event Binding -->
@@ -568,6 +565,7 @@
 
 <script>
   $(document).ready(() => {
+    initAddControlChangeEvent();
     initCmdFormatSel();
     initAddCmdGoalEvent();
 

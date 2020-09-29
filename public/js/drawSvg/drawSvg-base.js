@@ -29,17 +29,28 @@ const SENSOR_TYPE = {
   NONE: -1,
 };
 
+const DRAW_TYPE = {
+  PLACE: 0,
+  NODE: 1,
+  CMD: 2,
+};
+
 const {
   drawInfo: {
     frame: {
       mapInfo: { width: mapWidth, height: mapHeight, backgroundInfo },
       svgModelResourceList,
     },
-    positionInfo: { svgNodeList, svgPlaceList },
+    positionInfo: { svgNodeList = [], svgPlaceList = [], svgCmdList = [] },
   },
   setInfo: { nodeStructureList },
   relationInfo: { placeRelationList },
-  controlInfo: { singleCmdList = [] } = {},
+  controlInfo: {
+    singleCmdList = [],
+    setCmdList = [],
+    flowCmdList = [],
+    scenarioCmdList = [],
+  } = {},
 } = realMap;
 
 // svgModelResourceList 생성
@@ -64,8 +75,8 @@ const mdDeviceScenaioStorage = new Map();
 /** @type {Map<string, dControlValueStorage>} key:nodeId 단일 제어 Select 영역 구성 필요 정보 */
 const mdControlIdenStorage = new Map();
 
-/** @type {Map<string, mdCmdInfo>} */
-const mCmdStorage = new Map();
+/** @type {Map<string, mdCmdInfo>} key: cmdId */
+const mdCmdStorage = new Map();
 
 /**
  * 장치 제어 식별 Map 생성
@@ -85,7 +96,7 @@ function initDeviceControlIdentify(dCmdScenarioInfo, dControlValueStorage = new 
 
     // 다음 동작이 존재한다면 재귀
     if (nextStepInfo) {
-      return this.initDeviceControlIdentify(nextStepInfo, dControlValueStorage);
+      return initDeviceControlIdentify(nextStepInfo, dControlValueStorage);
     }
 
     /** @type {dControlIdenInfo} */
@@ -102,6 +113,30 @@ function initDeviceControlIdentify(dCmdScenarioInfo, dControlValueStorage = new 
   });
 
   return dControlValueStorage;
+}
+
+/**
+ * mCmdStorage에 Map 요소를 추가하기 위한 메소드
+ * @param {string} cmdFormat
+ * @param {string} cmdId
+ * @param {string} cmdName
+ * @param {svgNodePosOpt} svgNodePosOpt
+ */
+function setCmdStorage(cmdFormat, cmdId, cmdName, svgNodePosOpt) {
+  if (_.isEmpty(svgNodePosOpt)) {
+    return false;
+  }
+  const { placeId, resourceId, axisScale, moveScale } = svgNodePosOpt;
+
+  mdCmdStorage.set(cmdId, {
+    cmdFormat,
+    cmdId,
+    cmdName,
+    axisScale,
+    moveScale,
+    mdPlaceInfo: mdPlaceStorage.get(placeId),
+    svgModelResource: mdMapStorage.get(resourceId),
+  });
 }
 
 /**
@@ -181,6 +216,7 @@ function initDrawSvg() {
       target_id: ncId,
       target_name: ncName,
       data_unit: dataUnit,
+      operationStatusList = [],
     } = nClassInfo;
 
     mdNodeClassStorage.set(ncId, []);
@@ -245,6 +281,7 @@ function initDrawSvg() {
           moveScale,
           point: [],
           placeIdList,
+          operationStatusList,
           placeNameList: placeIdList.map(pId => mdPlaceStorage.get(pId).placeName),
           svgModelResource: mdMapStorage.get(resourceId),
         });
@@ -276,27 +313,47 @@ function initDrawSvg() {
       mdControlIdenStorage.set(ncId, dControlValueStorage);
     });
   });
-}
 
-/**
- * FIXME: SVG Filter 로딩 오류로 인해 사용하지 못함
- * 그림자
- * @param {SVG} model 그려질 장소.
- * @param {mSvgPositionInfo} svgPositionInfo 장소와 노드를 구분하기 위한 장소 또는 노드의 defId 값
- */
-function drawSvgShadow(model, svgPositionInfo) {
-  // if (getSvgType === SVG_TYPE.sensor) {
-  //   model.attr({ name: 'sensor' });
-  //   model.filter(add => {
-  //     const blur = add.offset(0, 0).in(add.sourceAlpha);
-  //     add.blend(add.source, blur);
-  //   });
-  // } else {
-  //   model.filter(add => {
-  //     const blur = add.offset(7, 7).in(add.sourceAlpha).gaussianBlur(4);
-  //     add.blend(add.source, blur);
-  //   });
-  // }
+  // 설정 명령
+  setCmdList.forEach(setCmdInfo => {
+    const { cmdId, cmdName, svgNodePosOpt } = setCmdInfo;
+
+    setCmdStorage('SET', cmdId, cmdName, svgNodePosOpt);
+  });
+
+  // 흐름 명령
+  flowCmdList.forEach(flowCmdInfo => {
+    const { destList = [], srcPlaceId } = flowCmdInfo;
+    let { srcPlaceName } = flowCmdInfo;
+
+    // srcName이 사용자가 지정하지 않았을 경우 Place 저장소에서 이름 추출
+    if (srcPlaceName === undefined) {
+      srcPlaceName = mdPlaceStorage.get(srcPlaceId).placeName;
+      flowCmdInfo.srcPlaceName = srcPlaceName;
+    }
+    // 목적지 순회
+    destList.forEach(destInfo => {
+      const { destPlaceId, svgNodePosOpt } = destInfo;
+      let { destPlaceName } = destInfo;
+      // 도착지 이름이 지정되지 않았을 경우 place 저장소에서 이름 추출하여 정의
+      if (destPlaceName === undefined) {
+        destPlaceName = mdPlaceStorage.get(destPlaceId).placeName;
+        destInfo.destPlaceName = destPlaceName;
+      }
+
+      const cmdId = `${srcPlaceId}_TO_${destPlaceId}`;
+      const cmdName = `${srcPlaceName}_TO_${destPlaceName}`;
+
+      setCmdStorage('FLOW', cmdId, cmdName, svgNodePosOpt);
+    });
+  });
+
+  // 시나리오 명령
+  scenarioCmdList.forEach(scenarioCmdInfo => {
+    const { scenarioId: cmdId, scenarioName: cmdName, svgNodePosOpt } = scenarioCmdInfo;
+
+    setCmdStorage('SCENARIO', cmdId, cmdName, svgNodePosOpt);
+  });
 }
 
 /**
@@ -343,20 +400,21 @@ function drawSvgPattern(svgCanvas, patternInfo) {
 /**
  * svg.js 의 도형별 그리기 이벤트를 모음
  * @param {svgDrawInfo} svgDrawInfo
+ * @param {string} drawType DRAW_TYPE(Place, Node, Cmd)
  */
-function drawSvgElement(svgDrawInfo) {
+function drawSvgElement(svgDrawInfo, drawType) {
   const {
     svgCanvas,
     svgPositionInfo: {
       id: positionId,
       name: positionName,
+      cursor = '',
       point: [x1, y1, x2, y2],
-      placeId,
     },
     ownerInfo,
     ownerInfo: {
       svgModelResource: {
-        type: svgModelType,
+        type: elementType,
         elementDrawInfo,
         elementDrawInfo: {
           errColor = 'red',
@@ -364,8 +422,10 @@ function drawSvgElement(svgDrawInfo) {
           opacity = 1,
           strokeInfo,
           patternInfo,
+          svgClass: [defaultSvgClass] = [],
+          filterInfo = {},
         },
-        textStyleInfo,
+        textStyleInfo = {},
       },
     },
     isShow = true,
@@ -380,29 +440,36 @@ function drawSvgElement(svgDrawInfo) {
   const bgOption = {
     id: positionId,
     opacity: isShow ? opacity : 0,
-    drawType: svgModelType,
+    cursor,
   };
-  // placeId가 존재하지 않으면 Node이고 Node의 isSensor가 0이면 Device이므로 Cursor: Pointer 처리
-  if (placeId !== undefined) {
-    const { isSensor } = mdNodeStorage.get(positionId);
-    isSensor === 0 && (bgOption.cursor = 'pointer');
+
+  // 클래스를 지정한다면 Attr 추가
+  if (defaultSvgClass) {
+    bgOption.class = defaultSvgClass;
   }
+  // 필터 정보가 있다면 Attr 추가 정의
+  _.forEach(filterInfo, (attrValue, attrKey) => {
+    bgOption[attrKey] = attrValue;
+  });
+
+  // console.log(bgOption);
 
   let svgCanvasBgElement;
+  // 기본 색상 재정의
+  defaultColor = drawType === DRAW_TYPE.NODE ? errColor : defaultColor;
 
   // SVG 생성
-  switch (svgModelType) {
+  switch (elementType) {
     case 'rect':
+    case 'diamond':
       svgCanvasBgElement = svgCanvas.rect(svgModelWidth, svgModelHeight);
-      // 장소일 경우 color사용, Place 위에 그려지는 Node의 초기값은 Error
-      defaultColor = placeId === undefined ? defaultColor : errColor;
+      // 노드 일 경우에는 초기값 Error, 그밖에는 기본 색상
       break;
     case 'circle':
       svgModelWidth = radius * 2;
       svgModelHeight = svgModelWidth;
       svgCanvasBgElement = svgCanvas.circle(radius * 2);
-      // 장소일 경우 color사용, Place 위에 그려지는 Node의 초기값은 Error
-      defaultColor = placeId === undefined ? defaultColor : errColor;
+      // 노드 일 경우에는 초기값 Error, 그밖에는 기본 색상
       break;
     case 'rhombus':
       svgModelWidth = radius * 2;
@@ -411,8 +478,7 @@ function drawSvgElement(svgDrawInfo) {
       svgCanvasBgElement = svgCanvas.polygon(
         `${radius}, 0 ${svgModelWidth}, ${radius} ${radius}, ${svgModelHeight} 0, ${radius} `,
       );
-      // 장소일 경우 color사용, Place 위에 그려지는 Node의 초기값은 Error
-      defaultColor = placeId === undefined ? defaultColor : errColor;
+      // 노드 일 경우에는 초기값 Error, 그밖에는 기본 색상
       break;
     case 'image':
       svgCanvasBgElement = svgCanvas
@@ -431,8 +497,13 @@ function drawSvgElement(svgDrawInfo) {
       break;
   }
 
+  // SVG Element 가 생성되었을 경우 속성 정의 및 이동
   if (svgCanvasBgElement !== undefined) {
-    svgCanvasBgElement.move(x1, y1).stroke(strokeInfo).attr(bgOption).fill(defaultColor);
+    svgCanvasBgElement.move(x1, y1).attr(bgOption);
+
+    defaultColor && svgCanvasBgElement.fill(defaultColor);
+    // 외곽 선 정보가 존재한다면 그림
+    strokeInfo && svgCanvasBgElement.stroke(strokeInfo);
   }
 
   // mdNodeInfo|mdPlaceInfo 에 SVG BG 정의
@@ -442,7 +513,7 @@ function drawSvgElement(svgDrawInfo) {
   const {
     isHiddenTitle = false,
     isTitleWrap = true,
-    leading = 1.1,
+    leading = 1,
     color = BASE.TXT.TITLE_COLOR,
     dataColor: [TXT_DATA_COLOR] = [BASE.TXT.DATA_COLOR],
     fontSize = BASE.TXT.FONT_SIZE,
@@ -461,8 +532,8 @@ function drawSvgElement(svgDrawInfo) {
     'pointer-events': 'none',
   };
 
-  // isTitleWrap을 하지 않을 경우 배경 데이터 공간을 기준으로 [좌: 타이틀, 우: 데이터] text 각각 생성
-  if (!isTitleWrap && !isHiddenTitle && placeId !== undefined) {
+  // 데이터를 [좌: 타이틀, 우: 데이터] 로 배치할 경우 배경 데이터 공간을 기준으로 text 각각 생성
+  if (!(isTitleWrap || isHiddenTitle) && drawType !== DRAW_TYPE.PLACE) {
     const yAxisPoint = y1 + svgModelHeight * tAxisScaleY + fontSize * 0.1;
     // Title 생성
     svgCanvas
@@ -487,46 +558,44 @@ function drawSvgElement(svgDrawInfo) {
       .move(x1 + svgModelWidth * 0.9, yAxisPoint)
       // 시작점에서 좌측으로 써나감
       .font({ ...fontOption, anchor: 'end' });
-    // tspan에 text를 집어넣을 경우 hidden, visible에 따라 위치 버그 발생때문에 아래로 배치
-    ownerInfo.svgEleName && ownerInfo.svgEleName.text(positionName);
   } else {
     let yAxisPoint = y1 + svgModelHeight * tAxisScaleY;
+
     svgCanvas
       .text(text => {
-        // mdNodeInfo|mdPlaceInfo 에 SVG Title 정의
-        if (!isHiddenTitle) {
-          ownerInfo.svgEleName = text.tspan('').font({ fill: color, size: fontSize });
-          // PlaceId가 존재하지 않을 경우 장소로 판단.
-          // data가 존재하지 않기 때문에 차감('dominant-baseline': 'middle'으로 해도 중심선이 안맞음. fontSize를 기준으로 10% 차감)
-          yAxisPoint -=
-            placeId === undefined ? fontSize * -0.1 : fontSize * leading * 0.4;
-        }
-
-        // 데이터 공간이 있을 경우
-        if (placeId !== undefined) {
-          // 타이틀을 사용하지 않을 경우
-          if (isHiddenTitle) {
+        // 타이틀을 숨길 경우
+        if (isHiddenTitle) {
+          // 단독으로 데이터를 표현할 경우
+          if (drawType === DRAW_TYPE.NODE) {
             ownerInfo.svgEleData = text
               .tspan(' ')
               .font({ size: fontSize, fill: TXT_DATA_COLOR });
-          } else {
-            // mdNodeInfo|mdPlaceInfo 에 SVG Data 정의
+          }
+        } else {
+          ownerInfo.svgEleName = text.tspan('').font({ fill: color, size: fontSize });
+
+          if (drawType === DRAW_TYPE.NODE) {
+            // 글자 크기만큼 yAxis 좌표 위치를 위로 올림
+            yAxisPoint -= fontSize * leading * 0.5;
+
             ownerInfo.svgEleData = text
               .tspan(' ')
               .newLine()
               .font({ size: fontSize, fill: TXT_DATA_COLOR });
           }
-          // mdNodeInfo|mdPlaceInfo 에 SVG Data Unit 정의
-          ownerInfo.svgEleDataUnit = text.tspan('').font({ size: fontSize * 0.9 });
         }
+        // 데이터 단위 추가
+        ownerInfo.svgEleDataUnit = text.tspan('').font({ size: fontSize * 0.9 });
       })
       // 공통 옵션
       .move(x1 + svgModelWidth * tAxisScaleX, yAxisPoint)
       .font({ ...fontOption, anchor });
 
-    // tspan에 text를 집어넣을 경우 hidden, visible에 따라 위치 버그 발생때문에 아래로 배치
-    ownerInfo.svgEleName && ownerInfo.svgEleName.text(positionName);
+    // 글자 크기에 비례하여 개행 간격 처리
+    ownerInfo.svgEleData && ownerInfo.svgEleData.dy(fontSize * leading * 1.33);
   }
+  // tspan에 text를 집어넣을 경우 hidden, visible에 따라 위치 버그 발생때문에 아래로 배치
+  ownerInfo.svgEleName && ownerInfo.svgEleName.text(positionName);
 
   return svgCanvasBgElement;
 }
@@ -546,13 +615,13 @@ function showNodeData(nodeId, data = '') {
       nodeData,
       isSensor,
       dataUnit = '',
-      mdPlaceInfo,
       svgModelResource: {
         elementDrawInfo: {
           color: [baseColor, actionColor],
           errColor = 'red',
+          svgClass = [],
         },
-        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [] } = {},
+        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [], fontSize } = {},
       },
       svgEleBg,
       svgEleData,
@@ -570,6 +639,7 @@ function showNodeData(nodeId, data = '') {
     // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
     let isValidData = 0;
     let selectedColor = baseColor;
+    let selectedIndex = 0;
     let selectedTxtColor = txtBaseColor;
 
     // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
@@ -592,10 +662,12 @@ function showNodeData(nodeId, data = '') {
       // 데이터가 들어오면 유효한 데이터
       if (strData.length) {
         isValidData = 1;
+        selectedIndex = 1;
         selectedColor = actionColor;
         // False 영역일 경우
         if (DATA_RANGE.FALSE.includes(strUpperData)) {
           selectedColor = baseColor;
+          selectedIndex = 0;
         }
       } else {
         selectedColor = errColor;
@@ -603,12 +675,16 @@ function showNodeData(nodeId, data = '') {
     }
 
     // 배경 색상 변경
-    svgEleBg.fill(selectedColor);
+    selectedColor && svgEleBg.fill(selectedColor);
+    // 데이터가 용이하고 class 가 존재할 경우 대체
+    if (isValidData && svgClass.length) {
+      svgEleBg.attr('class', svgClass[selectedIndex]);
+    }
     // 데이터 색상 변경
     svgEleData.font({ fill: selectedTxtColor });
     if (isValidData) {
       svgEleData.text(data);
-      svgEleDataUnit.text(dataUnit).dx(2);
+      svgEleDataUnit.text(dataUnit).dx(fontSize * 0.5);
     } else {
       // data가 유효범위가 아닐 경우
       svgEleData.clear();
@@ -622,11 +698,56 @@ function showNodeData(nodeId, data = '') {
 }
 
 /**
+ *
+ * @param {contractCmdInfo[]} commandList
+ */
+function updateCommand(commandList) {
+  // console.log(commandList);
+  mdCmdStorage.forEach(mdCmdInfo => {
+    const {
+      cmdId,
+      cmdStep,
+      svgModelResource: {
+        elementDrawInfo: {
+          color: [baseColor, actionColor],
+          svgClass = [],
+        },
+      },
+      svgEleBg,
+    } = mdCmdInfo;
+
+    // 현재 진행 중인 명령이 존재하는지 확인
+    const currCmdInfo = commandList.find(cmdInfo => cmdInfo.wrapCmdId === cmdId);
+
+    // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
+    let selectedColor = baseColor;
+    let selectedIndex = 0;
+
+    // 수행중인 명령이 존재할 경우
+    if (currCmdInfo) {
+      const { wrapCmdStep } = currCmdInfo;
+      mdCmdInfo.cmdStep = wrapCmdStep;
+      selectedIndex = 1;
+      selectedColor = actionColor;
+    } else if (typeof cmdStep === 'string' && cmdStep.length) {
+      // 수행 중인 명령이 삭제되었을 경우
+      mdCmdInfo.cmdStep = '';
+    }
+
+    // console.log('selectedIndex', svgClass[selectedIndex]);
+
+    // 배경 색상 변경
+    selectedColor && svgEleBg.fill(selectedColor);
+    svgEleBg.attr('class', svgClass[selectedIndex]);
+  });
+}
+
+/**
  * Svg Node Device 객체를 선택하여 제어를 하고자 할 경우
  * @param {mdNodeInfo} mdNodeInfo Device Node Id
  * @param {mSingleMiddleCmdInfo=} dCmdScenarioInfo 현재 수행 중인 장치 제어 단계
  */
-function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
+function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
   const { ncId, ndName = '', nodeId, nodeName, nodeData } = mdNodeInfo;
 
   const deviceName = `${ndName}(${nodeName})`;
@@ -658,7 +779,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
 
   // Node의 현 상태가 Error 일 경우 제어 불가
   if (nodeData === undefined || nodeData === '') {
-    alert(`${deviceName}의 상태를 점검해주세요.`);
+    return alert(`${deviceName}의 상태를 점검해주세요.`);
   }
 
   // 동적 다이어로그 구성
@@ -674,7 +795,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
         // 값 입력이 활성화 되어 있으나 사용자의 값 입력에 문제가 있을 경우
         if (isSetValue) {
           deviceSetValue = $deviceSetValue.val();
-          if (!deviceSetValue.length) {
+          if (deviceSetValue.length === 0) {
             // 값 존재 필요
             return $deviceSetValue.addClass('ui-state-error');
           }
@@ -683,7 +804,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
           const inputMax = Number($deviceSetValue.attr('max'));
           // 데이터의 유효 범위 충족 여부
           const isGoodScope = deviceSetValue >= inputMin && deviceSetValue <= inputMax;
-
+          // 스코프 범위를 벗어날 경우 오류
           if (!isGoodScope) {
             // 데이터 범위 오류
             return $deviceSetValue.addClass('ui-state-error');
@@ -701,7 +822,7 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
       // eslint-disable-next-line func-names
       btnFnInfo[krName] = function () {
         $(this).dialog('close');
-        alertDeviceCmdConfirm(mdNodeInfo, nextStepInfo);
+        confirmDeviceControl(mdNodeInfo, nextStepInfo);
       };
     }
     return btnFnInfo;
@@ -728,26 +849,47 @@ function alertDeviceCmdConfirm(mdNodeInfo, dCmdScenarioInfo = {}) {
 }
 
 /**
- * SVG Map 세팅
- * @param {string} documentId // 그려질 div의 id 값
- * @param {string=} isKorText // 장소, 장치, 센서 한글로 표현 유무
+ * mdCmdStorage에서 Single Command 를 제외한 명령 수행
+ * @param {mdCmdInfo} mdCmdInfo
  */
-function drawSvgBasePlace(documentId, isKorText = true) {
-  const textLang = isKorText ? 'ko' : 'en';
+function confirmCommand(mdCmdInfo) {
+  const CF_FLOW = 'FLOW';
+
+  const { cmdFormat, cmdId, cmdStep = '', cmdName } = mdCmdInfo;
+
+  /** @type {wsGenerateControlCmdAPI} */
+  const wsGenerateControlCmdAPI = {
+    cmdFormat,
+    cmdId,
+    // 진행중인 단계가 존재한다면 취소, 아니라면 요청
+    cmdType: cmdStep.length ? 'CANCEL' : 'CONTROL',
+  };
+
+  // 흐름 명령일 경우
+  if (cmdFormat === CF_FLOW) {
+    const [SPI, DPI] = cmdId.split('_TO_');
+    wsGenerateControlCmdAPI.SPI = SPI;
+    wsGenerateControlCmdAPI.DPI = DPI;
+  }
+
+  const reqMsg = cmdStep.length ? '취소' : '요청';
+  const confirmMsg = `명령('${cmdName}')을 ${reqMsg}하시겠습니까?`;
+  // 명령을 수행할 경우
+  if (confirm(confirmMsg)) {
+    console.log(wsGenerateControlCmdAPI);
+    typeof reqCommandControl === 'function' && reqCommandControl(wsGenerateControlCmdAPI);
+  }
+}
+
+/**
+ * SVG Map 세팅
+ * @param {SVG} SVG Canvas
+ */
+function drawSvgBasePlace(svgCanvas) {
   const {
     backgroundData = '',
     backgroundPosition: [bgPosX, bgPosY] = [0, 0],
   } = backgroundInfo;
-
-  const svgCanvas = SVG().addTo(`#${documentId}`).size('100%', '100%');
-
-  // canvas 정의
-  svgCanvas.attr({
-    id: 'svgCanvas',
-    class: 'svg_map',
-    preserveAspectRatio: 'xMidYMin meet',
-    lang: textLang,
-  });
 
   // 브라우저 크기에 반응하기 위한 뷰박스 세팅
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
@@ -773,12 +915,15 @@ function drawSvgBasePlace(documentId, isKorText = true) {
   svgPlaceList.forEach(svgPositionInfo => {
     const { id: placeId } = svgPositionInfo;
 
-    drawSvgElement({
-      svgCanvas,
-      svgPositionInfo,
-      isShow: !backgroundData.length,
-      ownerInfo: mdPlaceStorage.get(placeId),
-    });
+    drawSvgElement(
+      {
+        svgCanvas,
+        svgPositionInfo,
+        isShow: backgroundData.length === 0,
+        ownerInfo: mdPlaceStorage.get(placeId),
+      },
+      DRAW_TYPE.PLACE,
+    );
   });
 
   // Node 그리기
@@ -786,18 +931,42 @@ function drawSvgBasePlace(documentId, isKorText = true) {
     const { id: nodeId } = svgNodeInfo;
     const mdNodeInfo = mdNodeStorage.get(nodeId);
 
-    const svgCanvasBgElement = drawSvgElement({
-      svgCanvas,
-      svgPositionInfo: svgNodeInfo,
-      ownerInfo: mdNodeInfo,
-    });
+    const svgCanvasBgElement = drawSvgElement(
+      {
+        svgCanvas,
+        svgPositionInfo: svgNodeInfo,
+        ownerInfo: mdNodeInfo,
+      },
+      DRAW_TYPE.NODE,
+    );
 
     // 노드 타입이 장치라면 클릭 이벤트 바인딩
     if (mdNodeInfo.isSensor === SENSOR_TYPE.DEVICE) {
       svgCanvasBgElement.click(() => {
-        alertDeviceCmdConfirm(mdNodeInfo);
+        confirmDeviceControl(mdNodeInfo);
       });
     }
+  });
+
+  // 명령 그리기
+  svgCmdList.forEach(svgCmdInfo => {
+    const { id: cmdId } = svgCmdInfo;
+
+    const mdCmdInfo = mdCmdStorage.get(cmdId);
+
+    const svgCanvasBgElement = drawSvgElement(
+      {
+        svgCanvas,
+        svgPositionInfo: svgCmdInfo,
+        ownerInfo: mdCmdInfo,
+      },
+      DRAW_TYPE.CMD,
+    );
+
+    // 명령 클릭 이벤트 바인딩
+    svgCanvasBgElement.click(() => {
+      confirmCommand(mdCmdInfo);
+    });
   });
 }
 
@@ -840,5 +1009,5 @@ function runSimulator() {
  * @property {mSvgPositionInfo} svgPositionInfo
  * @property {boolean} isShow default: true,  true: 화면 표시 (기본값), false: 숨김
  * @property {mSvgModelResource} svgModelResource {width, height, radius, color}
- * @property {mdNodeInfo|mdPlaceInfo} ownerInfo mdNodeInfo or mdPlaceInfo
+ * @property {mdNodeInfo|mdPlaceInfo|mdPlaceInfo} ownerInfo mdNodeInfo or mdPlaceInfo
  */

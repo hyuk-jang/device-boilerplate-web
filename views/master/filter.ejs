@@ -1,0 +1,57 @@
+<!-- 반드시 XML <Open> <Close> 형식으로 작성해야함. -->
+<defs id="svgFilter">
+  <filter x="-5%" y="-5%" width="110%" height="110%" id="fyt">
+    <feFlood flood-color="yellow"> </feFlood>
+    <feComposite in="SourceGraphic"> </feComposite>
+  </filter>
+
+  <filter id="dropShadow">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"> </feGaussianBlur>
+    <feOffset dx="2" dy="2" result="offsetblur"> </feOffset>
+    <feComponentTransfer>
+      <feFuncA type="linear" slope="1.2"> </feFuncA>
+    </feComponentTransfer>
+    <feMerge>
+      <feMergeNode> </feMergeNode>
+      <feMergeNode in="SourceGraphic"> </feMergeNode>
+    </feMerge>
+  </filter>
+
+  <filter id="deviceShadow" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"> </feGaussianBlur>
+    <feOffset dx="1" dy="1" result="offsetblur"> </feOffset>
+    <feComponentTransfer>
+      <feFuncA type="linear" slope="0.5"> </feFuncA>
+    </feComponentTransfer>
+    <feMerge>
+      <feMergeNode> </feMergeNode>
+      <feMergeNode in="SourceGraphic"> </feMergeNode>
+    </feMerge>
+  </filter>
+
+  <linearGradient id="bg-sky-1" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#dbe4ff"></stop>
+    <stop offset="33%" stop-color="#d3deff"></stop>
+    <stop offset="66%" stop-color="#c1d0ff"></stop>
+    <stop offset="100%" stop-color="#b5c8ff"></stop>
+  </linearGradient>
+
+  <linearGradient id="bg-sky-2" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#00ffff"></stop>
+    <stop offset="33%" stop-color="#00ddff"></stop>
+    <stop offset="66%" stop-color="#00bbff"></stop>
+    <stop offset="100%" stop-color="#00aaff"></stop>
+  </linearGradient>
+
+  <linearGradient id="bg-gray-1" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#c9cfcb"></stop>
+    <stop offset="50%" stop-color="#b0b5b2"></stop>
+    <stop offset="100%" stop-color="#a1a6a3"></stop>
+  </linearGradient>
+
+  <linearGradient id="bg-green-1" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#18ff55"></stop>
+    <stop offset="50%" stop-color="#0be343"></stop>
+    <stop offset="100%" stop-color="#0bc33b"></stop>
+  </linearGradient>
+</defs>

@@ -7,6 +7,7 @@
     <script src="/js/handlebars.min.js"></script>
 
     <!-- SVG Map 을 생성하기 위한 필수 Library -->
+    <link href="/css/template/svg.filter.css" rel="stylesheet" />
     <script src="/js/svg/svg.js"></script>
 
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
@@ -81,7 +82,10 @@
           <div class="" id="structure">
             <%- include("./plugInMapControlBox.ejs") %>
             <!-- SVG canvas -->
-            <div class="svg_area" id="canvas"></div>
+            <div class="svg_area" id="canvas">
+              <%- include('../master/filter.ejs') %> <%-
+              include('../master/filter.btn.ejs') %>
+            </div>
           </div>
           <!-- Tables -->
           <div class="hidden" id="operStatusTable">
@@ -379,7 +383,25 @@
     <!-- SVG Map 세팅 -->
     <script>
       initDrawSvg();
-      drawSvgBasePlace('canvas'); // 멥 그리기
+
+      // 캔버스 생성
+      const svgCanvas = SVG().addTo(`#canvas`).size('100%', '100%');
+      // SVG Canvas 속성 정의
+      svgCanvas.attr({
+        id: 'svgCanvas',
+        class: 'svg_map',
+        preserveAspectRatio: 'xMidYMin meet',
+      });
+
+      // defs Element를 SVG Element 자식 요소 최상위로 정의
+      svgCanvas.defs();
+      // string으로 변환하여 붙여넣음. Dom 요소로 붙여넣을 경우 동작하지 않음
+      $('defs').html($('#svgFilter').html() + $('#svgBtnFilter').html());
+      // id 중복을 막기위한 filter 요소 삭제
+      document.querySelector('#svgFilter').remove();
+      document.querySelector('#svgBtnFilter').remove();
+
+      drawSvgBasePlace(svgCanvas); // 멥 그리기
 
       // FIXME: TEST 용
       // setTimeout(() => {
