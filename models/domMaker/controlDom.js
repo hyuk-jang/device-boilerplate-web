@@ -71,7 +71,7 @@ module.exports = {
 
     // 시나리오 명령 세팅
     scenarioCmdList.forEach((cmdInfo, index) => {
-      const { scenarioId: cmdId, scenarioName: cmdName = '' } = cmdInfo;
+      const { cmdId, cmdName = '' } = cmdInfo;
 
       scenarioCmdList[index] = {
         cmdId,

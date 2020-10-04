@@ -350,7 +350,7 @@ function initDrawSvg() {
 
   // 시나리오 명령
   scenarioCmdList.forEach(scenarioCmdInfo => {
-    const { scenarioId: cmdId, scenarioName: cmdName, svgNodePosOpt } = scenarioCmdInfo;
+    const { cmdId, cmdName, svgNodePosOpt } = scenarioCmdInfo;
 
     setCmdStorage('SCENARIO', cmdId, cmdName, svgNodePosOpt);
   });
@@ -386,7 +386,10 @@ function drawSvgPattern(svgCanvas, patternInfo) {
           add.circle(radius).opacity(opacity);
           break;
         case 'image':
-          add.image(fill).size(width, height).opacity(opacity);
+          add
+            .image(fill)
+            .size(width, height)
+            .opacity(opacity);
           break;
         default:
           break;
@@ -790,7 +793,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
     if (nextStepInfo === undefined) {
       // 다음 스텝이 없으면 즉시 실행
       // eslint-disable-next-line func-names
-      btnFnInfo[krName] = function () {
+      btnFnInfo[krName] = function() {
         const $deviceSetValue = $('#dialog-dynamic-input');
         // 값 입력이 활성화 되어 있으나 사용자의 값 입력에 문제가 있을 경우
         if (isSetValue) {
@@ -820,7 +823,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
       };
     } else {
       // eslint-disable-next-line func-names
-      btnFnInfo[krName] = function () {
+      btnFnInfo[krName] = function() {
         $(this).dialog('close');
         confirmDeviceControl(mdNodeInfo, nextStepInfo);
       };

@@ -1,5 +1,8 @@
 <script src="/js/panzoom.min.js"></script>
 <div class="map_control_box" id="mapControlBox">
+  <button id="updateIsApiClientConnImg" class="btn btn-danger btn-sm">
+    <span class="glyphicon glyphicon-link"></span>
+  </button>
   <!-- panzoom button-->
   <button id="zoomIn" class="btn btn-default btn-sm">
     <span class="glyphicon glyphicon-zoom-in"></span>
@@ -55,8 +58,12 @@
     $('#wrap > header').toggleClass('hidden');
     $('#wrap > footer').toggleClass('hidden');
 
-    $('#monitoring_mode').children().toggleClass('glyphicon-fullscreen');
-    $('#monitoring_mode').children().toggleClass('glyphicon-remove');
+    $('#monitoring_mode')
+      .children()
+      .toggleClass('glyphicon-fullscreen');
+    $('#monitoring_mode')
+      .children()
+      .toggleClass('glyphicon-remove');
 
     // $('.svg_area').height(window.innerHeight);
     window.dispatchEvent(new Event('resize'));

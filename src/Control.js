@@ -217,7 +217,9 @@ class Control {
     } = convertInfo;
 
     const placeRelRows =
-      isSubmitAPI === 1 ? _.filter(placeRelationRows, { is_submit_api: 1 }) : placeRelationRows;
+      isSubmitAPI === 1
+        ? _.filter(placeRelationRows, { is_submit_api: 1 })
+        : placeRelationRows;
 
     return _.map(placeRelRows, nodeInfo => {
       return _.reduce(
