@@ -1,20 +1,28 @@
 const _ = require('lodash');
 const { BU } = require('base-util-jh');
 
-const Control = require('../../../Control');
+const Control = require('../../Control');
 
-const Weathercast = require('../../../features/Weathercast/Weathercast');
-const SocketIOManager = require('../../../features/SocketIOManager/SocketIOManager');
-const ApiServer = require('../../../features/ApiCommunicator/ApiServer');
+const {
+  ApiServer,
+  SocketIOManager,
+  ToIMG,
+  Weathercast,
+} = require('../../features/index');
 
-class FpRndControl extends Control {
+module.exports = class extends Control {
   bindingFeature() {
+    // BU.CLI('bindingFeature');
     this.weathercast = new Weathercast();
+
     /** @type {SocketIOManager} */
     this.socketIoManager = new SocketIOManager(this);
 
     /** @type {ApiServer} */
     this.apiServer = new ApiServer(this);
+
+    /** @type {ToIMG} */
+    this.rtspManager = new ToIMG(this);
   }
 
   /**
@@ -22,7 +30,15 @@ class FpRndControl extends Control {
    * @param {featureConfig} featureConfig
    */
   runFeature(featureConfig) {
-    const { isStopWeathercast = false, ioConfig, apiConfig } = featureConfig;
+    const {
+      isStopWeathercast = false,
+      isRunRtsp = false,
+      ioConfig,
+      apiConfig,
+      rtspConfig,
+    } = featureConfig;
+
+    // BU.CLIN(featureConfig);
 
     // 기상청 동네예보 스케줄러 구동
     !isStopWeathercast && this.weathercast.init(this.dbInfo);
@@ -31,8 +47,13 @@ class FpRndControl extends Control {
 
     this.apiServer.init(apiConfig);
 
-    // API 에서 발생하는 각종 이슈들을 처리할 옵저버 세팅
     this.apiServer.attach(this);
+
+    // RTSP 모드를 사용할 경우 구동
+    if (isRunRtsp) {
+      this.rtspManager.bindingSocketIO(this.socketIoManager.io);
+
+      this.rtspManager.init(rtspConfig);
+    }
   }
-}
-module.exports = FpRndControl;
+};

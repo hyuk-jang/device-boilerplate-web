@@ -79,7 +79,7 @@
         <!-- Content -->
         <div id="controlContent">
           <!-- Svg Map -->
-          <div class="hidden" id="structure">
+          <div class="" id="structure">
             <%- include("./plugInMapControlBox.ejs") %>
             <!-- SVG canvas -->
             <div class="svg_area" id="canvas">
@@ -88,7 +88,7 @@
             </div>
           </div>
           <!-- Tables -->
-          <div class="" id="operStatusTable">
+          <div class="hidden" id="operStatusTable">
             <div class="container_row">
               <p class="table_desc_area">
                 명령 목록 - 갱신시간 &nbsp;<span id="cmdUpdateDate"></span>
@@ -210,7 +210,7 @@
         });
 
         // 제어 관리 js 세팅 및 바인딩
-        $('#operationModeSel').on('change', function() {
+        $('#operationModeSel').on('change', function () {
           const selectedAlgorithmId = $('#operationModeSel option:selected').val();
           // var modeName = $('#operationModeSel option:selected').text();
           // alert('운영 모드(' + modeName + ')를 변경하였습니다.');
@@ -349,7 +349,7 @@
         });
 
         // 서버로 명령 실행 요청한 결과 알림
-        socket.on('updateAlert', function(message) {
+        socket.on('updateAlert', function (message) {
           alert(message);
         });
       }
@@ -375,16 +375,14 @@
       bindingSocketOn();
 
       // FIXME: TEXT 종료 후 삭제
-      $(document).ready(function() {
+      $(document).ready(function () {
         const thisSelectValue = CF_SINGLE;
         // const thisSelectValue = CF_SET;
         // const thisSelectValue = CF_FLOW;
         // const thisSelectValue = CF_SCENARIO;
 
         // 명령 형식 변경
-        $('#cmdFormatSel')
-          .val(thisSelectValue)
-          .trigger('change');
+        $('#cmdFormatSel').val(thisSelectValue).trigger('change');
       });
     </script>
 
@@ -393,9 +391,7 @@
       initDrawSvg();
 
       // 캔버스 생성
-      const svgCanvas = SVG()
-        .addTo(`#canvas`)
-        .size('100%', '100%');
+      const svgCanvas = SVG().addTo(`#canvas`).size('100%', '100%');
       // SVG Canvas 속성 정의
       svgCanvas.attr({
         id: 'svgCanvas',
@@ -424,13 +420,13 @@
     <!-- 상단 카테고리 버튼 세팅 -->
     <script>
       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
-      $('input[name="contentTypeBtn"]').on('click', function() {
+      $('input[name="contentTypeBtn"]').on('click', function () {
         var viewType = $(this).data('view');
 
         // 버튼 색상 변경
         $('#contentTypeCategory')
           .children('input')
-          .each(function(index, inputElement) {
+          .each(function (index, inputElement) {
             var currDataView = $(inputElement).data('view');
             if (currDataView === viewType) {
               $(this).addClass('btn-danger');
@@ -444,7 +440,7 @@
         // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
         $('#controlContent')
           .children('div')
-          .each(function(index, domElement) {
+          .each(function (index, domElement) {
             if (domElement.id === viewType) {
               $(`#${domElement.id}`).removeClass('hidden');
             } else {

@@ -7,7 +7,7 @@ const app = require('express')();
 const server = require('http').Server(app);
 
 const Main = require('../../src/Main');
-const FpRndControl = require('../../src/projects/FP/RnD/FpRndControl');
+const FpRndControl = require('../../src/projects/FP/FpRndControl');
 const ToFFMPEG = require('../../src/features/RtspManager/ToFFMPEG');
 const ToIMG = require('../../src/features/RtspManager/ToIMG');
 

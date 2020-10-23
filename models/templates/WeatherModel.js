@@ -47,9 +47,7 @@ class WeatherModel extends BiModule {
    * @return {{title: string, color: string, start: string}[]} title: 내용, color: 배경 색상, start: 시작 날짜
    */
   async getCalendarEventList(userInfo) {
-    const startDate = moment()
-      .subtract(1, 'years')
-      .format();
+    const startDate = moment().subtract(1, 'years').format();
     const endDate = new Date(moment().format());
     const searchRange = this.createSearchRange('fixRange', startDate, endDate);
     searchRange.searchInterval = 'min10';
@@ -66,7 +64,10 @@ class WeatherModel extends BiModule {
       userInfo.weather_location_seq,
     );
     // BU.CLI(weatherCastList);
-    const calendarCommentList = await this.getCalendarComment(searchRange, userInfo.main_seq);
+    const calendarCommentList = await this.getCalendarComment(
+      searchRange,
+      userInfo.main_seq,
+    );
     // BU.CLI(calendarCommentList);
 
     /** @type {{title: string, start: string, color: string=}[]} */
@@ -214,7 +215,8 @@ class WeatherModel extends BiModule {
             ROUND(SUM(interval_inclined_solar), 1) AS total_interval_inclined_solar,
             ROUND(AVG(avg_wd), 0) AS avg_wd,	
             ROUND(AVG(avg_ws), 1) AS avg_ws,	
-            ROUND(AVG(avg_uv), 0) AS avg_uv
+            ROUND(AVG(avg_uv), 0) AS avg_uv,
+            ROUND(AVG(avg_rain_h), 0) AS avg_rain_h
       FROM
         (SELECT 
                 main_seq,
@@ -229,9 +231,12 @@ class WeatherModel extends BiModule {
                 AVG(wd) AS avg_wd,	
                 AVG(ws) AS avg_ws,	
                 AVG(uv) AS avg_uv,
+                AVG(rain_h) AS avg_rain_h,
                 COUNT(*) AS first_count
         FROM weather_device_data
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
         GROUP BY ${firstGroupByFormat}, main_seq
         ) AS result_wdd
@@ -304,7 +309,9 @@ class WeatherModel extends BiModule {
             ROUND(AVG(uv), 0) AS avg_uv
       FROM
         weather_device_data wdd
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${_.isNumber(mainSeq) ? ` AND main_seq = ${mainSeq} ` : ''}
       GROUP BY ${firstGroupByFormat}, main_seq
       ORDER BY main_seq, writedate
@@ -370,7 +377,11 @@ class WeatherModel extends BiModule {
     };
 
     weatherChartOptionList.forEach(chartOption => {
-      const staticChart = webUtil.makeStaticLineChart(weatherTrend, betweenDatePoint, chartOption);
+      const staticChart = webUtil.makeStaticLineChart(
+        weatherTrend,
+        betweenDatePoint,
+        chartOption,
+      );
       const chart = _.head(staticChart.series);
       chart.name = chartOption.name;
       chart.color = chartOption.color;

@@ -37,7 +37,7 @@ const config = require('./config');
 
 const { projectInfo, dbInfo, webServer } = config;
 const { featureConfig } = projectInfo;
-const { apiConfig, rtspConfig, isStopWeathercast } = featureConfig;
+const { apiConfig, rtspConfig, isStopWeathercast, isRunRtsp } = featureConfig;
 
 /**
  * Get port from environment and store in Express.
@@ -85,6 +85,7 @@ async function operationController() {
       },
       rtspConfig,
       isStopWeathercast,
+      isRunRtsp,
     });
   } catch (error) {
     BU.CLI(error);

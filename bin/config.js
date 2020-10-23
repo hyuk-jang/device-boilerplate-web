@@ -16,6 +16,7 @@ module.exports = {
         streamWebPort: 40404,
       },
       isStopWeathercast: ENV.IS_STOP_WEATHERCAST === '1',
+      isRunRtsp: ENV.IS_RUN_RTSP === '1',
     },
   },
   webServer: {

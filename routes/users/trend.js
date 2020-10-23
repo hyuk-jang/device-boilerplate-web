@@ -149,12 +149,18 @@ router.get(
     // BU.CLI(placeRows);
     // BU.CLI(_.assign(mainWhere, sensorWhere));
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable('v_dv_place_relation', mainWhere, false);
+    const placeRelationRows = await biDevice.getTable(
+      'v_dv_place_relation',
+      mainWhere,
+      false,
+    );
 
     // BU.CLIN(placeRelationRows);
 
     // NOTE: IVT가 포함된 장소는 제거.
-    _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(placeRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
     // console.timeEnd('init');
 
     // console.time('getSensorReport');
@@ -188,7 +194,11 @@ router.get(
     // console.time('extPlaRelSensorRep');
     // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
     // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
-    sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
+    sensorUtil.extPlaRelPerfectSenRep(
+      placeRelationRows,
+      sensorReportRows,
+      strGroupDateList,
+    );
     // console.timeEnd('extPlaRelSensorRep');
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
@@ -211,7 +221,11 @@ router.get(
     // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
     const madeLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
-      sensorUtil.makeSimpleLineChart(chartConfig, nodeDefStorageList, momentFormat.plotSeries),
+      sensorUtil.makeSimpleLineChart(
+        chartConfig,
+        nodeDefStorageList,
+        momentFormat.plotSeries,
+      ),
     );
 
     // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성

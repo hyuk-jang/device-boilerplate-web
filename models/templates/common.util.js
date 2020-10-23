@@ -16,42 +16,11 @@ function convertDateToUTC(date) {
 exports.convertDateToUTC = convertDateToUTC;
 
 /**
- *
- * @param {string} projectMainId
  */
-function convertProjectSource(projectMainId) {
-  let projectName = '';
-  let projectImg = '';
-  let loginBG = '';
+function convertProjectSource() {
+  const { PJ_IMG = '', PJ_NAME = '', PJ_LOGIN_BG = '' } = process.env;
 
-  switch (projectMainId) {
-    case 'UPSAS':
-      // projectImg = 'sm_logo.png';
-      // projectName = '염전 수중 태양광 발전소 통합 관리 시스템 v1.0'; // FIXME: GS 인증으로 임시 변경
-      projectImg = 'kepco_logo.png';
-      projectName = '수중태양광 모니터링';
-      break;
-    case 'FP':
-      projectImg = 'fp_logo.png';
-      // projectName = '농업병행 태양광발전 모니터링';
-      projectName = '영농형 태양광 통합 관리 시스템 v1.0';
-      loginBG = 'bg_fp.jpg';
-      break;
-    case 'HS':
-      projectImg = 's2w_logo.png';
-      projectName = '농가 보급형 태양광';
-      loginBG = 'bg_fp.jpg';
-      break;
-    case 'S2W':
-      projectImg = 's2w_logo.png';
-      projectName = '태양광 이모작 모니터링';
-      loginBG = 'bg_fp.jpg';
-      break;
-    default:
-      break;
-  }
-
-  return { projectName, projectImg, loginBG };
+  return { projectName: PJ_NAME, projectImg: PJ_IMG, loginBG: PJ_LOGIN_BG };
 }
 exports.convertProjectSource = convertProjectSource;
 
@@ -99,9 +68,7 @@ function getMomentFormat(searchRange, strStartDate = searchRange.strStartDate) {
   let momentFormat = 'YYYY-MM-DD HH:mm:ss';
 
   const plotSeries = {
-    pointStart: moment(strStartDate)
-      .add(9, 'hours')
-      .valueOf(),
+    pointStart: moment(strStartDate).add(9, 'hours').valueOf(),
     pointInterval: 0,
   };
   switch (searchInterval) {

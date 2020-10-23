@@ -38,7 +38,7 @@ const DRAW_TYPE = {
 const {
   drawInfo: {
     frame: {
-      mapInfo: { width: mapWidth, height: mapHeight, backgroundInfo },
+      mapInfo: { width: mapWidth, height: mapHeight, backgroundInfo = {} },
       svgModelResourceList,
     },
     positionInfo: { svgNodeList = [], svgPlaceList = [], svgCmdList = [] },
@@ -386,10 +386,7 @@ function drawSvgPattern(svgCanvas, patternInfo) {
           add.circle(radius).opacity(opacity);
           break;
         case 'image':
-          add
-            .image(fill)
-            .size(width, height)
-            .opacity(opacity);
+          add.image(fill).size(width, height).opacity(opacity);
           break;
         default:
           break;
@@ -448,7 +445,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
 
   // 클래스를 지정한다면 Attr 추가
   if (defaultSvgClass) {
-    bgOption.class = defaultSvgClass;
+    bgOption.class = errColor;
   }
   // 필터 정보가 있다면 Attr 추가 정의
   _.forEach(filterInfo, (attrValue, attrKey) => {
@@ -674,14 +671,17 @@ function showNodeData(nodeId, data = '') {
         }
       } else {
         selectedColor = errColor;
+        selectedIndex = -1;
       }
     }
 
     // 배경 색상 변경
     selectedColor && svgEleBg.fill(selectedColor);
     // 데이터가 용이하고 class 가 존재할 경우 대체
-    if (isValidData && svgClass.length) {
-      svgEleBg.attr('class', svgClass[selectedIndex]);
+    if (svgClass.length) {
+      isValidData
+        ? svgEleBg.attr('class', svgClass[selectedIndex])
+        : svgEleBg.attr('class', errColor);
     }
     // 데이터 색상 변경
     svgEleData.font({ fill: selectedTxtColor });
@@ -793,7 +793,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
     if (nextStepInfo === undefined) {
       // 다음 스텝이 없으면 즉시 실행
       // eslint-disable-next-line func-names
-      btnFnInfo[krName] = function() {
+      btnFnInfo[krName] = function () {
         const $deviceSetValue = $('#dialog-dynamic-input');
         // 값 입력이 활성화 되어 있으나 사용자의 값 입력에 문제가 있을 경우
         if (isSetValue) {
@@ -823,7 +823,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
       };
     } else {
       // eslint-disable-next-line func-names
-      btnFnInfo[krName] = function() {
+      btnFnInfo[krName] = function () {
         $(this).dialog('close');
         confirmDeviceControl(mdNodeInfo, nextStepInfo);
       };

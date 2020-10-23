@@ -64,23 +64,7 @@ app.use(flash());
  * Set Customize
  */
 
-let faviPath = '';
-switch (projectMainId) {
-  case 'FP':
-    faviPath = 'fp.ico';
-    break;
-  case 'S2W':
-  case 'HS':
-    faviPath = 's2w.ico';
-    break;
-  case 'UPSAS':
-    // faviPath = 'kepco.ico';
-    faviPath = 'sm.ico';
-    break;
-  default:
-    faviPath = 'favicon.ico';
-    break;
-}
+const faviPath = process.env.PJ_FAVICON || 'favicon.ico';
 
 app.use(favicon(path.resolve(__dirname, 'public/image/icon', faviPath)));
 app.set('dbInfo', dbInfo);

@@ -2,6 +2,7 @@
  * 생성된 Feature를 구동시킴
  * @typedef {Object} featureConfig
  * @property {boolean} isStopWeathercast SocketIOManager 설정
+ * @property {boolean} isRunRtsp RTSP 설정
  * @property {Object} ioConfig SocketIOManager 설정
  * @property {httpServer} ioConfig.httpServer http 객체
  * @property {Object} apiConfig API Communicator 설정

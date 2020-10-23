@@ -2,8 +2,8 @@ const { BU } = require('base-util-jh');
 
 const Control = require('./Control');
 const UpsasControl = require('./projects/UPSAS/UpsasControl');
-const FpRndControl = require('./projects/FP/RnD/FpRndControl');
-const S2WRndControl = require('./projects/S2W/RnD/S2WRndControl');
+const FpRndControl = require('./projects/FP/FpRndControl');
+const S2WRndControl = require('./projects/S2W/S2WRndControl');
 
 /**
  * 프로젝트에 따라 Control과 Model을 생성.
@@ -29,23 +29,11 @@ class Main {
         MainControl = UpsasControl;
         break;
       case 'FP':
-        switch (projectSubId) {
-          case 'RnD':
-            MainControl = FpRndControl;
-            break;
-          default:
-            break;
-        }
+        MainControl = FpRndControl;
         break;
       case 'HS':
       case 'S2W':
-        switch (projectSubId) {
-          case 'RnD':
-            MainControl = S2WRndControl;
-            break;
-          default:
-            break;
-        }
+        MainControl = S2WRndControl;
         break;
       default:
         break;

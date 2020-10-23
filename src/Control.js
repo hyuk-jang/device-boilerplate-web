@@ -233,29 +233,6 @@ class Control {
     });
   }
 
-  //   /**
-  //  * @desc Step 2
-  //  * Storage를 구동하기 위한 자식 객체를 생성
-  //  */
-  // setChildren() {
-  //   // 소켓 서버 구동
-  //   this.socketServer = new SocketServer({
-  //     dbInfo: this.config.dbInfo,
-  //     socketServerPort: this.config.socketServerPort,
-  //   });
-  //   this.socketServer.mainStorageList = this.mainStorageList;
-  //   // socket Server의 갱신 내용을 받기위해 Observer 등록
-  //   this.socketServer.attach(this);
-  //   this.socketServer.init();
-
-  //   // 태양광 발전 현황판 데이터 생성 객체
-  //   this.powerStatusMaker = new PowerStatusMaker({
-  //     dbInfo: this.config.dbInfo,
-  //   });
-  //   this.powerStatusMaker.mainStorageList = this.mainStorageList;
-  //   this.powerStatusMaker.runCronCalcPowerStatus();
-  // }
-
   /**
    * Field Socket Client의 접속 변화가 생겼을 경우
    * @param {msInfo} msInfo
