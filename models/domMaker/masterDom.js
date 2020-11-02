@@ -88,8 +88,11 @@ module.exports = {
    * @param {string} selectedNavi
    * @param {string=} userSeq
    */
-  makeNaviListDom(naviList = [], selectedNavi = 'main', userSeq = '') {
-    selectedNavi = selectedNavi.length ? selectedNavi : 'main';
+  makeNaviListDom(naviList = [], selectedNavi = '', userSeq = '') {
+    // 네비가 존재하지 않을 경우 첫번째 선택
+    if (naviList.findIndex(naviInfo => naviInfo.href === selectedNavi) === -1) {
+      selectedNavi = naviList[0].href;
+    }
     // siteId가 존재할 경우
     const siteParam = userSeq ? `/${userSeq}` : '';
 

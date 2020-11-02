@@ -39,7 +39,9 @@ router.use((req, res, next) => {
 
   const excludePathList = ['/favicon'];
 
-  const isExclude = _.some(excludePathList, excludePath => _.includes(req.path, excludePath));
+  const isExclude = _.some(excludePathList, excludePath =>
+    _.includes(req.path, excludePath),
+  );
 
   // BU.CLI(req.path);
   if (_.includes(req.path, '/app')) {
@@ -67,7 +69,9 @@ router.get('/intersection', (req, res) => {
   if (process.env.IS_CHECK_USER_GRADE !== '0') {
     // 승인 대기 시
     if (grade === AWAITER) {
-      return res.send(DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'));
+      return res.send(
+        DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'),
+      );
     }
     // 설정 외 권한 발생 시
     if (!_.includes(accountGradeList, grade)) {

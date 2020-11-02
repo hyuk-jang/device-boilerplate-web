@@ -52,14 +52,16 @@ const defaultDom = {
    * @param {string=} dynamicHeaderInfo.subTitleOptionList.cssWidthPer 테이블 구성할 경우 col width %
    */
   makeDynamicHeaderDom(dynamicHeaderInfo) {
-    const { staticTitleList = [], mainTitleList = [], subTitleOptionList } = dynamicHeaderInfo;
+    const {
+      staticTitleList = [],
+      mainTitleList = [],
+      subTitleOptionList,
+    } = dynamicHeaderInfo;
     let staticTitleTemplate = _.template('<th><%= title %></th>');
     let subTitleTemplate = _.template('<th><%= title %><%= dataUnit %></th>');
 
     // 실제적으로 사용될 MainTitle 길이
-    const realMainTitle = _(mainTitleList)
-      .reject(_.isEmpty)
-      .value();
+    const realMainTitle = _(mainTitleList).reject(_.isEmpty).value();
 
     // 대분류 제목이 없다면 일반적인 1줄 반환
     if (!realMainTitle.length) {
@@ -80,9 +82,13 @@ const defaultDom = {
     }
     const mainTitleTemplate = _.template('<th colspan=<%= colsPan %>><%= title %></th>');
     staticTitleTemplate = _.template('<th rowsPan=<%= rowsPan %>><%= title %></th>');
-    subTitleTemplate = _.template('<th rowspan=<%= rowsPan %>><%= title %><%= dataUnit %></th>');
+    subTitleTemplate = _.template(
+      '<th rowspan=<%= rowsPan %>><%= title %><%= dataUnit %></th>',
+    );
 
-    const staticDom = staticTitleList.map(title => staticTitleTemplate({ title, rowsPan: 2 }));
+    const staticDom = staticTitleList.map(title =>
+      staticTitleTemplate({ title, rowsPan: 2 }),
+    );
 
     // 대분류 Header Dom 생성
     const mainTitleDom = _.chain(mainTitleList)
@@ -251,7 +257,9 @@ const defaultDom = {
 
         const headerColspan = colspan > 1 ? `colspan=<%= ${colspan} %>` : '';
         const headerRowspan = rowspan > 1 ? `rowspan=<%= ${rowspan} %>` : '';
-        const headerWidthCss = _.isNumber(cssWidthPer) ? `style="width: ${cssWidthPer}%"` : '';
+        const headerWidthCss = _.isNumber(cssWidthPer)
+          ? `style="width: ${cssWidthPer}%"`
+          : '';
         const dataUnitEle = _.isString(dataUnit) ? ` (${dataUnit})` : '';
 
         const headerMainTemplate = _.template(
@@ -303,10 +311,7 @@ const defaultDom = {
     const { blockTableOptions, dataRows } = blockTableInfo;
     // 레포트 옵션 중 넘버링을 추가할 경우
     const { page, pageListCount } = pageInfo;
-    const firstRowNum = _.chain(page)
-      .subtract(1)
-      .multiply(pageListCount)
-      .value();
+    const firstRowNum = _.chain(page).subtract(1).multiply(pageListCount).value();
 
     const bodyTemplate = _.template(
       `<tr>
@@ -315,7 +320,9 @@ const defaultDom = {
         blockTableOptions,
         configInfo =>
           `<td ${
-            _.isArray(configInfo.classList) ? `class='${configInfo.classList.toString()}'` : ''
+            _.isArray(configInfo.classList)
+              ? `class='${configInfo.classList.toString()}'`
+              : ''
           } ><%= ${configInfo.dataKey} %></td>`,
       ).toString()}</tr>`,
     );
@@ -348,7 +355,8 @@ const defaultDom = {
     return _.map(setSubCategoryList, (categoryInfo, index) => {
       const { subCategory } = categoryInfo;
       const btnType = index === 0 ? 'btn1' : 'btn2';
-      const btnClass = selectedSubCategory === subCategory ? 'btn-success' : 'btn-default';
+      const btnClass =
+        selectedSubCategory === subCategory ? 'btn-success' : 'btn-default';
 
       return subCategoryBtnTemplate(_.assign(categoryInfo, { btnType, btnClass }));
     });

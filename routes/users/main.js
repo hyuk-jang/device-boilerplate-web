@@ -12,8 +12,6 @@ const sensorUtil = require('../../models/templates/sensor.util');
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
-require('../../models/jsdoc/domGuide');
-
 router.get(
   ['/', '/main', '/main/:siteId'],
   asyncHandler(async (req, res) => {
@@ -30,9 +28,10 @@ router.get(
     // ********** Power 관련
     // console.time('refineGeneralPowerInfo');
     // 발전 현황을 나타내는 기본적인 정보
-    const { powerGenerationInfo, validInverterDataList } = await refineModel.refineGeneralPowerInfo(
-      siteId,
-    );
+    const {
+      powerGenerationInfo,
+      validInverterDataList,
+    } = await refineModel.refineGeneralPowerInfo(siteId);
     // console.timeEnd('refineGeneralPowerInfo');
 
     // ********** Sensor 관련

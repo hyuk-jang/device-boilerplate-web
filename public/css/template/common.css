@@ -522,6 +522,8 @@ _:-ms-input-placeholder,
 .svg_area {
   display: flex;
   justify-content: center;
+  border: 1px solid #807a7a;
+  /* min-height: 300px; */
 }
 
 .svg_map {
