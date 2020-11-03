@@ -46,7 +46,9 @@ class RefineModel extends BiModule {
     const inverterSeqList = _.map(viewPowerProfileRows, 'inverter_seq');
 
     // 인버터 검색 Where 절
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+    const inverterWhere = inverterSeqList.length
+      ? { inverter_seq: inverterSeqList }
+      : null;
 
     // BU.CLI(inverterWhere);
 
@@ -62,7 +64,9 @@ class RefineModel extends BiModule {
     );
     // console.timeEnd('getInverterStatistics');
     // 금월 발전량 --> inverterMonthRows가 1일 단위의 발전량이 나오므로 해당 발전량을 전부 합산
-    const monthPower = webUtil.reduceDataList(monthInverterStatusRows, 'interval_power').toFixed(1);
+    const monthPower = webUtil
+      .reduceDataList(monthInverterStatusRows, 'interval_power')
+      .toFixed(1);
 
     // console.time('v_pw_inverter_status');
     /** @type {V_PW_INVERTER_STATUS[]} */
@@ -101,9 +105,7 @@ class RefineModel extends BiModule {
     );
 
     // 설치 인버터 총 용량
-    const ivtAmount = _(viewPowerProfileRows)
-      .map('ivt_amount')
-      .sum();
+    const ivtAmount = _(viewPowerProfileRows).map('ivt_amount').sum();
 
     // Curr PV 전력
     const pvKw = webUtil.calcValue(
@@ -134,7 +136,8 @@ class RefineModel extends BiModule {
       .value();
 
     // 현재 발전 효율
-    const currPf = _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
+    const currPf =
+      _.isNumber(pvKw) && _.isNumber(currKw) ? _.round((currKw / pvKw) * 100, 1) : '-';
 
     const powerGenerationInfo = {
       currKw,
@@ -159,7 +162,9 @@ class RefineModel extends BiModule {
    * @param {number[]=} inverterSeqList
    */
   async refineInverterStatus(inverterSeqList) {
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+    const inverterWhere = inverterSeqList.length
+      ? { inverter_seq: inverterSeqList }
+      : null;
 
     /** @type {V_INVERTER_STATUS[]} */
     const inverterStatusRows = await this.powerModel.getTable(
@@ -168,7 +173,9 @@ class RefineModel extends BiModule {
     );
 
     /** @type {{inverter_seq: number, siteName: string}[]} */
-    const inverterSiteNameList = await this.powerModel.makeInverterNameList(inverterSeqList);
+    const inverterSiteNameList = await this.powerModel.makeInverterNameList(
+      inverterSeqList,
+    );
 
     _(inverterStatusRows).forEach(statusRow => {
       statusRow.siteName = _.get(
@@ -188,7 +195,9 @@ class RefineModel extends BiModule {
     );
 
     /** 인버터 메뉴에서 사용 할 데이터 선언 및 부분 정의 */
-    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(validInverterStatusList);
+    const refinedInverterStatusList = webUtil.refineSelectedInverterStatus(
+      validInverterStatusList,
+    );
 
     return refinedInverterStatusList;
   }
@@ -200,12 +209,20 @@ class RefineModel extends BiModule {
    * @param {lineChartConfig} lineChartConfig
    */
   async refineInverterChart(searchRange, inverterSeqList, lineChartConfig) {
-    const inverterPowerList = await this.powerModel.getInverterPower(searchRange, inverterSeqList);
+    const inverterPowerList = await this.powerModel.getInverterPower(
+      searchRange,
+      inverterSeqList,
+    );
 
-    const inverterSiteNameList = await this.powerModel.makeInverterNameList(inverterSeqList);
+    const inverterSiteNameList = await this.powerModel.makeInverterNameList(
+      inverterSeqList,
+    );
 
     // 동적 라인 차트를 생성
-    const inverterLineChart = webUtil.makeDynamicLineChart(lineChartConfig, inverterPowerList);
+    const inverterLineChart = webUtil.makeDynamicLineChart(
+      lineChartConfig,
+      inverterPowerList,
+    );
 
     inverterLineChart.series.forEach(chartInfo => {
       const foundInverterInfo = _.find(inverterSiteNameList, {
@@ -262,7 +279,11 @@ class RefineModel extends BiModule {
     const strGroupDateList = commonUtil.getGroupDateList(searchRange);
 
     // fromToKey의 첫번째 인자로 그루핑을 하고 빈 데이터가 있을 경우 집어 넣음
-    const blockDataRowsGroup = commonUtil.extPerfectRows(baseToKey, dataRows, strGroupDateList);
+    const blockDataRowsGroup = commonUtil.extPerfectRows(
+      baseToKey,
+      dataRows,
+      strGroupDateList,
+    );
 
     // block 목록만큼의 동적 차트 생성
     const refinedDomChart = blockChartList.map(blockChartInfo => {
@@ -284,7 +305,13 @@ class RefineModel extends BiModule {
         // 실제 Block Chart 목록을 돌면서 의미있는 차트 정보 생성
         blockConfigList.forEach(blockConfig => {
           // convertKey가 없을 경우 toKey로 대체
-          const { fromKey, toKey, convertKey = toKey, convertName, mixColor = '' } = blockConfig;
+          const {
+            fromKey,
+            toKey,
+            convertKey = toKey,
+            convertName,
+            mixColor = '',
+          } = blockConfig;
 
           // 현재 Dom 정보에서 표현해줄 chart line 갯수를 뽑아내기 위하여 group 처리된 목록을 순회
           _.forEach(blockDataRowsGroup, (blockDataRows, groupSeq) => {
@@ -337,13 +364,17 @@ class RefineModel extends BiModule {
               /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
               const chartSeries = {
                 name: xAxisElementName,
-                color: mixColor.length ? BU.blendColors(chartColor, mixColor, 0.5) : chartColor,
+                color: mixColor.length
+                  ? BU.blendColors(chartColor, mixColor, 0.5)
+                  : chartColor,
                 tooltip: {
                   valueSuffix: dataUnit,
                 },
                 yAxis: index,
                 // 데이터가 없을 경우 빈공간으로 대체
-                data: _.map(blockDataRows, blockDataRow => _.get(blockDataRow, convertKey, '')),
+                data: _.map(blockDataRows, blockDataRow =>
+                  _.get(blockDataRow, convertKey, ''),
+                ),
                 chartSortRank,
               };
               // Chart Line 추가
@@ -403,7 +434,8 @@ class RefineModel extends BiModule {
       // 실제로 가져올 Block Chart Where 절 생성
       _.forEach(fromToKeyTableList, (fromToKeyInfo, index) => {
         const { fromKey, toKey } = fromToKeyInfo;
-        mainSelectQuery += fromToKeyTableList.length - 1 === index ? `${toKey}` : `${toKey},`;
+        mainSelectQuery +=
+          fromToKeyTableList.length - 1 === index ? `${toKey}` : `${toKey},`;
         const values = _.map(baseTableRows, fromKey);
         if (values.length === 0) {
           throw new Error(`${toKey} values is 0`);
@@ -495,7 +527,9 @@ class RefineModel extends BiModule {
                   ${dynamicSelectQuery.join(',\n\t\t')},
                   COUNT(*) AS row_count
           FROM ${blockTableName}
-          WHERE writedate>= "${searchRange.strStartDate}" AND writedate<"${searchRange.strEndDate}"
+          WHERE writedate>= "${searchRange.strStartDate}" AND writedate<"${
+        searchRange.strEndDate
+      }"
           ${addQuery.length ? ` AND ${addQuery}` : ''}
           ${sqlBlockWhere}
           GROUP BY ${firstGroupByFormat}, ${mainSelectQuery}

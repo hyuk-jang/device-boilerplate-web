@@ -108,7 +108,7 @@ router.get(
       },
       {
         key: 'FLOW',
-        value: '염수 이동',
+        value: '흐름 제어',
       },
       {
         key: 'SET',

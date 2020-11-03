@@ -48,7 +48,11 @@ router.get(
   ],
   asyncHandler(async (req, res, next) => {
     const {
-      mainInfo: { siteId, subCategory = DEFAULT_CATEGORY, subCategoryId = DEFAULT_SUB_SITE },
+      mainInfo: {
+        siteId,
+        subCategory = DEFAULT_CATEGORY,
+        subCategoryId = DEFAULT_SUB_SITE,
+      },
     } = req.locals;
 
     // BU.CLI(subCategory);
@@ -126,7 +130,9 @@ router.get(
     // req.query 값 비구조화 할당
     const { page = 1 } = req.query;
     // 모든 인버터 조회하고자 할 경우 Id를 지정하지 않음
-    const inverterWhere = _.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null;
+    const inverterWhere = _.isNumber(subCategoryId)
+      ? { inverter_seq: subCategoryId }
+      : null;
 
     /** @type {V_PW_PROFILE[]} */
     const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
@@ -176,7 +182,10 @@ router.get(
     _.set(req, 'locals.paginationInfo', paginationInfo);
 
     // 인버터 사이트 목록 돔 추가
-    const inverterSiteDom = reportDom.makeInverterSiteDom(powerProfileRows, subCategoryId);
+    const inverterSiteDom = reportDom.makeInverterSiteDom(
+      powerProfileRows,
+      subCategoryId,
+    );
     _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
 
     const deviceProtocol = new DeviceProtocol();
@@ -229,7 +238,10 @@ router.get(
     const inverterSeqList = _.get(req, 'locals.inverterSeqList', []);
 
     // 인버터 트렌드를 구함
-    const inverterTrendRows = await powerModel.getInverterTrend(searchRangeInfo, inverterSeqList);
+    const inverterTrendRows = await powerModel.getInverterTrend(
+      searchRangeInfo,
+      inverterSeqList,
+    );
     // BU.CLI(inverterTrendRows);
 
     const deviceProtocol = new DeviceProtocol();
@@ -238,22 +250,27 @@ router.get(
     const groupedInverterTrend = _.groupBy(inverterTrendRows, 'inverter_seq');
 
     // 인버터 별로 엑셀 시트를 생성
-    const excelWorkSheetList = _.map(groupedInverterTrend, (trendRows, strInverterSeq) => {
-      // BU.CLI(strInverterSeq, trendRows);
-      // 현재 인버터의 이름을 알기 위해서 찾아옴
-      const foundPowerProfile = _.find(powerProfileRows, { inverter_seq: Number(strInverterSeq) });
-      let blockName = '';
-      if (foundPowerProfile) {
-        blockName = `${foundPowerProfile.m_name} ${foundPowerProfile.ivt_target_name}`;
-      }
-      // 엑셀 시트 생성
-      return excelUtil.makeEWSWithBlock(trendRows, {
-        blockName,
-        searchRangeInfo,
-        strGroupDateList,
-        blockViewOptionList: deviceProtocol.reportInverterViewList,
-      });
-    });
+    const excelWorkSheetList = _.map(
+      groupedInverterTrend,
+      (trendRows, strInverterSeq) => {
+        // BU.CLI(strInverterSeq, trendRows);
+        // 현재 인버터의 이름을 알기 위해서 찾아옴
+        const foundPowerProfile = _.find(powerProfileRows, {
+          inverter_seq: Number(strInverterSeq),
+        });
+        let blockName = '';
+        if (foundPowerProfile) {
+          blockName = `${foundPowerProfile.m_name} ${foundPowerProfile.ivt_target_name}`;
+        }
+        // 엑셀 시트 생성
+        return excelUtil.makeEWSWithBlock(trendRows, {
+          blockName,
+          searchRangeInfo,
+          strGroupDateList,
+          blockViewOptionList: deviceProtocol.reportInverterViewList,
+        });
+      },
+    );
 
     if (excelWorkSheetList.length === 0) {
       return res.status(500).send('데이터가 존재하지 않습니다.');
@@ -308,7 +325,9 @@ router.get(
     );
 
     // NOTE: IVT가 포함된 장소는 제거.
-    _.remove(placeRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(placeRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
 
     // console.time('getSensorReport');
     /** @type {sensorReport[]} */
@@ -357,13 +376,13 @@ router.get(
     if (searchRange.searchOption === DEFAULT_SEARCH_OPTION) {
       // 동일 Node Def Id 를 사용하는 저장소 데이터를 GroupDate 별로 합산처리
       sensorUtil.calcMergedReportStorageList(nodeDefStorageList, sensorGroupDateInfo);
-      const { sensorReportHeaderDom, sensorReportBodyDom } = reportDom.makeSensorReportDomByCombine(
-        nodeDefStorageList,
-        {
-          pickedNodeDefIdList: deviceProtocol.pickedNodeDefIdList,
-          groupDateInfo: sensorGroupDateInfo,
-        },
-      );
+      const {
+        sensorReportHeaderDom,
+        sensorReportBodyDom,
+      } = reportDom.makeSensorReportDomByCombine(nodeDefStorageList, {
+        pickedNodeDefIdList: deviceProtocol.pickedNodeDefIdList,
+        groupDateInfo: sensorGroupDateInfo,
+      });
       _.set(req, 'locals.dom.sensorReportHeaderDom', sensorReportHeaderDom);
       _.set(req, 'locals.dom.sensorReportBodyDom', sensorReportBodyDom);
     }
@@ -417,7 +436,11 @@ router.get(
 
     // Place Relation Rows 확장
     // console.time('extPlaRelPerfectSenRep');
-    sensorUtil.extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDateList);
+    sensorUtil.extPlaRelPerfectSenRep(
+      placeRelationRows,
+      sensorReportRows,
+      strGroupDateList,
+    );
     // console.timeEnd('extPlaRelPerfectSenRep');
     // BU.CLIN(placeRelationRows)
 

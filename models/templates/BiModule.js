@@ -110,7 +110,9 @@ class BiModule extends BM {
         FROM module_data md
         LEFT OUTER JOIN photovoltaic pv
         ON pv.photovoltaic_seq = md.photovoltaic_seq        
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${moduleSeqList.length ? ` AND md.photovoltaic_seq IN (${moduleSeqList})` : ''}
           GROUP BY ${dateFormat.firstGroupByFormat}, md.photovoltaic_seq
           ORDER BY md.photovoltaic_seq, writedate
@@ -223,7 +225,10 @@ class BiModule extends BM {
       }
 
       // 기간 검색이 300일을 초과할 경우 1시간 단위로 변경
-      if (rangeDiffDay > 300 && (searchInterval === 'min' || searchInterval === 'min10')) {
+      if (
+        rangeDiffDay > 300 &&
+        (searchInterval === 'min' || searchInterval === 'min10')
+      ) {
         searchInterval = 'hour';
       }
       // BU.CLI(searchInterval);
@@ -250,7 +255,8 @@ class BiModule extends BM {
       switch (searchInterval) {
         case 'min':
           todayStrEndDateFormat = 'YYYY-MM-DD HH:mm:00';
-          diffDay === 0 && mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
+          diffDay === 0 &&
+            mEndDate.set({ minute: _.subtract(mEndDate.get('minute'), 1) });
           break;
         case 'min10':
           todayStrEndDateFormat = 'YYYY-MM-DD HH:mm:00';
@@ -493,7 +499,9 @@ class BiModule extends BM {
             MIN(power_cp_kwh) AS min_c_kwh,       
             ROUND((MAX(power_cp_kwh) - MIN(power_cp_kwh)), 5) AS interval_power
         FROM pw_inverter_data
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
     GROUP BY ${dateFormat.groupByFormat}, inverter_seq
     ) AS main
@@ -561,7 +569,9 @@ class BiModule extends BM {
               MAX(power_cp_kwh) AS max_c_kwh,
               COUNT(*) AS first_count
       FROM pw_inverter_data id
-      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
     ${inverterSeqList.length ? ` AND id.inverter_seq IN (${inverterSeqList})` : ''}
       GROUP BY ${firstGroupByFormat}, id.inverter_seq
       ORDER BY id.inverter_seq, writedate
@@ -614,7 +624,9 @@ class BiModule extends BM {
           ROUND(AVG(vol / 10), 1) AS avg_vol,
           DATE_FORMAT(writedate,"%H") AS hour_time
           FROM module_data md
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${moduleSeqList.length ? ` AND photovoltaic_seq IN (${moduleSeqList})` : ''}
         GROUP BY ${dateFormat.firstGroupByFormat}, photovoltaic_seq
         ORDER BY photovoltaic_seq, writedate
@@ -877,7 +889,9 @@ class BiModule extends BM {
           MIN(power_cp_kwh) AS min_c_kwh,
           MAX(power_cp_kwh) AS max_c_kwh
         FROM pw_inverter_data id
-        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+        WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
         ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
         GROUP BY ${dateFormat.firstGroupByFormat}, inverter_seq
         ORDER BY inverter_seq, writedate) AS id_group
@@ -978,9 +992,9 @@ class BiModule extends BM {
     const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
     // Report 가져오는 Query 생성
 
-    const mainQuery = `${sql}\n LIMIT ${(searchRange.page - 1) * searchRange.pageListCount}, ${
-      searchRange.pageListCount
-    }`;
+    const mainQuery = `${sql}\n LIMIT ${
+      (searchRange.page - 1) * searchRange.pageListCount
+    }, ${searchRange.pageListCount}`;
     const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
     const totalCount = resTotalCountQuery[0].total_count;
     const resMainQuery = await this.db.single(mainQuery, '', false);
@@ -1032,9 +1046,9 @@ class BiModule extends BM {
     const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
     // Report 가져오는 Query 생성
 
-    const mainQuery = `${sql}\n LIMIT ${(searchRange.page - 1) * searchRange.pageListCount}, ${
-      searchRange.pageListCount
-    }`;
+    const mainQuery = `${sql}\n LIMIT ${
+      (searchRange.page - 1) * searchRange.pageListCount
+    }, ${searchRange.pageListCount}`;
     const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
     const totalCount = resTotalCountQuery[0].total_count;
     const resMainQuery = await this.db.single(mainQuery, '', false);
@@ -1086,9 +1100,9 @@ class BiModule extends BM {
     const totalCountQuery = `SELECT COUNT(*) AS total_count FROM (${sql}) AS count_tbl`;
     // Report 가져오는 Query 생성
 
-    const mainQuery = `${sql}\n LIMIT ${(searchRange.page - 1) * searchRange.pageListCount}, ${
-      searchRange.pageListCount
-    }`;
+    const mainQuery = `${sql}\n LIMIT ${
+      (searchRange.page - 1) * searchRange.pageListCount
+    }, ${searchRange.pageListCount}`;
     const resTotalCountQuery = await this.db.single(totalCountQuery, '', false);
     const totalCount = resTotalCountQuery[0].total_count;
     const resMainQuery = await this.db.single(mainQuery, '', false);

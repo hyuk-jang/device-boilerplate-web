@@ -34,12 +34,17 @@ router.get(
     const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation', mainWhere);
+    const viewPlaceRelationRows = await biModule.getTable(
+      'v_dv_place_relation',
+      mainWhere,
+    );
 
     // TODO: 각  relation에 동일 node_seq를 사용하고 있다면 profile 현재 데이터 기입, 아니라면 row는 제거
 
     // IVT가 포함된 장소는 제거.
-    _.remove(viewPlaceRelationRows, placeRelation => _.includes(placeRelation.place_id, 'IVT'));
+    _.remove(viewPlaceRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
 
     // BU.CLI(viewSensorProfileRows);
 

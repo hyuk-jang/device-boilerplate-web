@@ -49,7 +49,9 @@ router.get(
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 상태 데이터 동적 생성 돔
-    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(inverterStatusList);
+    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(
+      inverterStatusList,
+    );
 
     _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 

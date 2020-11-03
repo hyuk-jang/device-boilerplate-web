@@ -11,7 +11,7 @@ module.exports = class extends DeviceProtocol {
    * 트렌드 생성 정보
    * @return {trendSensorDomConfig[]}
    */
-  get trendSolarIotViewList() {
+  get trendSensorViewList() {
     return [
       {
         domId: 'battery',

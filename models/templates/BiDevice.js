@@ -81,7 +81,9 @@ class BiDevice extends BiModule {
           ROUND(MAX(num_data), ${fixed})  AS max_data,
           ROUND(MAX(num_data) - MIN(num_data), ${fixed})  AS interval_data
       FROM dv_sensor_data
-      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${searchRange.strEndDate}"
+      WHERE writedate>= "${searchRange.strStartDate}" and writedate<"${
+      searchRange.strEndDate
+    }"
       ${nodeSeqList.length ? ` AND node_seq IN (${nodeSeqList})` : ''}
       GROUP BY ${dateFormat.groupByFormat}, node_seq
       ORDER BY node_seq, writedate
@@ -348,13 +350,28 @@ class BiDevice extends BiModule {
     // BU.CLI(sensorTrend);
 
     // 추출된 데이터에 인버터 Seq를 붙임
-    webUtil.addKeyToReport(sensorTrend, filterdPlaceRelationList, 'inverter_seq', 'node_seq');
+    webUtil.addKeyToReport(
+      sensorTrend,
+      filterdPlaceRelationList,
+      'inverter_seq',
+      'node_seq',
+    );
     // sensorTrend.forEach(e => BU.CLI(e));
     // BU.CLI(sensorTrend)
     // webUtil.addKeyToReport(sensorTrend, viewUpsasProfileList, 'ivt_target_id', 'inverter_seq');
     // webUtil.addKeyToReport(sensorTrend, viewUpsasProfileList, 'ivt_target_name', 'inverter_seq');
-    webUtil.addKeyToReport(sensorTrend, viewUpsasProfileList, 'pv_chart_color', 'inverter_seq');
-    webUtil.addKeyToReport(sensorTrend, viewUpsasProfileList, 'pv_chart_sort_rank', 'inverter_seq');
+    webUtil.addKeyToReport(
+      sensorTrend,
+      viewUpsasProfileList,
+      'pv_chart_color',
+      'inverter_seq',
+    );
+    webUtil.addKeyToReport(
+      sensorTrend,
+      viewUpsasProfileList,
+      'pv_chart_sort_rank',
+      'inverter_seq',
+    );
     // 검색 기간을 기준으로 data 비율을 조정함
     // BU.CLI(sensorTrend);
 
@@ -372,7 +389,11 @@ class BiDevice extends BiModule {
     // BU.CLI(betweenDatePoint);
 
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    const sensorChart = webUtil.makeStaticLineChart(sensorTrend, betweenDatePoint, chartOpt);
+    const sensorChart = webUtil.makeStaticLineChart(
+      sensorTrend,
+      betweenDatePoint,
+      chartOpt,
+    );
 
     // BU.CLI(sensorChart);
     // return;

@@ -218,7 +218,6 @@ router.get(
 
     // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
 
-    // console.time('madeSensorChartList');
     // 생육 환경정보 차트 목록을 생성
     const madeLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
       sensorUtil.makeSimpleLineChart(
