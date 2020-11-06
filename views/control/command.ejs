@@ -111,26 +111,25 @@
                       <th data-field="wrapCmdCancel">명령 취소</th>
                     </tr>
                   </thead>
-                  <tbody id="cmdTableBodyDom">
-                    <script id="cmdTableTemplate" type="template">
-                      {{#if commandList}}
-                        {{#each commandList}}
-                        <tr data-uuid={{ wrapCmdUUID }}>
-                          <td class="text-center">{{ wrapCmdFormat }}</td>
-                          <td class="text-center">{{ wrapCmdType }}</td>
-                          <td class="text-center">{{ wrapCmdStep }}</td>
-                          <td class="text-center">{{ wrapCmdId }}</td>
-                          <td class="text-center">{{ wrapCmdName }}</td>
-                          <td class="text-center"><button class="btn btn-primary" name="reqCancelCmd">취소</button></td>
-                        </tr>
-                          {{/each}}
-                          {{else}}
-                        <tr>
-                          <td colspan="6" class="text-center">There are no commands during execution</td>
-                        </tr>
-                      {{/if}}
-                    </script>
-                  </tbody>
+                  <tbody id="cmdTableBodyDom"></tbody>
+                  <script id="cmdTableTemplate" type="template">
+                    {{#if commandList}}
+                      {{#each commandList}}
+                      <tr data-uuid={{ wrapCmdUUID }}>
+                        <td class="text-center">{{ wrapCmdFormat }}</td>
+                        <td class="text-center">{{ wrapCmdType }}</td>
+                        <td class="text-center">{{ wrapCmdStep }}</td>
+                        <td class="text-center">{{ wrapCmdId }}</td>
+                        <td class="text-center">{{ wrapCmdName }}</td>
+                        <td class="text-center"><button class="btn btn-primary" name="reqCancelCmd">취소</button></td>
+                      </tr>
+                        {{/each}}
+                        {{else}}
+                      <tr>
+                        <td colspan="6" class="text-center">There are no commands during execution</td>
+                      </tr>
+                    {{/if}}
+                  </script>
                 </table>
               </div>
             </div>
@@ -148,18 +147,17 @@
                       <th data-field="d">데이터</th>
                     </tr>
                   </thead>
-                  <tbody id="nodeTableBodyDom">
-                    <script id="nodeTableTemplate" type="template">
-                      {{#each mdNodeStorage}}
-                      <tr>
-                        <td class="">{{ ndName }} ({{ nodeName }})</td>
-                        <td class="">{{ nodeId }}</td>
-                        <td class="">{{ placeNameList }}</td>
-                        <td class="">{{ nodeData }}</td>
-                      </tr>
-                      {{/each}}
-                    </script>
-                  </tbody>
+                  <tbody id="nodeTableBodyDom"></tbody>
+                  <script id="nodeTableTemplate" type="template">
+                    {{#each mdNodeStorage}}
+                    <tr>
+                      <td class="">{{ ndName }} ({{ nodeName }})</td>
+                      <td class="">{{ nodeId }}</td>
+                      <td class="">{{ placeNameList }}</td>
+                      <td class="">{{ nodeData }}</td>
+                    </tr>
+                    {{/each}}
+                  </script>
                 </table>
               </div>
             </div>
@@ -206,8 +204,9 @@
 
       function bindingSocketEmit() {
         // 서버로 명령 취소 요청
-        $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
-          const wrapCmdUUID = $('button[name="reqCancelCmd"]')
+        $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', event => {
+          // console.log(event.currentTarget);
+          const wrapCmdUUID = $(event.currentTarget)
             .parentsUntil('tr')
             .parent()
             .data('uuid');
@@ -266,6 +265,7 @@
          * @param {string} modeInfo.operationConfigList.cmdStrategy 명령 전략
          */
         socket.on('updateMode', modeInfo => {
+          console.log(modeInfo);
           currModeInfo = modeInfo;
 
           // modeInfo = {
@@ -330,8 +330,7 @@
             mdNodeStorage: mdNodeStorage.values(),
           });
 
-          $('#nodeTableBodyDom > tr ').empty();
-          $('#nodeTableBodyDom').append(nodeTableBody);
+          $('#nodeTableBodyDom').html(nodeTableBody);
 
           // 노드 정보 갱신 시각 반영
           $nodeUpdateDom.html(new Date().toLocaleString());
@@ -339,16 +338,16 @@
 
         // 명령 관련 갱신 반영
         socket.on('updateCommand', (commandList = []) => {
-          updateCommand(commandList);
           // console.log(commandList);
+          updateCommand(commandList);
           // cmdList Handlebars compile
           const cmdTbodyTemplate = $('#cmdTableTemplate').html();
           const cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
           const cmdTableBody = cmdTbodyBindTemplate({ commandList });
 
           //  리턴받은 html을 target에 innerHTML로 세팅한다.
-          $('#cmdTableBodyDom > tr ').empty();
-          $('#cmdTableBodyDom').append(cmdTableBody);
+          // $('#cmdTableBodyDom').empty();
+          $('#cmdTableBodyDom').html(cmdTableBody);
 
           // 명령 갱신 시각 반영
           $cmdUpdateDom.html(new Date().toLocaleString());

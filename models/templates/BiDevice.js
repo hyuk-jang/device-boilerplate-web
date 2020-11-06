@@ -36,6 +36,7 @@ class BiDevice extends BiModule {
         (
           SELECT MAX(sensor_data_seq) AS sensor_data_seq
           FROM dv_sensor_data
+          WHERE writedate > CURDATE()
           GROUP BY node_seq
         ) temp
         ON dsd.sensor_data_seq = temp.sensor_data_seq
