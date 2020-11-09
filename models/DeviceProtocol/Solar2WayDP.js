@@ -9,6 +9,12 @@ const {
 const DeviceProtocol = require('./DeviceProtocol');
 
 class Solar2WayDP extends DeviceProtocol {
+  constructor() {
+    super();
+
+    this.BASE_KEY = BASE_FARM_KEY;
+  }
+
   /**
    * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
    */
@@ -569,7 +575,7 @@ class Solar2WayDP extends DeviceProtocol {
       },
       blockChartList: [
         {
-          domId: 'inverter_power_chart',
+          domId: 'invPowerChart',
           title: 'AC 출력',
           chartOptionList: [
             {
@@ -577,7 +583,7 @@ class Solar2WayDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerGridKw,
                   toKey: 'power_kw',
-                  convertName: '',
+                  convertName: 'AC 출력',
                   toFixed: 4,
                 },
               ],
@@ -587,7 +593,7 @@ class Solar2WayDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'inverter_pv_chart',
+          domId: 'invPvChart',
           title: 'DC 현황',
           subtitle: '전압, 전류',
           chartOptionList: [
@@ -618,7 +624,7 @@ class Solar2WayDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'inverter_grid_chart',
+          domId: 'invGridChart',
           title: 'AC Grid 현황',
           subtitle: '전압, 전류',
           chartOptionList: [
@@ -675,7 +681,7 @@ class Solar2WayDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'interval_power_chart',
+          domId: 'intervalPowerChart',
           title: '기간 발전량',
           chartOptionList: [
             {
@@ -694,7 +700,7 @@ class Solar2WayDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'max_c_mwh_chart',
+          domId: 'cumulativeMwhChart',
           title: '누적 발전량',
           chartOptionList: [
             {

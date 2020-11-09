@@ -1,11 +1,3 @@
-const _ = require('lodash');
-const { BU, DU } = require('base-util-jh');
-
-const { BaseModel } = require('../../src/module').dpc;
-
-// 가져올려는 Report Key로 필터링
-const { BASE_KEY } = BaseModel.FarmParallel;
-
 require('./deviceProtocolFormat');
 
 const CALC_TYPE = {
@@ -22,8 +14,8 @@ const CALC_TYPE = {
 };
 
 class DeviceProtocol {
-  constructor(siteId) {
-    this.BASE_KEY = BASE_KEY;
+  constructor() {
+    this.BASE_KEY = {};
 
     this.CALC_TYPE = CALC_TYPE;
   }

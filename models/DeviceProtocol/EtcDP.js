@@ -14,7 +14,7 @@ module.exports = class extends DeviceProtocol {
   get trendSensorViewList() {
     return [
       {
-        domId: 'battery',
+        domId: 'batteryChart',
         title: '배터리',
         subtitle: '',
         chartOptionList: [

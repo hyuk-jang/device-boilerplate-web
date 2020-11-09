@@ -17,6 +17,15 @@ const favicon = require('serve-favicon');
 
 const { BU } = require('base-util-jh');
 
+const {
+  dbInfo,
+  projectInfo: { projectMainId, projectSubId },
+} = require('./bin/config');
+
+const projectConfig = require('./config')(projectMainId, projectSubId);
+// global로 선언
+global.projectConfig = projectConfig;
+
 const indexRouter = require('./routes/index');
 
 const authRouter = require('./routes/auth');
@@ -26,10 +35,6 @@ const appAuthRouter = require('./routes/app/appAuth');
 
 // const listener = require('./bin/listener');
 const passport = require('./bin/passport');
-const {
-  dbInfo,
-  projectInfo: { projectMainId },
-} = require('./bin/config');
 
 const BiAuth = require('./models/templates/auth/BiAuth');
 const BiModule = require('./models/templates/BiModule');
@@ -64,7 +69,7 @@ app.use(flash());
  * Set Customize
  */
 
-const faviPath = process.env.PJ_FAVICON || 'favicon.ico';
+const faviPath = projectConfig.viewInfo.titleInfo.imgPath;
 
 app.use(favicon(path.resolve(__dirname, 'public/image/icon', faviPath)));
 app.set('dbInfo', dbInfo);

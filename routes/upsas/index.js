@@ -64,7 +64,12 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu = 'main', siteId = userMainSeq, subCategory, subCategoryId } = req.params;
+    const {
+      naviMenu = 'main',
+      siteId = userMainSeq,
+      subCategory,
+      subCategoryId,
+    } = req.params;
 
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
@@ -110,7 +115,7 @@ router.get(
     const viewPowerProfileRows = await biModule.getTable('v_pw_profile');
 
     let totalSiteAmount = 0;
-    const siteList = mainRows.map((mainRow) => {
+    const siteList = mainRows.map(mainRow => {
       const { name: mainName, main_seq: mainSeq, power_amount: pAmount = 0 } = mainRow;
 
       // const totalAmount = _.chain(viewPowerProfileRows)
@@ -141,7 +146,7 @@ router.get(
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 프로젝트 홈
-    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectTitle(projectSource));
+    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectHome(projectSource));
     // 사이트 목록 추가
     const loginAreaDom = domMakerMaster.makeTopHeader(user);
     _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
@@ -200,13 +205,17 @@ router.get(
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 
     // Site 기상청 날씨 정보 구성
-    const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(mainRow.weather_location_seq);
+    const currWeatherCastInfo = await weatherModel.getCurrWeatherCast(
+      mainRow.weather_location_seq,
+    );
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
 
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
     // 현재 시간 기준 오늘, 내일, 모레 날씨 정보 FIXME: Row? Info?
-    const weatherCastRows = await weatherModel.getWeatherCast(mainRow.weather_location_seq);
+    const weatherCastRows = await weatherModel.getWeatherCast(
+      mainRow.weather_location_seq,
+    );
     _.set(req, 'locals.weatherCastList', weatherCastRows);
 
     // 해당 지역 위치값 정보 TODO:

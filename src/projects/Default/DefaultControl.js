@@ -38,8 +38,6 @@ module.exports = class extends Control {
       rtspConfig,
     } = featureConfig;
 
-    // BU.CLIN(featureConfig);
-
     // 기상청 동네예보 스케줄러 구동
     !isStopWeathercast && this.weathercast.init(this.dbInfo);
 

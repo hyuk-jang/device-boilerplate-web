@@ -42,7 +42,7 @@ router.get(
 
     /** @type {MAIN} */
     const mainList = await biAuth.getTable('MAIN', whereInfo);
-    const placeList = _.map(mainList, (mainInfo) => {
+    const placeList = _.map(mainList, mainInfo => {
       return { name: mainInfo.name, mainSeq: mainInfo.main_seq };
     });
     // BU.CLI(placeList);
@@ -54,13 +54,20 @@ router.get(
 );
 
 router.get('/login', (req, res) => {
-  const projectSourceInfo = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
+  /** @type {projectConfig} */
+  const pConfig = global.projectConfig;
+
+  const {
+    viewInfo: { loginInfo },
+  } = pConfig;
+
   if (process.env.IS_DEV_AUTO_AUTH === '1' && process.env.IS_USE_TLS === '0') {
     // BU.CLI('자동 로그인');
     // global.app.set('auth', true);
     if (!req.user) {
       // BU.CLI('poost!');
-      const urlPort = process.env.IS_USE_PROXY === '1' ? '' : `:${process.env.PJ_HTTP_PORT}`;
+      const urlPort =
+        process.env.IS_USE_PROXY === '1' ? '' : `:${process.env.PJ_HTTP_PORT}`;
       request.post(
         {
           url: `http://localhost${urlPort}/${SITE_HEADER}login`,
@@ -81,7 +88,7 @@ router.get('/login', (req, res) => {
     // BU.CLI('DEV_AUTO_AUTH false', SITE_HEADER);
     return res.render(`./${SITE_HEADER}login.ejs`, {
       message: req.flash('error'),
-      projectSourceInfo,
+      loginInfo,
     });
   }
 });
@@ -98,7 +105,7 @@ router.post(
 router.get('/logout', (req, res) => {
   req.logOut();
 
-  req.session.save((err) => {
+  req.session.save(err => {
     if (err) {
       console.log('logout error');
     }
@@ -154,7 +161,7 @@ router.post(
 
     const memberInfo = _.pick(req.body, memberPickList);
     // 모든 데이터가 입력이 되었는지 확인
-    const isOk = _.every(memberInfo, (value) => _.isString(value) && value.length);
+    const isOk = _.every(memberInfo, value => _.isString(value) && value.length);
     // 이상이 있을 경우 Back
     if (!isOk) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다!'));
@@ -200,11 +207,17 @@ router.post(
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
-    const { password = '', userid = '' } = _.pick(req.body, ['userid', 'password', 'nickname']);
+    const { password = '', userid = '' } = _.pick(req.body, [
+      'userid',
+      'password',
+      'nickname',
+    ]);
 
     // 입력된 id와 pw 가 string이 아닐 경우
     if (userid.length === 0 || password.length === 0) {
-      return res.status(500).send(DU.locationAlertGo('입력한 정보를 확인해주세요.', '/login'));
+      return res
+        .status(500)
+        .send(DU.locationAlertGo('입력한 정보를 확인해주세요.', '/login'));
     }
 
     /** @type {MEMBER} */
@@ -217,7 +230,9 @@ router.post(
     const memberInfo = await biAuth.getTable('MEMBER', whereInfo);
     // BU.CLI(memberInfo);
     if (!_.isEmpty(memberInfo)) {
-      return res.status(500).send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/login'));
+      return res
+        .status(500)
+        .send(DU.locationAlertGo('다른 ID를 입력해주세요.', '/login'));
     }
 
     const salt = BU.genCryptoRandomByte(16);

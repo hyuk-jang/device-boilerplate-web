@@ -15,11 +15,7 @@ const { BU } = require('base-util-jh');
  * @param {Object} filterInfo
  */
 function getPlaceRelationSeqList(placeRelationRows, filterInfo) {
-  return _(placeRelationRows)
-    .filter(filterInfo)
-    .map('node_seq')
-    .union()
-    .value();
+  return _(placeRelationRows).filter(filterInfo).map('node_seq').union().value();
 }
 exports.getPlaceRelationSeqList = getPlaceRelationSeqList;
 
@@ -73,10 +69,7 @@ exports.calcSensorProfileRows = calcSensorProfileRows;
  * @param {{group_date: string}[]} sensorGroupRows
  */
 function getDistinctGroupDateList(sensorGroupRows) {
-  return _(sensorGroupRows)
-    .map('group_date')
-    .union()
-    .value();
+  return _(sensorGroupRows).map('group_date').union().value();
 }
 exports.getDistinctGroupDateList = getDistinctGroupDateList;
 
@@ -93,9 +86,7 @@ function getMomentFormat(searchRange, strStartDate = searchRange.strStartDate) {
   let momentFormat = 'YYYY-MM-DD HH:mm:ss';
 
   const plotSeries = {
-    pointStart: moment(strStartDate)
-      .add(9, 'hours')
-      .valueOf(),
+    pointStart: moment(strStartDate).add(9, 'hours').valueOf(),
     pointInterval: 0,
   };
   switch (searchInterval) {
@@ -203,10 +194,12 @@ function extPlaRelPerfectSenRep(placeRelationRows, sensorReportRows, strGroupDat
 
   _(groupedSensorReport).forEach((groupRows, strNodeSeq) => {
     // BU.CLI(groupRows);
-    _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
-      placeRelationRow.sensorDataRows = groupRows;
-      // _.set(placeRelationRow, 'sensorGroupList', groupRows);
-    });
+    _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(
+      placeRelationRow => {
+        placeRelationRow.sensorDataRows = groupRows;
+        // _.set(placeRelationRow, 'sensorGroupList', groupRows);
+      },
+    );
   });
 }
 exports.extPlaRelPerfectSenRep = extPlaRelPerfectSenRep;
@@ -222,10 +215,12 @@ function extPlaRelWithSenRep(placeRelationRows, sensorGroupRows) {
     .groupBy('node_seq')
     .forEach((groupRows, strNodeSeq) => {
       // BU.CLI(groupRows);
-      _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(placeRelationRow => {
-        placeRelationRow.sensorDataRows = groupRows;
-        // _.set(placeRelationRow, 'sensorGroupList', groupRows);
-      });
+      _.filter(placeRelationRows, { node_seq: Number(strNodeSeq) }).forEach(
+        placeRelationRow => {
+          placeRelationRow.sensorDataRows = groupRows;
+          // _.set(placeRelationRow, 'sensorGroupList', groupRows);
+        },
+      );
     });
 }
 exports.extPlaRelWithSenRep = extPlaRelWithSenRep;
@@ -267,7 +262,10 @@ function makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds) {
         foundStorage.dataUnit = dataUnit;
         // foundStorage.chartColor = chartColor;
         // foundStorage.chartSortRank = chartSortRank;
-        foundStorage.nodePlaceList = _.sortBy(groupedRelationPlaceRows, 'chart_sort_rank');
+        foundStorage.nodePlaceList = _.sortBy(
+          groupedRelationPlaceRows,
+          'chart_sort_rank',
+        );
       }
     });
 
@@ -309,7 +307,10 @@ exports.extPlaWithPlaRel = extPlaWithPlaRel;
  */
 function extPlaRowsPlaRelRows(placeRelationRows, placeRows, pickedNodeDefIds) {
   placeRows.forEach(pRow => {
-    pRow.sensorRepStorageList = makeNodeDefStorageList(placeRelationRows, pickedNodeDefIds);
+    pRow.sensorRepStorageList = makeNodeDefStorageList(
+      placeRelationRows,
+      pickedNodeDefIds,
+    );
   });
 }
 exports.extPlaRowsPlaRelRows = extPlaRowsPlaRelRows;
@@ -326,7 +327,11 @@ function sliceStrGroupDateList(strGroupDateList = [], pageOption) {
   // page 정보 단위로 구간을 계산하고자 할 경우
   if (_.isNumber(page) && _.isNumber(pageListCount)) {
     const firstRowNum = (page - 1) * pageListCount;
-    strGroupDateList = _.slice(strGroupDateList, firstRowNum, firstRowNum + pageListCount);
+    strGroupDateList = _.slice(
+      strGroupDateList,
+      firstRowNum,
+      firstRowNum + pageListCount,
+    );
   }
 
   return {
@@ -454,7 +459,11 @@ function makeSensorChart(chartConfig, nodeDefStorageList, utcList) {
           let { chart_color: chartColor = '' } = nodePlace;
 
           // 같은 Place에 위치한 Node의 경우 색상이 같으므로 색상 표현을 다르게 하기 위한 논리
-          if (_.isString(chartColor) && chartColor.length && _.isString(mixColors[index])) {
+          if (
+            _.isString(chartColor) &&
+            chartColor.length &&
+            _.isString(mixColors[index])
+          ) {
             // keys 와 mixColors는 서로 대칭을 이루므로 해당 index의 mixColors를 가져옴
             chartColor = BU.blendColors(chartColor, mixColors[index], 0.5);
           }
@@ -523,7 +532,11 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
           let { chart_color: chartColor = '' } = nodePlace;
 
           // 같은 Place에 위치한 Node의 경우 색상이 같으므로 색상 표현을 다르게 하기 위한 논리
-          if (_.isString(chartColor) && chartColor.length && _.isString(mixColors[index])) {
+          if (
+            _.isString(chartColor) &&
+            chartColor.length &&
+            _.isString(mixColors[index])
+          ) {
             // keys 와 mixColors는 서로 대칭을 이루므로 해당 index의 mixColors를 가져옴
             chartColor = BU.blendColors(chartColor, mixColors[index], 0.5);
           }

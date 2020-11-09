@@ -25,12 +25,12 @@ module.exports = {
 
   /**
    * 프로젝트 Home 생성
-   * @param {{string: projectName, projectImg}} projectSource
+   * @param {{name: string, imgPath: string}} projectSource
    */
-  makeProjectTitle(projectSource) {
+  makeProjectHome(projectSource) {
     const projectTitle = _.template(
-      `<img src="/image/icon/<%= projectImg %>" />
-      <span><%= projectName %></span>`,
+      `<img src="/image/icon/<%= imgPath %>" />
+      <span><%= name %></span>`,
     );
 
     const madeMap = projectTitle(projectSource);

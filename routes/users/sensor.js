@@ -29,26 +29,17 @@ router.get(
     /** @type {{siteId: string, m_name: string}[]} */
     const mainSiteList = mainInfo.siteList;
 
-    // Power 현황 테이블에서 선택한 Site에 속해있는 인버터 목록을 가져옴
+    // Power 현황 테이블에서 선택한 Site에 속해있는 목록을 가져옴
     /** @type {V_DV_SENSOR_PROFILE[]} */
     const viewSensorProfileRows = await biDevice.getSensorProfile(mainWhere);
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const viewPlaceRelationRows = await biModule.getTable(
-      'v_dv_place_relation',
-      mainWhere,
-    );
+    const viewPlaceRelationRows = await biModule.getTable('v_dv_place_relation', {
+      ...mainWhere,
+      is_sensor: 1,
+    });
 
     // TODO: 각  relation에 동일 node_seq를 사용하고 있다면 profile 현재 데이터 기입, 아니라면 row는 제거
-
-    // IVT가 포함된 장소는 제거.
-    _.remove(viewPlaceRelationRows, placeRelation =>
-      _.includes(placeRelation.place_id, 'IVT'),
-    );
-
-    // BU.CLI(viewSensorProfileRows);
-
-    // BU.CLI(viewPlaceRelationRows);
 
     // 각 Relation에 해당 데이터 확장
     viewPlaceRelationRows.forEach(placeRelation => {

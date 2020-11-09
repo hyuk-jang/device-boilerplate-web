@@ -63,7 +63,7 @@
           <p class="table_desc_area">
             금일 시간 별 전력
           </p>
-          <article id="chart_div" class="lineChart_box default_area"></article>
+          <article id="divDomArea" class="lineChart_box default_area"></article>
         </div>
       </div>
       <!--하단1-->
@@ -77,11 +77,14 @@
       // 인버터 현재 상태 데이터 테이블 생성
       $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
 
+      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
 
-      // 차트를 그리기 위한 데이터
-      let inverterLineChart = <%- JSON.stringify(inverterLineChart) %>;
+      $('#divDomArea').html(divDomList)
 
-      makeLineChart(inverterLineChart)
+      madeLineChartList.forEach(function (chartInfo) {
+        makeLineChart(chartInfo)
+      });
     </script>
   </body>
 </html>

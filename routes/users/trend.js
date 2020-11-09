@@ -7,10 +7,8 @@ const router = express.Router();
 
 const { BU } = require('base-util-jh');
 
-const sensorUtil = require('../../models/templates/sensor.util');
+const commonUtil = require('../../models/templates/common.util');
 const defaultDom = require('../../models/domMaker/defaultDom');
-
-const DeviceProtocol = require('../../models/DeviceProtocol');
 
 // 검색할 기간 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_TYPE = 'days';
@@ -19,17 +17,15 @@ const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
 const DEFAULT_CATEGORY = 'inverter';
 
-/** @type {setCategoryInfo[]} */
-const subCategoryList = [
-  {
-    subCategory: 'inverter',
-    btnName: '인버터',
-  },
-  {
-    subCategory: 'sensor',
-    btnName: '생육환경',
-  },
-];
+/** @type {projectConfig} */
+const pConfig = global.projectConfig;
+
+const { naviList } = pConfig;
+
+const subCategoryList = _.chain(naviList)
+  .find({ href: 'trend' })
+  .get('subCategoryList')
+  .value();
 
 // trend middleware
 router.get(
@@ -74,11 +70,13 @@ router.get(
     // });
 
     // BU.CLI(searchRange);
+
+    BU.CLI(subCategoryList);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
     const trendInfo = {
       siteId,
       subCategory,
-      subCategoryName: _.find(subCategoryList, { subCategory }).btnName,
+      subCategoryName: _.find(subCategoryList, { subCategory }).name,
       strStartDateInputValue: searchRange.strStartDateInputValue,
       strEndDateInputValue: searchRange.strEndDateInputValue,
       searchType,
@@ -95,34 +93,22 @@ router.get(
 /** 인버터 트렌드 */
 router.get(
   ['/', '/:siteId', '/:siteId/inverter'],
-  asyncHandler(async (req, res, next) => {
-    /** @type {MEMBER} */
-    const { siteId } = req.locals.mainInfo;
+  asyncHandler(async (req, res) => {
+    const {
+      searchRange,
+      mainInfo: { siteId },
+    } = req.locals;
 
-    /** @type {RefineModel} */
-    const refineModel = global.app.get('refineModel');
-
-    const refinedInverterCharts = await refineModel.refineBlockCharts(
-      _.get(req, 'locals.searchRange'),
-      'inverter',
+    const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
+      searchRange,
       siteId,
-    );
+      mainNavi: 'trend',
+      subNavi: 'inverter',
+    });
 
-    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
-    const inverterDomTemplate = _.template(`
-        <div class="lineChart_box default_area" id="<%= domId %>"></div>
-    `);
-    const divDomList = refinedInverterCharts.map(refinedChart =>
-      inverterDomTemplate({
-        domId: refinedChart.domId,
-      }),
-    );
+    _.set(req, 'locals.dom.divDomList', chartDomList);
 
-    _.set(req, 'locals.dom.divDomList', divDomList);
-    // _.set(req, 'locals.madeLineChartList', madeLineChartList);
-    _.set(req, 'locals.madeLineChartList', refinedInverterCharts);
-
-    // BU.CLIN(req.locals);
+    _.set(req, 'locals.madeLineChartList', chartList);
 
     res.render('./trend/inverterTrend', req.locals);
   }),
@@ -133,118 +119,20 @@ router.get(
   ['/:siteId/sensor'],
   asyncHandler(async (req, res) => {
     const {
-      mainInfo: { siteId, mainWhere },
+      mainInfo: { siteId },
       searchRange,
     } = req.locals;
 
-    /** @type {BiDevice} */
-    const biDevice = global.app.get('biDevice');
-
-    // console.time('init');
-    /** @type {V_DV_PLACE[]} */
-    const placeRows = await biDevice.getTable('v_dv_place', mainWhere, false);
-    // FIXME: V_NODE에 포함되어 있 IVT가 포함된 장소는 제거.
-    _.remove(placeRows, pRow => _.includes(pRow.place_id, 'IVT'));
-
-    // BU.CLI(placeRows);
-    // BU.CLI(_.assign(mainWhere, sensorWhere));
-    /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await biDevice.getTable(
-      'v_dv_place_relation',
-      mainWhere,
-      false,
-    );
-
-    // BU.CLIN(placeRelationRows);
-
-    // NOTE: IVT가 포함된 장소는 제거.
-    _.remove(placeRelationRows, placeRelation =>
-      _.includes(placeRelation.place_id, 'IVT'),
-    );
-    // console.timeEnd('init');
-
-    // console.time('getSensorReport');
-    /** @type {sensorReport[]} */
-    const sensorReportRows = await biDevice.getSensorReport(
+    const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,
-      _.map(placeRelationRows, 'node_seq'),
-    );
-    // console.timeEnd('getSensorReport');
+      siteId,
+      mainNavi: 'trend',
+      subNavi: 'sensor',
+    });
 
-    // BU.CLIN(sensorReportRows);
+    _.set(req, 'locals.dom.divDomList', chartDomList);
+    _.set(req, 'locals.madeLineChartList', chartList);
 
-    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
-    const strGroupDateList = sensorUtil.getGroupDateList(searchRange);
-    // plotSeries 를 구하기 위한 객체
-    const momentFormat = sensorUtil.getMomentFormat(searchRange);
-
-    // 하루 단위로 검색할 경우에만 시간 제한을 둠
-    // if (searchRangeInfo.searchType === 'days') {
-    //   const rangeInfo = {
-    //     startHour: 7,
-    //     endHour: 20,
-    //   };
-    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
-    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
-    // } else {
-    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
-    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
-    // }
-
-    // console.time('extPlaRelSensorRep');
-    // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
-    // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
-    sensorUtil.extPlaRelPerfectSenRep(
-      placeRelationRows,
-      sensorReportRows,
-      strGroupDateList,
-    );
-    // console.timeEnd('extPlaRelSensorRep');
-
-    // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
-    const deviceProtocol = new DeviceProtocol(siteId);
-
-    // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
-    // console.time('makeNodeDefStorageList');
-    const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
-      placeRelationRows,
-      _.values(deviceProtocol.BASE_KEY),
-    );
-    // console.timeEnd('makeNodeDefStorageList');
-
-    // BU.CLIN(nodeDefStorageList, 3);
-
-    // FIXME: 구간 최대 값 차 차트 --> getSensorReport 밑에 저장해둠. 수정 필요.
-
-    // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
-
-    // 생육 환경정보 차트 목록을 생성
-    const madeLineChartList = deviceProtocol.trendSensorViewList.map(chartConfig =>
-      sensorUtil.makeSimpleLineChart(
-        chartConfig,
-        nodeDefStorageList,
-        momentFormat.plotSeries,
-      ),
-    );
-
-    // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
-    const sensorDomTemplate = _.template(`
-        <div class="lineChart_box default_area" id="<%= domId %>"></div>
-    `);
-    const divDomList = madeLineChartList.map(refinedChart =>
-      sensorDomTemplate({
-        domId: refinedChart.domId,
-      }),
-    );
-
-    _.set(req, 'locals.dom.divDomList', divDomList);
-    _.set(req, 'locals.madeLineChartList', madeLineChartList);
-
-    // TODO: 1. 각종 Chart 작업
-
-    // TODO: 1.1 인버터 발전량 차트 + 경사 일사량
-
-    // BU.CLIN(req.locals);
     res.render('./trend/sensorTrend', req.locals);
   }),
 );

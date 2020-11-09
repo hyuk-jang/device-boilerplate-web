@@ -3,6 +3,7 @@
   <head>
     <!-- Default Js -->
     <%- include("../master/head.ejs") %>
+    <script src="/js/contents/main/hichartMaker.js"></script>
     <!-- 동적 돔 생성을 위한 Library -->
     <script src="/js/handlebars.min.js"></script>
 
@@ -36,6 +37,11 @@
     var sessionID = <%- JSON.stringify(sessionID) %>;
     // 로그인 사용자 정보
     var user = <%- JSON.stringify(user) %>;
+
+    // 생성하고자 하는 차트 Dom 목록
+    var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+    // 생성하고자 하는 차트 목록
+    var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
   </script>
 
   <body>
@@ -86,11 +92,11 @@
               <%- include('../master/filter.ejs') %> <%-
               include('../master/filter.btn.ejs') %>
             </div>
-            <div class="flex_dir_col">
+            <div class="flex_dir_col hidden" id="divDom">
               <p class="table_desc_area">
                 트렌드
               </p>
-              <article id="chart_div" class="lineChart_box default_area"></article>
+              <div id="divDomArea" class="flex_box"></div>
             </div>
           </div>
           <!-- Tables -->
@@ -174,6 +180,16 @@
     <!-- Default Setting -->
     <script>
       $('#subCategoryDom').html(subCategoryDom);
+
+      // 생성하고자 하는 돔이 있을 경우 hidden 해제
+      if (divDomList.length) {
+        $('#divDom').removeClass('hidden');
+        $('#divDomArea').html(divDomList);
+        // 차트 생성
+        madeLineChartList.forEach(function (chartInfo) {
+          makeLineChart(chartInfo);
+        });
+      }
 
       // 명령 목록을 보여줄 돔
       var $cmdTableDom;

@@ -11,6 +11,7 @@ const WeatherModel = require('./WeatherModel');
 const webUtil = require('./web.util');
 const excelUtil = require('./excel.util');
 const commonUtil = require('./common.util');
+const sensorUtil = require('./sensor.util');
 
 const DeviceProtocol = require('../DeviceProtocol');
 
@@ -240,16 +241,99 @@ class RefineModel extends BiModule {
   }
 
   /**
-   * 블록 차트 목록을 뽑아옴
+   * 센서 차트 목록을 뽑아옴
    * @param {searchRange} searchRange
-   * @param {string} blockId Block Id
+   * @param {string[]} chartIdList Block Id
    * @param {number=} mainSeq
    */
-  async refineBlockCharts(searchRange, blockId, mainSeq) {
+  async refineSensorCharts(searchRange, chartIdList, mainSeq) {
+    const deviceProtocol = new DeviceProtocol();
+
+    // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
+    const { trendSensorViewList } = deviceProtocol;
+
+    const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
+
+    /** @type {V_DV_PLACE_RELATION[]} */
+    const placeRelationRows = await this.biDevice.getTable(
+      'v_dv_place_relation',
+      { ...mainWhere, is_sensor: 1 },
+      false,
+    );
+
+    // console.time('getSensorReport');
+    /** @type {sensorReport[]} */
+    const sensorReportRows = await this.biDevice.getSensorReport(
+      searchRange,
+      _.map(placeRelationRows, 'node_seq'),
+    );
+    // console.timeEnd('getSensorReport');
+
+    // 하루 단위로 검색할 경우에만 시간 제한을 둠
+    // if (searchRangeInfo.searchType === 'days') {
+    //   const rangeInfo = {
+    //     startHour: 7,
+    //     endHour: 20,
+    //   };
+    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo, rangeInfo);
+    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo, moment(_.head(strGroupDateList)));
+    // } else {
+    //   strGroupDateList = sensorUtil.getGroupDateList(searchRangeInfo);
+    //   momentFormat = sensorUtil.getMomentFormat(searchRangeInfo);
+    // }
+
+    // console.time('extPlaRelSensorRep');
+    // 그루핑 데이터를 해당 장소에 확장 (Extends Place Realtion Rows With Sensor Report Rows)
+    // sensorUtil.extPlaRelWithSenRep(placeRelationRows, sensorReportRows);
+    sensorUtil.extPlaRelPerfectSenRep(
+      placeRelationRows,
+      sensorReportRows,
+      // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+      sensorUtil.getGroupDateList(searchRange),
+    );
+    // console.timeEnd('extPlaRelSensorRep');
+
+    // Node Def Id 목록에 따라 Report Storage 목록을 구성하고 storageList에 Node Def Id가 동일한 확장된 placeRelationRow를 삽입
+    // console.time('makeNodeDefStorageList');
+    const nodeDefStorageList = sensorUtil.makeNodeDefStorageList(
+      placeRelationRows,
+      _.values(deviceProtocol.BASE_KEY),
+    );
+    // console.timeEnd('makeNodeDefStorageList');
+
+    // FIXME: 구간 최대 값 차 차트 --> getSensorReport 밑에 저장해둠. 수정 필요.
+
+    // FIXME: 과도한 쿼리를 발생시키는 SearchRange 는 serarchInterval 조정 후 반환
+
+    const madeLineChartList = trendSensorViewList
+      .filter(sensorViewInfo => _.includes(chartIdList, sensorViewInfo.domId))
+      .map(chartConfig =>
+        sensorUtil.makeSimpleLineChart(
+          chartConfig,
+          nodeDefStorageList,
+          // plotSeries 를 구하기 위한 객체
+          sensorUtil.getMomentFormat(searchRange).plotSeries,
+        ),
+      );
+
+    // BU.CLI(madeLineChartList[0]);
+
+    return madeLineChartList;
+  }
+
+  /**
+   * 블록 차트 목록을 뽑아옴
+   * @param {searchRange} searchRange
+   * @param {pcBlockChartInfo} blockInfo Block Id
+   * @param {number=} mainSeq
+   */
+  async refineBlockCharts(searchRange, blockInfo, mainSeq) {
+    const { blockId, nameExpInfo: { isMain = true } = {}, chartIdList } = blockInfo;
     const deviceProtocol = new DeviceProtocol();
 
     // baseTable이 V_DV_PLACE가 아닐 경우 baseTable.placeKey in [place_seq] 가져옴
     const blockTrendViews = deviceProtocol.getBlockChart(blockId);
+
     const {
       baseTableInfo: { fromToKeyTableList, placeKey },
       blockChartList,
@@ -269,7 +353,7 @@ class RefineModel extends BiModule {
       mainSeq,
     );
 
-    // BU.CLIN(blockDataRows);
+    // BU.CLIN(dataRows);
 
     const { fromKey: baseFromKey, toKey: baseToKey } = _.head(fromToKeyTableList);
 
@@ -286,108 +370,124 @@ class RefineModel extends BiModule {
     );
 
     // block 목록만큼의 동적 차트 생성
-    const refinedDomChart = blockChartList.map(blockChartInfo => {
-      // Chart Dom을 생성하기 위한 옵션 선언
-      const { domId, title = '', subtitle = '', chartOptionList } = blockChartInfo;
-      /** @type {lineChartInfo} 정제된 차트 정보 정의 */
-      const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
+    const refinedDomChart = blockChartList
+      .filter(blockChartInfo => _.includes(chartIdList, blockChartInfo.domId))
+      .map(blockChartInfo => {
+        // Chart Dom을 생성하기 위한 옵션 선언
+        const { domId, title = '', subtitle = '', chartOptionList } = blockChartInfo;
+        /** @type {lineChartInfo} 정제된 차트 정보 정의 */
+        const refinedChart = {
+          domId,
+          title,
+          subtitle,
+          yAxis: [],
+          plotSeries,
+          series: [],
+        };
 
-      // 차트를 생성하기 위한 목록 순회 (index: 0 = left yAxis, index: 1 = right yAxis)
-      chartOptionList.forEach((chartOption, index) => {
-        // 보여줄 축 정보
-        const { dataUnit = '', yTitle, blockConfigList } = chartOption;
-        // Y축 표현 정보 삽입
-        refinedChart.yAxis.push({
-          yTitle,
-          dataUnit,
-        });
+        // 차트를 생성하기 위한 목록 순회 (index: 0 = left yAxis, index: 1 = right yAxis)
+        chartOptionList.forEach((chartOption, index) => {
+          // 보여줄 축 정보
+          const { dataUnit = '', yTitle, blockConfigList } = chartOption;
+          // Y축 표현 정보 삽입
+          refinedChart.yAxis.push({
+            yTitle,
+            dataUnit,
+          });
 
-        // 실제 Block Chart 목록을 돌면서 의미있는 차트 정보 생성
-        blockConfigList.forEach(blockConfig => {
-          // convertKey가 없을 경우 toKey로 대체
-          const {
-            fromKey,
-            toKey,
-            convertKey = toKey,
-            convertName,
-            mixColor = '',
-          } = blockConfig;
+          // 실제 Block Chart 목록을 돌면서 의미있는 차트 정보 생성
+          blockConfigList.forEach(blockConfig => {
+            // convertKey가 없을 경우 toKey로 대체
+            const {
+              fromKey,
+              toKey,
+              convertKey = toKey,
+              convertName,
+              mixColor = '',
+            } = blockConfig;
 
-          // 현재 Dom 정보에서 표현해줄 chart line 갯수를 뽑아내기 위하여 group 처리된 목록을 순회
-          _.forEach(blockDataRowsGroup, (blockDataRows, groupSeq) => {
-            // BU.CLI(blockDataRows);
-            // 그룹 처리된 seq는 문자형이기 때문에 숫자형으로 변환
-            let placeSeq = Number(groupSeq);
-            // baseTable이 V_DV_PLACE가 아닐 경우 실제 해당 row의 place_seq를 가져옴
-            if (baseTableRows !== viewPlaceRows) {
-              const baseRow = _.find(baseTableRows, { [baseFromKey]: Number(groupSeq) });
-              placeSeq = _.get(baseRow, placeKey);
-            }
-
-            // BU.CLIS(placeSeq, fromKey);
-
-            // 장소 관계 Row 검색
-            const placeRelationInfo = _.find(viewPlaceRelationRows, {
-              place_seq: placeSeq,
-              nd_target_id: fromKey,
-            });
-
-            // 존재하지 않을경우 throw
-            // throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
-
-            // 관계가 있을 경우에만 추가
-            if (!_.isEmpty(placeRelationInfo)) {
-              // Place Relation 에 있는 속성 선언
-              const {
-                chart_color: chartColor,
-                node_name: nName,
-                nd_target_name: ndName,
-                place_name: pName,
-                place_node_name: pNodeName,
-                p_target_name: pTargetName,
-                p_target_code: pTargetCode,
-                chart_sort_rank: chartSortRank,
-              } = placeRelationInfo;
-
-              // x 요소 이름 지정
-              let xAxisElementName = '';
-              if (_.isString(convertName)) {
-                xAxisElementName = `${pTargetName} ${convertName}`;
-              } else if (pTargetName) {
-                xAxisElementName = `${pTargetName} ${ndName}`;
-              } else {
-                xAxisElementName = pNodeName;
+            // 현재 Dom 정보에서 표현해줄 chart line 갯수를 뽑아내기 위하여 group 처리된 목록을 순회
+            _.forEach(blockDataRowsGroup, (blockDataRows, groupSeq) => {
+              // BU.CLI(blockDataRows);
+              // 그룹 처리된 seq는 문자형이기 때문에 숫자형으로 변환
+              let placeSeq = Number(groupSeq);
+              // baseTable이 V_DV_PLACE가 아닐 경우 실제 해당 row의 place_seq를 가져옴
+              if (baseTableRows !== viewPlaceRows) {
+                const baseRow = _.find(baseTableRows, {
+                  [baseFromKey]: Number(groupSeq),
+                });
+                placeSeq = _.get(baseRow, placeKey);
               }
 
-              // BU.CLI(chartSortRank);
+              // BU.CLIS(placeSeq, fromKey);
 
-              /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
-              const chartSeries = {
-                name: xAxisElementName,
-                color: mixColor.length
-                  ? BU.blendColors(chartColor, mixColor, 0.5)
-                  : chartColor,
-                tooltip: {
-                  valueSuffix: dataUnit,
-                },
-                yAxis: index,
-                // 데이터가 없을 경우 빈공간으로 대체
-                data: _.map(blockDataRows, blockDataRow =>
-                  _.get(blockDataRow, convertKey, ''),
-                ),
-                chartSortRank,
-              };
-              // Chart Line 추가
-              refinedChart.series.push(chartSeries);
-            }
+              // 장소 관계 Row 검색
+              const placeRelationInfo = _.find(viewPlaceRelationRows, {
+                place_seq: placeSeq,
+                nd_target_id: fromKey,
+              });
+
+              // 존재하지 않을경우 throw
+              // throw new Error(`${fromKey} is not exist in viewPlaceRelation`);
+
+              // 관계가 있을 경우에만 추가
+              if (!_.isEmpty(placeRelationInfo)) {
+                // Place Relation 에 있는 속성 선언
+                const {
+                  m_name: mName,
+                  chart_color: chartColor,
+                  node_name: nName,
+                  nd_target_name: ndName,
+                  place_name: pName,
+                  place_node_name: pNodeName,
+                  p_target_name: pTargetName,
+                  p_target_code: pTargetCode,
+                  chart_sort_rank: chartSortRank,
+                } = placeRelationInfo;
+
+                // BU.CLIN(placeRelationInfo);
+
+                // x 요소 이름 지정
+                let xAxisElementName = isMain ? `${mName} ` : '';
+                if (_.isString(convertName)) {
+                  xAxisElementName += convertName.length
+                    ? `${pTargetName} - ${convertName}`
+                    : pTargetName;
+                } else if (pTargetName) {
+                  xAxisElementName += `${pTargetName} - ${ndName}`;
+                } else {
+                  xAxisElementName += pNodeName;
+                }
+
+                // BU.CLI(chartSortRank);
+
+                /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
+                const chartSeries = {
+                  name: xAxisElementName,
+                  color: mixColor.length
+                    ? BU.blendColors(chartColor, mixColor, 0.5)
+                    : chartColor,
+                  tooltip: {
+                    valueSuffix: dataUnit,
+                  },
+                  yAxis: index,
+                  // 데이터가 없을 경우 빈공간으로 대체
+                  data: _.map(blockDataRows, blockDataRow =>
+                    _.get(blockDataRow, convertKey, ''),
+                  ),
+                  chartSortRank,
+                };
+                // Chart Line 추가
+                refinedChart.series.push(chartSeries);
+              }
+            });
           });
         });
+        // 차트 정렬 순서대로 재정렬
+        refinedChart.series = _.sortBy(refinedChart.series, 'chartSortRank');
+        // 정제한 Chart Dom 반환
+        return refinedChart;
       });
-      // 차트 정렬 순서대로 재정렬
-      refinedChart.series = _.sortBy(refinedChart.series, 'chartSortRank');
-      // 정제한 Chart Dom 반환
-      return refinedChart;
-    });
 
     // BU.CLIN(refinedDomChart, 4);
 

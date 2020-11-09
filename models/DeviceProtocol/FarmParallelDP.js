@@ -8,6 +8,12 @@ const {
 const DeviceProtocol = require('./DeviceProtocol');
 
 class FarmParallelDP extends DeviceProtocol {
+  constructor() {
+    super();
+
+    this.BASE_KEY = BASE_FARM_KEY;
+  }
+
   /**
    * @return {string[]} 현 프로젝트에서 사용할 Sensor 목록, ND Id List
    */
@@ -220,7 +226,6 @@ class FarmParallelDP extends DeviceProtocol {
             keys: [BASE_FARM_KEY.isRain],
             mixColors: [],
             yTitle: '강우 감지 여부',
-            // dataUnit: 'ㅇd',
           },
         ],
       },
@@ -591,7 +596,6 @@ class FarmParallelDP extends DeviceProtocol {
                 },
               ],
               yTitle: '강우 감지 여부',
-              // dataUnit: 'ㅇd',
             },
           ],
         },
@@ -619,7 +623,7 @@ class FarmParallelDP extends DeviceProtocol {
       },
       blockChartList: [
         {
-          domId: 'inverter_power_chart',
+          domId: 'invPowerChart',
           title: 'AC 출력',
           chartOptionList: [
             {
@@ -627,8 +631,8 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerGridKw,
                   toKey: 'power_kw',
+                  convertName: 'AC 출력',
                   toFixed: 4,
-                  convertName: '',
                 },
               ],
               dataUnit: 'kW',
@@ -637,7 +641,7 @@ class FarmParallelDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'inverter_pv_chart',
+          domId: 'invPvChart',
           title: 'DC 현황',
           subtitle: '전압, 전류',
           chartOptionList: [
@@ -646,8 +650,8 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.pvVol,
                   toKey: 'pv_v',
-                  toFixed: 4,
                   convertName: '전압',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'V',
@@ -658,8 +662,8 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.pvAmp,
                   toKey: 'pv_a',
-                  toFixed: 4,
                   convertName: '전류',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'A',
@@ -668,7 +672,7 @@ class FarmParallelDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'inverter_grid_chart',
+          domId: 'invGridChart',
           title: 'AC Grid 현황',
           subtitle: '전압, 전류',
           chartOptionList: [
@@ -677,22 +681,22 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRsVol,
                   toKey: 'grid_rs_v',
-                  toFixed: 4,
                   convertName: 'RS 전압',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridStVol,
                   toKey: 'grid_st_v',
-                  toFixed: 4,
                   convertName: 'ST 전압',
                   mixColor: '#eeeeee',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTrVol,
                   toKey: 'grid_tr_v',
-                  toFixed: 4,
                   convertName: 'TR 전압',
                   mixColor: '#dddddd',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'V',
@@ -703,20 +707,20 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.gridRAmp,
                   toKey: 'grid_r_a',
-                  toFixed: 4,
                   convertName: 'R 전류',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridSAmp,
                   toKey: 'grid_s_a',
-                  toFixed: 4,
                   convertName: 'S 전류',
+                  toFixed: 4,
                 },
                 {
                   fromKey: BASE_INV_KEY.gridTAmp,
                   toKey: 'grid_t_a',
-                  toFixed: 4,
                   convertName: 'T 전류',
+                  toFixed: 4,
                 },
               ],
               dataUnit: 'A',
@@ -725,7 +729,7 @@ class FarmParallelDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'interval_power_chart',
+          domId: 'intervalPowerChart',
           title: '기간 발전량',
           chartOptionList: [
             {
@@ -733,7 +737,6 @@ class FarmParallelDP extends DeviceProtocol {
                 {
                   fromKey: BASE_INV_KEY.powerCpKwh,
                   toKey: 'power_cp_kwh',
-                  toFixed: 4,
                   convertKey: 'interval_power_cp_kwh',
                   convertName: '',
                   calcType: this.CALC_TYPE.INTERVAL_MAX,
@@ -745,7 +748,7 @@ class FarmParallelDP extends DeviceProtocol {
           ],
         },
         {
-          domId: 'max_c_mwh_chart',
+          domId: 'cumulativeMwhChart',
           title: '누적 발전량',
           chartOptionList: [
             {

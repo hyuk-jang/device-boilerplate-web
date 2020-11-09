@@ -8,6 +8,8 @@ const moment = require('moment');
 
 const { BU } = require('base-util-jh');
 
+const commonUtil = require('../../models/templates/common.util');
+
 const domMakerInverter = require('../../models/domMaker/inverterDom');
 
 // middleware
@@ -31,10 +33,13 @@ router.get(
   ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
     const {
-      mainInfo: { mainWhere },
+      mainInfo: { mainWhere, siteId },
       searchRange,
       viewPowerProfileRows,
     } = req.locals;
+
+    // 10분 간격
+    searchRange.searchInterval = 'min10';
 
     /** @type {RefineModel} */
     const refineModel = global.app.get('refineModel');
@@ -55,37 +60,18 @@ router.get(
 
     _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
 
-    // 10분 간격
-    searchRange.searchInterval = 'min10';
-
-    // BU.CLI(momentFormat);
-    /** @type {lineChartConfig} */
-    const chartConfig = {
-      domId: 'chart_div',
-      title: '인버터 발전 현황',
-      yAxisList: [
-        {
-          dataUnit: 'kW',
-          yTitle: '전력(kW)',
-        },
-      ],
-      chartOption: {
-        selectKey: 'avg_grid_kw',
-        dateKey: 'group_date',
-        groupKey: 'inverter_seq',
-        colorKey: 'chart_color',
-        sortKey: 'chart_sort_rank',
-      },
-    };
-
-    // 동적 라인 차트를 생성
-    const inverterLineChart = await refineModel.refineInverterChart(
+    const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,
-      inverterSeqList,
-      chartConfig,
-    );
+      siteId,
+      mainNavi: 'inverter',
+      // subNavi: 'inverter',
+    });
 
-    req.locals.inverterLineChart = inverterLineChart;
+    // BU.CLIN(chartList);
+
+    _.set(req, 'locals.dom.divDomList', chartDomList);
+    _.set(req, 'locals.madeLineChartList', chartList);
+
     // BU.CLIN(req.locals);
     res.render('./inverter/inverter', req.locals);
   }),

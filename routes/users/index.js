@@ -31,12 +31,6 @@ const domMakerMaster = require('../../models/domMaker/masterDom');
 
 const DEFAULT_SITE_ID = 'all';
 
-const { PJ_NAVI_HREF_LIST = '', PJ_NAVI_NAME_LIST = '' } = process.env;
-// 네비 HREF 목록
-const selectedNaviList = PJ_NAVI_HREF_LIST.split(',').map(navi => navi.trim());
-// 네비 Name 목록
-const selectedNaviNameList = PJ_NAVI_NAME_LIST.split(',').map(navi => navi.trim());
-
 // const accountUserGradeRange = ['manager', 'owner', 'guest'];
 
 // server middleware
@@ -59,17 +53,13 @@ const DEFAULT_SEARCH_TYPE = 'days';
 const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
 
-function getNaviList() {
-  const realNaviList = selectedNaviList.map((naviHref, index) => {
-    return {
-      href: naviHref,
-      name: selectedNaviNameList[index],
-    };
-  });
+/** @type {projectConfig} */
+const pConfig = global.projectConfig;
 
-  return realNaviList;
-}
-
+const {
+  naviList,
+  viewInfo: { homeInfo },
+} = pConfig;
 // server middleware
 router.get(
   [
@@ -96,7 +86,17 @@ router.get(
     let { naviMenu } = req.params;
 
     /* *********      ↓↓↓  Navi 관련 설정  ↓↓↓       ********* */
-    const currNaviList = getNaviList();
+    /** @type {Object[]} */
+    const currNaviList = _.filter(naviList, naviInfo => {
+      const { grade: naviGrade = [] } = naviInfo;
+
+      // 권한 등급이 지정되어 있을 경우 체크
+      if (naviGrade.length) {
+        return _.includes(naviGrade, grade);
+      }
+
+      return true;
+    });
 
     // 네비가 존재하지 않을 경우 첫번째 선택
     if (_.find(currNaviList, { href: naviMenu }) === undefined) {
@@ -104,7 +104,6 @@ router.get(
     }
 
     /* *********      ↓↓↓  searchRange, siteInfo   ↓↓↓       ********* */
-
     const mainWhere = _.isNumber(siteId) ? { main_seq: siteId } : null;
 
     /** @type {BiModule} */
@@ -129,6 +128,14 @@ router.get(
       strStartDate: strStartDateInputValue,
       strEndDate: strEndDateInputValue,
     });
+
+    // const searchRange = biModule.createSearchRange({
+    //   searchType,
+    //   searchInterval,
+    //   searchOption,
+    //   strStartDate: '2020-08-21',
+    //   // strEndDate: '2020-08-22',
+    // });
 
     _.set(req, 'locals.searchRange', searchRange);
 
@@ -167,18 +174,10 @@ router.get(
     _.set(req, 'locals.mainInfo.uuid', mainRow.uuid);
 
     /* *********      ↓↓↓  DOM   ↓↓↓       ********* */
-
-    // 관리자 모드 추가
-    if (_.eq(grade, 'admin')) {
-      currNaviList.push({
-        href: 'admin',
-        name: '관리',
-      });
-    }
     const naviListDom = domMakerMaster.makeNaviListDom(currNaviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
     // 프로젝트 홈
-    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectTitle(projectSource));
+    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectHome(homeInfo));
     // 사이트 목록 추가
     const loginAreaDom = domMakerMaster.makeTopHeader(user);
     _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
@@ -202,9 +201,10 @@ router.get(
 );
 
 // Router 추가
-selectedNaviList.forEach((naviHref, index) => {
-  index === 0 && router.use('/', routerInfo[naviHref]);
-  router.use(`/${naviHref}`, routerInfo[naviHref]);
+naviList.forEach((naviInfo, index) => {
+  const { href } = naviInfo;
+  index === 0 && router.use('/', routerInfo[href]);
+  router.use(`/${href}`, routerInfo[href]);
 });
 router.use('/admin', admin);
 

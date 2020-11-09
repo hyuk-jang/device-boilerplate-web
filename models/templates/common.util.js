@@ -176,3 +176,103 @@ function extPerfectRows(groupKey, dataRows, strGroupDateList) {
   return dataRowsGroup;
 }
 exports.extPerfectRows = extPerfectRows;
+
+/**
+ *
+ * @param {Object} dynamicChartInfo
+ * @param {searchRange} dynamicChartInfo.searchRange
+ * @param {number=} dynamicChartInfo.siteId
+ * @param {string} dynamicChartInfo.mainNavi
+ * @param {string=} dynamicChartInfo.subNavi
+ */
+async function getDynamicChart(dynamicChartInfo) {
+  const { searchRange, siteId, mainNavi = '', subNavi = '' } = dynamicChartInfo;
+  /** @type {projectConfig} */
+  const pConfig = global.projectConfig;
+
+  const { naviList } = pConfig;
+
+  const naviInfo = _.find(naviList, { href: mainNavi });
+
+  /** @type {pcChartInfo} */
+  let pcChartInfo = {};
+
+  // BU.CLI(subNavi);
+
+  if (subNavi.length) {
+    const subNaviInfo = _.find(naviInfo.subCategoryList, { subCategory: subNavi });
+    const { chartInfo = {} } = subNaviInfo;
+    pcChartInfo = chartInfo;
+  } else {
+    const { chartInfo = {} } = naviInfo;
+    pcChartInfo = chartInfo;
+  }
+
+  /** @type {lineChartInfo[]} */
+  let chartList = [];
+
+  const { blockChartInfo, sensorChartList = [] } = pcChartInfo;
+
+  /** @type {RefineModel} */
+  const refineModel = global.app.get('refineModel');
+
+  if (blockChartInfo) {
+    const blockCharts = await refineModel.refineBlockCharts(
+      searchRange,
+      blockChartInfo,
+      siteId,
+    );
+
+    chartList = chartList.concat(blockCharts);
+  }
+
+  if (sensorChartList.length) {
+    const blockCharts = await refineModel.refineSensorCharts(
+      searchRange,
+      sensorChartList,
+      siteId,
+    );
+
+    chartList = chartList.concat(blockCharts);
+  }
+
+  return chartList;
+}
+exports.getDynamicChart = getDynamicChart;
+
+/**
+ *
+ * @param {Object} dynamicChartInfo
+ * @param {searchRange} dynamicChartInfo.searchRange
+ * @param {number=} dynamicChartInfo.siteId
+ * @param {string} dynamicChartInfo.mainNavi
+ * @param {string=} dynamicChartInfo.subNavi
+ */
+async function getDynamicChartDom(dynamicChartInfo) {
+  // BU.CLI(dynamicChartInfo);
+  const chartList = await getDynamicChart(dynamicChartInfo);
+
+  // 만들어진 차트 목록에서 domId 를 추출하여 DomTemplate를 구성
+  const domTemplate = _.template(`
+      <div class="lineChart_box default_area" id="<%= domId %>"></div>
+  `);
+
+  // 모든 센서 정보가 없다면 표시 하지 않음
+  chartList.forEach(chartInfo => {
+    chartInfo.series.every(seriesInfo => {
+      return _.get(seriesInfo, 'data', []).length === 0;
+    }) && (chartInfo.series = []);
+  });
+
+  const chartDomList = chartList.map(refinedChart =>
+    domTemplate({
+      domId: refinedChart.domId,
+    }),
+  );
+
+  return {
+    chartList,
+    chartDomList,
+  };
+}
+exports.getDynamicChartDom = getDynamicChartDom;

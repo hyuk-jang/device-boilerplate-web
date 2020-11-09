@@ -16,7 +16,10 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <!--Fontawesome CDN-->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    />
 
     <!--Custom styles-->
     <link rel="stylesheet" type="text/css" href="/css/template/login.css" />
@@ -28,7 +31,7 @@
       <div class="d-flex justify-content-center h-100">
         <div class="card" id="loginArea">
           <div class="card-header">
-            <h3 id="projectName"></h3>
+            <h3 id="loginName"></h3>
           </div>
           <div class="card-body">
             <form action="/auth/login" method="post">
@@ -84,9 +87,9 @@
 
 <script>
   // 프로젝트에 따라 표현할 데이터
-  var projectSourceInfo = <%- JSON.stringify(projectSourceInfo) %>;
-  var projectName = projectSourceInfo.projectName;
-  var loginBG = projectSourceInfo.loginBG;
+  var loginInfo = <%- JSON.stringify(loginInfo) %>;
+  var loginName = loginInfo.name;
+  var loginBG = loginInfo.imgPath;
   // 로그인 시도 에러 발생 시 결과 메시지
   var message = '<%- message %>';
 </script>
@@ -98,9 +101,9 @@
 
   $(document).ready(function () {
     // BG Path가 존재할 경우 명시
-    if (typeof projectName === 'string' && projectName.length) {
-      document.getElementById('projectName').innerHTML = projectName;
-      document.querySelector('title').innerHTML = projectName + ' : 로그인';
+    if (typeof loginName === 'string' && loginName.length) {
+      document.getElementById('loginName').innerHTML = loginName;
+      document.querySelector('title').innerHTML = loginName + ' : 로그인';
     }
 
     if (typeof loginBG === 'string' && loginBG.length) {

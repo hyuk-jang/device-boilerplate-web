@@ -1,6 +1,7 @@
 const { BU } = require('base-util-jh');
 
 const Control = require('./Control');
+const DefaultControl = require('./projects/Default/DefaultControl');
 const UpsasControl = require('./projects/UPSAS/UpsasControl');
 const FpRndControl = require('./projects/FP/FpRndControl');
 const S2WRndControl = require('./projects/S2W/S2WRndControl');
@@ -36,6 +37,7 @@ class Main {
         MainControl = S2WRndControl;
         break;
       default:
+        MainControl = DefaultControl;
         break;
     }
 

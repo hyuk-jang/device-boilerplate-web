@@ -25,17 +25,15 @@ const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
-/** @type {setCategoryInfo[]} */
-const subCategoryList = [
-  {
-    subCategory: 'inverter',
-    btnName: '인버터',
-  },
-  {
-    subCategory: 'sensor',
-    btnName: '생육환경',
-  },
-];
+/** @type {projectConfig} */
+const pConfig = global.projectConfig;
+
+const { naviList } = pConfig;
+
+const subCategoryList = _.chain(naviList)
+  .find({ href: 'report' })
+  .get('subCategoryList')
+  .value();
 
 // report middleware
 router.get(

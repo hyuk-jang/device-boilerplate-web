@@ -26,10 +26,15 @@ class PowerModel extends BiModule {
    * @param {number[]} inverterSeqList
    */
   async makeInverterNameList(inverterSeqList = []) {
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+    const inverterWhere = inverterSeqList.length
+      ? { inverter_seq: inverterSeqList }
+      : null;
 
     /** @type {V_PW_INVERTER_PROFILE[]} */
-    const inverterProfileRows = await this.getTable('v_pw_inverter_profile', inverterWhere);
+    const inverterProfileRows = await this.getTable(
+      'v_pw_inverter_profile',
+      inverterWhere,
+    );
 
     return inverterProfileRows.map(inverterProfile => {
       // subName과 lastName을 구성하고 정의
@@ -62,7 +67,12 @@ class PowerModel extends BiModule {
    * @param {plotSeries} rangeInfo.plotSeries
    * @return {{inverterPowerChartData: chartData, inverterTrend: Object[], viewInverterStatusList: V_INVERTER_STATUS[]}} chartData
    */
-  async getInverterLineChart(searchRange, trendInverterDomConfigList, inverterSeqList, rangeInfo) {
+  async getInverterLineChart(
+    searchRange,
+    trendInverterDomConfigList,
+    inverterSeqList,
+    rangeInfo,
+  ) {
     // BU.CLI(searchRange);
 
     const chartConfigList = trendInverterDomConfigList.map(domConfig => {
@@ -130,8 +140,18 @@ class PowerModel extends BiModule {
       webUtil.calcRangePower(inverterTrend, calcOption);
     }
     // DB 긁어온 내용에 key 추가
-    webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_id', 'inverter_seq');
-    webUtil.addKeyToReport(inverterTrend, inverterStatusRows, 'target_name', 'inverter_seq');
+    webUtil.addKeyToReport(
+      inverterTrend,
+      inverterStatusRows,
+      'target_id',
+      'inverter_seq',
+    );
+    webUtil.addKeyToReport(
+      inverterTrend,
+      inverterStatusRows,
+      'target_name',
+      'inverter_seq',
+    );
     // 기간 발전량을 기준으로 실제 계통 출력량을 계산하여 추가함(grid_out_w)
     webUtil.calcRangeGridOutW(inverterTrend, searchRange, 'interval_power');
     // 검색 기간을 기준으로 data 비율을 조정함
@@ -190,12 +210,18 @@ class PowerModel extends BiModule {
       inverterTrend: [],
     };
     // 장비 종류가 접속반, 장비 선택이 전체라면 즉시 종료
-    if (searchOption.device_type === 'connector' && searchOption.device_list_type === 'all') {
+    if (
+      searchOption.device_type === 'connector' &&
+      searchOption.device_list_type === 'all'
+    ) {
       return returnValue;
     }
 
     // 인버터나 전체를 검색한게 아니라면 즉시 리턴
-    if (searchOption.device_list_type !== 'all' && searchOption.device_list_type !== 'inverter') {
+    if (
+      searchOption.device_list_type !== 'all' &&
+      searchOption.device_list_type !== 'inverter'
+    ) {
       return returnValue;
     }
 
@@ -211,7 +237,10 @@ class PowerModel extends BiModule {
     // BU.CLI(viewInverterPacketList);
     // 인버터 차트 데이터 불러옴
     // BU.CLI(searchRange);
-    const inverterTrend = await this.getInverterTrend(searchRange, searchOption.device_seq);
+    const inverterTrend = await this.getInverterTrend(
+      searchRange,
+      searchOption.device_seq,
+    );
     // BU.CLI(inverterTrend);
 
     // 하루 데이터(10분 구간)는 특별히 데이터를 정제함.
@@ -248,8 +277,18 @@ class PowerModel extends BiModule {
       };
       webUtil.calcRangePower(inverterTrend, calcOption);
     }
-    webUtil.addKeyToReport(inverterTrend, viewInverterStatusList, 'target_id', 'inverter_seq');
-    webUtil.addKeyToReport(inverterTrend, viewInverterStatusList, 'target_name', 'inverter_seq');
+    webUtil.addKeyToReport(
+      inverterTrend,
+      viewInverterStatusList,
+      'target_id',
+      'inverter_seq',
+    );
+    webUtil.addKeyToReport(
+      inverterTrend,
+      viewInverterStatusList,
+      'target_name',
+      'inverter_seq',
+    );
     // 기간 발전량을 기준으로 실제 계통 출력량을 계산하여 추가함(grid_out_w)
     webUtil.calcRangeGridOutW(inverterTrend, searchRange, 'interval_power');
     // 검색 기간을 기준으로 data 비율을 조정함
@@ -346,7 +385,9 @@ class PowerModel extends BiModule {
 
     // BU.CLI(searchRangeList);
     const workSheetInfoList = await Promise.all(
-      searchRangeList.map(sr => this.getExcelWorkSheet(sr, userInfo, viewPowerProfileList)),
+      searchRangeList.map(sr =>
+        this.getExcelWorkSheet(sr, userInfo, viewPowerProfileList),
+      ),
     );
 
     const fileName = _.head(workSheetInfoList).sheetName;
@@ -406,7 +447,10 @@ class PowerModel extends BiModule {
 
     // BU.CLI(searchRange);
     // BU.CLI(inverterPowerChartData);
-    const { weatherTrend, weatherChartOptionList } = await this.weatherModel.getWeatherChart(
+    const {
+      weatherTrend,
+      weatherChartOptionList,
+    } = await this.weatherModel.getWeatherChart(
       searchRange,
       betweenDatePoint,
       userInfo.main_seq,
@@ -418,7 +462,10 @@ class PowerModel extends BiModule {
     const chartDecoration = webUtil.makeChartDecoration(searchRange);
     const powerChartData = inverterPowerChartData;
 
-    const waterLevelDataPacketList = await this.getWaterLevel(searchRange, searchOption.device_seq);
+    const waterLevelDataPacketList = await this.getWaterLevel(
+      searchRange,
+      searchOption.device_seq,
+    );
     const calendarCommentList = await this.weatherModel.getCalendarComment(
       searchRange,
       userInfo.main_seq,
@@ -451,7 +498,8 @@ class PowerModel extends BiModule {
       });
       currentItem.option.scale = foundIt.scale;
       currentItem.data.forEach((data, index) => {
-        currentItem.data[index] = data === '' ? '' : Number((data * foundIt.scale).scale(1, 1));
+        currentItem.data[index] =
+          data === '' ? '' : Number((data * foundIt.scale).scale(1, 1));
       });
     });
   }
@@ -498,12 +546,18 @@ class PowerModel extends BiModule {
     let chartData = { range: [], series: [] };
 
     // 장비 종류가 인버터, 장비 선택이 전체라면 즉시 종료
-    if (searchOption.device_type === 'inverter' && searchOption.device_list_type === 'all') {
+    if (
+      searchOption.device_type === 'inverter' &&
+      searchOption.device_list_type === 'all'
+    ) {
       return chartData;
     }
 
     // 인버터나 전체를 검색한게 아니라면 즉시 리턴
-    if (searchOption.device_list_type !== 'all' && searchOption.device_list_type !== 'connector') {
+    if (
+      searchOption.device_list_type !== 'all' &&
+      searchOption.device_list_type !== 'connector'
+    ) {
       return chartData;
     }
 
@@ -539,16 +593,23 @@ class PowerModel extends BiModule {
     };
 
     /** 정해진 column을 기준으로 모듈 데이터를 정리 */
-    chartData = webUtil.makeStaticLineChart(connectorTrend, betweenDatePoint, chartOption);
+    chartData = webUtil.makeStaticLineChart(
+      connectorTrend,
+      betweenDatePoint,
+      chartOption,
+    );
 
     // BU.CLI(chartData);
 
     /* Scale 적용 */
     chartData.series.forEach(currentItem => {
-      const foundIt = _.find(tempSacle.moduleScale, { photovoltaic_seq: Number(currentItem.name) });
+      const foundIt = _.find(tempSacle.moduleScale, {
+        photovoltaic_seq: Number(currentItem.name),
+      });
       currentItem.scale = foundIt.scale;
       currentItem.data.forEach((data, index) => {
-        currentItem.data[index] = data === '' ? '' : Number((data * foundIt.scale).scale(1, 1));
+        currentItem.data[index] =
+          data === '' ? '' : Number((data * foundIt.scale).scale(1, 1));
       });
     });
 

@@ -9,29 +9,20 @@ const { BU, DU } = require('base-util-jh');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
 const controlDom = require('../../models/domMaker/controlDom');
+const commonUtil = require('../../models/templates/common.util');
 
 const DEFAULT_CATEGORY = 'command';
 const PAGE_LIST_COUNT = 20; // 한 페이지당 목록을 보여줄 수
 
-/** @type {setCategoryInfo[]} */
-const subCategoryList = [
-  {
-    subCategory: 'command',
-    btnName: '제어관리',
-  },
-  {
-    subCategory: 'history',
-    btnName: '제어이력',
-  },
-  // {
-  //   subCategory: 'event',
-  //   btnName: '이벤트관리',
-  // },
-  // {
-  //   subCategory: 'threshold',
-  //   btnName: '임계치관리',
-  // },
-];
+/** @type {projectConfig} */
+const pConfig = global.projectConfig;
+
+const { naviList } = pConfig;
+
+const subCategoryList = _.chain(naviList)
+  .find({ href: 'control' })
+  .get('subCategoryList')
+  .value();
 
 router.get(
   ['/', '/:siteId', '/:siteId/:subCategory'],
@@ -59,7 +50,10 @@ router.get(
     const biModule = global.app.get('biModule');
 
     // Site Sequence.지점 Id를 불러옴
-    const { mainWhere } = req.locals.mainInfo;
+    const {
+      searchRange,
+      mainInfo: { siteId, mainWhere },
+    } = req.locals;
 
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', mainWhere);
@@ -82,6 +76,17 @@ router.get(
       );
     }
     req.locals.map = map;
+
+    const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
+      searchRange,
+      siteId,
+      mainNavi: 'control',
+      subNavi: 'command',
+    });
+
+    _.set(req, 'locals.dom.divDomList', chartDomList);
+
+    _.set(req, 'locals.madeLineChartList', chartList);
 
     res.render('./control/command', req.locals);
   }),
