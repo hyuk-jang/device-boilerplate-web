@@ -179,7 +179,12 @@ router.post(
     const adminModel = global.app.get('adminModel');
 
     const { siteId, memberIdx } = req.params;
-    const { grade = 'awaiter', is_deleted = 0, is_account_lock = 0, password = '' } = req.body;
+    const {
+      grade = 'awaiter',
+      is_deleted = 0,
+      is_account_lock = 0,
+      password = '',
+    } = req.body;
 
     const isValidMember = _.isNumber(memberIdx);
     const isValidGrade = _.includes(accountGradeRange, grade);
@@ -202,7 +207,9 @@ router.post(
     /** @type {MEMBER} */
     const memberRow = await adminModel.getTableRow('MEMBER', { member_seq: memberIdx });
     /** @type {MEMBER} */
-    const adminRow = await adminModel.getTableRow('MEMBER', { user_id: req.user.user_id });
+    const adminRow = await adminModel.getTableRow('MEMBER', {
+      user_id: req.user.user_id,
+    });
 
     // 회원 정보 수정 이력 테이블 스키마
     const schemaRows = await adminModel.getTableSchema(process.env.PJ_DB_DB, 'MEMBER');
@@ -232,7 +239,11 @@ router.post(
     });
 
     // 로그인한 사용자와 수정할려는 ID가 동일하고 비밀번호를 변경하고자 할 경우
-    if (memberRow.user_id === req.user.user_id && _.isString(password) && password.length) {
+    if (
+      memberRow.user_id === req.user.user_id &&
+      _.isString(password) &&
+      password.length
+    ) {
       // 비밀번호 정규식
       const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
       // 비밀번호 유효성 체크
@@ -269,7 +280,9 @@ router.post(
     // 회원 정보 변경 이력 입력
     await adminModel.setTables('MEMBER_EDIT_HISTORY', memberEditHistorys, false);
 
-    return res.send(DU.locationAlertGo('정상적으로 갱신되었습니다.', `/admin/${siteId}/member`));
+    return res.send(
+      DU.locationAlertGo('정상적으로 갱신되었습니다.', `/admin/${siteId}/member`),
+    );
   }),
 );
 

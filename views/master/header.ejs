@@ -67,40 +67,51 @@
 <!-- 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-xss/0.3.3/xss.min.js"></script>
 <script>
-  var html = filterXSS('<script>alert("xss");</scr' + 'ipt>');
+  const html = filterXSS('<script>alert("xss");</scr' + 'ipt>');
   alert(html);
 </script> -->
 
 <script>
-  var mainInfo = <%- JSON.stringify(mainInfo) %>;
-  var projectMainId = _.get(mainInfo, 'projectMainId', '');
-  var naviId = _.get(mainInfo, 'naviId', '');
-  var siteId = _.get(mainInfo, 'siteId', '');
-  var subCategory = _.get(mainInfo, 'subCategory', '');
-  var manualPath = _.get(mainInfo, 'manualPath', '');
+  const mainInfo = <%- JSON.stringify(mainInfo) %>;
+  const masterDom = <%- JSON.stringify(dom) %>;
+</script>
 
-  $('#projectTitle').html(projectMainId)
-  $('#projectHome').html(<%- JSON.stringify(dom.projectHome) %>)
+<script>
+  const { projectMainId = '', naviId = '', manualPath = '' } = mainInfo;
+
+  let { siteId = '', subCategory = '' } = mainInfo;
+
+  const {
+    projectHome = '',
+    loginAreaDom = '',
+    naviListDom = '',
+    siteListDom = '',
+    weathercastDom = '',
+  } = masterDom;
+
+  document.getElementById('projectTitle').innerHTML = projectMainId;
+
+  document.getElementById('projectHome').innerHTML = projectHome;
 
   // 네비게이션 DOM
-  $('#loginAreaDom').html(<%- JSON.stringify(dom.loginAreaDom) %>);
+  document.getElementById('loginAreaDom').innerHTML = loginAreaDom;
   // 네비게이션 DOM
-  $('#naviListDom').html(<%- JSON.stringify(dom.naviListDom) %>);
+  document.getElementById('naviListDom').innerHTML = naviListDom;
   // 사이트 목록 DOM
-  $('#siteListDom').html(<%- JSON.stringify(dom.siteListDom) %>);
+  document.getElementById('siteListDom').innerHTML = siteListDom;
   // 날씨 동적 DOM 생성
-  $('#weathercastDom').html(<%- JSON.stringify(dom.weathercastDom) %>);
+  document.getElementById('weathercastDom').innerHTML = weathercastDom;
 
   // 사이트 변경 시
   $('#siteListDom').change(function () {
     location.href = window.location.origin + '/' + naviId + '/' + $(this).val();
-  })
+  });
 
   // 페이지 동적 바인딩이 완료되었을 경우 View 처리
   window.onload = function () {
-    $('#wrap').removeClass('hidden');
+    document.getElementById('wrap').classList.remove('hidden');
     // Spinner Loader
     // $('#loader').removeClass('hidden')
     // $('#loader-ground').removeClass('hidden')
-  }
+  };
 </script>

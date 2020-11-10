@@ -18,7 +18,7 @@
           <div id="subCategoryDom" class="report_category"></div>
         </div>
         <%- include("../master/searchReport.ejs") %>
-        <div class="container_row flex_dir_col ">
+        <div class="container_row flex_dir_col">
           <div class="table-responsive default_area">
             <table class="table table-bordered number_table">
               <thead id="sensorReportHeaderDom">
@@ -51,37 +51,49 @@
     </div>
 
     <script>
+      const dom = <%- JSON.stringify(dom) %>;
+
+      const searchRange = <%- JSON.stringify(searchRange) %>;
+      const reportInfo = <%- JSON.stringify(reportInfo) %>;
+    </script>
+
+    <script>
       // 돔 설정
+      const {
+        subSelectBoxDom,
+        sensorReportHeaderDom,
+        sensorReportBodyDom,
+        paginationDom,
+        subCategoryDom,
+      } = dom;
       // $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
-      $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
-      $('#sensorReportHeaderDom').html(<%- JSON.stringify(dom.sensorReportHeaderDom) %>);
-      $('#sensorReportBodyDom').html(<%- JSON.stringify(dom.sensorReportBodyDom) %>);
-      $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
 
-      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+      document.getElementById('subSelectBoxDom').innerHTML = subSelectBoxDom;
+      document.getElementById('sensorReportHeaderDom').innerHTML = sensorReportHeaderDom;
+      document.getElementById('sensorReportBodyDom').innerHTML = sensorReportBodyDom;
+      document.getElementById('paginationDom').innerHTML = paginationDom;
+      document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
 
-      // 초기 시작시 라디오 체크버튼 클릭처리
-      var searchRange = <%- JSON.stringify(searchRange) %>;
-      var reportInfo = <%- JSON.stringify(reportInfo) %>;
+      // Master.Header 에서 정의한 내용 덮어쓰기
+      siteId = _.get(reportInfo, 'siteId');
+      subCategory = _.get(reportInfo, 'subCategory');
 
-      var siteId = _.get(reportInfo, 'siteId');
-      var subCategory = _.get(reportInfo, 'subCategory');
-      var subCategoryId = _.get(reportInfo, 'subCategoryId');
-      var subCategoryName = _.get(reportInfo, 'subCategoryName');
+      const { subCategoryId, subCategoryName } = reportInfo;
 
-      $('#subCategoryName').html(subCategoryName);
+      document.getElementById('subCategoryName').innerHTML = subCategoryName;
     </script>
 
     <script src="/js/contents/report/search.js"></script>
 
     <!-- 기본 데이터 세팅 -->
     <script>
-      checkSelectBoxOption('searchInterval', searchRange.searchInterval);
-      checkSelectBoxOption('searchType', searchRange.searchType);
-      checkSelectBoxOption('searchOption', searchRange.searchOption);
+      const { searchInterval, searchType, searchOption } = searchRange;
+      checkSelectBoxOption('searchInterval', searchInterval);
+      checkSelectBoxOption('searchType', searchType);
+      checkSelectBoxOption('searchOption', searchOption);
 
       // 검색 타입에 따라 적용
-      applySearchType(searchRange.searchType);
+      applySearchType(searchType);
     </script>
   </body>
 </html>

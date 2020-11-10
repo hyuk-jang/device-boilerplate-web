@@ -64,39 +64,50 @@
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
+
     <script>
-      // 인버터 목록 돔
-      $('#subSelectBoxDom').html(<%- JSON.stringify(dom.subSelectBoxDom) %>);
-      $('#tableHeaderDom').html(<%- JSON.stringify(dom.tableHeaderDom) %>);
-      $('#tableBodyDom').html(<%- JSON.stringify(dom.tableBodyDom) %>);
-      $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+      const dom = <%- JSON.stringify(dom) %>;
 
-      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+      const searchRange = <%- JSON.stringify(searchRange) %>;
+      const reportInfo = <%- JSON.stringify(reportInfo) %>;
+    </script>
 
-      // 초기 시작시 라디오 체크버튼 클릭처리
-      var searchRange = <%- JSON.stringify(searchRange)  %>;
-      var reportInfo = <%- JSON.stringify(reportInfo) %>;
+    <script>
+      // 돔 설정
+      const {
+        subSelectBoxDom,
+        tableHeaderDom,
+        tableBodyDom,
+        paginationDom,
+        subCategoryDom,
+      } = dom;
 
-      // console.log(reportInfo);
+      document.getElementById('subSelectBoxDom').innerHTML = subSelectBoxDom;
+      document.getElementById('tableHeaderDom').innerHTML = tableHeaderDom;
+      document.getElementById('tableBodyDom').innerHTML = tableBodyDom;
+      document.getElementById('paginationDom').innerHTML = paginationDom;
+      document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
 
-      var siteId = _.get(reportInfo, 'siteId');
-      var subCategory = _.get(reportInfo, 'subCategory');
-      var subCategoryId = _.get(reportInfo, 'subCategoryId');
-      var subCategoryName = _.get(reportInfo, 'subCategoryName');
+      // Master.Header 에서 정의한 내용 덮어쓰기
+      siteId = _.get(reportInfo, 'siteId');
+      subCategory = _.get(reportInfo, 'subCategory');
 
-      $('#subCategoryName').html(subCategoryName);
+      const { subCategoryId, subCategoryName } = reportInfo;
+
+      document.getElementById('subCategoryName').innerHTML = subCategoryName;
     </script>
 
     <script src="/js/contents/report/search.js"></script>
 
     <!-- 기본 데이터 세팅 -->
     <script>
-      checkSelectBoxOption('searchInterval', searchRange.searchInterval);
-      checkSelectBoxOption('searchType', searchRange.searchType);
-      checkSelectBoxOption('searchOption', searchRange.searchOption);
+      const { searchInterval, searchType, searchOption } = searchRange;
+      checkSelectBoxOption('searchInterval', searchInterval);
+      checkSelectBoxOption('searchType', searchType);
+      checkSelectBoxOption('searchOption', searchOption);
 
       // 검색 타입에 따라 적용
-      applySearchType(searchRange.searchType);
+      applySearchType(searchType);
     </script>
   </body>
 </html>

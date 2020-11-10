@@ -54,11 +54,9 @@ router.get(
 
     /** @@@@@@@@@@@ DOM @@@@@@@@@@ */
     // 인버터 현재 상태 데이터 동적 생성 돔
-    const inverterStatusListDom = domMakerInverter.makeInverterStatusList(
-      inverterStatusList,
-    );
+    const invStatusBodyDom = domMakerInverter.makeInverterStatusList(inverterStatusList);
 
-    _.set(req, 'locals.dom.inverterStatusListDom', inverterStatusListDom);
+    _.set(req, 'locals.dom.invStatusBodyDom', invStatusBodyDom);
 
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,
@@ -67,12 +65,9 @@ router.get(
       // subNavi: 'inverter',
     });
 
-    // BU.CLIN(chartList);
+    _.set(req, 'locals.dom.chartDomList', chartDomList);
+    _.set(req, 'locals.chartList', chartList);
 
-    _.set(req, 'locals.dom.divDomList', chartDomList);
-    _.set(req, 'locals.madeLineChartList', chartList);
-
-    // BU.CLIN(req.locals);
     res.render('./inverter/inverter', req.locals);
   }),
 );

@@ -15,7 +15,7 @@ const DEFAULT_SEARCH_TYPE = 'days';
 // Report 데이터 간 Grouping 할 단위 (min: 1분, min10: 10분, hour: 1시간, day: 일일, month: 월, year: 년 )
 const DEFAULT_SEARCH_INTERVAL = 'hour';
 const DEFAULT_SEARCH_OPTION = 'merge';
-const DEFAULT_CATEGORY = 'inverter';
+// const DEFAULT_CATEGORY = 'inverter';
 
 /** @type {projectConfig} */
 const pConfig = global.projectConfig;
@@ -33,7 +33,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     // req.param 값 비구조화 할당
     const { siteId } = req.locals.mainInfo;
-    const { subCategory = DEFAULT_CATEGORY } = req.params;
+    const { subCategory = subCategoryList[0].subCategory } = req.params;
 
     // console.time('Trend Middleware');
     /** @type {BiModule} */
@@ -71,12 +71,15 @@ router.get(
 
     // BU.CLI(searchRange);
 
-    BU.CLI(subCategoryList);
+    // BU.CLI(subCategoryList);
     // 레포트 페이지에서 기본적으로 사용하게 될 정보
     const trendInfo = {
       siteId,
       subCategory,
-      subCategoryName: _.find(subCategoryList, { subCategory }).name,
+      subCategoryName: _.chain(subCategoryList)
+        .find({ subCategory })
+        .get('btnName', '')
+        .value(),
       strStartDateInputValue: searchRange.strStartDateInputValue,
       strEndDateInputValue: searchRange.strEndDateInputValue,
       searchType,
@@ -90,50 +93,34 @@ router.get(
   }),
 );
 
-/** 인버터 트렌드 */
+/** 트렌드 */
 router.get(
-  ['/', '/:siteId', '/:siteId/inverter'],
-  asyncHandler(async (req, res) => {
+  ['/', '/:siteId', '/:siteId/:subCategory'],
+  asyncHandler(async (req, res, next) => {
     const {
       searchRange,
       mainInfo: { siteId },
+      trendInfo: { subCategory, subCategoryName },
     } = req.locals;
+
+    // 서브 카테고리 이름이 없을 경우 존재하지 않는 href로 판단
+    if (subCategoryName.length === 0) {
+      return next();
+    }
 
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,
       siteId,
       mainNavi: 'trend',
-      subNavi: 'inverter',
+      subNavi: subCategory,
     });
 
-    _.set(req, 'locals.dom.divDomList', chartDomList);
+    _.set(req, 'locals.dom.chartDomList', chartDomList);
 
-    _.set(req, 'locals.madeLineChartList', chartList);
+    _.set(req, 'locals.chartList', chartList);
 
-    res.render('./trend/inverterTrend', req.locals);
+    res.render('./trend/trend', req.locals);
   }),
 );
 
-/** 생육 환경 트렌드 */
-router.get(
-  ['/:siteId/sensor'],
-  asyncHandler(async (req, res) => {
-    const {
-      mainInfo: { siteId },
-      searchRange,
-    } = req.locals;
-
-    const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
-      searchRange,
-      siteId,
-      mainNavi: 'trend',
-      subNavi: 'sensor',
-    });
-
-    _.set(req, 'locals.dom.divDomList', chartDomList);
-    _.set(req, 'locals.madeLineChartList', chartList);
-
-    res.render('./trend/sensorTrend', req.locals);
-  }),
-);
 module.exports = router;

@@ -86,9 +86,9 @@ const defaultDom = {
       '<th rowspan=<%= rowsPan %>><%= title %><%= dataUnit %></th>',
     );
 
-    const staticDom = staticTitleList.map(title =>
-      staticTitleTemplate({ title, rowsPan: 2 }),
-    );
+    const staticDom = staticTitleList
+      .map(title => staticTitleTemplate({ title, rowsPan: 2 }))
+      .join('');
 
     // 대분류 Header Dom 생성
     const mainTitleDom = _.chain(mainTitleList)
@@ -112,11 +112,11 @@ const defaultDom = {
       titleInfo.dataUnit = _.isNil(titleInfo.dataUnit) ? '' : `(${titleInfo.dataUnit})`;
       // 기존 타이틀 정보에 열 병합 추가 후 Dom 생성
       return subTitleTemplate(_.assign(titleInfo, { rowsPan }));
-    });
+    }).join('');
 
     return `
       <tr>
-        ${_.concat(staticDom, mainTitleDom)}
+        ${_.concat(staticDom, mainTitleDom).join('')}
       </tr>
       <tr>
         ${subTitleDom}
@@ -177,19 +177,21 @@ const defaultDom = {
     });
 
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
-    return dataRows.map(dataRow => {
-      bodyConfigList.forEach(bodyConfig => {
-        const { dataKey } = bodyConfig;
-        let calcData = _.get(dataRow, [dataKey]);
-        // 데이터 변형 목록에 있는지 확인
-        if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
-          calcData = this.refineData(calcData, bodyConfig);
-        }
-        _.set(dataRow, [dataKey], calcData);
-      });
+    return dataRows
+      .map(dataRow => {
+        bodyConfigList.forEach(bodyConfig => {
+          const { dataKey } = bodyConfig;
+          let calcData = _.get(dataRow, [dataKey]);
+          // 데이터 변형 목록에 있는지 확인
+          if (_.findIndex(calcBodyConfigList, bodyConfig) !== -1) {
+            calcData = this.refineData(calcData, bodyConfig);
+          }
+          _.set(dataRow, [dataKey], calcData);
+        });
 
-      return bodyTemplate(dataRow);
-    });
+        return bodyTemplate(dataRow);
+      })
+      .join('');
   },
 
   /**
@@ -197,7 +199,7 @@ const defaultDom = {
    * @param {string[]} dataKeyList json 객체에서 가져올 key 목록
    */
   makeStaticBodyElements(dataKeyList) {
-    return _.map(dataKeyList, dataKey => `<td><%= ${dataKey} %></td>`).toString();
+    return _.map(dataKeyList, dataKey => `<td><%= ${dataKey} %></td>`).join('');
   },
 
   /**
@@ -328,18 +330,20 @@ const defaultDom = {
     );
 
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
-    return dataRows.map((dataRow, index) => {
-      // 첫번째 시작 번호가 숫자일 경우
-      _.isNumber(page) && _.set(dataRow, 'num', firstRowNum + index + 1);
+    return dataRows
+      .map((dataRow, index) => {
+        // 첫번째 시작 번호가 숫자일 경우
+        _.isNumber(page) && _.set(dataRow, 'num', firstRowNum + index + 1);
 
-      blockTableOptions.forEach(bodyConfig => {
-        const { dataKey } = bodyConfig;
+        blockTableOptions.forEach(bodyConfig => {
+          const { dataKey } = bodyConfig;
 
-        dataRow[dataKey] = this.refineData(dataRow[dataKey], bodyConfig);
-      });
+          dataRow[dataKey] = this.refineData(dataRow[dataKey], bodyConfig);
+        });
 
-      return bodyTemplate(dataRow);
-    });
+        return bodyTemplate(dataRow);
+      })
+      .join('');
   },
 
   /**
@@ -359,7 +363,7 @@ const defaultDom = {
         selectedSubCategory === subCategory ? 'btn-success' : 'btn-default';
 
       return subCategoryBtnTemplate(_.assign(categoryInfo, { btnType, btnClass }));
-    });
+    }).join('');
   },
 
   /**

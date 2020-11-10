@@ -1,61 +1,60 @@
 ﻿<!DOCTYPE html>
 <html>
+  <head>
+    <!-- Default Js -->
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+  </head>
 
-<head>
-  <!-- Default Js -->
-  <%- include("../master/head.ejs") %>
-  <script src="/js/contents/master/mainUtil.js"></script>
-</head>
-
-<body>
-  <div id="wrap" class="wrap hidden">
-    <!-- Header -->
-    <%- include("../master/header.ejs") %>
-    <!--메인-->
-    <div class="container_body">
-      <div class="container_row flex_dir_col">
-        <p class="table_desc_area">
-          생육환경 모니터링 측정시간 &nbsp; <span id="sensorMeasureTime"> 2018-10-17 10:27:00</span>
-        </p>
-        <div class="table-responsive default_area">
-          <table class="table table-bordered number_table">
-            <thead id="sensorEnvHeaderDom">
-              <tr>
-                <th></th>
-                <th>조도(lx)</th>
-                <th>이산화탄소(ppm)</th>
-                <th>토양EC(%)</th>
-                <th>토양온도(℃)</th>
-                <th>토양습도(%)</th>
-                <th>외기온도(℃)</th>
-                <th>외기습도(%)</th>
-                <th>수평일사량(W/m2)</th>
-                <th>풍향</th>
-                <th>풍속(km/h)</th>
-                <th>강우량(mm/hr)</th>
-                <th>강우상황</th>
-              </tr>
-            </thead>
-            <tbody id="sensorEnvBodyDom">
-            </tbody>
-          </table>
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row flex_dir_col">
+          <p class="table_desc_area">
+            생육환경 모니터링 측정시간 &nbsp;
+            <span id="measureTime"> 2018-10-17 10:27:00</span>
+          </p>
+          <div class="table-responsive default_area">
+            <table class="table table-bordered number_table">
+              <thead id="sensorEnvHeaderDom">
+                <tr>
+                  <th></th>
+                  <th>조도(lx)</th>
+                  <th>이산화탄소(ppm)</th>
+                  <th>토양EC(%)</th>
+                  <th>토양온도(℃)</th>
+                  <th>토양습도(%)</th>
+                  <th>외기온도(℃)</th>
+                  <th>외기습도(%)</th>
+                  <th>수평일사량(W/m2)</th>
+                  <th>풍향</th>
+                  <th>풍속(km/h)</th>
+                  <th>강우량(mm/hr)</th>
+                  <th>강우상황</th>
+                </tr>
+              </thead>
+              <tbody id="sensorEnvBodyDom"></tbody>
+            </table>
+          </div>
         </div>
       </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
     </div>
-    <!--하단1-->
 
-    <%- include("../master/footer.ejs") %>
+    <script>
+      const measureTime = <%- JSON.stringify(measureInfo.measureTime) %>;
+      const sensorEnvHeaderDom = <%- JSON.stringify(dom.sensorEnvHeaderDom) %>;
+      const sensorEnvBodyDom = <%- JSON.stringify(dom.sensorEnvBodyDom) %>;
+    </script>
 
-  </div>
-
-  <script>
-    // 센서 측정 시간 입력
-    document.getElementById('sensorMeasureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
-
-    // 작물 생육환경 테이블 구성
-    $('#sensorEnvHeaderDom').html(<%- JSON.stringify(dom.sensorEnvHeaderDom) %>)
-    $('#sensorEnvBodyDom').html(<%- JSON.stringify(dom.sensorEnvBodyDom) %>)
-  </script>
-</body>
-
+    <script>
+      document.getElementById('measureTime').innerHTML = measureTime;
+      document.getElementById('sensorEnvHeaderDom').innerHTML = sensorEnvHeaderDom;
+      document.getElementById('sensorEnvBodyDom').innerHTML = sensorEnvBodyDom;
+    </script>
+  </body>
 </html>

@@ -72,6 +72,7 @@ router.get(
       },
       mainSiteList,
     );
+
     _.set(req, 'locals.dom.sensorEnvHeaderDom', sensorEnvHeaderDom);
     _.set(req, 'locals.dom.sensorEnvBodyDom', sensorEnvBodyDom);
 

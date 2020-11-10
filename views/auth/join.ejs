@@ -130,16 +130,16 @@
 
   <script>
     // 사이트 목록 동적 생성
-    placeList.forEach(function(place) {
+    placeList.forEach(function (place) {
       $('#selectPlace').append(`<option value=${place.mainSeq}>${place.name}</option>`);
     });
     // 가입 취소 시 로그인 창으로
-    $('#historyBack').on('click', function() {
+    $('#historyBack').on('click', function () {
       location.href = window.location.origin + '/auth/login';
     });
 
     // 회원 가입 처리
-    $('#join-submit').click(function(e) {
+    $('#join-submit').click(function (e) {
       e.preventDefault();
 
       if ($('#inputUserid').val() === '') {
@@ -197,9 +197,7 @@
       var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
       if (!pwReg.test($('#inputPassword').val())) {
         alert('비밀번호는 8~16자 영문+숫자+특수문자를 사용하세요.');
-        $('#inputPassword')
-          .val('')
-          .focus();
+        $('#inputPassword').val('').focus();
         return false;
       }
 
@@ -224,9 +222,7 @@
       var cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
       if (!cellPhoneReg.test($('#inputTel').val())) {
         alert('휴대폰 형식에 맞지 않습니다.');
-        $('#inputTel')
-          .val('')
-          .focus();
+        $('#inputTel').val('').focus();
         return false;
       }
 
@@ -237,32 +233,31 @@
 
   <!-- 휴대폰 번호 - 기호 자동 삽입 및 유효성 체크 정규식 -->
   <script type="text/javascript">
-    $(function() {
+    $(function () {
       $('#inputTel')
-        .on('keydown', function(e) {
+        .on('keydown', function (e) {
           // 숫자만 입력받기
-          var trans_num = $(this)
-            .val()
-            .replace(/-/gi, '');
+          var trans_num = $(this).val().replace(/-/gi, '');
           var k = e.keyCode;
 
           // 휴대폰 번호 자릿수를 넘어서는 입력 불가
           if (
             trans_num.length >= 11 &&
             ((k >= 48 && k <= 126) ||
-              ((k >= 12592 && k <= 12687) || k === 32 || k === 229 || (k >= 45032 && k <= 55203)))
+              (k >= 12592 && k <= 12687) ||
+              k === 32 ||
+              k === 229 ||
+              (k >= 45032 && k <= 55203))
           ) {
             e.preventDefault();
           }
         })
-        .on('blur', function() {
+        .on('blur', function () {
           // 포커스를 잃었을때 실행합니다.
           if ($(this).val() === '') return;
 
           // 기존 번호에서 - 를 삭제합니다.
-          var trans_num = $(this)
-            .val()
-            .replace(/-/gi, '');
+          var trans_num = $(this).val().replace(/-/gi, '');
 
           // 입력값이 있을때만 실행합니다.
           if (trans_num != null && trans_num != '') {

@@ -96,12 +96,12 @@ module.exports = {
     const firstRowNum = (page - 1) * pageListCount;
 
     // 동적으로 Table Header를 구성하기 위한 템플릿 초안 정의
-    const headerTemplate = _.template('<th style="width:7%"><%= ndName %>(<%= dataUnit %>)</th>');
+    const headerTemplate = _.template(
+      '<th style="width:7%"><%= ndName %>(<%= dataUnit %>)</th>',
+    );
 
     const pickNdIdList = _.filter(pickedNodeDefIdList, ndId => {
-      return _.chain(_.find(nodeDefStorage, { ndId }))
-        .get('ndName', '')
-        .value();
+      return _.chain(_.find(nodeDefStorage, { ndId })).get('ndName', '').value();
     });
 
     // Picked목록에 따라 동적 Header 생성
@@ -112,6 +112,7 @@ module.exports = {
         }),
       )
       .map(dom => headerTemplate(dom))
+      .join('')
       .value();
 
     // 만들어진 동적 Table Header Dom
@@ -124,35 +125,39 @@ module.exports = {
     `;
 
     // Picked 목록에 따라 동적으로 만들 Table Tr TD 템플릿 초안 정의
-    const dynamicTemplate = pickNdIdList.map(key => `<td><%= ${key} %></td>`);
+    const dynamicTemplate = pickNdIdList.map(key => `<td><%= ${key} %></td>`).join('');
     // 기본으로 생성할 TR 열 틀에 해당 동적 템플릿을 삽입
     const sensorReportTemplate = _.template(`
         <tr>
         <td class="text-center"><%= num %></td>
         <td class="text-center"><%= group_date %></td>
-        ${dynamicTemplate.toString()}
+        ${dynamicTemplate}
       </tr>
     `);
 
     // BU.CLI(sensorReportTemplate);
     // 선택한 페이지에 따라 생성할 Dom을 생성하기 위해 기존 ViewStrDateList를 자름
-    const sensorReportBodyDom = strGroupDateList.map((row, index) => {
-      // 실제 데이터를 가져올 Row Index 설정
-      const rowNum = _.sum([firstRowNum, index, 1]);
-      const sensorData = {
-        num: rowNum, // 사용자에게 보여질 번호는 + 1
-        group_date: row, // row당 보여질 일시
-      };
-      // ND_TARGET_ID에 따라 그루핑된 레포트 저장소를 순회하면서 해당 ndId를 Key로 한 데이터 확장
-      _.forEach(nodeDefStorage, reportStorage => {
-        _.assign(sensorData, { [reportStorage.ndId]: reportStorage.mergedAvgList[index] });
-      });
+    const sensorReportBodyDom = strGroupDateList
+      .map((row, index) => {
+        // 실제 데이터를 가져올 Row Index 설정
+        const rowNum = _.sum([firstRowNum, index, 1]);
+        const sensorData = {
+          num: rowNum, // 사용자에게 보여질 번호는 + 1
+          group_date: row, // row당 보여질 일시
+        };
+        // ND_TARGET_ID에 따라 그루핑된 레포트 저장소를 순회하면서 해당 ndId를 Key로 한 데이터 확장
+        _.forEach(nodeDefStorage, reportStorage => {
+          _.assign(sensorData, {
+            [reportStorage.ndId]: reportStorage.mergedAvgList[index],
+          });
+        });
 
-      BU.toLocaleString(sensorData);
+        BU.toLocaleString(sensorData);
 
-      // 확장한 sensorData를 템플릿에 반영
-      return sensorReportTemplate(sensorData);
-    });
+        // 확장한 sensorData를 템플릿에 반영
+        return sensorReportTemplate(sensorData);
+      })
+      .join('');
 
     return {
       sensorReportHeaderDom,
@@ -170,10 +175,14 @@ module.exports = {
 
     const { pickedSensorKeys = [], viewStrDateList = [], searchRangeInfo } = reportOption;
 
-    const headerTemplate = _.template('<th style="width:7%"><%= ndName %><%= dataUnit %></th>');
+    const headerTemplate = _.template(
+      '<th style="width:7%"><%= ndName %><%= dataUnit %></th>',
+    );
 
     const dynamicHeaderDom = pickedSensorKeys.map(key => {
-      const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, { ndId: key });
+      const { ndName = '', dataUnit = '' } = _.find(reportStoragesByNdName, {
+        ndId: key,
+      });
       return headerTemplate({
         ndName,
         dataUnit: dataUnit.length ? `(${dataUnit})` : '',
@@ -252,29 +261,31 @@ module.exports = {
       </tr>
     `);
 
-    const tableBodyDom = inverterReportRows.map((dataRow, index) => {
-      defaultDom.applyCalcDataRow({
-        dataRow,
-        bodyConfigList: blockViewList,
-      });
+    const tableBodyDom = inverterReportRows
+      .map((dataRow, index) => {
+        defaultDom.applyCalcDataRow({
+          dataRow,
+          bodyConfigList: blockViewList,
+        });
 
-      const pvKw = _.get(dataRow, 'avg_pv_kw', '');
-      const powerKw = _.get(dataRow, 'avg_power_kw', '');
+        const pvKw = _.get(dataRow, 'avg_pv_kw', '');
+        const powerKw = _.get(dataRow, 'avg_power_kw', '');
 
-      // 번호
-      _.set(dataRow, 'num', firstRowNum + index + 1);
-      // 발전 효율 (계산하여 재정의 함)
-      const avgPF = _.divide(powerKw, pvKw);
-      _.set(
-        dataRow,
-        'avg_p_f',
-        Number.isNaN(avgPF) || avgPF === Infinity ? '-' : _.round(avgPF * 100, 1),
-      );
+        // 번호
+        _.set(dataRow, 'num', firstRowNum + index + 1);
+        // 발전 효율 (계산하여 재정의 함)
+        const avgPF = _.divide(powerKw, pvKw);
+        _.set(
+          dataRow,
+          'avg_p_f',
+          Number.isNaN(avgPF) || avgPF === Infinity ? '-' : _.round(avgPF * 100, 1),
+        );
 
-      // BU.toLocaleString(dataRow);
+        // BU.toLocaleString(dataRow);
 
-      return bodyTemplate(dataRow);
-    });
+        return bodyTemplate(dataRow);
+      })
+      .join('');
 
     return {
       tableHeaderDom,

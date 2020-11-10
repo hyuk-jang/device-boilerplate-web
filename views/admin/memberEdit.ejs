@@ -7,9 +7,9 @@
   </head>
   <body>
     <script>
-      var member = <%- JSON.stringify(member) %>;
-      var user = <%- JSON.stringify(user) %>;
-      var memberIdx = <%- JSON.stringify(memberIdx) %>;
+      const member = <%- JSON.stringify(member) %>;
+      const user = <%- JSON.stringify(user) %>;
+      const memberIdx = <%- JSON.stringify(memberIdx) %>;
     </script>
     <div id="wrap" class="wrap hidden">
       <!-- Header -->
@@ -17,7 +17,7 @@
       <!--메인-->
       <div class="container_body">
         <div class="container_row flex_jus_center">
-          <div class="col-sm-6 ">
+          <div class="col-sm-6">
             <form role="form" id="memberEdit" action="" method="post">
               <input type="hidden" name="_method" value="put" />
               <div class="form-group">
@@ -108,40 +108,37 @@
     </div>
     <!-- 관리 -->
     <script>
-      setDomElementValueWithJson(document.getElementById('memberEdit'), member, 'value', 'id');
+      setDomElementValueWithJson(
+        document.getElementById('memberEdit'),
+        member,
+        'value',
+        'id',
+      );
 
       document.getElementById('memberEdit').action = memberIdx;
       // document.getElementById('memberEdit').action = memberIdx;
       // 가입 취소 시 로그인 창으로
-      $('#historyBack').on('click', function() {
+      $('#historyBack').on('click', function () {
         location.href = window.location.origin + '/admin';
       });
 
-      $('#grade')
-        .val(_.toString(member.grade))
-        .prop('selected', true);
+      $('#grade').val(_.toString(member.grade)).prop('selected', true);
 
-      $('#isDeleted')
-        .val(_.toString(member.is_deleted))
-        .prop('selected', true);
+      $('#isDeleted').val(_.toString(member.is_deleted)).prop('selected', true);
 
-      $('#isAccountLock')
-        .val(_.toString(member.is_account_lock))
-        .prop('selected', true);
+      $('#isAccountLock').val(_.toString(member.is_account_lock)).prop('selected', true);
 
       // 정보 수정 시
-      document.querySelector('#submitUpdate').addEventListener('click', function() {
+      document.querySelector('#submitUpdate').addEventListener('click', function () {
         // 관리자 비밀번호 수정 로직
-        var $inputPassword = $('#inputPassword');
+        const $inputPassword = $('#inputPassword');
 
         // 비밀번호 돔이 존재하고 해당 비밀번호를 변경하고자 할 경우
         if (!_.isEmpty($inputPassword) && $inputPassword.val() !== '') {
-          var pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+          const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
           if (!pwReg.test($('#inputPassword').val())) {
             alert('비밀번호는 8~16자 숫자+영문자+특수문자를 사용하세요.');
-            $('#inputPassword')
-              .val('')
-              .focus();
+            $('#inputPassword').val('').focus();
             return false;
           }
 
@@ -158,7 +155,7 @@
           }
         }
 
-        var form = document.querySelector('form');
+        const form = document.querySelector('form');
         form.submit();
       });
     </script>

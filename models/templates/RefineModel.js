@@ -255,10 +255,15 @@ class RefineModel extends BiModule {
     const mainWhere = _.isNumber(mainSeq) ? { main_seq: mainSeq } : null;
 
     /** @type {V_DV_PLACE_RELATION[]} */
-    const placeRelationRows = await this.biDevice.getTable(
+    let placeRelationRows = await this.biDevice.getTable(
       'v_dv_place_relation',
       { ...mainWhere, is_sensor: 1 },
       false,
+    );
+
+    placeRelationRows = _.unionBy(
+      placeRelationRows,
+      placeRelationInfo => placeRelationInfo.node_seq,
     );
 
     // console.time('getSensorReport');

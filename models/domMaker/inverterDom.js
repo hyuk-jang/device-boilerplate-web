@@ -72,6 +72,6 @@ module.exports = {
 
       return inverterStatusTemplate(inverterStatusInfo);
     });
-    return madeDom;
+    return madeDom.join('');
   },
 };

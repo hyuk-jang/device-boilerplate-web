@@ -107,7 +107,7 @@ module.exports = {
       }
       return siteOptionTemplate({ href, name, isSelected, siteParam });
     });
-    return madeDom;
+    return madeDom.join('');
   },
 
   makeShadowDom() {},

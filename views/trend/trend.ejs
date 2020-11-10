@@ -22,32 +22,31 @@
         </div>
         <%- include("../master/search.ejs") %>
         <div class="container_row flex_dir_col mt0">
-          <p class="table_desc_area">
-            인버터 트렌드
-          </p>
-          <div id="divDomArea" class="flex_box"></div>
+          <p id="chartAreaTitle" class="table_desc_area"></p>
+          <div id="chartDomList" class="flex_box"></div>
         </div>
       </div>
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
     <script>
-      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
-      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+      const chartDomList = <%- JSON.stringify(dom.chartDomList) %>;
+      const subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
 
-      $('#divDomArea').html(divDomList)
+      const chartList = <%- JSON.stringify(chartList) %>;
+      const searchRange = <%- JSON.stringify(searchRange) %>;
+      const trendInfo = <%- JSON.stringify(trendInfo) %>;
+      const subCategoryName = _.get(trendInfo, 'subCategoryName');
 
-      madeLineChartList.forEach(function (chartInfo) {
+      // 차트를 위치시킬 돔 생성
+      document.getElementById('chartDomList').innerHTML = chartDomList;
+      // 생성된 돔에 차트 구현
+      chartList.forEach(function (chartInfo) {
         makeLineChart(chartInfo)
       });
 
-      // 초기 시작시 라디오 체크버튼 클릭처리
-      var searchRange = <%- JSON.stringify(searchRange) %>;
-      var trendInfo = <%- JSON.stringify(trendInfo) %>;
-      var subCategory = _.get(trendInfo, 'subCategory');
-
-      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
-      $('#categoryName').html(<%- JSON.stringify(trendInfo.subCategoryName) %>);
+      document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
+      document.getElementById('chartAreaTitle').innerText = `${subCategoryName} 트렌드`;
     </script>
 
     <script src="/js/contents/report/search.js"></script>
@@ -59,10 +58,6 @@
 
       // 검색 타입에 따라 적용
       applySearchType(searchRange.searchType);
-    </script>
-
-    <script>
-      // 차트를 그리기 위한 데이터
     </script>
   </body>
 </html>

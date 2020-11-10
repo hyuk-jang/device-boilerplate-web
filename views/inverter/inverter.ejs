@@ -55,7 +55,7 @@
                   <th>동작 여부</th>
                 </tr>
               </thead>
-              <tbody id="inverterStatus"></tbody>
+              <tbody id="invStatusBodyDom"></tbody>
             </table>
           </div>
         </div>
@@ -63,26 +63,32 @@
           <p class="table_desc_area">
             금일 시간 별 전력
           </p>
-          <article id="divDomArea" class="lineChart_box default_area"></article>
+          <article id="chartDomList" class="lineChart_box default_area"></article>
         </div>
       </div>
       <!--하단1-->
-
       <%- include("../master/footer.ejs") %>
     </div>
     <script>
+      // 계측 시간
+      const measureTime = <%- JSON.stringify(measureInfo.measureTime) %>;
+      // 인버터 현재 상태 Table Body Dom
+      const invStatusBodyDom = <%- JSON.stringify(dom.invStatusBodyDom) %>;
+      // 인버터 차트 돔 영역
+      const chartDomList = <%- JSON.stringify(dom.chartDomList) %>;
+      // 차트를 그릴 내용
+      const chartList = <%- JSON.stringify(chartList) %>;
+
       // 측정 시간 입력
-      document.getElementById('measureTime').innerHTML = <%- JSON.stringify(measureInfo.measureTime) %>;
+      document.getElementById('measureTime').innerHTML = measureTime;
 
       // 인버터 현재 상태 데이터 테이블 생성
-      $('#inverterStatus').html(<%- JSON.stringify(dom.inverterStatusListDom) %>)
+      document.getElementById('invStatusBodyDom').innerHTML = invStatusBodyDom;
 
-      var divDomList = <%- JSON.stringify(dom.divDomList) %>;
-      var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
-
-      $('#divDomArea').html(divDomList)
-
-      madeLineChartList.forEach(function (chartInfo) {
+      // 차트를 위치시킬 돔 생성
+      document.getElementById('chartDomList').innerHTML = chartDomList;
+      // 생성된 돔에 차트 구현
+      chartList.forEach(function (chartInfo) {
         makeLineChart(chartInfo)
       });
     </script>

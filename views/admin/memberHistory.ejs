@@ -60,49 +60,51 @@
   </body>
 
   <script>
-    var reportRows = <%- JSON.stringify(reportRows) %>;
-    var paginationInfo = <%- JSON.stringify(paginationInfo) %>;
+    const dom = <%- JSON.stringify(dom) %>;
 
-    var firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
+    const reportRows = <%- JSON.stringify(reportRows) %>;
+    const paginationInfo = <%- JSON.stringify(paginationInfo) %>;
+  </script>
 
-    $('#paginationDom').html(<%- JSON.stringify(dom.paginationDom) %>);
+  <script>
+    // 돔 설정
+    const { paginationDom, subCategoryDom } = dom;
 
-    $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+    const firstRowNum = (paginationInfo.page - 1) * paginationInfo.pageListCount;
+    document.getElementById('paginationDom').innerHTML = paginationDom;
+    document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
   </script>
 
   <script src="/js/contents/report/search.js"></script>
 
   <script>
     //2. htmlTemplate을 가져온후 Handlebars로 compile 한다.
-    var commentTemplate = document.querySelector('#bodyTemplate').innerHTML;
-    var commentBindTemplate = Handlebars.compile(commentTemplate);
+    const commentTemplate = document.querySelector('#bodyTemplate').innerHTML;
+    const commentBindTemplate = Handlebars.compile(commentTemplate);
 
     //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
-    var tableBody = _.map(reportRows, function(reportRow, index) {
-      var rowNumber = firstRowNum + index + 1;
+    const tableBody = _.map(reportRows, function (reportRow, index) {
+      const rowNumber = firstRowNum + index + 1;
       Object.assign(reportRow, { rowsNumber: rowNumber });
       reportRow.is_deleted = reportRow.is_deleted === 0 ? 'X' : 'O';
       reportRow.is_account_lock = reportRow.is_account_lock === 0 ? 'X' : 'O';
 
       return commentBindTemplate(reportRow);
-    });
+    }).join('');
 
     // 4. 리턴받은 html을 target에 innerHTML로 세팅한다.
-    var commentUl = document.querySelector('#tableBodyDom');
-    $('#tableBodyDom').html(tableBody);
+    const commentUl = document.querySelector('#tableBodyDom');
+    document.getElementById('tableBodyDom').innerHTML = tableBody;
 
     // 조회한 쿼리스트링 가져옴
-    var searchInfo = paginationInfo.queryString;
+    const searchInfo = paginationInfo.queryString;
     // 쿼리스트링이 존재할 경우에만
     if (typeof searchInfo === 'object') {
       // 쿼리스트링 존재 수 만큼 반복하면서 selectBox 값 변경
-      _.forEach(searchInfo, function(value, key) {
-        var domElement = document.getElementById(key);
+      _.forEach(searchInfo, function (value, key) {
+        const domElement = document.getElementById(key);
         // domElement가 존재할 경우에만 실행
-        domElement &&
-          $(domElement)
-            .val(value)
-            .prop('selected', true);
+        domElement && $(domElement).val(value).prop('selected', true);
       });
     }
   </script>

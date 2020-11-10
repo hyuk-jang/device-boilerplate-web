@@ -52,6 +52,10 @@ select {
   cursor: pointer;
 }
 
+.cursorDefault {
+  cursor: default;
+}
+
 html {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -504,11 +508,11 @@ _:-ms-input-placeholder,
 }
 
 .map_control_box {
-  width: 1%;
+  /* width: 1%;
+  display: grid; */
   height: 9vw;
   margin: 5px;
   position: absolute;
-  display: grid;
   gap: 5px;
   z-index: 1;
 }

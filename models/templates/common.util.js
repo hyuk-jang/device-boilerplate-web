@@ -264,11 +264,13 @@ async function getDynamicChartDom(dynamicChartInfo) {
     }) && (chartInfo.series = []);
   });
 
-  const chartDomList = chartList.map(refinedChart =>
-    domTemplate({
-      domId: refinedChart.domId,
-    }),
-  );
+  const chartDomList = chartList
+    .map(refinedChart =>
+      domTemplate({
+        domId: refinedChart.domId,
+      }),
+    )
+    .join('');
 
   return {
     chartList,

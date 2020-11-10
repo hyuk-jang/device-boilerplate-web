@@ -1,6 +1,6 @@
 <script src="/js/panzoom.min.js"></script>
 <div class="map_control_box" id="mapControlBox">
-  <button id="updateIsApiClientConnImg" class="btn btn-danger btn-sm">
+  <button id="isApiClientConn" class="btn btn-danger btn-sm cursorDefault">
     <span class="glyphicon glyphicon-link"></span>
   </button>
   <!-- panzoom button-->
@@ -44,11 +44,11 @@
 
     const mCBoxOffset = $('#mapControlBox').offset();
 
-    $(window).scroll(() => {
-      $(document).scrollTop() > mCBoxOffset.top
-        ? $('#mapControlBox').css({ position: 'fixed', top: '0px' })
-        : $('#mapControlBox').css({ position: '', top: '' });
-    });
+    // $(window).scroll(() => {
+    //   $(document).scrollTop() > mCBoxOffset.top
+    //     ? $('#mapControlBox').css({ position: 'fixed', top: '0px' })
+    //     : $('#mapControlBox').css({ position: '', top: '' });
+    // });
   });
 
   // 모니터링 버튼 이벤트
@@ -58,12 +58,8 @@
     $('#wrap > header').toggleClass('hidden');
     $('#wrap > footer').toggleClass('hidden');
 
-    $('#monitoring_mode')
-      .children()
-      .toggleClass('glyphicon-fullscreen');
-    $('#monitoring_mode')
-      .children()
-      .toggleClass('glyphicon-remove');
+    $('#monitoring_mode').children().toggleClass('glyphicon-fullscreen');
+    $('#monitoring_mode').children().toggleClass('glyphicon-remove');
 
     // $('.svg_area').height(window.innerHeight);
     window.dispatchEvent(new Event('resize'));

@@ -17,20 +17,22 @@ module.exports = {
     const headerTemplate = _.template('<th><%= nd_target_name %>(<%= data_unit %>)</th>');
 
     // Picked목록에 따라 동적 Header 생성
-    const dynamicHeaderDom = _.concat(rowsNdIdList, rowspanNdIdList).map(key => {
-      const placeRelationRow = _.find(viewPlaceRelationRows, {
-        nd_target_id: key,
-      });
+    const dynamicHeaderDom = _.concat(rowsNdIdList, rowspanNdIdList)
+      .map(key => {
+        const placeRelationRow = _.find(viewPlaceRelationRows, {
+          nd_target_id: key,
+        });
 
-      // 해당 결과물이 없을 경우 ndId는 없는 것으로 판단하고 ndIdList 재조정
-      if (_.isUndefined(placeRelationRow)) {
-        _.pull(rowsNdIdList, key);
-        _.pull(rowspanNdIdList, key);
-        return false;
-      }
+        // 해당 결과물이 없을 경우 ndId는 없는 것으로 판단하고 ndIdList 재조정
+        if (_.isUndefined(placeRelationRow)) {
+          _.pull(rowsNdIdList, key);
+          _.pull(rowspanNdIdList, key);
+          return false;
+        }
 
-      return headerTemplate(placeRelationRow);
-    });
+        return headerTemplate(placeRelationRow);
+      })
+      .join('');
 
     // 만들어진 동적 Table Header Dom
     const sensorEnvHeaderDom = `
@@ -55,14 +57,14 @@ module.exports = {
     const partBodyTemplate = _.template(
       `<tr>
       <td class="table_title" title="<%= siteName %>"><%= siteName %></td>
-      ${dynamicRowsBodyTemplate.toString()}
+      ${dynamicRowsBodyTemplate.join('')}
       </tr>`,
     );
 
     const fullBodyTemplate = _.template(
       `<tr>
       <td class="table_title"><%= siteName %></td>
-      ${_.concat(dynamicRowsBodyTemplate, dynamicRowspanBodyTemplate).toString()}
+      ${_.concat(dynamicRowsBodyTemplate, dynamicRowspanBodyTemplate).join('')}
       </tr>`,
     );
 
@@ -72,7 +74,9 @@ module.exports = {
       const mainName = _.get(siteInfo, 'm_name', '');
 
       // 공통으로 들어갈 외기 환경 부분을 추출
-      const rowspanSensor = _.assign(..._.map(gPlaRelRows, row => _.pick(row, rowspanNdIdList)));
+      const rowspanSensor = _.assign(
+        ..._.map(gPlaRelRows, row => _.pick(row, rowspanNdIdList)),
+      );
 
       // 데이터 가공
       this.convertData(rowspanSensor);
@@ -87,10 +91,7 @@ module.exports = {
       // _.set(outsideSensor, 'rainStatus', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
 
       // 센서 군 장소 목록 길이
-      const rowsLength = _(gPlaRelRows)
-        .map('place_seq')
-        .uniq()
-        .value().length;
+      const rowsLength = _(gPlaRelRows).map('place_seq').uniq().value().length;
 
       // 장소 단위로 그룹
       let isFirst = true;
@@ -111,7 +112,9 @@ module.exports = {
             // ndId에 맞는 Rows. ex) [{lux: 15}, {lux: 23}]
             const filterdRows = _.filter(pRowsSensorDataRows, row => _.has(row, ndId));
             // 데이터가 존재할 경우에만 평균치 객체 생성
-            return filterdRows.length ? { [ndId]: _.round(_.meanBy(filterdRows, ndId), 1) } : {};
+            return filterdRows.length
+              ? { [ndId]: _.round(_.meanBy(filterdRows, ndId), 1) }
+              : {};
           }),
         );
 
@@ -131,9 +134,9 @@ module.exports = {
           // p_target_code: lastCode = '',
         } = _.head(pRows);
 
-        const siteName = `${mainName ? ` ${mainName}` : ''}${subName ? ` ${subName}` : ''}${
-          lastName ? ` ${lastName}` : ''
-        }`;
+        const siteName = `${mainName ? ` ${mainName}` : ''}${
+          subName ? ` ${subName}` : ''
+        }${lastName ? ` ${lastName}` : ''}`;
 
         _.set(rowsSensor, 'siteName', siteName);
 
@@ -148,12 +151,12 @@ module.exports = {
         return partBodyTemplate(rowsSensor);
       });
 
-      return sensorTableTR;
+      return sensorTableTR.join('');
     });
 
     return {
       sensorEnvHeaderDom,
-      sensorEnvBodyDom: _.flatten(sensorEnvBodyDomList),
+      sensorEnvBodyDom: _.flatten(sensorEnvBodyDomList).join(''),
     };
 
     // return _.flatten(sensorEnvBodyDomList);
@@ -246,74 +249,77 @@ module.exports = {
     ];
 
     // main Site 지점별 목록 순회
-    const madeDom = _.map(groupByMainSeqRelation, (groupPlaceRelationRows, strMainSeq) => {
-      const siteInfo = _.find(mainSiteList, { siteId: strMainSeq });
-      const mainName = _.get(siteInfo, 'm_name', '');
-      // 공통으로 들어갈 외기 환경 부분을 추출
-      const outsidePlaceRows = groupPlaceRelationRows.filter(row =>
-        _.includes(row.place_id, 'OS_'),
-      );
+    const madeDom = _.map(
+      groupByMainSeqRelation,
+      (groupPlaceRelationRows, strMainSeq) => {
+        const siteInfo = _.find(mainSiteList, { siteId: strMainSeq });
+        const mainName = _.get(siteInfo, 'm_name', '');
+        // 공통으로 들어갈 외기 환경 부분을 추출
+        const outsidePlaceRows = groupPlaceRelationRows.filter(row =>
+          _.includes(row.place_id, 'OS_'),
+        );
 
-      const outsideSensor = _.assign(..._.map(outsidePlaceRows, row => _.pick(row, OUTSIDE_LIST)));
+        const outsideSensor = _.assign(
+          ..._.map(outsidePlaceRows, row => _.pick(row, OUTSIDE_LIST)),
+        );
 
-      // 풍향 재설정
-      _.set(
-        outsideSensor,
-        'windDirection',
-        BU.getWindDirection(_.get(outsideSensor, 'windDirection', '')),
-      );
+        // 풍향 재설정
+        _.set(
+          outsideSensor,
+          'windDirection',
+          BU.getWindDirection(_.get(outsideSensor, 'windDirection', '')),
+        );
 
-      if (_.get(outsideSensor, 'isRain', '') === 1) {
-        _.set(outsideSensor, 'rainStatus', 'O');
-      } else if (_.get(outsideSensor, 'isRain', '') === 0) {
-        _.set(outsideSensor, 'rainStatus', 'X');
-      } else {
-        _.set(outsideSensor, 'rainStatus', '-');
-      }
+        if (_.get(outsideSensor, 'isRain', '') === 1) {
+          _.set(outsideSensor, 'rainStatus', 'O');
+        } else if (_.get(outsideSensor, 'isRain', '') === 0) {
+          _.set(outsideSensor, 'rainStatus', 'X');
+        } else {
+          _.set(outsideSensor, 'rainStatus', '-');
+        }
 
-      _.forEach(OUTSIDE_LIST, ndId => {
-        !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
-      });
-
-      // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
-      // _.set(outsideSensor, 'rainStatus', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
-
-      // 센서 군 장소 목록 길이
-      const rowsLength = _(groupPlaceRelationRows)
-        .map('place_seq')
-        .uniq()
-        .value().length;
-
-      // 장소 단위로 그룹
-      let isFirst = true;
-      const groupByPlaceSeqRelation = _.groupBy(groupPlaceRelationRows, 'place_seq');
-
-      const sensorTable = _.map(groupByPlaceSeqRelation, pRows => {
-        const insideSensor = _.assign(..._.map(pRows, row => _.pick(row, INSIDE_LIST)));
-        // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
-        _.forEach(INSIDE_LIST, ndId => {
-          !_.has(insideSensor, ndId) && _.set(insideSensor, ndId, '');
+        _.forEach(OUTSIDE_LIST, ndId => {
+          !_.has(outsideSensor, ndId) && _.set(outsideSensor, ndId, '');
         });
 
-        // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
-        const { pd_target_name: subName, p_target_name: lastName } = _.head(pRows);
-        const siteName = `${mainName} ${subName || ''} ${lastName || ''}`;
+        // 강우 상황 설정 (rainImg: weather_5.png, sunImg: weather_1.png)
+        // _.set(outsideSensor, 'rainStatus', _.get(outsideSensor, 'isRain', '') === 1 ? 5 : 1);
 
-        _.set(insideSensor, 'siteName', siteName);
+        // 센서 군 장소 목록 길이
+        const rowsLength = _(groupPlaceRelationRows).map('place_seq').uniq().value()
+          .length;
 
-        // Site의 첫번째를 구성할 경우에는 rowsPan 처리를 하여야 하므로 외기 환경과의 데이터를 합침
-        if (isFirst) {
-          isFirst = false;
-          // rowsPan 입력
-          _.set(insideSensor, 'rowsPan', rowsLength);
+        // 장소 단위로 그룹
+        let isFirst = true;
+        const groupByPlaceSeqRelation = _.groupBy(groupPlaceRelationRows, 'place_seq');
 
-          return firstTemplateTR(_.assign(insideSensor, outsideSensor));
-        }
-        return secondRowTemplateTR(insideSensor);
-      });
+        const sensorTable = _.map(groupByPlaceSeqRelation, pRows => {
+          const insideSensor = _.assign(..._.map(pRows, row => _.pick(row, INSIDE_LIST)));
+          // 만약 해당 Node Def Id가 없을 경우 공백 데이터 삽입
+          _.forEach(INSIDE_LIST, ndId => {
+            !_.has(insideSensor, ndId) && _.set(insideSensor, ndId, '');
+          });
 
-      return sensorTable;
-    });
+          // pRows 장소는 모두 동일하므로 첫번째 목록 표본을 가져와 subName과 lastName을 구성하고 정의
+          const { pd_target_name: subName, p_target_name: lastName } = _.head(pRows);
+          const siteName = `${mainName} ${subName || ''} ${lastName || ''}`;
+
+          _.set(insideSensor, 'siteName', siteName);
+
+          // Site의 첫번째를 구성할 경우에는 rowsPan 처리를 하여야 하므로 외기 환경과의 데이터를 합침
+          if (isFirst) {
+            isFirst = false;
+            // rowsPan 입력
+            _.set(insideSensor, 'rowsPan', rowsLength);
+
+            return firstTemplateTR(_.assign(insideSensor, outsideSensor));
+          }
+          return secondRowTemplateTR(insideSensor);
+        });
+
+        return sensorTable;
+      },
+    );
 
     return _.flatten(madeDom);
   },

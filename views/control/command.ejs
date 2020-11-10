@@ -39,9 +39,9 @@
     var user = <%- JSON.stringify(user) %>;
 
     // 생성하고자 하는 차트 Dom 목록
-    var divDomList = <%- JSON.stringify(dom.divDomList) %>;
+    var chartDomList = <%- JSON.stringify(dom.chartDomList) %>;
     // 생성하고자 하는 차트 목록
-    var madeLineChartList = <%- JSON.stringify(madeLineChartList) %>;
+    var chartList = <%- JSON.stringify(chartList) %>;
   </script>
 
   <body>
@@ -92,11 +92,11 @@
               <%- include('../master/filter.ejs') %> <%-
               include('../master/filter.btn.ejs') %>
             </div>
-            <div class="flex_dir_col hidden" id="divDom">
+            <div class="flex_dir_col hidden" id="chartDom">
               <p class="table_desc_area">
                 트렌드
               </p>
-              <div id="divDomArea" class="flex_box"></div>
+              <div id="chartDomList" class="flex_box"></div>
             </div>
           </div>
           <!-- Tables -->
@@ -179,14 +179,15 @@
 
     <!-- Default Setting -->
     <script>
-      $('#subCategoryDom').html(subCategoryDom);
+      document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
 
       // 생성하고자 하는 돔이 있을 경우 hidden 해제
-      if (divDomList.length) {
-        $('#divDom').removeClass('hidden');
-        $('#divDomArea').html(divDomList);
+      if (chartDomList.length) {
+        document.getElementById('chartDom').classList.remove('hidden');
+        document.getElementById('chartDomList').innerHTML = chartDomList;
+
         // 차트 생성
-        madeLineChartList.forEach(function (chartInfo) {
+        chartList.forEach(function (chartInfo) {
           makeLineChart(chartInfo);
         });
       }
@@ -263,11 +264,11 @@
           document.getElementById('connApiClientImg').setAttribute('src', connStatusImg);
 
           if (isConn === true) {
-            $('#updateIsApiClientConnImg').addClass('btn-success');
-            $('#updateIsApiClientConnImg').removeClass('btn-danger');
+            document.getElementById('isApiClientConn').classList.add('btn-success');
+            document.getElementById('isApiClientConn').classList.remove('btn-danger');
           } else {
-            $('#updateIsApiClientConnImg').removeClass('btn-success');
-            $('#updateIsApiClientConnImg').addClass('btn-danger');
+            document.getElementById('isApiClientConn').classList.remove('btn-success');
+            document.getElementById('isApiClientConn').classList.add('btn-danger');
           }
         });
 
@@ -281,7 +282,7 @@
          * @param {string} modeInfo.operationConfigList.cmdStrategy 명령 전략
          */
         socket.on('updateMode', modeInfo => {
-          console.log(modeInfo);
+          // console.log(modeInfo);
           currModeInfo = modeInfo;
 
           // modeInfo = {
@@ -340,13 +341,15 @@
           });
 
           // nodeList Handlebars compile
-          const nodeTbodyTemplate = $('#nodeTableTemplate').html();
+          const nodeTbodyTemplate = document.getElementById('nodeTableTemplate')
+            .innerHTML;
+
           const nodeTbodyBindTemplate = Handlebars.compile(nodeTbodyTemplate);
           const nodeTableBody = nodeTbodyBindTemplate({
             mdNodeStorage: mdNodeStorage.values(),
           });
 
-          $('#nodeTableBodyDom').html(nodeTableBody);
+          document.getElementById('nodeTableBodyDom').innerHTML = nodeTableBody;
 
           // 노드 정보 갱신 시각 반영
           $nodeUpdateDom.html(new Date().toLocaleString());
@@ -357,13 +360,12 @@
           // console.log(commandList);
           updateCommand(commandList);
           // cmdList Handlebars compile
-          const cmdTbodyTemplate = $('#cmdTableTemplate').html();
+          const cmdTbodyTemplate = document.getElementById('cmdTableTemplate').innerHTML;
           const cmdTbodyBindTemplate = Handlebars.compile(cmdTbodyTemplate);
           const cmdTableBody = cmdTbodyBindTemplate({ commandList });
 
           //  리턴받은 html을 target에 innerHTML로 세팅한다.
-          // $('#cmdTableBodyDom').empty();
-          $('#cmdTableBodyDom').html(cmdTableBody);
+          document.getElementById('cmdTableBodyDom').innerHTML = cmdTableBody;
 
           // 명령 갱신 시각 반영
           $cmdUpdateDom.html(new Date().toLocaleString());
@@ -422,11 +424,16 @@
 
       // defs Element를 SVG Element 자식 요소 최상위로 정의
       svgCanvas.defs();
+
       // string으로 변환하여 붙여넣음. Dom 요소로 붙여넣을 경우 동작하지 않음
-      $('defs').html($('#svgFilter').html() + $('#svgBtnFilter').html());
+      const defHtml =
+        document.getElementById('svgFilter').innerHTML +
+        document.getElementById('svgBtnFilter').innerHTML;
       // id 중복을 막기위한 filter 요소 삭제
-      document.querySelector('#svgFilter').remove();
-      document.querySelector('#svgBtnFilter').remove();
+      document.getElementById('svgFilter').remove();
+      document.getElementById('svgBtnFilter').remove();
+
+      document.getElementById('svgCanvas').querySelector('defs').innerHTML = defHtml;
 
       drawSvgBasePlace(svgCanvas); // 멥 그리기
 
@@ -461,11 +468,12 @@
         // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
         $('#controlContent')
           .children('div')
-          .each(function (index, domElement) {
-            if (domElement.id === viewType) {
-              $(`#${domElement.id}`).removeClass('hidden');
+          .each((index, domElement) => {
+            const { id: domId } = domElement;
+            if (domId === viewType) {
+              document.getElementById(domId).classList.remove('hidden');
             } else {
-              $(`#${domElement.id}`).addClass('hidden');
+              document.getElementById(domId).classList.add('hidden');
             }
           });
       });
@@ -476,7 +484,7 @@
 
     <script>
       $(document).ready(() => {
-        $('#container_body').removeClass('hidden');
+        document.getElementById('container_body').classList.remove('hidden');
       });
     </script>
   </body>

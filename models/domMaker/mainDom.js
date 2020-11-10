@@ -15,7 +15,7 @@ module.exports = {
       <p><%= dataUnit %></p>
     </article>
     `);
-    const madeDom = domMainSensorList.map(row => sensorStatusTemplate(row));
+    const madeDom = domMainSensorList.map(row => sensorStatusTemplate(row)).join('');
 
     return madeDom;
   },
@@ -41,14 +41,16 @@ module.exports = {
       </section>
     </article>
     `);
-    const madeDom = validInverterStatusRows.map(validRow => {
-      if (!validRow.hasValidData) {
-        _.set(validRow.data, 'grid_rs_v', '-');
-        _.set(validRow.data, 'grid_r_a', '-');
-      }
+    const madeDom = validInverterStatusRows
+      .map(validRow => {
+        if (!validRow.hasValidData) {
+          _.set(validRow.data, 'grid_rs_v', '-');
+          _.set(validRow.data, 'grid_r_a', '-');
+        }
 
-      return inverterStatusTemplate(validRow.data);
-    });
+        return inverterStatusTemplate(validRow.data);
+      })
+      .join('');
 
     return madeDom;
   },
@@ -86,9 +88,9 @@ module.exports = {
         if (moment(dates[index]).format('D') === moment(dates[index + 1]).format('D')) {
           checkNextDayCount += 1;
         } else {
-          madeHeader = `<th class="elipsis" colspan="${checkNextDayCount}">${moment(date).format(
-            'D',
-          )}일 (${day})</th>`;
+          madeHeader = `<th class="elipsis" colspan="${checkNextDayCount}">${moment(
+            date,
+          ).format('D')}일 (${day})</th>`;
           checkNextDayCount = 1;
         }
         return madeHeader;
@@ -125,7 +127,10 @@ module.exports = {
           madeBody = _.map(dataList, data => `<p class="color_blue">${data}</p>`);
           break;
         case 'wd':
-          madeBody = _.map(dataList, data => `<img src="/image/weather/wd_${data}.gif" />`);
+          madeBody = _.map(
+            dataList,
+            data => `<img src="/image/weather/wd_${data}.gif" />`,
+          );
           break;
         default:
           madeBody = dataList;
@@ -141,7 +146,7 @@ module.exports = {
         })}
         </tr>
       `;
-    }).toString();
+    }).join('');
 
     const dynamicColgroup = _.map(weatherCastRows, () => '<col class="w_2rem">');
 

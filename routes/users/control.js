@@ -51,9 +51,14 @@ router.get(
 
     // Site Sequence.지점 Id를 불러옴
     const {
-      searchRange,
+      // searchRange,
       mainInfo: { siteId, mainWhere },
     } = req.locals;
+
+    const searchRange = biModule.createSearchRange({
+      searchType: 'day',
+      searchInterval: 'min',
+    });
 
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', mainWhere);
@@ -84,9 +89,9 @@ router.get(
       subNavi: 'command',
     });
 
-    _.set(req, 'locals.dom.divDomList', chartDomList);
+    _.set(req, 'locals.dom.chartDomList', chartDomList);
 
-    _.set(req, 'locals.madeLineChartList', chartList);
+    _.set(req, 'locals.chartList', chartList);
 
     res.render('./control/command', req.locals);
   }),
