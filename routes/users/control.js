@@ -8,7 +8,6 @@ const router = express.Router();
 const { BU, DU } = require('base-util-jh');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
-const controlDom = require('../../models/domMaker/controlDom');
 const commonUtil = require('../../models/templates/common.util');
 
 const DEFAULT_CATEGORY = 'command';

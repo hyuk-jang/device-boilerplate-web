@@ -148,7 +148,7 @@ router.get(
     // 프로젝트 홈
     _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectHome(projectSource));
     // 사이트 목록 추가
-    const loginAreaDom = domMakerMaster.makeTopHeader(user);
+    const loginAreaDom = domMakerMaster.makeLoginUser(user);
     _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
 
     const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);

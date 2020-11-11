@@ -13,10 +13,20 @@ module.exports = {
     },
     loginInfo: {
       name: '태양광발전 IoT 소비전력 최적화 시스템 v1.0',
-      // imgPath: 'bg_fp.jpg',
     },
-    contentsInfo: {
-      // imgPath: 'bg_fp.jpg',
+    footerInfo: {
+      copyrightInfo: {
+        company: '(주)에스엠소프트',
+        address: '전라남도 나주시 빛가람동 892-7 3층 Tel) 061-285-3411',
+        href: 'http://smsoft.co.kr',
+        imgPath: '/image/icon/sm_logo.png',
+      },
+      noticeList: [
+        {
+          name: '사용자 취급 설명서',
+          href: '/docs/manual.pptx',
+        },
+      ],
     },
   },
   naviList: [

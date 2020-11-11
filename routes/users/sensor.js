@@ -40,6 +40,10 @@ router.get(
     });
 
     // TODO: 각  relation에 동일 node_seq를 사용하고 있다면 profile 현재 데이터 기입, 아니라면 row는 제거
+    // FIXME: IVT가 포함된 장소는 제거.(임시)
+    _.remove(viewPlaceRelationRows, placeRelation =>
+      _.includes(placeRelation.place_id, 'IVT'),
+    );
 
     // 각 Relation에 해당 데이터 확장
     viewPlaceRelationRows.forEach(placeRelation => {
@@ -59,6 +63,8 @@ router.get(
         }
       }
     });
+
+    // BU.CLIN(viewPlaceRelationRows);
 
     // 항목별 데이터를 추출하기 위하여 Def 별로 묶음
     const { rowsNdIdList, rowspanNdIdList } = new DeviceProtocol(siteId);

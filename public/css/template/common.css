@@ -66,22 +66,32 @@ html {
 /***************************************/
 footer {
   background: #f2f2f2;
-  padding: 1rem;
+  padding: 0.5rem;
   margin-top: auto;
   border-top: 1px solid #ddd;
   display: flex;
   justify-content: center;
 }
 
+footer img {
+  margin-bottom: 0.3rem;
+}
+
+footer p {
+  margin: 0.5rem 0;
+}
+
+footer a {
+  font-size: 1.5rem;
+}
+
+footer span {
+  padding: 0 1rem;
+}
+
 _:-ms-input-placeholder,
 :root .footer_area {
   margin-top: 5rem;
-}
-
-.footer_copyright {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  text-align: center;
 }
 
 .footer_logo {
@@ -93,7 +103,7 @@ _:-ms-input-placeholder,
 
 .footer_logo > span {
   font-weight: bold;
-  font-size: 2rem;
+  font-size: 1.5rem;
   text-indent: 1rem;
 }
 
@@ -129,7 +139,7 @@ _:-ms-input-placeholder,
 
 .weathercast_data_unit {
   align-self: flex-end;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.6rem;
 }
 
 .header_top {
@@ -509,8 +519,8 @@ _:-ms-input-placeholder,
 
 .map_control_box {
   /* width: 1%;
-  display: grid; */
-  height: 9vw;
+  display: grid;
+  height: 9vw; */
   margin: 5px;
   position: absolute;
   gap: 5px;
@@ -526,8 +536,10 @@ _:-ms-input-placeholder,
 .svg_area {
   display: flex;
   justify-content: center;
+  align-items: center;
   border: 1px solid #807a7a;
-  /* min-height: 300px; */
+  min-width: 300px;
+  min-height: 200px;
 }
 
 .svg_map {

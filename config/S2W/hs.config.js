@@ -18,6 +18,14 @@ module.exports = {
     contentsInfo: {
       imgPath: 'bg_fp.jpg',
     },
+    footerInfo: {
+      copyrightInfo: {
+        company: '(주)에스엠소프트',
+        address: '전라남도 나주시 빛가람동 892-7 3층 Tel) 061-285-3411',
+        href: 'http://smsoft.co.kr',
+        imgPath: '/image/icon/sm_logo.png',
+      },
+    },
   },
   naviList: [
     {

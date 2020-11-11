@@ -81,10 +81,17 @@ footer {
   background: #091219;
 }
 
-footer .footer_copyright > a {
-  color: burlywood;
+footer p {
+  color: #ccc;
 }
 
+footer a {
+  color: #fff;
+}
+
+footer span {
+  color: #ccc;
+}
 /***************************************/
 /************** Container **************/
 /***************************************/

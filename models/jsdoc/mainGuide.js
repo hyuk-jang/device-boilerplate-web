@@ -10,7 +10,29 @@
  * @property {pcViewInfo} homeInfo
  * @property {pcViewInfo} loginInfo
  * @property {pcViewInfo} contentsInfo
+ * @property {fDetailFooterInfo} footerInfo
  */
+
+/**
+ * @typedef {Object} fDetailFooterInfo Footer 생성 정보
+ * @property {fCopyrightInfo} copyrightInfo 회사 정보
+ * @property {fNoticeInfo[]=} noticeList 고지 정보 목록
+ */
+
+/**
+ * @typedef {Object} fCopyrightInfo 저작권을 갖는 회사 정보
+ * @property {string} company 회사명
+ * @property {string} address 회사 주소
+ * @property {string} href 회사 홈페이지 URL
+ * @property {string} imgPath 회사 로고 경로
+ */
+
+/**
+ * @typedef {Object} fNoticeInfo 저작권을 갖는 회사 정보
+ * @property {string} name 고지 명
+ * @property {string} href 고지 URL
+ * @property {boolean=} isBold 굵게 처리 flag
+ * @property {string} imgPath 회사 로고 경로 */
 
 /**
  * @typedef {Object} pcViewInfo

@@ -1,23 +1,52 @@
 <footer class="footer_area">
   <div>
-    <p class="footer_copyright" id="footer_copyright">
-      <span>
-        Copyright © <a href="http://smsoft.co.kr"><b>(주)에스엠소프트</b></a> All Rights Reserved.
-      </span>
-      |
-      <a href="" id="downloadManual">사용자 취급 설명서</a>
+    <p id="copyrightArea">
+      <img width="20" height="20" src="" />
+      <a href="http://smsoft.co.kr">&nbsp;© <b> 에스엠소프트</b></a>
+      <!-- <span>|</span>
+      <a href="" id="downloadManual">사용자 취급 설명서</a> -->
     </p>
-    <p>
-      <span>전라남도 나주시 빛가람동 892-7 3층 Tel) 061-285-3411</span>
-    </p>
-    <p class="footer_logo">
-      <img width="30" height="30" src="/image/common/sm_logo.png" />
-      <span>(주)에스엠소프트</span>
+    <p id="companyAddress">
+      <!-- 전라남도 나주시 빛가람동 892-7 3층 Tel) 061-285-3411 -->
     </p>
   </div>
 </footer>
 
 <script>
-  // 매뉴얼 다운
-  document.querySelector('#downloadManual').setAttribute('href', '/docs/manual.pptx');
+  const { footerInfo } = mainInfo;
+
+  const {
+    copyrightInfo,
+    copyrightInfo: {
+      address: ftAddress = '',
+      company: ftCompany = '',
+      href: ftHref = '',
+      imgPath: ftImgPath = '',
+    },
+    noticeList: ftNoticeList = [],
+  } = footerInfo;
+
+  const copyrightAreaEle = document.getElementById('copyrightArea');
+  // 회사 명
+  const copyrightLogoEle = copyrightAreaEle.querySelector('img');
+  const copyrightCompanyEle = copyrightAreaEle.querySelector('a');
+
+  // 이미지 경로가 있다면 추가
+  ftImgPath.length
+    ? copyrightLogoEle.setAttribute('src', ftImgPath)
+    : copyrightLogoEle.remove();
+  //
+  copyrightCompanyEle.setAttribute('href', ftHref);
+  copyrightCompanyEle.querySelector('b').innerText = ftCompany;
+  document.getElementById('companyAddress').innerText = ftAddress;
+
+  // 고지 사항 템플릿 정의
+  const noticeTemplate = Handlebars.compile(
+    '<span>|</span><a href="{{ href }}">{{ name }}</a>',
+  );
+  // 고지 사항 목록 생성
+  copyrightAreaEle.insertAdjacentHTML(
+    'beforeend',
+    ftNoticeList.map(noticeTemplate).join(''),
+  );
 </script>

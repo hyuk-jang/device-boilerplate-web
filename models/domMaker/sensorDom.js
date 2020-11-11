@@ -9,7 +9,6 @@ module.exports = {
    * @param {{siteId: string, m_name: string}[]} mainSiteList
    */
   makeDynamicSensorDom(viewPlaceRelationRows, pickedIdInfo, mainSiteList) {
-    // BU.CLI(viewPlaceRelationRows);
     const { rowsNdIdList = [], rowspanNdIdList = [] } = pickedIdInfo;
     // place_seq를 기준으로 grouping 후 총 지점 개수를 구함
     const gPlaceRelationInfo = _.groupBy(viewPlaceRelationRows, 'main_seq');
@@ -18,7 +17,7 @@ module.exports = {
 
     // Picked목록에 따라 동적 Header 생성
     const dynamicHeaderDom = _.concat(rowsNdIdList, rowspanNdIdList)
-      .map(key => {
+      .reduce((domList, key) => {
         const placeRelationRow = _.find(viewPlaceRelationRows, {
           nd_target_id: key,
         });
@@ -27,11 +26,11 @@ module.exports = {
         if (_.isUndefined(placeRelationRow)) {
           _.pull(rowsNdIdList, key);
           _.pull(rowspanNdIdList, key);
-          return false;
+        } else {
+          domList.push(headerTemplate(placeRelationRow));
         }
-
-        return headerTemplate(placeRelationRow);
-      })
+        return domList;
+      }, [])
       .join('');
 
     // 만들어진 동적 Table Header Dom
@@ -154,6 +153,7 @@ module.exports = {
       return sensorTableTR.join('');
     });
 
+    // BU.CLIN(sensorEnvBodyDomList);
     return {
       sensorEnvHeaderDom,
       sensorEnvBodyDom: _.flatten(sensorEnvBodyDomList).join(''),

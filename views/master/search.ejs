@@ -22,9 +22,22 @@
     <div class="search_box">
       <span class="search_title">날짜</span>
       <div class="search_body">
-        <input class="input_tre" name="start" id="strStartDateInputValue" type="text" readonly />
+        <input
+          class="input_tre"
+          name="start"
+          id="strStartDateInputValue"
+          type="text"
+          readonly
+        />
         <span id="between-start-end" hidden>~</span>
-        <input class="input_tre" name="end" id="strEndDateInputValue" type="text" readonly hidden />
+        <input
+          class="input_tre"
+          name="end"
+          id="strEndDateInputValue"
+          type="text"
+          readonly
+          hidden
+        />
       </div>
     </div>
     <div class="submit_box">
@@ -37,7 +50,7 @@
 
 <script>
   // 검색 클릭 시
-  document.querySelector('#searchBtn').addEventListener('click', function(event) {
+  document.querySelector('#searchBtn').addEventListener('click', function (event) {
     // searchRange 형태 만듬
     var searchValue = getSearchValue();
     // 생성된 searchRange로 쿼리스트링 생성
@@ -45,8 +58,8 @@
     // 쿼리스트링이 정상적으로 만들어 질 경우
 
     if (queryString.length) {
-      $('#loader').removeClass('hidden');
-      $('#loader-ground').removeClass('hidden');
+      document.getElementById('loader').classList.remove('hidden');
+      document.getElementById('loader-ground').classList.remove('hidden');
 
       // 사이트 변경 시
       location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}?${queryString}`;

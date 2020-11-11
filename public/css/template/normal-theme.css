@@ -205,3 +205,24 @@ header {
   width: 80%;
   background: #333;
 }
+
+/***************************************/
+/************ Footer Master ************/
+/***************************************/
+footer {
+  border-top: 1px solid #31373a;
+  /* background: #091219; */
+  background-color: white;
+}
+
+footer p {
+  color: #777;
+}
+
+footer a {
+  color: #000;
+}
+
+footer span {
+  color: #ccc;
+}

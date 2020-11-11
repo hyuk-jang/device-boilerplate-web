@@ -11,7 +11,7 @@ module.exports = {
    *
    * @param {MEMBER} userInfo
    */
-  makeTopHeader(userInfo) {
+  makeLoginUser(userInfo) {
     // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
       `<span class="user_id"><%= name %></span><span class="user_nim">님</span>
@@ -36,6 +36,31 @@ module.exports = {
     const madeMap = projectTitle(projectSource);
 
     return madeMap;
+  },
+
+  /**
+   *
+   * @param {fDetailFooterInfo} footerInfo
+   */
+  makeProjectFooter(footerInfo) {
+    const {
+      copyrightInfo: { address, company, href, imgPath },
+      noticeList = [],
+    } = footerInfo;
+
+    const copyrightTemplate = _.template(
+      `
+        <img width="20" height="20" src="<%= imgPath >" />
+        <a href="<%= href %>"><b>© <%= company %></b></a>
+      `,
+    );
+
+    const noticeTemplate = _.template(
+      `
+        <span>|</span>
+        <a href="<%= href %>"><%= name %></a>
+       `,
+    );
   },
 
   /**

@@ -58,7 +58,7 @@ const pConfig = global.projectConfig;
 
 const {
   naviList,
-  viewInfo: { homeInfo },
+  viewInfo: { titleInfo, homeInfo, footerInfo },
 } = pConfig;
 // server middleware
 router.get(
@@ -82,8 +82,7 @@ router.get(
     const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { siteId = userMainSeq, subCategory, subCategoryId } = req.params;
-    let { naviMenu } = req.params;
+    const { naviMenu, siteId = userMainSeq, subCategory, subCategoryId } = req.params;
 
     /* *********      ↓↓↓  Navi 관련 설정  ↓↓↓       ********* */
     /** @type {Object[]} */
@@ -91,16 +90,12 @@ router.get(
       const { grade: naviGrade = [] } = naviInfo;
 
       // 권한 등급이 지정되어 있을 경우 체크
-      if (naviGrade.length) {
-        return _.includes(naviGrade, grade);
-      }
-
-      return true;
+      return naviGrade.length ? _.includes(naviGrade, grade) : true;
     });
 
-    // 네비가 존재하지 않을 경우 첫번째 선택
+    // 경로를 설정하지 않았거나 존재하지 않는 경로일 경우 Redirect
     if (_.find(currNaviList, { href: naviMenu }) === undefined) {
-      naviMenu = currNaviList[0].href;
+      return res.redirect(`/${currNaviList[0].href}`);
     }
 
     /* *********      ↓↓↓  searchRange, siteInfo   ↓↓↓       ********* */
@@ -162,9 +157,8 @@ router.get(
     siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
     _.set(req, 'locals.viewPowerProfileRows', _.filter(viewPowerProfileRows, mainWhere));
 
-    const projectSource = commonUtil.convertProjectSource(process.env.PJ_MAIN_ID);
-
-    _.set(req, 'locals.mainInfo.projectMainId', projectSource.projectName);
+    _.set(req, 'locals.mainInfo.projectMainId', titleInfo.name);
+    _.set(req, 'locals.mainInfo.footerInfo', footerInfo);
     _.set(req, 'locals.mainInfo.naviId', naviMenu);
     _.set(req, 'locals.mainInfo.siteId', siteId);
     _.set(req, 'locals.mainInfo.subCategory', subCategory);
@@ -177,10 +171,10 @@ router.get(
     const naviListDom = domMakerMaster.makeNaviListDom(currNaviList, naviMenu, siteId);
     _.set(req, 'locals.dom.naviListDom', naviListDom);
     // 프로젝트 홈
-    _.set(req, 'locals.dom.projectHome', domMakerMaster.makeProjectHome(homeInfo));
+    _.set(req, 'locals.dom.projectHomeDom', domMakerMaster.makeProjectHome(homeInfo));
     // 사이트 목록 추가
-    const loginAreaDom = domMakerMaster.makeTopHeader(user);
-    _.set(req, 'locals.dom.loginAreaDom', loginAreaDom);
+    const loginUserDom = domMakerMaster.makeLoginUser(user);
+    _.set(req, 'locals.dom.loginUserDom', loginUserDom);
 
     const siteListDom = domMakerMaster.makeSiteListDom(siteList, siteId);
     _.set(req, 'locals.dom.siteListDom', siteListDom);
@@ -203,9 +197,11 @@ router.get(
 // Router 추가
 naviList.forEach((naviInfo, index) => {
   const { href } = naviInfo;
-  index === 0 && router.use('/', routerInfo[href]);
+  // index === 0
+  //   ? router.use('/', routerInfo[href])
+  //   : router.use(`/${href}`, routerInfo[href]);
   router.use(`/${href}`, routerInfo[href]);
 });
-router.use('/admin', admin);
+// router.use('/admin', admin);
 
 module.exports = router;
