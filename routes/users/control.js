@@ -159,7 +159,7 @@ router.get(
       // 회원 이름 추가
       cmdHistoryInfo.memberName = _.chain(memberRows)
         .find({ member_seq: memSeq })
-        .get('name')
+        .get('name', '시스템')
         .value();
 
       // 사이트 이름 추가
@@ -201,7 +201,7 @@ router.get(
     paginationInfo = _.omit(paginationInfo, 'paginationDom');
     _.set(req, 'locals.paginationInfo', paginationInfo);
 
-    res.render('./UPSAS/control/history', req.locals);
+    res.render('./control/history', req.locals);
   }),
 );
 

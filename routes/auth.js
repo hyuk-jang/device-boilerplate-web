@@ -138,12 +138,9 @@ router.post(
     const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
     const cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
     // 쓰이는 장소 목록
-    const placeRows = await biAuth.getTable('V_DV_PLACE');
+    const mainRows = await biAuth.getTable('MAIN');
 
-    const placeSelList = _.map(placeRows, 'place_seq');
-
-    // BU.CLI(placeSelList);
-    // BU.CLI(place_seq);
+    const mainSelList = _.map(mainRows, 'main_seq');
 
     // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
     const idFlag = idReg.test(userid);
@@ -153,7 +150,8 @@ router.post(
     const telFlag = cellPhoneReg.test(tel);
     // BU.CLIS(idFlag, pwFlag, nickNameFlag, telFlag);
     const isPassFlag = idFlag && nameFlag && nickNameFlag && pwFlag && telFlag;
-    if (!isPassFlag || !_.includes(placeSelList, place_seq)) {
+    // BU.CLIS(placeSelList, place_seq)
+    if (!isPassFlag || !_.includes(mainSelList, place_seq)) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
     }
 

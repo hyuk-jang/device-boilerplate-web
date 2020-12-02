@@ -233,7 +233,7 @@ class ApiServer extends AbstApiServer {
         // 사용자 명령 요청이 성공하였을 경우 사용자 정보와 명령 ID를 저장
         this.controlModel.addReqCmdUser(user.member_seq, contents);
       } else if (commandId === MODE) {
-        console.log(fieldData);
+        // console.log(fieldData);
         socket.emit('updateAlert', '제어모드를 변경하였습니다.');
       }
     } catch (error) {

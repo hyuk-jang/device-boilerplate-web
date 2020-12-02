@@ -41,7 +41,7 @@ class BiAuth extends BM {
     /** @type {MEMBER} */
     const whereInfo = {
       user_id: loginInfo.userId,
-      is_deleted: 0,
+      // is_deleted: 0,
     };
     // ID와 삭제가 되지 않은 해당 ID를 찾음.
     /** @type {MEMBER} */
@@ -49,7 +49,14 @@ class BiAuth extends BM {
 
     // 매칭되는 회원이 없다면
     if (_.isEmpty(memberRow)) {
-      throw new Error(`We could not find a member that matches id: ${whereInfo.user_id}.`);
+      throw new Error(
+        `We could not find a member that matches id: ${whereInfo.user_id}.`,
+      );
+    }
+
+    // 삭제된 계정은 로그인 못함
+    if (memberRow.is_deleted === 1) {
+      throw new RangeError('해당 계정은 접근이 차단되었습니다. 관리자에게 문의하십시오.');
     }
 
     // 잠긴 계정은 로그인 못함
@@ -69,6 +76,11 @@ class BiAuth extends BM {
         { member_seq: memberRow.member_seq },
         { login_fail_count: 0, is_account_lock: 0, lastest_login_date: new Date() },
       );
+      // 승인 대기 시
+      if (memberRow.grade === 'awaiter') {
+        throw new RangeError('해당 계정은 관리자의 승인을 기다리고 있습니다.');
+      }
+
       // 회원 정보 반환
       return memberRow;
     }

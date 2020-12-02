@@ -67,12 +67,6 @@ router.get('/intersection', (req, res) => {
 
   // 사용자 권한 체크
   if (process.env.IS_CHECK_USER_GRADE !== '0') {
-    // 승인 대기 시
-    if (grade === AWAITER) {
-      return res.send(
-        DU.locationAlertBack('관리자의 승인을 기다리고 있습니다.', '/login'),
-      );
-    }
     // 설정 외 권한 발생 시
     if (!_.includes(accountGradeList, grade)) {
       return res.send(

@@ -5,7 +5,7 @@
     <script src="/js/handlebars.js"></script>
   </head>
   <body>
-    <div id="wrap" class="wrap hidden">
+    <div id="wrap" class="wrap">
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
@@ -15,7 +15,7 @@
         </div>
         <div class="container_row flex_dir_col">
           <div class="table-responsive default_area">
-            <table class="table table-bordered number_table ">
+            <table class="table table-bordered number_table">
               <colgroup>
                 <!-- <col width="0%" /> -->
               </colgroup>
@@ -71,7 +71,7 @@
     var commentBindTemplate = Handlebars.compile(commentTemplate);
 
     //3. 컴파일한 템플릿에 데이터를 집어넣는다. 이 때 리턴값은 html로 나온다.
-    var tableBody = _.map(reportRows, function(reportRow, index) {
+    var tableBody = _.map(reportRows, function (reportRow, index) {
       var rowNumber = firstRowNum + index + 1;
       Object.assign(reportRow, { rowsNumber: rowNumber });
       reportRow.is_deleted = reportRow.is_deleted === 0 ? 'X' : 'O';
