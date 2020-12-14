@@ -135,7 +135,7 @@ router.post(
     const idReg = /^[a-z0-9]{4,12}$/;
     const nameReg = /^[가-힣]{2,20}$/;
     const nickNameReg = /^[a-zA-Z가-힣0-9]{2,20}$/;
-    const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+    const pwReg = /^(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?=.*[0-9]).{8,16}$/;
     const cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
     // 쓰이는 장소 목록
     const mainRows = await biAuth.getTable('MAIN');

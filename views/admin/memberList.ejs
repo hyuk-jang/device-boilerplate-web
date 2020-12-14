@@ -189,9 +189,6 @@
         '&accountLock=' +
         accountLock;
 
-      document.getElementById('loader').classList.remove('hidden');
-      document.getElementById('loader-ground').classList.remove('hidden');
-
       // 사이트 변경 시
       location.href = `${window.location.origin}/${naviId}/${siteId}/member?${queryString}`;
     }
