@@ -505,14 +505,12 @@ exports.makeSensorChart = makeSensorChart;
  * @param {plotSeriesInfo} plotSeries
  */
 function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
-  console.log(plotSeries);
   // 차트 생성하기 위한 설정
   const { domId, title = '', subtitle = '', chartOptionList } = chartConfig;
   // 정제된 차트 정보
   const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
   // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
   chartOptionList.forEach(chartOption => {
-    console.log(chartOption);
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
     // 보여줄 축 정보
     const { dataUnit = '', yTitle, keys, mixColors } = chartOption;
@@ -561,7 +559,6 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
             data: _.map(nodePlace.sensorDataRows, 'avg_data'),
           };
 
-          console.log(plotSeries.pointInterval);
           if (plotSeries.pointInterval < 13 && plotSeries.pointInterval > 0) {
             chartSeriesInfo.data = Array(plotSeries.pointInterval)
               .fill(null)

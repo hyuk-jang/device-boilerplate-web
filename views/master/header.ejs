@@ -28,8 +28,12 @@
     <div class="max_w1024">
       <div class="header_sub_box">
         <div class="header_w_r">
-          <select id="siteListDom" name="siteList" class="siteList" label="siteList">
-          </select>
+          <select
+            id="siteListDom"
+            name="siteList"
+            class="siteList"
+            label="siteList"
+          ></select>
         </div>
         <div class="header_w_r">
           <div id="weathercastDom" class="nav_row_st_right">
@@ -60,10 +64,13 @@
     </div>
   </div>
 </header>
+<%- include("./modal.ejs") %>
 
 <script>
   const mainInfo = <%- JSON.stringify(mainInfo) %>;
   const masterDom = <%- JSON.stringify(dom) %>;
+  // 모달 메시지
+  const modalMsg = <%- JSON.stringify(modalMsg) %>;
 </script>
 
 <script>
@@ -78,6 +85,11 @@
     siteListDom = '',
     weathercastDom = '',
   } = masterDom;
+
+  // 모달 메시지가 존재한다면 표출
+  if (modalMsg.length) {
+    showModal(modalMsg);
+  }
 
   document.getElementById('projectTitle').innerHTML = projectMainId;
 

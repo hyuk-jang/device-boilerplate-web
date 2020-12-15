@@ -84,6 +84,7 @@ module.exports = (app, dbInfo) => {
         'address',
         'tel',
         'main_uuid',
+        'is_pw_renewal',
       ]);
 
       // BU.CLI('complete deserializeUser', pickedUserInfo);

@@ -62,7 +62,13 @@ router.use((req, res, next) => {
 });
 
 router.get('/intersection', (req, res) => {
-  const grade = _.get(req, 'user.grade');
+  const { grade, is_pw_renewal: isPwRenewal = 0 } = req.user;
+
+  if (isPwRenewal === 0) {
+    req.flash('modalMsg', '패스워드를 변경해주세요.');
+  }
+
+  // const grade = _.get(req, 'user.grade');
 
   // 사용자 권한 체크
   if (process.env.IS_CHECK_USER_GRADE !== '0') {

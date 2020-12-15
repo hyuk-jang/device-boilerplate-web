@@ -10,11 +10,6 @@ const commonUtil = require('../../models/templates/common.util');
 
 const defaultDom = require('../../models/domMaker/defaultDom');
 
-require('../../models/jsdoc/domGuide');
-
-const accountGradeRange = ['admin', 'manager', 'awaiter'];
-const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
-
 const DEFAULT_CATEGORY = 'member';
 /** @type {setCategoryInfo[]} */
 const subCategoryList = [
@@ -50,9 +45,7 @@ router.get(
       member_seq: req.user.member_seq,
     });
 
-    // _.set(req, 'locals.user', req.user);
     _.set(req, 'locals.member', memberRow);
-    // _.set(req, 'locals.memberIdx', memberIdx);
 
     res.render('./myPage/memberEdit', req.locals);
   }),
@@ -63,12 +56,9 @@ router.get(
 router.post(
   ['/', '/:siteId/member', '/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
-    console.log('@@@@@@@');
     commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
-
-    const { memberIdx = req.user.member_seq } = req.params;
 
     const { password = '', name = '', nick_name = '', tel = '' } = req.body;
 
@@ -81,11 +71,11 @@ router.post(
     // ID or PW 정규식에 어긋나거나 Place가 존재하지 않을 경우 전송 데이터 이상
     const nameFlag = nameReg.test(name);
     const nickNameFlag = nickNameReg.test(nick_name);
-    const pwFlag = password.length || pwReg.test(password);
+    const pwFlag = password.length === 0 || pwReg.test(password);
     const telFlag = cellPhoneReg.test(tel);
-    // BU.CLIS(idFlag, pwFlag, nickNameFlag, telFlag);
+
     const isPassFlag = nameFlag && nickNameFlag && pwFlag && telFlag;
-    // BU.CLIS(placeSelList, place_seq)
+
     if (!isPassFlag) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
     }
@@ -93,6 +83,7 @@ router.post(
     const memberPickList = ['name', 'nick_name', 'tel'];
 
     const memberInfo = _.pick(req.body, memberPickList);
+
     // 모든 데이터가 입력이 되었는지 확인
     const isOk = _.every(memberInfo, value => _.isString(value) && value.length);
     // 이상이 있을 경우 Back
@@ -100,7 +91,6 @@ router.post(
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다!'));
     }
 
-    // FIXME: 갱신일은 둘다 현 시점으로 처리함. 회원가입 갱신 기능이 추가될 경우 수정 필요
     /** @type {MEMBER} */
     const newMemberInfo = {
       name,
@@ -111,10 +101,25 @@ router.post(
 
     // 패스워드를 갱신하였다면 갱신 요청 처리 flag 0 설정
     if (password.length) {
+      const salt = BU.genCryptoRandomByte(16);
+      const hashPw = await EU.encryptPbkdf2(password, salt);
+
+      if (hashPw instanceof Error) {
+        throw new Error('Password hash failed.');
+      }
+
       newMemberInfo.is_pw_renewal = 0;
+      // 수정 비밀번호 입력
+      newMemberInfo.pw_salt = salt;
+      newMemberInfo.pw_hash = hashPw;
     }
 
-    await biAuth.setMember(password, newMemberInfo);
+    // 회원 정보 수정
+    await biAuth.updateTable(
+      'MEMBER',
+      { member_seq: req.user.member_seq },
+      newMemberInfo,
+    );
 
     return res.send(DU.locationAlertGo('정상적으로 갱신되었습니다.', '/'));
   }),

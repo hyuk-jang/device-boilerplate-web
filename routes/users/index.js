@@ -192,6 +192,8 @@ router.get(
     const weathercastDom = domMakerMaster.makeWeathercastDom(currWeatherCastInfo);
     _.set(req, 'locals.dom.weathercastDom', weathercastDom);
 
+    _.set(req, 'locals.modalMsg', req.flash('modalMsg'));
+
     next();
   }),
 );

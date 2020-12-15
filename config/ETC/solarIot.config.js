@@ -63,7 +63,7 @@ module.exports = {
     {
       href: 'myPage',
       name: '마이페이지',
-      isHidden: true,
+      // isHidden: true,
     },
     {
       href: 'admin',
