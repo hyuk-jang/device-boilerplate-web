@@ -44,6 +44,7 @@
  * @typedef {Object} pcNaviInfo
  * @property {string} href 네비 주소. router 명과 href 일치
  * @property {string} name 네비 이름
+ * @property {boolean=} isHidden 타이틀 숨김 여부
  * @property {pcChartInfo=} chartInfo 차트 정보
  * @property {pcNaviCateInfo[]=} subCategoryList 서브 카테고리
  */

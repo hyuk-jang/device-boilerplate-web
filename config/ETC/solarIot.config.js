@@ -61,6 +61,11 @@ module.exports = {
       ],
     },
     {
+      href: 'myPage',
+      name: '마이페이지',
+      isHidden: true,
+    },
+    {
       href: 'admin',
       name: '관리',
       grade: ['admin'],

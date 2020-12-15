@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("../master/head.ejs") %>
+    <script src="/js/contents/master/mainUtil.js"></script>
+  </head>
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+        </div>
+        <div class="container_row flex_jus_center">
+          <div class="col-sm-6">
+            <form role="form" id="memberEdit" action="/myPage/1/member" method="post">
+              <input type="hidden" name="_method" value="put" />
+              <div class="form-group">
+                <label>아이디</label>
+                <input type="text" readonly class="form-control" id="user_id" />
+              </div>
+              <div class="form-group">
+                <label>관리사이트</label>
+                <input type="text" readonly class="form-control" id="main_name" />
+              </div>
+              <div class="form-group">
+                <label for="name">성명</label>
+                <input
+                  type="text"
+                  maxlength="20"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  autocomplete="off"
+                  placeholder="이름을 입력해 주세요"
+                />
+                <span class="notice_next_box"> * 2~20자의 한글만 사용 가능합니다 </span>
+              </div>
+              <div class="form-group">
+                <label for="nick_name">닉네임</label>
+                <input
+                  type="text"
+                  maxlength="20"
+                  class="form-control"
+                  id="nick_name"
+                  name="nick_name"
+                  autocomplete="off"
+                  placeholder="닉네임을 입력해 주세요"
+                />
+                <span class="notice_next_box">
+                  * 2~20자의 영문, 한글, 숫자만 사용 가능합니다.
+                </span>
+              </div>
+              <div class="form-group">
+                <label for="tel">휴대폰 번호</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="tel"
+                  name="tel"
+                  placeholder="휴대폰번호를 입력해 주세요"
+                />
+                <span class="notice_next_box">
+                  * 휴대폰 번호 형식에 맞추어 작성하세요. '-' 기호는 안넣으셔도 됩니다.
+                </span>
+              </div>
+              <div class="form-group">
+                <label for="inputPassword">비밀번호</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  name="password"
+                  autocomplete="off"
+                  placeholder="변경하고자 하는 비밀번호를 입력해주세요"
+                />
+                <span class="error_next_box">
+                  * 8~16자 숫자+영문자+특수문자를 사용하세요.
+                </span>
+              </div>
+              <div class="form-group">
+                <label for="inputPasswordCheck">비밀번호 확인</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPasswordCheck"
+                  name="passwordCheck"
+                  autocomplete="off"
+                  placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요"
+                />
+                <div class="form-group text-center">
+                  <button type="button" id="submitUpdate" class="btn btn-primary">
+                    정보변경<i class="fa fa-check spaceLeft"></i>
+                  </button>
+                  <button type="button" class="btn btn-danger" id="historyBack">
+                    돌아가기<i class="fa fa-times spaceLeft"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+    <script>
+      const member = <%- JSON.stringify(member) %>;
+
+      const subCategoryDom = <%- JSON.stringify(dom.subCategoryDom) %>;
+
+      document.getElementById('subCategoryDom').innerHTML = subCategoryDom;
+    </script>
+    <script src="/js/contents/report/search.js"></script>
+    <!-- 관리 -->
+    <script>
+      setDomElementValueWithJson(
+        document.getElementById('memberEdit'),
+        member,
+        'value',
+        'id',
+      );
+
+      document.getElementById('memberEdit').action = member.member_seq;
+      // 홈으로
+      $('#historyBack').on('click', function () {
+        location.href = window.location.origin + '/';
+      });
+
+      // 정보 수정 시
+      // $('#join-submit').click(function (e) {
+      document.querySelector('#submitUpdate').addEventListener('click', function () {
+        if ($('#name').val() === '') {
+          alert('성명을 입력하세요');
+          $('#name').focus();
+
+          return false;
+        }
+
+        var inputNameReg = /^[가-힣]{2,20}$/;
+        if (!inputNameReg.test($('#name').val())) {
+          alert('성명은 2~20자의 한글만 사용 가능합니다.');
+          $('#name').focus();
+
+          return false;
+        }
+
+        if ($('#nick_name').val() === '') {
+          alert('닉네임을 입력하세요');
+          $('#nick_name').focus();
+
+          return false;
+        }
+
+        var nickNameReg = /^[a-zA-Z가-힣0-9]{2,20}$/;
+        if (!nickNameReg.test($('#nick_name').val())) {
+          alert('닉네임은 2~20자의 영문, 한글, 숫자만 사용 가능합니다.');
+          $('#nick_name').focus();
+
+          return false;
+        }
+
+        // 비밀번호를 변경할 경우에만 입력
+        const passwordValue = $('#inputPassword').val();
+        if (passwordValue.length) {
+          var pwReg = /^(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?=.*[0-9]).{8,16}$/;
+
+          if (!pwReg.test($('#inputPassword').val())) {
+            alert('비밀번호는 8~16자 영문+숫자+특수문자를 사용하세요.');
+            $('#inputPassword').val('').focus();
+            return false;
+          }
+
+          if ($('#inputPasswordCheck').val() === '') {
+            alert('비밀번호를 다시 한번 더 입력하세요');
+            $('#inputPasswordCheck').focus();
+
+            return false;
+          }
+
+          if ($('#inputPassword').val() !== $('#inputPasswordCheck').val()) {
+            alert('비밀번호를 둘다 동일하게 입력하세요');
+            return false;
+          }
+        }
+
+        if ($('#tel').val() === '') {
+          alert('휴대폰 번호를 입력하세요');
+          $('#tel').focus();
+          return false;
+        }
+
+        var cellPhoneReg = /^(?:(010-?\d{4})|(01[1|6|7|8|9]-?\d{3,4}))-?\d{4}$/;
+        if (!cellPhoneReg.test($('#tel').val())) {
+          alert('휴대폰 형식에 맞지 않습니다.');
+          $('#tel').val('').focus();
+          return false;
+        }
+
+        var form = document.querySelector('form');
+        form.submit();
+      });
+    </script>
+
+    <!-- 휴대폰 번호 - 기호 자동 삽입 및 유효성 체크 정규식 -->
+    <script type="text/javascript">
+      $(function () {
+        $('#tel')
+          .on('keydown', function (e) {
+            // 숫자만 입력받기
+            var trans_num = $(this).val().replace(/-/gi, '');
+            var k = e.keyCode;
+
+            // 휴대폰 번호 자릿수를 넘어서는 입력 불가
+            if (
+              trans_num.length >= 11 &&
+              ((k >= 48 && k <= 126) ||
+                (k >= 12592 && k <= 12687) ||
+                k === 32 ||
+                k === 229 ||
+                (k >= 45032 && k <= 55203))
+            ) {
+              e.preventDefault();
+            }
+          })
+          .on('blur', function () {
+            // 포커스를 잃었을때 실행합니다.
+            if ($(this).val() === '') return;
+
+            // 기존 번호에서 - 를 삭제합니다.
+            var trans_num = $(this).val().replace(/-/gi, '');
+
+            // 입력값이 있을때만 실행합니다.
+            if (trans_num != null && trans_num != '') {
+              // 총 핸드폰 자리수는 11글자이거나, 10자여야 합니다.
+              if (trans_num.length === 11 || trans_num.length === 10) {
+                // 유효성 체크
+                var regExp_ctn = /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})([0-9]{3,4})([0-9]{4})$/;
+                if (regExp_ctn.test(trans_num)) {
+                  // 유효성 체크에 성공하면 하이픈을 넣고 값을 바꿔줍니다.
+                  trans_num = trans_num.replace(
+                    /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})-?([0-9]{3,4})-?([0-9]{4})$/,
+                    '$1-$2-$3',
+                  );
+                  $(this).val(trans_num);
+                } else {
+                  alert('유효하지 않은 전화번호 입니다.');
+                  $(this).val('');
+                  $(this).focus();
+                }
+              } else {
+                alert('유효하지 않은 전화번호 입니다.');
+                $(this).val('');
+                $(this).focus();
+              }
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

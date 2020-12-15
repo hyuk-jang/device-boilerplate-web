@@ -14,6 +14,7 @@ const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
 const admin = require('./admin');
+const myPage = require('./myPage');
 
 const routerInfo = {
   main,
@@ -23,6 +24,7 @@ const routerInfo = {
   report,
   control,
   admin,
+  myPage,
 };
 
 const commonUtil = require('../../models/templates/common.util');
@@ -202,6 +204,6 @@ naviList.forEach((naviInfo, index) => {
   //   : router.use(`/${href}`, routerInfo[href]);
   router.use(`/${href}`, routerInfo[href]);
 });
-// router.use('/admin', admin);
+// router.use('/myPage', myPage);
 
 module.exports = router;

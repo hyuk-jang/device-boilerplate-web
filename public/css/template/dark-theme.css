@@ -246,3 +246,7 @@ input.form-control:read-only {
   color: #fff !important;
   background: linear-gradient(#2c5364, #0f2027);
 }
+
+.notice_next_box {
+  color: white;
+}

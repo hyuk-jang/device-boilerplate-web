@@ -13,20 +13,23 @@ class BiAuth extends BM {
 
   /**
    * 사용자 추가를 할 경우
-   * @param {string} password 사용자의 진짜 PW
+   * @param {string=} password 사용자의 진짜 PW
    * @param {MEMBER} memberInfo 저장할 Member
    */
   async setMember(password, memberInfo) {
-    const salt = BU.genCryptoRandomByte(16);
+    // 패스워드가 존재할 경우에만 암호화
+    if (password.length) {
+      const salt = BU.genCryptoRandomByte(16);
 
-    const hashPw = await EU.encryptPbkdf2(password, salt);
+      const hashPw = await EU.encryptPbkdf2(password, salt);
 
-    if (hashPw instanceof Error) {
-      throw new Error('Password hash failed.');
+      if (hashPw instanceof Error) {
+        throw new Error('Password hash failed.');
+      }
+
+      memberInfo.pw_salt = salt;
+      memberInfo.pw_hash = hashPw;
     }
-
-    memberInfo.pw_salt = salt;
-    memberInfo.pw_hash = hashPw;
 
     const resultQuery = await this.setTable('MEMBER', memberInfo);
     return resultQuery;

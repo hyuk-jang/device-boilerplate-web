@@ -153,6 +153,10 @@ _:-ms-input-placeholder,
   align-items: center;
 }
 
+.user_box .user_id {
+  cursor: pointer;
+}
+
 .user_box .user_nim {
   color: #fff;
   margin-right: 1rem;

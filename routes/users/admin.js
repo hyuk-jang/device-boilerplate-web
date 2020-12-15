@@ -12,8 +12,8 @@ const defaultDom = require('../../models/domMaker/defaultDom');
 
 require('../../models/jsdoc/domGuide');
 
-const accountGradeList = ['all', 'admin', 'manager', 'owner', 'guest', 'awaiter'];
-const accountGradeRange = ['admin', 'manager', 'owner', 'guest', 'awaiter'];
+const accountGradeList = ['all', 'admin', 'manager', 'awaiter'];
+const accountGradeRange = ['admin', 'manager', 'awaiter'];
 const accountSecessionList = ['all', 'ok', 'no'];
 const accountLockList = ['all', 'ok', 'no'];
 const PAGE_LIST_COUNT = 10; // 한 페이지당 목록을 보여줄 수
@@ -53,7 +53,6 @@ router.get(
 router.get(
   ['/', '/:siteId', '/:siteId/member'],
   asyncHandler(async (req, res) => {
-    // BU.CLI(req.locals);
     commonUtil.applyHasNumbericReqToNumber(req);
 
     const {
@@ -70,8 +69,6 @@ router.get(
 
     /** @type {AdminModel} */
     const adminModel = global.app.get('adminModel');
-
-    // BU.CLI(req.query);
 
     /** @type {MEMBER} */
     const memberWhere = {};
@@ -181,26 +178,36 @@ router.post(
     const { siteId, memberIdx } = req.params;
     const {
       grade = 'awaiter',
-      is_deleted = 0,
-      is_account_lock = 0,
-      password = '',
+      is_deleted: isDeleted = 0,
+      is_account_lock: isAccountLock = 0,
+      is_pw_renewal: isPwRenewal = 0,
     } = req.body;
+
+    let { password = '' } = req.body;
 
     const isValidMember = _.isNumber(memberIdx);
     const isValidGrade = _.includes(accountGradeRange, grade);
-    const isValidDeleted = is_deleted === 0 || is_deleted === 1;
-    const isValidLock = is_account_lock === 0 || is_account_lock === 1;
+    const isValidDeleted = isDeleted === 0 || isDeleted === 1;
+    const isValidLock = isAccountLock === 0 || isAccountLock === 1;
+    const isValidPwRenewal = isPwRenewal === 0 || isPwRenewal === 1;
 
+    const isValid = _.every([
+      isValidMember,
+      isValidGrade,
+      isValidDeleted,
+      isValidLock,
+      isValidPwRenewal,
+    ]);
     // 데이터에 이상이 있을 경우 알려주고 종료
-    if (!(isValidMember && isValidGrade && isValidDeleted && isValidLock)) {
+    if (isValid === false) {
       return res.send(DU.locationAlertBack('데이터에 이상이 있습니다.'));
     }
 
     /** @type {MEMBER} */
     const memberInfo = {
       grade,
-      is_deleted,
-      is_account_lock,
+      is_deleted: isDeleted,
+      is_account_lock: isAccountLock,
     };
 
     // 정보를 수정할 회원 정보를 불러옴
@@ -224,7 +231,13 @@ router.post(
     // 회원 정보 수정 이력 Insert를 위함
     _.forEach(memberInfo, (value, column) => {
       // 데이터가 일치할 경우 업데이트 절 없음
-      if (!_.isEqual(value, memberRow[column])) {
+      let isSameState = _.isEqual(value, memberRow[column]);
+      // 패스워드 초기화일 경우 해당사항이 있으면 히스토리 등재
+      // if (column === 'is_pw_renewal') {
+      //   isSameState = !value;
+      // }
+
+      if (isSameState === false) {
         const schemaRow = _.find(schemaRows, { COLUMN_NAME: column });
 
         memberEditHistorys.push({
@@ -238,16 +251,16 @@ router.post(
       }
     });
 
+    // 비밀번호를 초기화할 경우 랜덤 생성
+    password = isPwRenewal === 1 ? Math.random().toString(36).slice(2) : password; // "uk02kso845o"
+
     // 로그인한 사용자와 수정할려는 ID가 동일하고 비밀번호를 변경하고자 할 경우
-    if (
-      memberRow.user_id === req.user.user_id &&
-      _.isString(password) &&
-      password.length
-    ) {
+    const isChangePw = _.isString(password) && password.length;
+    if (isChangePw) {
       // 비밀번호 정규식
-      const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+      const pwReg = /^(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?=.*[0-9]).{8,16}$/;
       // 비밀번호 유효성 체크
-      if (!pwReg.test(password)) {
+      if (isPwRenewal === 0 && pwReg.test(password) === false) {
         return res.send(DU.locationAlertBack('데이터에 이상이 있습니다.'));
       }
       const salt = BU.genCryptoRandomByte(16);
@@ -256,7 +269,6 @@ router.post(
       if (hashPw instanceof Error) {
         throw new Error('Password hash failed.');
       }
-
       const schemaRow = _.find(schemaRows, { COLUMN_NAME: 'pw_hash' });
 
       // 회원 비밀번호가 변경되었다면 회원 정보 변경 이력에 추가
@@ -269,16 +281,32 @@ router.post(
       // 수정 비밀번호 입력
       memberInfo.pw_salt = salt;
       memberInfo.pw_hash = hashPw;
-    }
 
+      // 관리자가 비밀번호를 바꾼 것이라면
+      if (memberRow.user_id === req.user.user_id) {
+        _.set(memberInfo, 'is_pw_renewal', 0);
+      } else if (isPwRenewal) {
+        // 패스워드를 갱신하였을 경우에만
+        _.set(memberInfo, 'is_pw_renewal', 1);
+      }
+    }
     // 계정 잠금 해제 일 경우
-    is_account_lock === 0 && Object.assign(memberInfo, { login_fail_count: 0 });
+    isAccountLock === 0 && Object.assign(memberInfo, { login_fail_count: 0 });
 
     // 회원 정보 수정
     await adminModel.updateTable('MEMBER', { member_seq: memberIdx }, memberInfo);
 
     // 회원 정보 변경 이력 입력
     await adminModel.setTables('MEMBER_EDIT_HISTORY', memberEditHistorys, false);
+    // 패스워드가 랜덤으로 변경되었다면 사용자에게 알려줌
+    if (isPwRenewal) {
+      return res.send(
+        DU.locationAlertGo(
+          `정상적으로 갱신되었습니다. 변경 PW: ${password}`,
+          `/admin/${siteId}/member`,
+        ),
+      );
+    }
 
     return res.send(
       DU.locationAlertGo('정상적으로 갱신되었습니다.', `/admin/${siteId}/member`),
@@ -290,7 +318,6 @@ router.post(
 router.get(
   ['/:siteId/history', '/:siteId/history/:memberIdx'],
   asyncHandler(async (req, res) => {
-    // BU.CLI(req.locals);
     commonUtil.applyHasNumbericReqToNumber(req);
 
     const {
@@ -302,8 +329,6 @@ router.get(
 
     /** @type {AdminModel} */
     const adminModel = global.app.get('adminModel');
-
-    // BU.CLI(req.query);
 
     // 레포트 데이터로 환산
     const { reportRows, totalCount } = await adminModel.getMemberEditHistoryReport({

@@ -14,7 +14,7 @@ module.exports = {
   makeLoginUser(userInfo) {
     // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
-      `<span class="user_id"><%= name %></span><span class="user_nim">님</span>
+      `<a href="/myPage"><span class="user_id"><%= name %></span></a><span class="user_nim">님</span>
       <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
     );
 
@@ -124,14 +124,16 @@ module.exports = {
     const siteOptionTemplate = _.template(
       '<li class="<%= isSelected %>"><a href="/<%= href %><%= siteParam %>"><%= name %></a></li>',
     );
-    const madeDom = naviList.map(naviInfo => {
-      const { href, name } = naviInfo;
-      let isSelected = '';
-      if (selectedNavi === href) {
-        isSelected = 'active';
-      }
-      return siteOptionTemplate({ href, name, isSelected, siteParam });
-    });
+    const madeDom = naviList
+      .filter(naviInfo => !naviInfo.isHidden)
+      .map(naviInfo => {
+        const { href, name } = naviInfo;
+        let isSelected = '';
+        if (selectedNavi === href) {
+          isSelected = 'active';
+        }
+        return siteOptionTemplate({ href, name, isSelected, siteParam });
+      });
     return madeDom.join('');
   },
 

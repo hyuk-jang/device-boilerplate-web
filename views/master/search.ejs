@@ -49,6 +49,37 @@
 </div>
 
 <script>
+  // 검색 조회기간 변경 시 조회 간격 돔 자동 변경
+  document.querySelector('#searchType').addEventListener('change', function (event) {
+    const searchInfo = {
+      days: ['min', 'min10', 'hour', 'day'],
+      months: ['min', 'min10', 'hour', 'day', 'month'],
+      years: ['hour', 'day', 'month'],
+      range: ['min', 'min10', 'hour', 'day'],
+    };
+    const searchInervalTxt = {
+      min: '1분',
+      min10: '10분',
+      hour: '1시간',
+      day: '1일',
+      month: '1달',
+    };
+
+    // 템플릿 정의
+    const optionTemplate = Handlebars.compile(
+      '<option {{ selected }}  value="{{ optionId }}">{{ optionValue }}</option>',
+    );
+
+    const intervalSelectDom = searchInfo[this.value].map(intervalTxt => {
+      return optionTemplate({
+        optionId: intervalTxt,
+        optionValue: searchInervalTxt[intervalTxt],
+      });
+    });
+
+    document.querySelector('#searchInterval').innerHTML = intervalSelectDom;
+  });
+
   // 검색 클릭 시
   document.querySelector('#searchBtn').addEventListener('click', function (event) {
     // searchRange 형태 만듬

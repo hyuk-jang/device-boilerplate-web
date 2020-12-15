@@ -144,10 +144,12 @@ function makeGaugeChart(gaugeOption) {
           name: series.name,
           data: [series.data],
           dataLabels: {
-            format: `<div style="text-align:center"><span style="font-size:25px;color:${(Highcharts.theme &&
-              Highcharts.theme.contrastTextColor) ||
-              'black'}">{y}</span><br/>
-              <span style="font-size:12px;color:silver">${series.tooltip.valueSuffix}</span></div>`,
+            format: `<div style="text-align:center"><span style="font-size:25px;color:${
+              (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+            }">{y}</span><br/>
+              <span style="font-size:12px;color:silver">${
+                series.tooltip.valueSuffix
+              }</span></div>`,
           },
           tooltip: {
             valueSuffix: series.tooltip.valueSuffix,
@@ -251,11 +253,14 @@ function makeGaugeChart2(powerGenerationInfo, domId) {
         type: 'pie',
         name: 'Browser share',
         innerSize: '50%',
-        data: [[`${percentageKw}%`, percentageKw], ['', maxKw]],
+        data: [
+          [`${percentageKw}%`, percentageKw],
+          ['', maxKw],
+        ],
         dataLabels: {
-          format: `<div style="text-align:center"><span style="font-size:15px;color:${(Highcharts.theme &&
-            Highcharts.theme.contrastTextColor) ||
-            'black'}">{y}</span>
+          format: `<div style="text-align:center"><span style="font-size:15px;color:${
+            (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+          }">{y}</span>
             <span style="font-size:12px;color:silver">%</span></div>`,
         },
       },
@@ -423,7 +428,20 @@ function makeColumnChart(chartOption) {
 
 Highcharts.setOptions({
   lang: {
-    months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+    months: [
+      '1월',
+      '2월',
+      '3월',
+      '4월',
+      '5월',
+      '6월',
+      '7월',
+      '8월',
+      '9월',
+      '10월',
+      '11월',
+      '12월',
+    ],
     shortMonths: [
       '1월',
       '2월',
@@ -560,7 +578,7 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       plotOptions: {
         spline: {
           marker: {
-            radius: 0,
+            radius: 1,
             lineColor: '#666666',
             lineWidth: 1,
           },
@@ -583,7 +601,9 @@ function makeLineChart(chartInfo, isAreaChart = false) {
 
     Highcharts.chart(chartInfo.domId, lineChartInfo);
   } else {
-    $(`#${chartInfo.domId}`).html(`<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`);
+    $(`#${chartInfo.domId}`).html(
+      `<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`,
+    );
   }
 }
 /**
@@ -727,6 +747,8 @@ function makeAreaChart(chartInfo) {
 
     Highcharts.chart(chartInfo.domId, areaChartInfo);
   } else {
-    $(`#${chartInfo.domId}`).html(`<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`);
+    $(`#${chartInfo.domId}`).html(
+      `<h2>${chartInfo.title}</h2><h3>내역이 존재하지 않습니다.</h3>`,
+    );
   }
 }

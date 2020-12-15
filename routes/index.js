@@ -13,7 +13,7 @@ const admin = require('./admin/users');
 const users = require('./users');
 const upsas = require('./upsas');
 
-const accountGradeList = ['admin', 'manager', 'owner', 'guest', 'awaiter'];
+const accountGradeList = ['admin', 'manager', 'awaiter'];
 const AWAITER = 'awaiter';
 // const accountGradeRange = ['manager', 'owner', 'guest', 'awaiter'];
 
@@ -62,7 +62,6 @@ router.use((req, res, next) => {
 });
 
 router.get('/intersection', (req, res) => {
-  // BU.CLI(req.user);
   const grade = _.get(req, 'user.grade');
 
   // 사용자 권한 체크

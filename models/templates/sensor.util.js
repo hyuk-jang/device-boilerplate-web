@@ -79,7 +79,7 @@ exports.getDistinctGroupDateList = getDistinctGroupDateList;
  * @param {string=} strStartDate 시작 날짜
  */
 function getMomentFormat(searchRange, strStartDate = searchRange.strStartDate) {
-  const { searchInterval } = searchRange;
+  const { searchInterval, searchType } = searchRange;
 
   let addUnit = 'minutes';
   let addValue = 1;
@@ -114,11 +114,12 @@ function getMomentFormat(searchRange, strStartDate = searchRange.strStartDate) {
     case 'month':
       addUnit = 'months';
       momentFormat = 'YYYY-MM';
+      plotSeries.pointInterval = searchType === 'months' ? 1 : 12;
       break;
-    case 'year':
-      addUnit = 'years';
-      momentFormat = 'YYYY';
-      break;
+    // case 'year':
+    //   addUnit = 'years';
+    //   momentFormat = 'YYYY';
+    //   break;
     default:
       break;
   }
@@ -504,13 +505,14 @@ exports.makeSensorChart = makeSensorChart;
  * @param {plotSeriesInfo} plotSeries
  */
 function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
-  // BU.CLI(plotSeries)
+  console.log(plotSeries);
   // 차트 생성하기 위한 설정
   const { domId, title = '', subtitle = '', chartOptionList } = chartConfig;
   // 정제된 차트 정보
   const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
   // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
   chartOptionList.forEach(chartOption => {
+    console.log(chartOption);
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
     // 보여줄 축 정보
     const { dataUnit = '', yTitle, keys, mixColors } = chartOption;
@@ -528,7 +530,11 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
       // Node Def ID를 가진 저장소가 있을 경우
       if (!_.isUndefined(nodeDefStorage)) {
         nodeDefStorage.nodePlaceList.forEach(nodePlace => {
-          const { node_name: ndName = '', place_node_name: placeNodeName } = nodePlace;
+          const {
+            node_name: ndName = '',
+            place_node_name: placeNodeName,
+            sensorDataRows = [],
+          } = nodePlace;
           let { chart_color: chartColor = '' } = nodePlace;
 
           // 같은 Place에 위치한 Node의 경우 색상이 같으므로 색상 표현을 다르게 하기 위한 논리
@@ -542,6 +548,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
           }
 
           const chartSeriesInfo = {
+            // type: 'spline',
             // 차트 컬럼 개체 명
             name: ndName,
             // 차트 컬럼 개체 색상
@@ -553,6 +560,26 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
             // dataTable. 각 데이터는 [[utc, data][...]] 이룸
             data: _.map(nodePlace.sensorDataRows, 'avg_data'),
           };
+
+          console.log(plotSeries.pointInterval);
+          if (plotSeries.pointInterval < 13 && plotSeries.pointInterval > 0) {
+            chartSeriesInfo.data = Array(plotSeries.pointInterval)
+              .fill(null)
+              .map((data, idx) => {
+                return [
+                  moment(plotSeries.pointStart)
+                    .add(idx, 'months')
+                    .add(9, 'hours')
+                    .valueOf(),
+                  _.get(sensorDataRows[idx], 'avg_data', null),
+                ];
+              });
+          } else {
+            chartSeriesInfo.data = _.map(nodePlace.sensorDataRows, 'avg_data');
+          }
+
+          // console.log(chartSeriesInfo.data);
+
           refinedChart.series.push(chartSeriesInfo);
         });
       }

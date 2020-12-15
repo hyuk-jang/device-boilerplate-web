@@ -157,6 +157,10 @@ function getSearchValue() {
   // 조회기간이 기간 검색일 경우
   if (searchType === 'range') {
     strEndDateInputValue = document.getElementById('strEndDateInputValue').value;
+    if (searchInterval === 'month') {
+      return alert('기간선택에서는 조회간격을 1달로 설정할 수 없습니다.');
+    }
+
     if (strStartDateInputValue > strEndDateInputValue) {
       return alert('종료일이 시작일보다 빠를 수 없습니다.');
     }

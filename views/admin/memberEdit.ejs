@@ -70,8 +70,6 @@
                 <label>회원권한</label>
                 <select class="form-control" id="grade" name="grade">
                   <option value="awaiter">awaiter</option>
-                  <option value="guest">guest</option>
-                  <option value="owner">owner</option>
                   <option value="manager">manager</option>
                   <option value="admin">admin</option>
                 </select>
@@ -90,6 +88,15 @@
                   <option value="0">X</option>
                 </select>
               </div>
+              <% if(member.grade !== 'admin') { %>
+              <div class="form-group">
+                <label>비밀번호를 초기화하시겠습니까?</label>
+                <select class="form-control" id="isPwRenewal" name="is_pw_renewal">
+                  <option value="0">X</option>
+                  <option value="1">O</option>
+                </select>
+              </div>
+              <% } %>
               <div class="form-group text-center">
                 <button type="button" id="submitUpdate" class="btn btn-primary">
                   정보변경<i class="fa fa-check spaceLeft"></i>
@@ -127,6 +134,8 @@
 
       $('#isAccountLock').val(_.toString(member.is_account_lock)).prop('selected', true);
 
+      // $('#isPwRenewal').val(_.toString(member.is_pw_renewal)).prop('selected', true);
+
       // 정보 수정 시
       document.querySelector('#submitUpdate').addEventListener('click', function () {
         // 관리자 비밀번호 수정 로직
@@ -134,7 +143,7 @@
 
         // 비밀번호 돔이 존재하고 해당 비밀번호를 변경하고자 할 경우
         if (!_.isEmpty($inputPassword) && $inputPassword.val() !== '') {
-          const pwReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+          const pwReg = /^(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?=.*[0-9]).{8,16}$/;
           if (!pwReg.test($('#inputPassword').val())) {
             alert('비밀번호는 8~16자 숫자+영문자+특수문자를 사용하세요.');
             $('#inputPassword').val('').focus();
