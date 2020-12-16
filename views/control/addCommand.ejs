@@ -18,11 +18,11 @@
     <div class="search_area" name="cmdCore" data-cmd-core="SINGLE">
       <div class="search_box">
         <span class="search_title">장치 타입</span>
-        <select class="form-control" id="deviceCateSel"> </select>
+        <select class="form-control" id="deviceCateSel"></select>
       </div>
       <div class="search_box">
         <span class="search_title">장치 목록</span>
-        <select class="form-control" id="deviceListSel"> </select>
+        <select class="form-control" id="deviceListSel"></select>
       </div>
       <div class="search_box">
         <span class="search_title">제어 목록</span>
@@ -45,7 +45,7 @@
     </div>
 
     <!-- 설정 제어 명령 -->
-    <div class="search_area" name="cmdCore" data-cmd-core="SET" style="display: none;">
+    <div class="search_area" name="cmdCore" data-cmd-core="SET" style="display: none">
       <div class="search_box">
         <span class="search_title">명령 종류</span>
         <select class="form-control" id="setCmdSelList"></select>
@@ -53,14 +53,14 @@
     </div>
 
     <!-- 흐름 제어 명령 -->
-    <div class="search_area" name="cmdCore" data-cmd-core="FLOW" style="display: none;">
+    <div class="search_area" name="cmdCore" data-cmd-core="FLOW" style="display: none">
       <div class="search_box">
         <span class="search_title">시작지</span>
-        <select class="form-control" id="flowCmdSrcPlaceSel"> </select>
+        <select class="form-control" id="flowCmdSrcPlaceSel"></select>
       </div>
       <div class="search_box">
         <span class="search_title">도착지</span>
-        <select class="form-control" id="flowCmdDestPlaceSel"> </select>
+        <select class="form-control" id="flowCmdDestPlaceSel"></select>
       </div>
     </div>
 
@@ -69,11 +69,11 @@
       class="search_area"
       name="cmdCore"
       data-cmd-core="SCENARIO"
-      style="display: none;"
+      style="display: none"
     >
       <div class="search_box">
         <span class="search_title">시나리오</span>
-        <select class="form-control" id="scenarioCmdSelList"> </select>
+        <select class="form-control" id="scenarioCmdSelList"></select>
       </div>
     </div>
 
@@ -85,7 +85,7 @@
           class="input_tre w_3rem"
           data-limit-time="hours"
           min="0"
-          max="1000"
+          max="24"
           placeholder="시"
         />
         <span>:</span>
@@ -109,9 +109,7 @@
       </div>
     </div>
     <div class="submit_box">
-      <button type="button" class="btn btn-success" id="reqCommandBtn">
-        제어 요청
-      </button>
+      <button type="button" class="btn btn-success" id="reqCommandBtn">제어 요청</button>
     </div>
   </div>
   <div name="cmdGoalArea" id="cmdGoalArea"></div>
@@ -281,33 +279,49 @@
         break;
     }
 
+    let limitTimeErrMsg = '';
     // TODO: 달성 목표 추가 (cmdGoal)
     var limitTimeSec = _.chain(document.getElementById('limitTime'))
       .get('children', [])
       .filter(limitEleDom => typeof limitEleDom.dataset.limitTime === 'string')
       .reduce((totalSec, limitEleDom) => {
+        const limitValue = Number(limitEleDom.value);
         let multiplyScale = 0;
         switch (limitEleDom.dataset.limitTime) {
           case 'hours':
+            limitTimeErrMsg =
+              limitValue > 24 ? '제한시간은 24시간을 초과할 수 없습니다.' : '';
             multiplyScale = 60 * 60;
             break;
           case 'minutes':
+            limitTimeErrMsg =
+              !limitTimeErrMsg.length && limitValue > 59
+                ? '제한시간은 59분을 초과할 수 없습니다.'
+                : limitTimeErrMsg;
             multiplyScale = 60;
             break;
           case 'seconds':
+            limitTimeErrMsg =
+              !limitTimeErrMsg.length && limitValue > 59
+                ? '제한시간은 59초를 초과할 수 없습니다.'
+                : limitTimeErrMsg;
             multiplyScale = 1;
             break;
           default:
             multiplyScale = 0;
             break;
         }
-        return totalSec + _.toNumber(limitEleDom.value) * multiplyScale;
+        return totalSec + _.toNumber(limitValue) * multiplyScale;
       }, 0)
       .value();
+    // 에러 메시지가 있을 경우 출력
+    if (limitTimeErrMsg.length > 0) {
+      return alert(limitTimeErrMsg);
+    }
 
     limitTimeSec > 0 && _.set(reqCmdInfo, 'cmdGoal.limitTimeSec', limitTimeSec);
 
-    // console.log('limitTimeSec', reqCmdInfo);
+    // console.log('limitTimeSec', limitTimeSec, reqCmdInfo);
 
     var isError = 0;
     // 달성 목표 체크

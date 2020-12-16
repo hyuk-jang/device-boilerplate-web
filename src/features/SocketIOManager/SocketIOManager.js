@@ -109,6 +109,13 @@ class SocketIOManager extends AbstSocketIOManager {
             DPI,
           } = generateControlCmdInfo;
 
+          const { limitTimeSec = 0 } = WCG;
+
+          // 24시간 59분 59초 => 89,999초 보다 높은 타이머가 들어올 경우
+          if (limitTimeSec >= 90000) {
+            throw new Error('제한 시간의 허용 범위를 넘어섰습니다.');
+          }
+
           // BU.CLI(generateControlCmdInfo);
 
           /** @type {wsControlCmdAPI} */

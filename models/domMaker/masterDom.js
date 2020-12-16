@@ -14,7 +14,7 @@ module.exports = {
   makeLoginUser(userInfo) {
     // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
-      `<a href="/myPage"><span class="user_id"><%= name %></span></a><span class="user_nim">님</span>
+      `<span class="user_id"><%= nick_name %></span><span class="user_nim">님</span>
       <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
     );
 
