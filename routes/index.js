@@ -64,7 +64,7 @@ router.use((req, res, next) => {
 router.get('/intersection', (req, res) => {
   const { grade, is_pw_renewal: isPwRenewal = 0 } = req.user;
 
-  if (isPwRenewal === 0) {
+  if (isPwRenewal === 1) {
     req.flash('modalMsg', '패스워드를 변경해주세요.');
   }
 
