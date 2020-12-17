@@ -47,15 +47,23 @@ class SocketIOManager extends AbstSocketIOManager {
 
       // 인증 요청 응답 수신 처리(접속한 Socket 등록)
       socket.on('authSocket', sessionInfo => {
+        const { sessionUserInfo } = sessionInfo;
+        let { siteId = '' } = sessionInfo;
+
+        // 사이트가 지정이 안되어 있거나 all 일 경우 사용자 siteId 가져옴
+        if (siteId === '' || _.toLower(siteId) === 'all') {
+          siteId = sessionUserInfo.main_seq;
+        }
+
+        // Main 정보(거점)의 ID가 동일한 객체 탐색
+        const foundMsInfo = _.find(this.mainStorageList, msInfo =>
+          _.isEqual(msInfo.msFieldInfo.main_seq, Number(siteId)),
+        );
+
         /** @type {msUserInfo} */
         const msUser = sessionInfo;
         // 접속한 Socket 정보 정의
         msUser.socketClient = socket;
-
-        // Main 정보(거점)의 ID가 동일한 객체 탐색
-        const foundMsInfo = _.find(this.mainStorageList, msInfo =>
-          _.isEqual(msInfo.msFieldInfo.main_seq, msUser.sessionUserInfo.main_seq),
-        );
 
         // 거점을 찾을 경우 초기 값을 보내줌.
         if (foundMsInfo) {
@@ -101,7 +109,7 @@ class SocketIOManager extends AbstSocketIOManager {
             // 기본 값은 명령 요청
             cmdType: WCT = reqWCT.CONTROL,
             cmdId: WCI,
-            cmdGoal: WCG,
+            cmdGoal: WCG = {},
             nodeId: NI,
             singleControlType: SCT,
             controlSetValue: CSV,

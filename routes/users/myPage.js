@@ -60,7 +60,13 @@ router.post(
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
-    const { password = '', name = '', nick_name = '', tel = '' } = req.body;
+    const {
+      password = '',
+      currPassword = '',
+      name = '',
+      nick_name = '',
+      tel = '',
+    } = req.body;
 
     // ID, 비밀번호, 닉네임, 휴대폰 정규식
     const nameReg = /^[가-힣]{2,20}$/;
@@ -78,6 +84,24 @@ router.post(
 
     if (!isPassFlag) {
       return res.send(DU.locationAlertBack('전송 데이터에 이상이 있습니다.'));
+    }
+
+    // 변경 비밀번호가 존재할 경우 기존 비밀번호 맞는지 확인
+    if (password.length) {
+      const isValidMember = await biAuth.isValidMember({
+        userId: req.user.user_id,
+        password: currPassword,
+      });
+
+      if (isValidMember === false) {
+        return res.send(DU.locationAlertBack('현재 비밀번호를 확인해주세요.'));
+      }
+      // 동일 비밀번호 변경 불가
+      if (currPassword === password) {
+        return res.send(
+          DU.locationAlertBack('변경 비밀번호가 현재 비밀번호와 동일합니다.'),
+        );
+      }
     }
 
     const memberPickList = ['name', 'nick_name', 'tel'];

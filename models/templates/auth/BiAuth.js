@@ -37,6 +37,30 @@ class BiAuth extends BM {
    * 로그인 정보와 DB에 저장된 회원정보를 비교하여 pw를 검증
    * @param {{userId: string, password: string}} loginInfo
    */
+  async isValidMember(loginInfo) {
+    /** @type {MEMBER} */
+    const whereInfo = {
+      user_id: loginInfo.userId,
+    };
+    // ID와 삭제가 되지 않은 해당 ID를 찾음.
+    /** @type {MEMBER} */
+    const memberRow = await this.getTableRow('MEMBER', whereInfo);
+
+    // 매칭되는 회원이 없다면
+    if (_.isEmpty(memberRow)) {
+      return false;
+    }
+
+    // Hash 비밀번호의 동일함을 체크
+    const hashPw = await EU.encryptPbkdf2(loginInfo.password, memberRow.pw_salt);
+
+    return _.isEqual(hashPw, memberRow.pw_hash);
+  }
+
+  /**
+   * 로그인 정보와 DB에 저장된 회원정보를 비교하여 pw를 검증
+   * @param {{userId: string, password: string}} loginInfo
+   */
   async getAuthMember(loginInfo) {
     const LOGIN_FAIL_COUNT = 5;
     /** @type {MEMBER} */
