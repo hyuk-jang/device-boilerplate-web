@@ -209,11 +209,11 @@ app.use((err, req, res, next) => {
 
   // FIXME: 정상 요청일 경우에도 로드됨. 문제인지 아닌지 파악 필요
   if (app.get('env') === 'production') {
-    res.render('./templates/error/page404', req.locals);
+    return res.render('./templates/error/pageError', req.locals);
 
     // return res
     //   .status(500)
-    //   .send('페이지 요청 중에 문제가 발생하였습니다.\n관리자에게 문의하시기 바랍니다.');
+    // .send('페이지 요청 중에 문제가 발생하였습니다.\n관리자에게 문의하시기 바랍니다.');
   }
 
   // render the error page

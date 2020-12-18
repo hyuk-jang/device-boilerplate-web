@@ -2,14 +2,25 @@ $('#searchType').on('change', function () {
   applySearchType($(this).val());
 });
 
-// 생육 환경, 인버터 클릭 시 페이지 이동
-$('#subCategoryDom')
-  .children()
-  .each((index, dom) => {
-    $(dom).on('click', function () {
-      location.href = `${window.location.origin}/${naviId}/${siteId}/${$(this).val()}`;
+const subCategoryElement = document.querySelector('#subCategoryDom');
+
+if (subCategoryElement !== null) {
+  const subCategoryDomLength = subCategoryElement.children.length;
+
+  $('#subCategoryDom')
+    .children()
+    .each((index, dom) => {
+      if (subCategoryDomLength > 1) {
+        $(dom).on('click', function (e) {
+          location.href = `${window.location.origin}/${naviId}/${siteId}/${$(
+            this,
+          ).val()}`;
+        });
+      } else {
+        dom.setAttribute('style', 'pointer-events:none;');
+      }
     });
-  });
+}
 
 function checkSelectBoxOption(selectBoxId, selectValue) {
   const $selectBoxOptions = $(`#${selectBoxId}`).children();
