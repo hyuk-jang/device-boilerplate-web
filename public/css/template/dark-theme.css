@@ -250,3 +250,17 @@ input.form-control:read-only {
 .notice_next_box {
   color: white;
 }
+
+/***************************************/
+/************** 하이차트 ***************/
+/***************************************/
+
+.highcharts-data-table thead {
+  background: linear-gradient(#2c5364, #0f2027);
+}
+.highcharts-data-table tbody tr:hover {
+  background: #274c7c;
+}
+.highcharts-data-table caption {
+  background: #359b5d;
+}

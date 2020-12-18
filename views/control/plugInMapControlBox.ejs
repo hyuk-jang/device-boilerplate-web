@@ -3,6 +3,7 @@
   <button
     id="isApiClientConn"
     class="btn btn-danger btn-sm cursorDefault"
+    style="pointer-events: none"
     title="수집서버 연결 상태"
   >
     <span class="glyphicon glyphicon-link"></span>
@@ -36,6 +37,8 @@
     var canvasPanzoom = Panzoom(canvas, {
       cursor: 'default',
       startScale: startScale,
+      // maxScale: 5,
+      minScale: 1,
     });
 
     document.getElementById('zoomIn').addEventListener('click', canvasPanzoom.zoomIn);

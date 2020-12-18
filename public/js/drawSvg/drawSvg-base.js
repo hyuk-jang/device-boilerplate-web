@@ -78,6 +78,9 @@ const mdControlIdenStorage = new Map();
 /** @type {Map<string, mdCmdInfo>} (key: cmdId) */
 const mdCmdStorage = new Map();
 
+/** @type {Map<string, mConvertRelationInfo>} (key: ndId) */
+const mdConvertStorage = new Map();
+
 // /** @type {Map<string, mdConvertInfo>} key: nodeDefId */
 // const mdConvertStorage = new Map();
 
@@ -155,8 +158,6 @@ function initDrawSvg(isProd = true) {
     const { id } = modelInfo;
     mdMapStorage.set(id, modelInfo);
   });
-
-  // console.log(mdNodeStorage);
 
   // PlaceRelationList을 순회하면서 Map<placeId, mSvgStorageInfo> 세팅
   placeRelationList.forEach(pClassInfo => {
@@ -246,6 +247,7 @@ function initDrawSvg(isProd = true) {
         const {
           target_code: nCode,
           target_name: nName,
+          modbusInfo,
           svgNodePosOpt = {},
           svgNodePosOpt: { resourceId, axisScale, moveScale } = {},
         } = nodeInfo;
@@ -291,6 +293,7 @@ function initDrawSvg(isProd = true) {
           nodeId,
           nodeName,
           nodeData: undefined,
+          modbusInfo,
           isSensor,
           dataUnit,
           axisScale,
@@ -309,7 +312,17 @@ function initDrawSvg(isProd = true) {
     });
   });
 
-  // console.log(mdNodeStorage);
+  // 변환 정보 설정
+  convertRelationList.forEach(cRelInfo => {
+    const { nDefId = [] } = cRelInfo;
+
+    if (typeof nDefId === 'string') {
+      mdConvertStorage.set(nDefId, cRelInfo);
+    } else {
+      nDefId.forEach(ndId => mdConvertStorage.set(ndId, cRelInfo));
+    }
+  });
+
   // Place Class Storage 수정 (Node 상태에 따라)
   mdPlaceRelationStorage.forEach(mdPlaceRelHeadInfo => {
     const { pcId, mdPlaceRelTailStorage } = mdPlaceRelHeadInfo;
@@ -921,6 +934,30 @@ function drawSvgElement(svgDrawInfo, drawType) {
 }
 
 /**
+ * 데이터 변환
+ * @param {mdNodeInfo} mdNodeInfo
+ * @param {number|string} data 데이터 값
+ */
+function refineNodeData(mdNodeInfo, data) {
+  const { ndId, nodeName } = mdNodeInfo;
+
+  const convertStorage = mdConvertStorage.get(ndId);
+  // 변환 정보가 없을 경우 원본 반환
+  if (convertStorage === undefined) {
+    return data;
+  }
+  const { convertInfo, isNodeNameUse = false } = convertStorage;
+
+  const convertData = convertInfo[data];
+
+  // 노드 이름 사용 flag가 참일 경우 변환 정보에 따라 반환
+  if (isNodeNameUse) {
+    return convertData ? nodeName : '';
+  }
+  return convertData;
+}
+
+/**
  * 노드 또는 센서에 데이터 표시
  * @param {string} nodeId
  * @param {number|string} data 데이터 값
@@ -954,6 +991,9 @@ function showNodeData(nodeId, data = '') {
       svgEleDataUnit,
     } = mdNodeInfo;
 
+    // 변환 정보가 존재할 경우 data 값 치환
+    data = refineNodeData(mdNodeInfo, data);
+
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
     if (nodeData === data) return false;
 
@@ -967,7 +1007,7 @@ function showNodeData(nodeId, data = '') {
     let selectedTxtColor = txtBaseColor;
 
     // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
-    if (isSensor) {
+    if (isSensor === 1) {
       if (data === '' || data === undefined) {
         selectedColor = errColor;
       } else {
@@ -1022,7 +1062,7 @@ function showNodeData(nodeId, data = '') {
 
     return false;
   } catch (e) {
-    // console.error(nodeId, e);
+    // console.error(nodeId, e.message);
   }
 }
 
@@ -1313,27 +1353,47 @@ function runSimulator() {
   // SVG('#IVT_PW_G_KW_1_title').clear().text('TEST');
 
   mdNodeStorage.forEach(mdNodeInfo => {
-    const { nodeId, isSensor } = mdNodeInfo;
-    if (isSensor) {
-      showNodeData(nodeId, _.round(_.random(0, 1000, true), 2));
+    const { nodeId, isSensor, modbusInfo } = mdNodeInfo;
+
+    let nodeData;
+    // 모드버스 형태일 경우
+    if (modbusInfo === undefined) {
+      if (isSensor) {
+        nodeData = _.round(_.random(0, 1000, true), 2);
+      } else {
+        const isDataType = _.random(0, 2);
+
+        switch (isDataType) {
+          case 0:
+            nodeData = DATA_RANGE.FALSE[_.random(0, DATA_RANGE.FALSE.length - 1)];
+            break;
+          case 1:
+            nodeData = DATA_RANGE.TRUE[_.random(0, DATA_RANGE.TRUE.length - 1)];
+            break;
+          default:
+            nodeData = _.round(_.random(0, 1000, true), 2);
+            break;
+        }
+      }
     } else {
-      const isDataType = _.random(0, 2);
+      // 모드버스 일 경우
+      const { fnCode, dataLength = 1 } = modbusInfo;
 
-      let nodeData;
-
-      switch (isDataType) {
-        case 0:
-          nodeData = DATA_RANGE.FALSE[_.random(0, DATA_RANGE.FALSE.length - 1)];
-          break;
+      switch (fnCode) {
         case 1:
-          nodeData = DATA_RANGE.TRUE[_.random(0, DATA_RANGE.TRUE.length - 1)];
+          nodeData = _.sample([0, 1]);
+          break;
+        case 3:
+        case 4:
+          nodeData = _.random(0, 1000, true);
+          nodeData = dataLength > 1 ? _.round(nodeData, 2) : _.round(nodeData);
           break;
         default:
-          nodeData = _.round(_.random(0, 1000, true), 2);
+          nodeData = _.random(0, 1000, true);
           break;
       }
-      showNodeData(nodeId, nodeData);
     }
+    showNodeData(nodeId, nodeData);
   });
 }
 

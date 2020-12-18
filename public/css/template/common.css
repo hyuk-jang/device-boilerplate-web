@@ -132,9 +132,11 @@ _:-ms-input-placeholder,
   height: 3rem;
   width: 7rem;
   color: #000;
+  cursor: default;
   text-align: center;
   border-radius: 2rem;
   margin-right: 0.4rem;
+  pointer-events: none;
 }
 
 .weathercast_data_unit {
@@ -151,10 +153,6 @@ _:-ms-input-placeholder,
 .user_box {
   display: flex;
   align-items: center;
-}
-
-.user_box .user_id {
-  cursor: pointer;
 }
 
 .user_box .user_nim {
@@ -543,7 +541,7 @@ _:-ms-input-placeholder,
   align-items: center;
   border: 1px solid #807a7a;
   min-width: 300px;
-  min-height: 200px;
+  min-height: 160px;
 }
 
 .svg_map {
@@ -879,6 +877,54 @@ article.sdv_w_side > p:last-child {
 
 .color_black {
   color: black;
+}
+
+.highcharts-figure,
+.highcharts-data-table table {
+  min-width: 310px;
+  max-width: 800px;
+  margin: 1em auto;
+}
+
+/***************************************/
+/************** 하이차트 ***************/
+/***************************************/
+#container {
+  height: 400px;
+}
+
+.highcharts-data-table table {
+  font-family: Verdana, sans-serif;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  margin: 10px auto;
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+}
+.highcharts-data-table caption {
+  padding: 1em 0;
+  font-size: 1.1em;
+}
+.highcharts-data-table th {
+  font-weight: 600;
+  padding: 0.5em;
+  text-align: center;
+}
+.highcharts-data-table td,
+.highcharts-data-table th,
+.highcharts-data-table caption {
+  padding: 0.5em;
+  color: #fff;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+.highcharts-data-table thead tr,
+.highcharts-data-table tr:nth-child(even) {
+  /* background: #f8f8f8; */
+}
+.highcharts-data-table tr:hover {
+  /* background: #f1f7ff; */
 }
 
 /***************************************/

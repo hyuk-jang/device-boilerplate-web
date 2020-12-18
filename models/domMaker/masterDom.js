@@ -15,7 +15,7 @@ module.exports = {
     // console.log('userInfo', userInfo);
     const loginAreaTemplate = _.template(
       `<span class="user_id"><%= nick_name %></span><span class="user_nim">님</span>
-      <input type="button" class="logout" onclick="location.href='/auth/logout'" value="Logout" />`,
+      <input type="button" class="logout" onclick="location.href='/auth/logout'" value="로그아웃" />`,
     );
 
     const madeMap = loginAreaTemplate(userInfo);

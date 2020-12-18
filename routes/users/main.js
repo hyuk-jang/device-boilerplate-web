@@ -13,7 +13,7 @@ const sensorUtil = require('../../models/templates/sensor.util');
 const DeviceProtocol = require('../../models/DeviceProtocol');
 
 router.get(
-  ['/', '/main', '/main/:siteId'],
+  ['/', '/:siteId'],
   asyncHandler(async (req, res) => {
     const {
       mainInfo: { siteId, mainWhere },
@@ -97,13 +97,6 @@ router.get(
     req.locals.powerGenerationInfo = powerGenerationInfo;
     req.locals.growthEnv = sensorDataInfo;
     // BU.CLI(req.locals);
-    res.render('./main/index', req.locals);
-  }),
-);
-
-router.get(
-  '/main/:id',
-  asyncHandler(async (req, res) => {
     res.render('./main/index', req.locals);
   }),
 );
