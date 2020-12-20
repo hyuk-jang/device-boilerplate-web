@@ -232,10 +232,15 @@
         optionTemplate({ optionId: CF_SCENARIO, optionValue: '시나리오' }),
       );
     }
-
-    // if ($cmdFormatSel.length) {
-    //   $('#controlCommandArea').addClass('hidden');
-    // }
+    // 제어 명령 자체가 존재하지 않을 경우
+    if ($cmdFormatSel.length) {
+      $('#controlCommandArea').remove();
+    } else {
+      // 목표 추가 관련 이벤트 바인딩
+      initAddCmdGoalEvent();
+      // 초기 값 이벤트 발생 트리거
+      $('#deviceCateSel').trigger('change');
+    }
   }
 
   // TODO: DBS에 명령을 요청할 공통 형식
@@ -413,7 +418,7 @@
     }
   }
 
-  /** 단일 명령, 설정 명령, 염수 이동 명령, 시나리오 명령에 관한 동적 돔 생성 */
+  /** 단일 명령, 설정 명령, 흐름 명령, 시나리오 명령에 관한 동적 돔 생성 */
   function initAddControlChangeEvent() {
     // 명령 형식 선택 이벤트
     $('#cmdFormatSel').on('change', function () {
@@ -450,9 +455,9 @@
       $('#flowCmdDestPlaceSel').html(flowCmdInfo.destList.map(cmdTemplate));
     });
 
-    // 흐름 명령 배수지 Dom 생성
+    // 흐름 명령 출발지 Dom 생성
     $('#flowCmdSrcPlaceSel').html(_.map(flowCmdList, cmdTemplate));
-    // 흐름 명령 급수지 Dom 생성. handleFlowSrcPlace() 실행 시킴
+    // 흐름 명령 도착지 Dom 생성. handleFlowSrcPlace() 실행 시킴
     $('#flowCmdSrcPlaceSel').trigger('change');
 
     // 시나리오 돔 설정
@@ -581,10 +586,5 @@
   $(document).ready(() => {
     initAddControlChangeEvent();
     initCmdFormatSel();
-    initAddCmdGoalEvent();
-
-    $('#deviceCateSel').trigger('change');
-
-    // $('#addCmdGoalBtn').trigger('click');
   });
 </script>

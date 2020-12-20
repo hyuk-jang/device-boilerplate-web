@@ -1,6 +1,7 @@
 const solarIotConfig = require('./ETC/solarIot.config');
 const fpConfig = require('./FarmParallel/fp.config');
 const hsConfig = require('./S2W/hs.config');
+const stpFirstConfig = require('./STP/first.config');
 
 module.exports = (mainId, subId) => {
   let projectConfig;
@@ -23,6 +24,13 @@ module.exports = (mainId, subId) => {
       switch (subId) {
         default:
           projectConfig = hsConfig;
+          break;
+      }
+      break;
+    case 'STP':
+      switch (subId) {
+        default:
+          projectConfig = stpFirstConfig;
           break;
       }
       break;

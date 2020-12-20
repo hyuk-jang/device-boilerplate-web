@@ -1,7 +1,5 @@
-const TRUE_DATA = '1';
-const FALSE_DATA = '0';
-const ERROR_DATA = '-1';
-
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-alert */
 var _ = _;
 var $ = $;
 var SVG = SVG;
@@ -392,16 +390,6 @@ function initDrawSvg(isProd = true) {
 
 /**
  *
- * @param {mdNodeInfo} nodeInfo
- */
-function convertDataFormat(nodeInfo) {
-  const { nodeId } = nodeInfo;
-  // mdNodeStorage.get(nodeId).
-  // const  convertRelationList.find(nodeId)
-}
-
-/**
- *
  * @param {SVG} svgCanvas
  * @param {mPatternInfo} patternInfo
  */
@@ -471,8 +459,6 @@ function drawInsideElement(svgDrawInfo, drawType) {
               svgClass: headerDefaultSvgClass = defaultSvgClass,
               fontColor: headerFontColor = '#fff',
               fontSize: headerFontSize = 10,
-              strokeColor: headerStrokeColor = 'white',
-              strokeWidth: headerStrokeWidth = 1,
             } = {},
             bodyInfo: {
               fontColor: bodyFontColor = '#fff',
@@ -675,12 +661,15 @@ function drawInsideElement(svgDrawInfo, drawType) {
  * @param {mSvgPositionInfo} svgPositionInfo
  */
 function setTableIndex(mdNodeInfo, svgPositionInfo) {
+  const { nodeId } = mdNodeInfo;
   // console.log(mdNodeInfo, svgPositionInfo);
   const { name, placeId, tblIndex } = svgPositionInfo;
 
-  const { svgEleName, svgEleData, svgEleDataUnit } = mdPlaceStorage.get(
-    placeId,
-  ).svgEleTbls[tblIndex];
+  const mdPlaceTblInfo = mdPlaceStorage.get(placeId).svgEleTbls[tblIndex];
+
+  mdPlaceTblInfo.nodeId = nodeId;
+
+  const { svgEleName, svgEleData, svgEleDataUnit } = mdPlaceTblInfo;
 
   // FIXME: 데이터에 임시로 지정함
   svgEleData.attr({ id: mdNodeInfo.nodeId });
@@ -792,7 +781,6 @@ function drawSvgElement(svgDrawInfo, drawType) {
       // 노드 일 경우에는 초기값 Error, 그밖에는 기본 색상
       break;
     case 'image':
-      console.log(defaultColor);
       svgCanvasBgElement = svgCanvas
         .image(defaultColor)
         .size(svgModelWidth, svgModelHeight);
@@ -984,7 +972,7 @@ function showNodeData(nodeId, data = '') {
           errColor = 'red',
           svgClass = [],
         },
-        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [], fontSize } = {},
+        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [] } = {},
       },
       svgEleBg,
       svgEleData,
@@ -992,10 +980,10 @@ function showNodeData(nodeId, data = '') {
     } = mdNodeInfo;
 
     // 변환 정보가 존재할 경우 data 값 치환
-    data = refineNodeData(mdNodeInfo, data);
+    const cData = refineNodeData(mdNodeInfo, data);
 
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
-    if (nodeData === data) return false;
+    if (nodeData === cData) return false;
 
     // data update
     mdNodeInfo.nodeData = data;
@@ -1008,19 +996,19 @@ function showNodeData(nodeId, data = '') {
 
     // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
     if (isSensor === 1) {
-      if (data === '' || data === undefined) {
+      if (cData === '' || cData === undefined) {
         selectedColor = errColor;
       } else {
         isValidData = 1;
 
         // string 형식일 경우에는 dataRange 체크
-        if (typeof data === 'string' && DATA_RANGE.TRUE.includes(data.toUpperCase())) {
+        if (typeof cData === 'string' && DATA_RANGE.TRUE.includes(cData.toUpperCase())) {
           selectedTxtColor = txtActionColor;
         }
       }
     } else {
       // node 타입이 Device 일 경우에는 DATA_RANGE 범위 측정. 아닐 경우 에러
-      const strData = _.toString(data);
+      const strData = _.toString(cData);
       const strUpperData = strData.toUpperCase();
 
       // 데이터가 들어오면 유효한 데이터
@@ -1052,7 +1040,7 @@ function showNodeData(nodeId, data = '') {
     svgEleData.font({ fill: selectedTxtColor });
 
     if (isValidData) {
-      svgEleData.text(data);
+      svgEleData.text(cData);
       svgEleDataUnit.text(dataUnit);
     } else {
       // data가 유효범위가 아닐 경우
@@ -1062,7 +1050,7 @@ function showNodeData(nodeId, data = '') {
 
     return false;
   } catch (e) {
-    // console.error(nodeId, e.message);
+    console.error(nodeId, e.message);
   }
 }
 
@@ -1182,7 +1170,6 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
 
         $(this).dialog('close');
 
-        // TODO: Execute 전송
         // console.log('Execute', deviceSetValue, controlValue);
         typeof reqSingleControl === 'function' &&
           reqSingleControl(nodeId, controlValue, deviceSetValue);
@@ -1263,21 +1250,24 @@ function drawSvgBasePlace(svgCanvas) {
   // 브라우저 크기에 반응하기 위한 뷰박스 세팅
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
 
-  // 일반 색상으로 표현하고자 할 경우
-  if (backgroundData.length < 8) {
-    const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
+  // 백그라운드 정보가 있을 경우
+  if (backgroundData.length > 0) {
+    if (backgroundData.includes('map')) {
+      // map에 배경의 데이터가 있을경우 배경 이미지 지정
+      svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+    } else {
+      // 일반 색상으로 표현하고자 할 경우
+      const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
 
-    svgCanvas
-      .rect(mapWidth, mapHeight)
-      .fill(bgColor)
-      .stroke({
-        width: 1,
-        color: '#ccc',
-      })
-      .opacity(0.1);
-  } else {
-    // map에 배경의 데이터가 있을경우 배경 이미지 지정
-    svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+      svgCanvas
+        .rect(mapWidth, mapHeight)
+        .fill(bgColor)
+        .stroke({
+          width: 1,
+          color: '#ccc',
+        })
+        .opacity(0.1);
+    }
   }
 
   // Place 그리기

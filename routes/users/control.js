@@ -71,14 +71,14 @@ router.get(
 
     const map = JSON.parse(baseMap);
 
-    //  Map 경로 재설정
-    if (typeof baseImgPath === 'string') {
-      _.set(
-        map,
-        'drawInfo.frame.mapInfo.backgroundInfo.backgroundData',
-        `/map/${baseImgPath}`,
-      );
-    }
+    // //  Map 경로 재설정
+    // if (typeof baseImgPath === 'string') {
+    //   _.set(
+    //     map,
+    //     'drawInfo.frame.mapInfo.backgroundInfo.backgroundData',
+    //     `/map/${baseImgPath}`,
+    //   );
+    // }
     req.locals.map = map;
 
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({

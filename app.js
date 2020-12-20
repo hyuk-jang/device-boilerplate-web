@@ -182,11 +182,20 @@ app.use(
   }),
 );
 // 맵 이미지 저장 경로
+
 app.use(
   '/map',
-  express.static(path.join(__dirname, 'map'), {
-    extensions: ['jpg', 'png', 'gif'],
-  }),
+  express.static(
+    path.join(
+      __dirname,
+      ...['map', process.env.PJ_MAIN_ID, process.env.PJ_SUB_ID].filter(
+        pjId => typeof pjId === 'string' && pjId.length,
+      ),
+    ),
+    {
+      extensions: ['jpg', 'png', 'gif'],
+    },
+  ),
 );
 
 app.use('/auth', authRouter);

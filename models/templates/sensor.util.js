@@ -438,7 +438,7 @@ function makeSensorChart(chartConfig, nodeDefStorageList, utcList) {
   // 정제된 차트 정보
   const refinedChart = { domId, title, subtitle, yAxis: [], series: [] };
   // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
-  chartOptionList.forEach(chartOption => {
+  chartOptionList.forEach((chartOption, yAxis) => {
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
     // 보여줄 축 정보
     const { dataUnit, yTitle, keys, mixColors } = chartOption;
@@ -478,6 +478,7 @@ function makeSensorChart(chartConfig, nodeDefStorageList, utcList) {
             tooltip: {
               valueSuffix: dataUnit,
             },
+            yAxis,
             // dataTable. 각 데이터는 [[utc, data][...]] 이룸
             data: _.zip(utcList, _.map(nodePlace.sensorDataRows, 'avg_data')),
           };
@@ -510,7 +511,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
   // 정제된 차트 정보
   const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
   // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
-  chartOptionList.forEach(chartOption => {
+  chartOptionList.forEach((chartOption, yAxis) => {
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
     // 보여줄 축 정보
     const { dataUnit = '', yTitle, keys, mixColors } = chartOption;
@@ -549,6 +550,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
             // type: 'spline',
             // 차트 컬럼 개체 명
             name: ndName,
+            yAxis,
             // 차트 컬럼 개체 색상
             color: chartColor,
             // 차트를 마우스 오버 하였을 경우 나타나는 단위
