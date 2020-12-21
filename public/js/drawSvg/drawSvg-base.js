@@ -1243,7 +1243,7 @@ function confirmCommand(mdCmdInfo) {
  */
 function drawSvgBasePlace(svgCanvas) {
   const {
-    backgroundData = '',
+    backgroundData = 'yellowgreen',
     backgroundPosition: [bgPosX, bgPosY] = [0, 0],
   } = backgroundInfo;
 
@@ -1251,23 +1251,21 @@ function drawSvgBasePlace(svgCanvas) {
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
 
   // 백그라운드 정보가 있을 경우
-  if (backgroundData.length > 0) {
-    if (backgroundData.includes('map')) {
-      // map에 배경의 데이터가 있을경우 배경 이미지 지정
-      svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
-    } else {
-      // 일반 색상으로 표현하고자 할 경우
-      const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
+  if (backgroundData.includes('map')) {
+    // map에 배경의 데이터가 있을경우 배경 이미지 지정
+    svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+  } else {
+    // 일반 색상으로 표현하고자 할 경우
+    const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
 
-      svgCanvas
-        .rect(mapWidth, mapHeight)
-        .fill(bgColor)
-        .stroke({
-          width: 1,
-          color: '#ccc',
-        })
-        .opacity(0.1);
-    }
+    svgCanvas
+      .rect(mapWidth, mapHeight)
+      .fill(bgColor)
+      .stroke({
+        width: 1,
+        color: '#ccc',
+      })
+      .opacity(0.1);
   }
 
   // Place 그리기

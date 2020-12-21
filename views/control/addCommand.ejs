@@ -232,8 +232,9 @@
         optionTemplate({ optionId: CF_SCENARIO, optionValue: '시나리오' }),
       );
     }
+
     // 제어 명령 자체가 존재하지 않을 경우
-    if ($cmdFormatSel.length) {
+    if ($cmdFormatSel.length === 0) {
       $('#controlCommandArea').remove();
     } else {
       // 목표 추가 관련 이벤트 바인딩
