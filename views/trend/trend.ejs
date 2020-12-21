@@ -57,7 +57,8 @@
       checkSelectBoxOption('searchOption', searchRange.searchOption);
 
       // 검색 타입에 따라 적용
-      applySearchType(searchRange.searchType);
+      // applySearchType(searchRange.searchType);
+      document.querySelector('#searchType').dispatchEvent(new Event('change'));
     </script>
   </body>
 </html>

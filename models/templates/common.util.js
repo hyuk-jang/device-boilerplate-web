@@ -225,15 +225,15 @@ async function getDynamicChart(dynamicChartInfo) {
 
     chartList = chartList.concat(blockCharts);
   }
-
+  // DV_SENSOR_DATA 에서 가져올 때
   if (sensorChartList.length) {
-    const blockCharts = await refineModel.refineSensorCharts(
+    const sensorCharts = await refineModel.refineSensorCharts(
       searchRange,
       sensorChartList,
       siteId,
     );
 
-    chartList = chartList.concat(blockCharts);
+    chartList = chartList.concat(sensorCharts);
   }
 
   return chartList;

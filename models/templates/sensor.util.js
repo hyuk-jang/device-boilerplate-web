@@ -568,16 +568,16 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
                 return [
                   moment(plotSeries.pointStart)
                     .add(idx, 'months')
-                    .add(9, 'hours')
+                    // .add(9, 'hours')
                     .valueOf(),
                   _.get(sensorDataRows[idx], 'avg_data', null),
                 ];
               });
+
+            delete plotSeries.pointInterval;
           } else {
             chartSeriesInfo.data = _.map(nodePlace.sensorDataRows, 'avg_data');
           }
-
-          // console.log(chartSeriesInfo.data);
 
           refinedChart.series.push(chartSeriesInfo);
         });
