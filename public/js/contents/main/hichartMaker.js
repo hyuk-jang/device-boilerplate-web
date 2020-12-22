@@ -467,6 +467,8 @@ Highcharts.setOptions({
  * @param {string=} chartInfo.subtitle
  * @param {Object} chartInfo.xAxis
  * @param {string=} chartInfo.xAxis.title
+ * @param {number=} chartInfo.xAxis.min
+ * @param {number=} chartInfo.xAxis.max
  * @param {Object[]} chartInfo.yAxis
  * @param {string=} chartInfo.yAxis.title
  * @param {string=} chartInfo.yAxis.dataUnit
@@ -497,8 +499,10 @@ function makeLineChart(chartInfo, isAreaChart = false) {
       },
       xAxis: {
         title: {
-          // text: chartDecorator.xAxisTitle
+          text: '시간',
         },
+        min: chartInfo.xAxis.min,
+        max: chartInfo.xAxis.max,
         type: 'datetime',
         // tickWidth: 0,
         // gridLineWidth: 1,

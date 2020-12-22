@@ -509,7 +509,19 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
   // 차트 생성하기 위한 설정
   const { domId, title = '', subtitle = '', chartOptionList } = chartConfig;
   // 정제된 차트 정보
-  const refinedChart = { domId, title, subtitle, yAxis: [], plotSeries, series: [] };
+  const refinedChart = {
+    domId,
+    title,
+    subtitle,
+    xAxis: {},
+    yAxis: [],
+    plotSeries,
+    series: [],
+  };
+
+  refinedChart.xAxis.min = plotSeries.pointStart;
+  let xAxisLength = 0;
+
   // 차트 옵션 정보(index: 0 --> 좌측, index: 1 --> 우측) 순회
   chartOptionList.forEach((chartOption, yAxis) => {
     // FIXME: 현재는 LEFT Y 축만을 표현함. 차후 RIGHT 필요시 수정
@@ -520,6 +532,7 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
       yTitle,
       dataUnit,
     });
+
     // Node Def ID 목록을 순회하면서 Nod Def Storage 정보를 바탕으로 차트 정보를 구성
     keys.forEach((ndId, index) => {
       // 표현할 Node Def Storage 목록에 해당 ndId를 가진 객체를 찾음.
@@ -545,6 +558,8 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
             // keys 와 mixColors는 서로 대칭을 이루므로 해당 index의 mixColors를 가져옴
             chartColor = BU.blendColors(chartColor, mixColors[index], 0.5);
           }
+
+          xAxisLength = sensorDataRows.length;
 
           const chartSeriesInfo = {
             // type: 'spline',
@@ -584,6 +599,8 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
       }
     });
   });
+
+  refinedChart.xAxis.max = plotSeries.pointStart + xAxisLength * plotSeries.pointInterval;
 
   return refinedChart;
 }

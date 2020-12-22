@@ -277,6 +277,8 @@ router.post(
         editor_seq: adminRow.member_seq,
         edit_column_id: 'pw_hash',
         edit_column_name: _.get(schemaRow, 'COLUMN_COMMENT', ''),
+        prev_value: null,
+        curr_value: null,
       });
       // 수정 비밀번호 입력
       memberInfo.pw_salt = salt;

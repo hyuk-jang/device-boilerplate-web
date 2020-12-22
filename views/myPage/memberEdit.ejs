@@ -76,9 +76,7 @@
                   autocomplete="off"
                   placeholder="현재 비밀번호를 입력해주세요"
                 />
-                <span class="notice_next_box">
-                  * 현재 비밀번호 변경 시 입력
-                </span>
+                <span class="notice_next_box"> * 현재 비밀번호 변경 시 입력 </span>
               </div>
               <div class="form-group">
                 <label for="inputPassword">비밀번호</label>
@@ -177,17 +175,16 @@
 
         // 비밀번호를 변경할 경우에만 입력
         const passwordValue = $('#inputPassword').val();
-        if (passwordValue.length) {
+        const inputPasswordValue = $('#inputPasswordCheck').val();
+        if (passwordValue.length || inputPasswordValue.length) {
           // 비밀번호를 변경할 현재 비밀번호 입력
           const currPasswordValue = $('#inputCurrPassword').val();
 
           if (currPasswordValue.length === 0) {
             alert('비밀번호를 변경할 경우 현재 비밀번호를 입력하세요.');
-            $('#inputPassword').val('').focus();
+            $('#inputCurrPassword').val('').focus();
             return false;
           }
-
-
 
           var pwReg = /^(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?=.*[0-9]).{8,16}$/;
 
