@@ -42,7 +42,7 @@ const {
     positionInfo: { svgNodeList = [], svgPlaceList = [], svgCmdList = [] },
   },
   setInfo: { nodeStructureList },
-  relationInfo: { placeRelationList = [], convertRelationList = [] },
+  relationInfo: { placeRelationList = [], convertRelationList = [], imgTriggerList = [] },
   controlInfo: {
     singleCmdList = [],
     setCmdList = [],
@@ -304,6 +304,11 @@ function initDrawSvg(isProd = true) {
           observerList,
           attach: observer => {
             observerList.push(observer);
+          },
+          dettach: observer => {
+            const obIndex = observerList.findIndex(ob => ob === observer);
+
+            obIndex !== -1 && observerList.splice(obIndex, 1);
           },
         });
       });
@@ -957,11 +962,6 @@ function showNodeData(nodeId, data = '') {
     // 해당 노드가 존재하지 않는다면 처리 X
     if (mdNodeInfo === undefined) return false;
 
-    // 옵저버에게 전파
-    mdNodeInfo.observerList.forEach(ob => {
-      _.get(ob, 'notifyNodeData') && ob.notifyNodeData(mdNodeInfo);
-    });
-
     const {
       nodeData,
       isSensor,
@@ -987,6 +987,12 @@ function showNodeData(nodeId, data = '') {
 
     // data update
     mdNodeInfo.nodeData = data;
+
+    // 옵저버에게 전파
+    mdNodeInfo.observerList.forEach(ob => {
+      // console.log(nodeId, data);
+      _.get(ob, 'notifyNodeData') && ob.notifyNodeData(mdNodeInfo);
+    });
 
     // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
     let isValidData = 0;
@@ -1244,6 +1250,7 @@ function confirmCommand(mdCmdInfo) {
 function drawSvgBasePlace(svgCanvas) {
   const {
     backgroundData = 'yellowgreen',
+    coverData = '',
     backgroundPosition: [bgPosX, bgPosY] = [0, 0],
   } = backgroundInfo;
 
@@ -1251,28 +1258,39 @@ function drawSvgBasePlace(svgCanvas) {
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
 
   // 백그라운드 정보가 있을 경우
-  if (backgroundData.includes('map')) {
-    // map에 배경의 데이터가 있을경우 배경 이미지 지정
-    svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
-  } else {
-    // 일반 색상으로 표현하고자 할 경우
-    const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
+  if (backgroundData.length > 0) {
+    if (backgroundData.includes('map')) {
+      // map에 배경의 데이터가 있을경우 배경 이미지 지정
+      svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+    } else {
+      // 일반 색상으로 표현하고자 할 경우
+      const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
 
-    svgCanvas
-      .rect(mapWidth, mapHeight)
-      .fill(bgColor)
-      .stroke({
-        width: 1,
-        color: '#ccc',
-      })
-      .opacity(0.1);
+      svgCanvas
+        .rect(mapWidth, mapHeight)
+        .fill(bgColor)
+        .stroke({
+          width: 1,
+          color: '#ccc',
+        })
+        .opacity(0.1);
+    }
+  }
+
+  // 트리거 이미지 생성 불러옴
+  // eslint-disable-next-line no-undef
+  initTriggerImg(svgCanvas, mdNodeStorage, imgTriggerList);
+
+  // 이미지 커버가 존재할 경우
+  if (coverData.length) {
+    svgCanvas.image(coverData).move(bgPosX, bgPosY);
   }
 
   // Place 그리기
   svgPlaceList.forEach(svgPositionInfo => {
     const { id: placeId } = svgPositionInfo;
 
-    const resourceOpcity = _.get(
+    const resourceOpacity = _.get(
       mdPlaceStorage.get(placeId),
       'svgModelResource.elementDrawInfo.opacity',
       0,
@@ -1282,7 +1300,7 @@ function drawSvgBasePlace(svgCanvas) {
       {
         svgCanvas,
         svgPositionInfo,
-        isShow: resourceOpcity,
+        isShow: resourceOpacity,
         ownerInfo: mdPlaceStorage.get(placeId),
       },
       DRAW_TYPE.PLACE,

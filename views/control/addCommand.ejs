@@ -9,9 +9,7 @@
 
     <div class="search_box">
       <span class="search_title">명령 형식</span>
-      <select class="form-control" id="cmdFormatSel">
-        <!-- <option value="SINGLE">단일 제어</option> -->
-      </select>
+      <select class="form-control" id="cmdFormatSel"></select>
     </div>
 
     <!-- 단일 제어 명령 -->
@@ -234,13 +232,14 @@
     }
 
     // 제어 명령 자체가 존재하지 않을 경우
-    if ($cmdFormatSel.length === 0) {
-      $('#controlCommandArea').remove();
+    if (document.querySelector('#cmdFormatSel').querySelectorAll('option').length === 0) {
+      document.querySelector('#controlCommandArea').remove();
     } else {
       // 목표 추가 관련 이벤트 바인딩
       initAddCmdGoalEvent();
+
+      document.querySelector('#deviceCateSel').dispatchEvent(new Event('change'));
       // 초기 값 이벤트 발생 트리거
-      $('#deviceCateSel').trigger('change');
     }
   }
 
@@ -248,8 +247,8 @@
   function makeControlCommand(reqCmdBtn) {
     // console.log('makeControlCommand', reqCmdBtn);
     var reqCmdInfo = {
-      cmdFormat: $('#cmdFormatSel').val(),
-      // cmdType: $('#cmdTypeSel').val(), //FIXME: 후에 주석처리
+      cmdFormat: document.querySelector('#cmdFormatSel').value,
+      // cmdType: document.querySelector('#cmdTypeSel').value, //FIXME: 후에 주석처리
       cmdGoal: {
         goalDataList: [],
       },

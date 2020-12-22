@@ -181,14 +181,14 @@ app.use(
     extensions: ['pptx', 'hwp', 'docx'],
   }),
 );
-// 맵 이미지 저장 경로
 
+// 맵 이미지 저장 경로
 app.use(
   '/map',
   express.static(
     path.join(
       __dirname,
-      ...['map', process.env.PJ_MAIN_ID, process.env.PJ_SUB_ID].filter(
+      ...['maps', process.env.PJ_MAIN_ID, process.env.PJ_SUB_ID].filter(
         pjId => typeof pjId === 'string' && pjId.length,
       ),
     ),

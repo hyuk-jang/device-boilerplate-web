@@ -69,17 +69,7 @@ router.get(
     const baseMap = mainRow.map;
     const baseImgPath = mainMapRow.path;
 
-    const map = JSON.parse(baseMap);
-
-    // //  Map 경로 재설정
-    // if (typeof baseImgPath === 'string') {
-    //   _.set(
-    //     map,
-    //     'drawInfo.frame.mapInfo.backgroundInfo.backgroundData',
-    //     `/map/${baseImgPath}`,
-    //   );
-    // }
-    req.locals.map = map;
+    req.locals.map = JSON.parse(baseMap);
 
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,

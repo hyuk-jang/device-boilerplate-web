@@ -13,6 +13,7 @@ ecosystem.config.js
 **/docs/
 **/snapshot/
 **/dist/
+**/maps/
 **/map/
 
 # 와일드카드도 사용가능
