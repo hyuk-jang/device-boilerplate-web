@@ -200,6 +200,8 @@ class ThreImgGoal extends ThreImgComponent {
         isClear = this.isReachNumGoal(nodeData);
       } else if (_.isString(nodeData)) {
         isClear = this.isReachStrGoal(nodeData);
+      } else if (nodeData === undefined) {
+        isClear = this.goalDR.EQUAL === this.goalRange && this.goalValue === nodeData;
       }
     }
 

@@ -10,7 +10,7 @@
       "node_modules/nanoid/**/*",
       "docs/**/*",
       "views/**/*",
-      "map/**/*",
+      "maps/**/*",
       "public/**/*"
     ]
   },

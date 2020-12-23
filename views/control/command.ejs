@@ -433,6 +433,8 @@
       document.getElementById('svgCanvas').querySelector('defs').innerHTML = defHtml;
 
       drawSvgBasePlace(svgCanvas); // 멥 그리기
+      // Trigger 이미지 임계치 확인
+      threImgManager.handleThresholdClear();
 
       // FIXME: TEST 용
       // setTimeout(() => {
