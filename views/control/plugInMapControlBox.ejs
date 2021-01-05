@@ -34,11 +34,19 @@
     var canvas = document.getElementById('svgCanvas');
     var startScale = 1;
 
+    // 캔버스 실행에 실패할 경우 (Map이 존재하지 않을 경우)
+    if (canvas === null) {
+      document.querySelector('#canvas').remove();
+      document.querySelector('#mapControlBox').remove();
+      document.querySelector('#commandStatus').remove();
+      return false;
+    }
+
     var canvasPanzoom = Panzoom(canvas, {
       cursor: 'default',
       startScale: startScale,
-      // maxScale: 5,
-      minScale: 1,
+      // maxScale: 0.5,
+      minScale: 0.5,
     });
 
     document.getElementById('zoomIn').addEventListener('click', canvasPanzoom.zoomIn);

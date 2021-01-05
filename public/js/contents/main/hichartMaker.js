@@ -501,8 +501,8 @@ function makeLineChart(chartInfo, isAreaChart = false) {
         title: {
           text: '시간',
         },
-        min: chartInfo.xAxis.min,
-        max: chartInfo.xAxis.max,
+        min: _.get(chartInfo, 'xAxis.min', null),
+        max: _.get(chartInfo, 'xAxis.max', null),
         type: 'datetime',
         // tickWidth: 0,
         // gridLineWidth: 1,

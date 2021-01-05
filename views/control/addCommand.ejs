@@ -1,11 +1,10 @@
 <!-- 제어 명령 -->
 <div class="container_row flex_dir_col default_search_area" id="controlCommandArea">
   <div class="search_area">
-    <!-- <div class="flex flex_end">
-      <button type="button" class="btn btn-info" id="addCmdGoalBtn">
-        목표 추가
-      </button>
-    </div> -->
+    <!-- FIXME: 명령 목표 필요 시 -->
+    <div class="flex flex_end">
+      <button type="button" class="btn btn-info" id="addCmdGoalBtn">목표 추가</button>
+    </div>
 
     <div class="search_box">
       <span class="search_title">명령 형식</span>
@@ -118,14 +117,26 @@
 <!-- FIXME: 템플릿 코드 최종버젼에서는 script 로 이동(IE 호환 문제) -->
 <script type="text/template" id="cmdGoalTemplate">
   <div class="search_area">
-    <div class="search_box mw_2rem">
-      <button name="deleteCmdGoal" class="btn btn-danger">×</button>
+    <div class="search_box">
+      <span class="search_title">목표 삭제</span>
+      <button name="deleteCmdGoal" class="btn btn-info">×</button>
     </div>
     <div class="search_box mw_7rem">
       <span class="search_title">목표 종료</span>
       <select class="form-control" name="isCompleteClear">
         <option value="0">No</option>
         <option value="1">Yes</option>
+      </select>
+    </div>
+    <div class="search_box mw_7rem">
+      <span class="search_title">그룹 ID</span>
+      <select class="form-control" name="groupId">
+        <option value="">X</option>
+        <option value="1">A</option>
+        <option value="2">B</option>
+        <option value="3">C</option>
+        <option value="4">D</option>
+        <option value="5">E</option>
       </select>
     </div>
     <div class="search_box">
@@ -144,18 +155,18 @@
       <span class="search_title">센서</span>
       <select class="form-control" name="sensorNameSel"> </select>
     </div>
-    <div class="search_box mw_10rem">
-      <span class="search_title">달성 목표치</span>
-      <div class="search_body">
-        <input type="text" class="input_tre" name="goalValue" placeholder="없음" />
-      </div>
+    <div class="search_box mw_5rem">
+      <span class="search_title">목표치</span>
+        <input type="number" class="input_tre w_7rem" name="goalValue" placeholder="없음" />
     </div>
     <div class="search_box mw_8rem">
       <span class="search_title">목표 범위</span>
       <select class="form-control" name="goalRange">
-        <option value="UPPER">이상</option>
-        <option value="EQUAL">동일</option>
-        <option value="LOWER">이하</option>
+        <option data-is-inclusion-goal="0" value="UPPER">초과</option>
+        <option data-is-inclusion-goal="1" value="UPPER">이상</option>
+        <option data-is-inclusion-goal="0" value="EQUAL">동일</option>
+        <option data-is-inclusion-goal="1" value="LOWER">이하</option>
+        <option data-is-inclusion-goal="0" value="LOWER">미만</option>
       </select>
     </div>
   </div>
@@ -334,32 +345,36 @@
       .children()
       .each(function (index, cmdGoalEle) {
         // 달성 목표 객체
-        var goalInfo = {};
-        var nodeId = $(cmdGoalEle).find('select[name="sensorNameSel"]').first().val();
+        const goalInfo = {};
 
-        var $goalValue = $(cmdGoalEle).find('input[name="goalValue"]').first();
+        const nodeId = cmdGoalEle.querySelector('select[name="sensorNameSel"]').value;
 
-        var goalRange = $(cmdGoalEle).find('select[name="goalRange"]').first().val();
+        const groupId = cmdGoalEle.querySelector('select[name="groupId"]').value;
 
-        var isCompleteClear = $(cmdGoalEle)
-          .find('select[name="isCompleteClear"]')
-          .first()
-          .val();
+        const goalValueDom = cmdGoalEle.querySelector('input[name="goalValue"]');
+
+        const goalRangeSelDom = cmdGoalEle.querySelector('select[name="goalRange"]');
+        const goalRangeOpt = goalRangeSelDom.options[goalRangeSelDom.selectedIndex];
+
+        const isCompleteClear = cmdGoalEle.querySelector('select[name="isCompleteClear"]')
+          .value;
 
         // 달성 목표치가 없을 경우 False
         // FIXME: 달성 목표 문자 타입 체크 필요
-        if (_.isEmpty($goalValue.val())) {
+        if (_.isEmpty(goalValueDom.value)) {
           alert('달성 목표를 확인해주세요');
 
-          $goalValue.focus();
+          goalValueDom.focus();
 
           isError = 1;
           return false;
         } else {
           goalInfo.nodeId = nodeId;
-          goalInfo.goalValue = $goalValue.val();
-          goalInfo.goalRange = goalRange;
+          goalInfo.groupId = groupId;
+          goalInfo.goalValue = goalValueDom.value;
+          goalInfo.goalRange = goalRangeOpt.value;
           goalInfo.isCompleteClear = isCompleteClear;
+          goalInfo.isInclusionGoal = goalRangeOpt.getAttribute('data-is-inclusion-goal');
           reqCmdInfo.cmdGoal.goalDataList.push(goalInfo);
         }
       });
@@ -466,6 +481,8 @@
     // 서버로 명령 실행 요청
     $('#reqCommandBtn').on('click', function (event) {
       const reqCmdInfo = makeControlCommand(this);
+
+      console.log(reqCmdInfo);
 
       // FIXME: 명령을 정상적으로 요청하였을 경우 요청하였다는 메시지 출력
       !_.isEmpty(reqCmdInfo) &&
@@ -586,5 +603,7 @@
   $(document).ready(() => {
     initAddControlChangeEvent();
     initCmdFormatSel();
+
+    document.querySelector('#addCmdGoalBtn').dispatchEvent(new Event('click'));
   });
 </script>

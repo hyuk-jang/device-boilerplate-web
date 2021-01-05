@@ -4,7 +4,7 @@ var _ = _;
 var $ = $;
 var SVG = SVG;
 /** @type {mDeviceMap} */
-const realMap = map;
+const realMap = map || {};
 
 const BASE = {
   TXT: {
@@ -36,13 +36,17 @@ const DRAW_TYPE = {
 const {
   drawInfo: {
     frame: {
-      mapInfo: { width: mapWidth, height: mapHeight, backgroundInfo = {} },
+      mapInfo: { width: mapWidth, height: mapHeight, backgroundInfo = {} } = {},
       svgModelResourceList,
-    },
-    positionInfo: { svgNodeList = [], svgPlaceList = [], svgCmdList = [] },
-  },
-  setInfo: { nodeStructureList },
-  relationInfo: { placeRelationList = [], convertRelationList = [], imgTriggerList = [] },
+    } = {},
+    positionInfo: { svgNodeList = [], svgPlaceList = [], svgCmdList = [] } = {},
+  } = {},
+  setInfo: { nodeStructureList } = {},
+  relationInfo: {
+    placeRelationList = [],
+    convertRelationList = [],
+    imgTriggerList = [],
+  } = {},
   controlInfo: {
     singleCmdList = [],
     setCmdList = [],
@@ -740,12 +744,13 @@ function drawSvgElement(svgDrawInfo, drawType) {
     cursor,
   };
 
+  // 내부 Draw 정보가 없을 경우
   if (insideInfo === undefined) {
     bgOption.id = positionId;
 
     // 클래스를 지정한다면 Attr 추가
     if (defaultSvgClass) {
-      bgOption.class = errColor;
+      bgOption.class = drawType === DRAW_TYPE.NODE ? errColor : defaultSvgClass;
     }
 
     defaultColor = drawType === DRAW_TYPE.NODE ? errColor : defaultColor;
@@ -982,17 +987,16 @@ function showNodeData(nodeId, data = '') {
     // 변환 정보가 존재할 경우 data 값 치환
     const cData = refineNodeData(mdNodeInfo, data);
 
+    // 옵저버에게 전파
+    mdNodeInfo.observerList.forEach(ob => {
+      _.get(ob, 'notifyNodeData') && ob.notifyNodeData(mdNodeInfo);
+    });
+
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
     if (nodeData === cData) return false;
 
     // data update
     mdNodeInfo.nodeData = data;
-
-    // 옵저버에게 전파
-    mdNodeInfo.observerList.forEach(ob => {
-      // console.log(nodeId, data);
-      _.get(ob, 'notifyNodeData') && ob.notifyNodeData(mdNodeInfo);
-    });
 
     // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
     let isValidData = 0;
@@ -1001,7 +1005,7 @@ function showNodeData(nodeId, data = '') {
     let selectedTxtColor = txtBaseColor;
 
     // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
-    if (isSensor === 1) {
+    if (isSensor === 1 || typeof cData === 'number') {
       if (cData === '' || cData === undefined) {
         selectedColor = errColor;
       } else {
@@ -1285,7 +1289,6 @@ function drawSvgBasePlace(svgCanvas) {
   if (coverData.length) {
     svgCanvas.image(coverData).move(bgPosX, bgPosY);
   }
-
   // Place 그리기
   svgPlaceList.forEach(svgPositionInfo => {
     const { id: placeId } = svgPositionInfo;

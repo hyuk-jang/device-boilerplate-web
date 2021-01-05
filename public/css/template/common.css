@@ -688,7 +688,7 @@ article.sdv_w_side > p:last-child {
   align-items: center;
   justify-content: center;
   margin-left: 2.5rem;
-  min-width: 90px;
+  min-width: 60px;
 }
 
 .search_box > .search_title {
@@ -1411,6 +1411,8 @@ article.sdv_w_side > p:last-child {
     width: 45%;
   }
 
+  .search_box input,
+  .search_box button,
   .search_box select {
     width: 80%;
   }

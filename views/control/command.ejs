@@ -49,7 +49,7 @@
       <div class="container_body hidden" id="container_body">
         <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
-          <div class="command_status">
+          <div id="commandStatus" class="command_status">
             <img id="connApiClientImg" src="" title="수집서버 연결 상태" />
             <div></div>
             <div id="contentTypeCategory" class="ml_2rem">
@@ -408,40 +408,42 @@
 
     <!-- SVG Map 세팅 -->
     <script>
-      initDrawSvg();
+      if (map !== null) {
+        initDrawSvg();
 
-      // 캔버스 생성
-      const svgCanvas = SVG().addTo(`#canvas`).size('100%', '100%');
-      // SVG Canvas 속성 정의
-      svgCanvas.attr({
-        id: 'svgCanvas',
-        class: 'svg_map',
-        preserveAspectRatio: 'xMidYMin meet',
-      });
+        // 캔버스 생성
+        const svgCanvas = SVG().addTo(`#canvas`).size('100%', '100%');
+        // SVG Canvas 속성 정의
+        svgCanvas.attr({
+          id: 'svgCanvas',
+          class: 'svg_map',
+          preserveAspectRatio: 'xMidYMin meet',
+        });
 
-      // defs Element를 SVG Element 자식 요소 최상위로 정의
-      svgCanvas.defs();
+        // defs Element를 SVG Element 자식 요소 최상위로 정의
+        svgCanvas.defs();
 
-      // string으로 변환하여 붙여넣음. Dom 요소로 붙여넣을 경우 동작하지 않음
-      const defHtml =
-        document.getElementById('svgFilter').innerHTML +
-        document.getElementById('svgBtnFilter').innerHTML;
-      // id 중복을 막기위한 filter 요소 삭제
-      document.getElementById('svgFilter').remove();
-      document.getElementById('svgBtnFilter').remove();
+        // string으로 변환하여 붙여넣음. Dom 요소로 붙여넣을 경우 동작하지 않음
+        const defHtml =
+          document.getElementById('svgFilter').innerHTML +
+          document.getElementById('svgBtnFilter').innerHTML;
+        // id 중복을 막기위한 filter 요소 삭제
+        document.getElementById('svgFilter').remove();
+        document.getElementById('svgBtnFilter').remove();
 
-      document.getElementById('svgCanvas').querySelector('defs').innerHTML = defHtml;
+        document.getElementById('svgCanvas').querySelector('defs').innerHTML = defHtml;
 
-      drawSvgBasePlace(svgCanvas); // 멥 그리기
-      // Trigger 이미지 임계치 확인
-      threImgManager.handleThresholdClear();
+        drawSvgBasePlace(svgCanvas); // 멥 그리기
+        // Trigger 이미지 임계치 확인
+        threImgManager.handleThresholdClear();
 
-      // FIXME: TEST 용
-      // setTimeout(() => {
-      //   runSimulator();
-      // }, 100);
-      // console.log(wsPlaceRelList);
-      // console.log(mdPlaceStorage);
+        // FIXME: TEST 용
+        // setTimeout(() => {
+        //   runSimulator();
+        // }, 100);
+        // console.log(wsPlaceRelList);
+        // console.log(mdPlaceStorage);
+      }
     </script>
 
     <!-- 상단 카테고리 버튼 세팅 -->

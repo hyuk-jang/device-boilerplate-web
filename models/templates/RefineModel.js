@@ -385,10 +385,14 @@ class RefineModel extends BiModule {
           domId,
           title,
           subtitle,
+          xAxis: {},
           yAxis: [],
           plotSeries,
           series: [],
         };
+
+        refinedChart.xAxis.min = plotSeries.pointStart;
+        let xAxisLength = 0;
 
         // 차트를 생성하기 위한 목록 순회 (index: 0 = left yAxis, index: 1 = right yAxis)
         chartOptionList.forEach((chartOption, index) => {
@@ -466,6 +470,8 @@ class RefineModel extends BiModule {
 
                 // BU.CLI(chartSortRank);
 
+                xAxisLength = blockDataRows.length;
+
                 /** @type {chartSeriesInfo} 의미있는 차트 정보 생성 */
                 const chartSeries = {
                   name: xAxisElementName,
@@ -490,6 +496,9 @@ class RefineModel extends BiModule {
         });
         // 차트 정렬 순서대로 재정렬
         refinedChart.series = _.sortBy(refinedChart.series, 'chartSortRank');
+
+        refinedChart.xAxis.max =
+          plotSeries.pointStart + xAxisLength * plotSeries.pointInterval;
         // 정제한 Chart Dom 반환
         return refinedChart;
       });

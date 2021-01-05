@@ -202,11 +202,6 @@ footer span {
   border: 1px solid rgb(204, 204, 204);
 }
 
-.search_box > button {
-  border: 1px solid #19462b;
-  background: linear-gradient(#3baf69, #349059);
-}
-
 .search_box > button:hover {
   background: linear-gradient(#359b5d, #2c774a);
 }

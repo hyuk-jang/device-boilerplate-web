@@ -31,7 +31,8 @@ class ControlModel extends BM {
   addReqCmdUser(memberSeq, contractCmdInfo) {
     const { wrapCmdUUID } = contractCmdInfo;
 
-    this.reqCmdUserList.findIndex(cmdUserInfo => cmdUserInfo.cmdUUID === wrapCmdUUID) < 0 &&
+    this.reqCmdUserList.findIndex(cmdUserInfo => cmdUserInfo.cmdUUID === wrapCmdUUID) <
+      0 &&
       this.reqCmdUserList.push({
         memberSeq,
         cmdUUID: wrapCmdUUID,

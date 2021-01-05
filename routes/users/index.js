@@ -152,11 +152,11 @@ router.get(
 
       totalSiteAmount += pAmount;
 
-      const siteName = `${pAmount}kW급 (${mainName})`;
+      const siteName = `${pAmount} ℃ (${mainName})`;
       return { siteId: mSeq.toString(), name: siteName, m_name: mainName };
     });
 
-    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount}kW급)` });
+    siteList.unshift({ siteId: DEFAULT_SITE_ID, name: `모두(${totalSiteAmount} ℃)` });
     _.set(req, 'locals.viewPowerProfileRows', _.filter(viewPowerProfileRows, mainWhere));
 
     _.set(req, 'locals.mainInfo.projectMainId', titleInfo.name);
