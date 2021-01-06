@@ -56,7 +56,6 @@ router.get(
 router.post(
   ['/', '/:siteId/member', '/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {BiAuth} */
     const biAuth = global.app.get('biAuth');
 
@@ -90,7 +89,8 @@ router.post(
     if (password.length) {
       const isValidMember = await biAuth.isValidMember({
         userId: req.user.user_id,
-        password: currPassword,
+        password:
+          typeof currPassword === 'number' ? currPassword.toString() : currPassword,
       });
 
       if (isValidMember === false) {

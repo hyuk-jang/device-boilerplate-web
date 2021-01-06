@@ -53,8 +53,6 @@ router.get(
 router.get(
   ['/', '/:siteId', '/:siteId/member'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
-
     const {
       mainInfo: { siteId },
     } = req.locals;
@@ -170,8 +168,6 @@ router.get(
 router.post(
   ['/:siteId/member', '/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
-
     /** @type {AdminModel} */
     const adminModel = global.app.get('adminModel');
 
@@ -320,8 +316,6 @@ router.post(
 router.get(
   ['/:siteId/history', '/:siteId/history/:memberIdx'],
   asyncHandler(async (req, res) => {
-    commonUtil.applyHasNumbericReqToNumber(req);
-
     const {
       mainInfo: { siteId },
     } = req.locals;
