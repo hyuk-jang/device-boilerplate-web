@@ -40,7 +40,7 @@
                 <input type="text" readonly class="form-control" id="main_name" />
               </div>
               <div class="form-group">
-                <label>회원권한</label>
+                <label>회원등급</label>
                 <select class="form-control" id="grade" name="grade">
                   <option value="awaiter">awaiter</option>
                   <option value="manager">manager</option>
@@ -48,7 +48,7 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>회원탈퇴</label>
+                <label>회원접근차단</label>
                 <select class="form-control" id="isDeleted" name="is_deleted">
                   <option value="1">O</option>
                   <option value="0">X</option>
@@ -68,6 +68,9 @@
                   <option value="0">X</option>
                   <option value="1">O</option>
                 </select>
+                <span class="error_next_box">
+                  * 비밀번호를 초기화하면 회원의 비밀번호가 임의로 변경됩니다.
+                </span>
               </div>
               <% } %>
               <div class="form-group text-center">

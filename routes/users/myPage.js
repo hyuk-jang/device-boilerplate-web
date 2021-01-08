@@ -105,7 +105,7 @@ router.post(
     }
 
     const memberPickList = ['name', 'nick_name', 'tel'];
-
+    // 반영할 멤버 정보
     const memberInfo = _.pick(req.body, memberPickList);
 
     // 모든 데이터가 입력이 되었는지 확인
@@ -120,7 +120,6 @@ router.post(
       name,
       nick_name,
       tel,
-      updatedate: new Date(),
     };
 
     // 패스워드를 갱신하였다면 갱신 요청 처리 flag 0 설정
@@ -136,7 +135,17 @@ router.post(
       // 수정 비밀번호 입력
       newMemberInfo.pw_salt = salt;
       newMemberInfo.pw_hash = hashPw;
+    } else {
+      const isNonUpdate = _.every(memberInfo, (value, key) =>
+        _.isEqual(newMemberInfo[key], value),
+      );
+
+      if (isNonUpdate) {
+        return res.send(DU.locationAlertBack('변경사항이 존재하지 않습니다.'));
+      }
     }
+    // 수정일 입력
+    newMemberInfo.updatedate = new Date();
 
     // 회원 정보 수정
     await biAuth.updateTable(

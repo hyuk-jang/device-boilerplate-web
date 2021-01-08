@@ -50,7 +50,14 @@
         <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
           <div id="commandStatus" class="command_status">
-            <img id="connApiClientImg" src="" title="수집서버 연결 상태" />
+            <button
+              name="isApiClientConn"
+              class="btn btn-danger btn-sm cursorDefault"
+              style="pointer-events: none"
+              title="수집서버 연결 상태"
+            >
+              <span class="glyphicon glyphicon-link"></span>
+            </button>
             <div></div>
             <div id="contentTypeCategory" class="ml_2rem">
               <input
@@ -255,18 +262,17 @@
 
         // 장치 연결 상태 반영
         socket.on('updateIsApiClientConn', isConn => {
-          var connStatusImg =
-            isConn === true ? '/image/connection.png' : '/image/disconnection.png';
-
-          document.getElementById('connApiClientImg').setAttribute('src', connStatusImg);
-
-          if (isConn === true) {
-            document.getElementById('isApiClientConn').classList.add('btn-success');
-            document.getElementById('isApiClientConn').classList.remove('btn-danger');
-          } else {
-            document.getElementById('isApiClientConn').classList.remove('btn-success');
-            document.getElementById('isApiClientConn').classList.add('btn-danger');
-          }
+          document
+            .querySelectorAll('button[name="isApiClientConn"]')
+            .forEach(btnElement => {
+              if (isConn === true) {
+                btnElement.classList.add('btn-success');
+                btnElement.classList.remove('btn-danger');
+              } else {
+                btnElement.classList.remove('btn-success');
+                btnElement.classList.add('btn-danger');
+              }
+            });
         });
 
         /**
@@ -434,8 +440,9 @@
         document.getElementById('svgCanvas').querySelector('defs').innerHTML = defHtml;
 
         drawSvgBasePlace(svgCanvas); // 멥 그리기
-        // Trigger 이미지 임계치 확인
+
         threImgManager.handleThresholdClear();
+        // Trigger 이미지 임계치 확인
 
         // FIXME: TEST 용
         // setTimeout(() => {

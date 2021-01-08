@@ -984,6 +984,9 @@ function showNodeData(nodeId, data = '') {
       svgEleDataUnit,
     } = mdNodeInfo;
 
+    // data update
+    mdNodeInfo.nodeData = data;
+
     // 변환 정보가 존재할 경우 data 값 치환
     const cData = refineNodeData(mdNodeInfo, data);
 
@@ -994,9 +997,6 @@ function showNodeData(nodeId, data = '') {
 
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
     if (nodeData === cData) return false;
-
-    // data update
-    mdNodeInfo.nodeData = data;
 
     // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
     let isValidData = 0;

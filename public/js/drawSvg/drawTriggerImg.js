@@ -164,10 +164,10 @@ class ThreImgGoal extends ThreImgComponent {
         isReach = goalData === goalValue;
         break;
       case this.goalDR.LOWER:
-        isReach = isInclusionGoal ? goalData < goalValue : goalData <= goalValue;
+        isReach = isInclusionGoal ? goalData <= goalValue : goalData < goalValue;
         break;
       case this.goalDR.UPPER:
-        isReach = isInclusionGoal ? goalData > goalValue : goalData >= goalValue;
+        isReach = isInclusionGoal ? goalData >= goalValue : goalData > goalValue;
         break;
       default:
         break;
@@ -249,13 +249,13 @@ class ThreImgGoal extends ThreImgComponent {
         break;
       case this.goalDR.LOWER:
         isClear = this.isInclusionGoal
-          ? deviceData < this.goalValue
-          : deviceData <= this.goalValue;
+          ? deviceData <= this.goalValue
+          : deviceData < this.goalValue;
         break;
       case this.goalDR.UPPER:
         isClear = this.isInclusionGoal
-          ? deviceData > this.goalValue
-          : deviceData >= this.goalValue;
+          ? deviceData >= this.goalValue
+          : deviceData > this.goalValue;
         break;
       default:
         break;

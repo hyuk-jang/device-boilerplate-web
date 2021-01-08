@@ -168,6 +168,7 @@ router.get(
 router.post(
   ['/:siteId/member', '/:siteId/member/:memberIdx'],
   asyncHandler(async (req, res) => {
+    commonUtil.applyHasNumbericReqToNumber(req);
     /** @type {AdminModel} */
     const adminModel = global.app.get('adminModel');
 
@@ -194,6 +195,7 @@ router.post(
       isValidLock,
       isValidPwRenewal,
     ]);
+
     // 데이터에 이상이 있을 경우 알려주고 종료
     if (isValid === false) {
       return res.send(DU.locationAlertBack('데이터에 이상이 있습니다.'));
@@ -227,11 +229,7 @@ router.post(
     // 회원 정보 수정 이력 Insert를 위함
     _.forEach(memberInfo, (value, column) => {
       // 데이터가 일치할 경우 업데이트 절 없음
-      let isSameState = _.isEqual(value, memberRow[column]);
-      // 패스워드 초기화일 경우 해당사항이 있으면 히스토리 등재
-      // if (column === 'is_pw_renewal') {
-      //   isSameState = !value;
-      // }
+      const isSameState = _.isEqual(value, memberRow[column]);
 
       if (isSameState === false) {
         const schemaRow = _.find(schemaRows, { COLUMN_NAME: column });
@@ -250,7 +248,7 @@ router.post(
     // 비밀번호를 초기화할 경우 랜덤 생성
     password = isPwRenewal === 1 ? Math.random().toString(36).slice(2) : password; // "uk02kso845o"
 
-    // 로그인한 사용자와 수정할려는 ID가 동일하고 비밀번호를 변경하고자 할 경우
+    // 비밀번호 초기화 여부
     const isChangePw = _.isString(password) && password.length;
     if (isChangePw) {
       // 비밀번호 정규식
@@ -287,6 +285,9 @@ router.post(
         // 패스워드를 갱신하였을 경우에만
         _.set(memberInfo, 'is_pw_renewal', 1);
       }
+    } else if (memberEditHistorys.length === 0) {
+      // 비밀번호를 초기화하지 않고 변경사항이 존재하지 않는다면 변경사항이 없는 것
+      return res.send(DU.locationAlertBack('변경사항이 존재하지 않습니다.'));
     }
     // 계정 잠금 해제 일 경우
     isAccountLock === 0 && Object.assign(memberInfo, { login_fail_count: 0 });
