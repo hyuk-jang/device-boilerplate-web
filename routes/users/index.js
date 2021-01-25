@@ -81,10 +81,11 @@ router.get(
     const { grade } = user;
 
     // 사용자가 Manager 등급이라면 기본 siteId를 all로 지정
-    const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
+    // FIXME: GS 인증용. 쓸모없는 계정이라 함
+    // const userMainSeq = grade === 'manager' ? DEFAULT_SITE_ID : user.main_seq;
 
     // 선택한 SiteId와 인버터 Id를 정의
-    const { naviMenu, siteId = userMainSeq, subCategory, subCategoryId } = req.params;
+    const { naviMenu, siteId = user.main_seq, subCategory, subCategoryId } = req.params;
 
     /* *********      ↓↓↓  Navi 관련 설정  ↓↓↓       ********* */
     /** @type {Object[]} */

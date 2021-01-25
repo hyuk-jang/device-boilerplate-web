@@ -383,9 +383,9 @@ class ApiServer extends AbstApiServer {
     await this.controlModel.insertCmdHistory(msFieldInfo, startCmdEventList);
 
     // 현재 수행중인 명령 목록에 EventHistory가 없다면 종료된 명령이라고 해석
-    const completeCmdEventList = _.reject(controlEventHistoryRows, historyRow => {
-      return _.includes(contractCmdUUIDs, historyRow.cmd_uuid);
-    });
+    const completeCmdEventList = _.reject(controlEventHistoryRows, historyRow =>
+      _.includes(contractCmdUUIDs, historyRow.cmd_uuid),
+    );
     // 제어 종료 업데이트
     await this.controlModel.completeCmdHistory(completeCmdEventList);
   }

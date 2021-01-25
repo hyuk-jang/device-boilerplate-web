@@ -1,17 +1,36 @@
 {
-  "extends": ["airbnb", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "script"
+  },
+  "extends": ["airbnb",  "prettier"],
   "plugins": ["prettier"],
+  "globals": {
+    "$": true,
+    "_": true,
+    "SVG": true,
+    "map": true,
+    "alert": true,
+    "confirm": true,
+    "Handlebars": true
+  },
   "rules": {
     "linebreak-style": "off",
     "quotes": "error",
     "no-console": "off",
     "max-len": "off",
     "no-unused-expressions": "off",
+    "no-unused-vars": "warn",
     "no-param-reassign": "off",
     "class-methods-use-this": "off",
     "consistent-return": "off",
-    "no-unused-vars": "warn",
-    "camelcase": "warn",
-    "prettier/prettier": "error"
+    "prefer-arrow-callback": "off",
+    "func-names": "off",
+    "no-bitwise": ["error", { "allow": ["^"] }],
+    "prettier/prettier": "error",
+    "react/state-in-constructor": "off",
+    "react/static-property-placement": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/jsx-curly-newline": "off"
   }
 }

@@ -190,16 +190,16 @@ class Control {
    * @param {Object} pickInfo default: 브라우저를 위한 값
    */
   convertNodesToWsNodes(nodeList, pickInfo = wsNodePickKey.FOR_BROWSER) {
-    return _.map(nodeList, nodeInfo => {
-      return _.reduce(
+    return _.map(nodeList, nodeInfo =>
+      _.reduce(
         pickInfo,
         (result, value, key) => {
           result[value] = _.get(nodeInfo, key, '');
           return result;
         },
         {},
-      );
-    });
+      ),
+    );
   }
 
   /**
@@ -221,16 +221,16 @@ class Control {
         ? _.filter(placeRelationRows, { is_submit_api: 1 })
         : placeRelationRows;
 
-    return _.map(placeRelRows, nodeInfo => {
-      return _.reduce(
+    return _.map(placeRelRows, nodeInfo =>
+      _.reduce(
         pickInfo,
         (result, value, key) => {
           result[value] = _.get(nodeInfo, key, '');
           return result;
         },
         {},
-      );
-    });
+      ),
+    );
   }
 
   /**
