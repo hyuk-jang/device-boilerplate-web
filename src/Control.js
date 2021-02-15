@@ -84,8 +84,6 @@ class Control {
     /** @type {MAIN[]} */
     let mainList = await this.controlModel.getTable('main', { is_deleted: 0 });
 
-    /** @type {dataLoggerInfo[]} */
-    const dataLoggerList = await this.controlModel.getTable('v_dv_data_logger');
     /** @type {nodeInfo[]} */
     const nodeList = await this.controlModel.getTable('v_dv_node');
 
@@ -167,7 +165,6 @@ class Control {
             algorithmId: '',
             operationConfigList: [],
           },
-          dataLoggerList: _.filter(dataLoggerList, where),
           nodeList: filteredNodeList,
           placeRelList: filteredPlaceRelList,
           contractCmdList: _.filter(controlCmdHistoryRows, where),

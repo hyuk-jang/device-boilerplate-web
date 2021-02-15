@@ -39,7 +39,7 @@ class PowerModel extends BiModule {
     return inverterProfileRows.map(inverterProfile => {
       // subName과 lastName을 구성하고 정의
       const {
-        inverter_seq,
+        inverter_seq: inverterSeq,
         name: mainName = '',
         target_name: subName,
         director_name: company = '',
@@ -51,7 +51,7 @@ class PowerModel extends BiModule {
       }`;
 
       return {
-        inverter_seq,
+        inverter_seq: inverterSeq,
         siteName,
       };
     });

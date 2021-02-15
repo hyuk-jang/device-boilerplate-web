@@ -2,6 +2,8 @@ const _ = require('lodash');
 
 const { BU } = require('base-util-jh');
 
+const { addComma } = require('../templates/common.util');
+
 module.exports = {
   /**
    * 인버터 현재 상태
@@ -62,12 +64,14 @@ module.exports = {
   </tr>
     `);
     const madeDom = inverterStatusList.dataList.map(inverterStatusInfo => {
-      BU.toLocaleString(inverterStatusInfo);
       const operImgName = inverterStatusInfo.isOperation ? 'green.png' : 'red.png';
       inverterStatusInfo.operImgName = operImgName;
       // 데이터 중 이상 데이터일 경우 - 변환
       _.forEach(inverterStatusInfo, (v, k) => {
-        _.isNumber(v) && !Number.isFinite(v) && _.set(inverterStatusInfo, [k], '-');
+        if (_.isNumber(v)) {
+          // 일반 숫자형은 천단위 기호 추가, NaN or Infinite 경우 - 기호 처리
+          inverterStatusInfo[k] = Number.isFinite(v) ? addComma(v) : '-';
+        }
       });
 
       return inverterStatusTemplate(inverterStatusInfo);

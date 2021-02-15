@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const { BU } = require('base-util-jh');
 
+const { addComma } = require('../templates/common.util');
+
 const defaultDom = {
   /**
    * @description makeDynamicHeaderDom
@@ -93,14 +95,12 @@ const defaultDom = {
     // 대분류 Header Dom 생성
     const mainTitleDom = _.chain(mainTitleList)
       .union()
-      .map(title => {
-        return {
-          title,
-          colsPan: _(mainTitleList) // [인버터, 인버터]
-            .groupBy() // [인버터: [인버터, 인버터]]
-            .get(title).length, // get(인버터) -> [인버터, 인버터].length = 2
-        };
-      })
+      .map(title => ({
+        title,
+        colsPan: _(mainTitleList) // [인버터, 인버터]
+          .groupBy() // [인버터: [인버터, 인버터]]
+          .get(title).length, // get(인버터) -> [인버터, 인버터].length = 2
+      }))
       .map(mainTitleTemplate)
       .value();
 
@@ -139,10 +139,10 @@ const defaultDom = {
         calcData = _.chain(calcData)
           .multiply(scale)
           .round(toFixed)
-          .thru(cValue => {
+          .thru(cValue =>
             // 천단위 기호 추가
-            return isAddComma ? this.addComma(cValue) : cValue;
-          })
+            isAddComma ? addComma(cValue) : cValue,
+          )
           .value();
       } else {
         calcData = '-';
@@ -172,9 +172,9 @@ const defaultDom = {
     );
 
     // 데이터 변형을 사용할 목록 필터링
-    const calcBodyConfigList = bodyConfigList.filter(bodyInfo => {
-      return _.isNumber(bodyInfo.scale) || _.isNumber(bodyInfo.toFixed);
-    });
+    const calcBodyConfigList = bodyConfigList.filter(
+      bodyInfo => _.isNumber(bodyInfo.scale) || _.isNumber(bodyInfo.toFixed),
+    );
 
     // dataRows 를 순회하면서 데이터 변형을 필요로 할 경우 계산. 천단위 기호를 적용한뒤 Dom 반환
     return dataRows
@@ -379,9 +379,9 @@ const defaultDom = {
     const { bodyConfigList, dataRow } = calcDataRowInfo;
 
     // 데이터 변형을 사용할 목록 필터링
-    const calcBodyConfigList = bodyConfigList.filter(bodyInfo => {
-      return _.isNumber(bodyInfo.scale) || _.isNumber(bodyInfo.toFixed);
-    });
+    const calcBodyConfigList = bodyConfigList.filter(
+      bodyInfo => _.isNumber(bodyInfo.scale) || _.isNumber(bodyInfo.toFixed),
+    );
 
     bodyConfigList.forEach(bodyConfig => {
       const { dataKey } = bodyConfig;
@@ -394,34 +394,6 @@ const defaultDom = {
       _.set(dataRow, [dataKey], calcData);
       // 천단위 기호 추가 후 본 객체에 적용
     });
-  },
-
-  /**
-   * 천단위 기호 추가 함수
-   * @param {number} value 수
-   */
-  addComma(value) {
-    try {
-      if (value == null || value === '') {
-        return value;
-      }
-
-      // 소수점 분리
-      const valueArr = value.toString().split('.');
-
-      let str = valueArr[0].toString();
-      str = str.replace(/,/g, '');
-      let retValue = '';
-
-      for (let i = 1; i <= str.length; i += 1) {
-        if (i > 1 && i % 3 === 1) retValue = `${str.charAt(str.length - i)},${retValue}`;
-        else retValue = str.charAt(str.length - i) + retValue;
-      }
-
-      return retValue + (valueArr.length > 1 ? `.${valueArr[1]}` : '');
-    } catch (error) {
-      return '';
-    }
   },
 };
 

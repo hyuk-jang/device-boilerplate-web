@@ -84,34 +84,37 @@ app.set('weatherModel', new WeatherModel(dbInfo));
 app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
-app.use(helmet());
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        'stackpath.bootstrapcdn.com',
-        'use.fontawesome.com',
-        'fonts.googleapis.com',
-        'fonts.gstatic.com',
-        'code.jquery.com',
-      ],
-      scriptSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        "'unsafe-eval'",
-        'stackpath.bootstrapcdn.com',
-        'code.jquery.com',
-      ],
-      objectSrc: ["'self'"],
-      upgradeInsecureRequests: [],
-    },
-  }),
-);
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet());
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'stackpath.bootstrapcdn.com',
+          'use.fontawesome.com',
+          'fonts.googleapis.com',
+          'fonts.gstatic.com',
+          'code.jquery.com',
+        ],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          'stackpath.bootstrapcdn.com',
+          'code.jquery.com',
+        ],
+        objectSrc: ["'self'"],
+        upgradeInsecureRequests: [],
+      },
+    }),
+  );
 
-app.use(helmet.noSniff());
-app.use(helmet.xssFilter());
+  app.use(helmet.noSniff());
+  app.use(helmet.xssFilter());
+}
+
 // const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
 const store = new MySQLStore(dbInfo);
 const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour

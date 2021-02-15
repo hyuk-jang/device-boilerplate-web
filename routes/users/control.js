@@ -61,13 +61,9 @@ router.get(
 
     /** @type {MAIN} */
     const mainRow = await biModule.getTableRow('main', mainWhere);
-    /** @type {MAIN_MAP} */
-    const mainMapRow = await biModule.getTableRow('main_map', mainWhere);
 
     /** @type {mDeviceMap} */
-    // const map = JSON.parse(mainRow.map);
     const baseMap = mainRow.map;
-    const baseImgPath = mainMapRow.path;
 
     req.locals.map = JSON.parse(baseMap);
 

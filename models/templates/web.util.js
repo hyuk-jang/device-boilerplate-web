@@ -85,9 +85,7 @@ function calcStatisticsReport(dataRows, chartOption) {
   }
   // TODO
   if (averKey) {
-    returnValue.aver = _(dataRows)
-      .map(averKey)
-      .mean();
+    returnValue.aver = _(dataRows).map(averKey).mean();
   }
 
   return returnValue;
@@ -234,7 +232,8 @@ function calcRangePower(tableRows, calcOption) {
         if (hasCalcDate && prevDate instanceof Date) {
           /** @type {Date} */
           let currDate = tableRow[calcOption.rangeOption.dateKey];
-          currDate = typeof currDate === 'string' ? BU.convertTextToDate(currDate) : currDate;
+          currDate =
+            typeof currDate === 'string' ? BU.convertTextToDate(currDate) : currDate;
           // BU.CLI(BU.convertDateToText(prevDate), BU.convertDateToText(currDate));
           const thisCritical = (currDate.getTime() - prevDate.getTime()) * 0.001;
           // BU.CLIS(prevDate.getTime(), currDate.getTime(), currDate.getTime() - prevDate.getTime());
@@ -256,7 +255,8 @@ function calcRangePower(tableRows, calcOption) {
 
         if (hasCalcDate) {
           prevDate = tableRow[calcOption.rangeOption.dateKey];
-          prevDate = typeof prevDate === 'string' ? BU.convertTextToDate(prevDate) : prevDate;
+          prevDate =
+            typeof prevDate === 'string' ? BU.convertTextToDate(prevDate) : prevDate;
         }
       });
       // rowList.shift();
@@ -352,7 +352,10 @@ exports.calcRangeGridOutW = calcRangeGridOutW;
 function calcScaleRowDataPacket(dataRows, searchRange, dataKeyList) {
   dataRows.forEach(dataRow => {
     dataKeyList.forEach(dataKey => {
-      dataRow[dataKey] = convertValueBySearchType(dataRow[dataKey], searchRange.searchType);
+      dataRow[dataKey] = convertValueBySearchType(
+        dataRow[dataKey],
+        searchRange.searchType,
+      );
     });
   });
 }
@@ -448,7 +451,11 @@ function refineSelectedInverterStatus(validInverterStatus) {
             : _.round(_.divide(powerF, pvKw) * 100, 1),
         );
 
-      _.set(data, INCLINED_SOLAR, _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '');
+      _.set(
+        data,
+        INCLINED_SOLAR,
+        _.isNumber(data[INCLINED_SOLAR]) ? data[INCLINED_SOLAR] : '',
+      );
     } else {
       data.pv_a = '';
       data.pv_v = '';
@@ -473,8 +480,16 @@ function refineSelectedInverterStatus(validInverterStatus) {
   // currInverterDataList = _.sortBy(currInverterDataList, 'target_name');
   // 인버터 실시간 데이터 테이블
   returnValue.dataList = currInverterDataList;
-  returnValue.totalInfo.pv_kw = calcValue(reduceDataList(currInverterDataList, 'pv_kw'), 1, 3);
-  returnValue.totalInfo.grid_kw = calcValue(reduceDataList(currInverterDataList, 'grid_kw'), 1, 3);
+  returnValue.totalInfo.pv_kw = calcValue(
+    reduceDataList(currInverterDataList, 'pv_kw'),
+    1,
+    3,
+  );
+  returnValue.totalInfo.grid_kw = calcValue(
+    reduceDataList(currInverterDataList, 'grid_kw'),
+    1,
+    3,
+  );
   returnValue.totalInfo.d_kwh = calcValue(
     reduceDataList(currInverterDataList, 'daily_power_kwh'),
     1,
@@ -546,10 +561,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
         let data = _.get(dataRow, selectKey);
         // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
         data = _.isNumber(data)
-          ? _.chain(data)
-              .multiply(scale)
-              .round(toFixed)
-              .value()
+          ? _.chain(data).multiply(scale).round(toFixed).value()
           : data;
 
         chartSeries.data.push([commonUtil.convertDateToUTC(dataRow[dateKey]), data]);
@@ -575,18 +587,16 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       .groupBy(dateKey)
       .toPairs() // [[date, [[data], [data], [data]]], ...]
       .sortBy() // 날짜 오름 차순 정렬
-      .map(pairList => {
-        return [
-          commonUtil.convertDateToUTC(_.head(pairList)),
-          _.chain(_.nth(pairList, 1))
-            .map(selectKey)
-            .sum()
-            .multiply(scale)
-            .round(toFixed)
-            .value(),
-          // _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
-        ];
-      })
+      .map(pairList => [
+        commonUtil.convertDateToUTC(_.head(pairList)),
+        _.chain(_.nth(pairList, 1))
+          .map(selectKey)
+          .sum()
+          .multiply(scale)
+          .round(toFixed)
+          .value(),
+        // _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
+      ])
       .value();
 
     refinedLineChart.series.push(chartSeries);
@@ -606,7 +616,15 @@ exports.makeDynamicLineChart = makeDynamicLineChart;
  */
 function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
   // BU.CLI(dataRows);
-  const { domId, subtitle, title, scale, toFixed = 1, yAxisList, chartOption } = lineChartConfig;
+  const {
+    domId,
+    subtitle,
+    title,
+    scale,
+    toFixed = 1,
+    yAxisList,
+    chartOption,
+  } = lineChartConfig;
 
   const { selectKey, dateKey, groupKey, colorKey, sortKey, hasArea } = chartOption;
 
@@ -658,10 +676,7 @@ function makeStaticLineChart(lineChartConfig, dataRows, rangeInfo) {
         // 데이터가 숫자이고 scale이 숫자라면 데이터에 배율을 곱한 후 반올림 및 소수점 절삭 처리
         data =
           _.isNumber(data) && _.isNumber(scale)
-            ? _.chain(data)
-                .multiply(scale)
-                .round(toFixed)
-                .value()
+            ? _.chain(data).multiply(scale).round(toFixed).value()
             : data;
 
         chartSeries.data.push(data);
@@ -843,10 +858,14 @@ function applyScaleChart(chartData, searchType) {
     if (chart.option) {
       const { option } = chart;
       if (option.max) {
-        option.max = _.isNumber(option.max) ? convertValueBySearchType(option.max, searchType) : '';
+        option.max = _.isNumber(option.max)
+          ? convertValueBySearchType(option.max, searchType)
+          : '';
       }
       if (option.min) {
-        option.min = _.isNumber(option.min) ? convertValueBySearchType(option.min, searchType) : '';
+        option.min = _.isNumber(option.min)
+          ? convertValueBySearchType(option.min, searchType)
+          : '';
       }
       if (option.aver) {
         option.aver = _.isNumber(option.aver)
@@ -856,7 +875,9 @@ function applyScaleChart(chartData, searchType) {
     }
     chart.data.forEach((data, index) => {
       // BU.CLI(data);
-      chart.data[index] = _.isNumber(data) ? convertValueBySearchType(data, searchType) : '';
+      chart.data[index] = _.isNumber(data)
+        ? convertValueBySearchType(data, searchType)
+        : '';
     });
   });
   return chartData;
@@ -938,7 +959,13 @@ exports.makeChartDecoration = makeChartDecorator;
  * @param {string} mappingKey matchingKey
  * @return {chartData} Name 처리 한 후 반환
  */
-function mappingChartDataName(chartData, mappingTarget, matchingKey, mappingKey, hasSort) {
+function mappingChartDataName(
+  chartData,
+  mappingTarget,
+  matchingKey,
+  mappingKey,
+  hasSort,
+) {
   // BU.CLIS(mappingTarget, matchingKey);
   chartData.series.forEach(chart => {
     const chartKey = chart.name;

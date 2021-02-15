@@ -199,6 +199,10 @@
 
   // 검색 클릭 시
   document.querySelector('#searchBtn').addEventListener('click', function (event) {
+    const sCateId = document
+      .querySelector('#subSelectBoxDom option:checked')
+      .value.trim();
+
     // searchRange 형태 만듬
     var searchValue = getSearchValue();
     // 생성된 searchRange로 쿼리스트링 생성
@@ -209,8 +213,8 @@
       document.getElementById('loader').classList.remove('hidden');
       document.getElementById('loader-ground').classList.remove('hidden');
 
+      location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}/${sCateId}?${queryString}`;
       // 사이트 변경 시
-      location.href = `${window.location.origin}/${naviId}/${siteId}/${subCategory}?${queryString}`;
     }
   });
 
@@ -223,12 +227,16 @@
       return false;
     }
 
+    const sCateId = document
+      .querySelector('#subSelectBoxDom option:checked')
+      .value.trim();
+
     document.getElementById('loader').classList.remove('hidden');
     document.getElementById('loader-ground').classList.remove('hidden');
 
     $.ajax({
       type: 'GET',
-      url: `${window.location.origin}/${naviId}/${siteId}/${subCategory}/${subCategoryId}/excel`,
+      url: `${window.location.origin}/${naviId}/${siteId}/${subCategory}/${sCateId}/excel`,
       data: searchValue,
     })
       .done(excelData => {

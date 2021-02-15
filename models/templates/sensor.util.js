@@ -579,15 +579,10 @@ function makeSimpleLineChart(chartConfig, nodeDefStorageList, plotSeries = {}) {
           if (plotSeries.pointInterval < 13 && plotSeries.pointInterval > 0) {
             chartSeriesInfo.data = Array(plotSeries.pointInterval)
               .fill(null)
-              .map((data, idx) => {
-                return [
-                  moment(plotSeries.pointStart)
-                    .add(idx, 'months')
-                    // .add(9, 'hours')
-                    .valueOf(),
-                  _.get(sensorDataRows[idx], 'avg_data', null),
-                ];
-              });
+              .map((data, idx) => [
+                moment(plotSeries.pointStart).add(idx, 'months').valueOf(),
+                _.get(sensorDataRows[idx], 'avg_data', null),
+              ]);
 
             delete plotSeries.pointInterval;
           } else {

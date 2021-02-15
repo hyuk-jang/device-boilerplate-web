@@ -3,9 +3,12 @@
     "ecmaVersion": 11,
     "sourceType": "script"
   },
-  "extends": ["airbnb",  "prettier"],
+  "extends": ["airbnb", "prettier"],
   "plugins": ["prettier"],
   "globals": {
+    "document": true,
+    "window": true,
+    "location": true,
     "$": true,
     "_": true,
     "SVG": true,

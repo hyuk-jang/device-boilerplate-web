@@ -50,11 +50,16 @@ router.get(
     });
 
     const inverterSeqList = _.map(powerProfileRows, 'inverter_seq');
-    const inverterWhere = inverterSeqList.length ? { inverter_seq: inverterSeqList } : null;
+    const inverterWhere = inverterSeqList.length
+      ? { inverter_seq: inverterSeqList }
+      : null;
 
     // Site 발전 현황 구성.
     // 인버터 총합 발전현황 그래프2개 (현재, 금일 발전량),
-    let searchRange = biModule.createSearchRange({ searchType: 'months', searchInterval: 'month' });
+    let searchRange = biModule.createSearchRange({
+      searchType: 'months',
+      searchInterval: 'month',
+    });
     // BU.CLI(searchRange);
     // 검색 조건이 일 당으로 검색되기 때문에 금월 날짜로 date Format을 지정하기 위해 day --> month 로 변경
     const inverterStatisticsRows = await biModule.getInverterStatistics(
@@ -105,7 +110,10 @@ router.get(
 
     // 인버터 현재 발전 현황
     /** @type {V_PW_INVERTER_STATUS[]} */
-    const inverterStatusRows = await biModule.getTable('v_pw_inverter_status', inverterWhere);
+    const inverterStatusRows = await biModule.getTable(
+      'v_pw_inverter_status',
+      inverterWhere,
+    );
     // 인버터 현황 데이터 목록에 경사 일사량 데이터를 붙임.
     inverterStatusRows.forEach(inverterStatus => {
       const { inverter_seq: inverterSeq } = inverterStatus;
@@ -137,9 +145,7 @@ router.get(
     );
 
     // 설치 인버터 총 용량
-    const ivtAmount = _(powerProfileRows)
-      .map('ivt_amount')
-      .sum();
+    const ivtAmount = _(powerProfileRows).map('ivt_amount').sum();
 
     const powerGenerationInfo = {
       currKw: webUtil.calcValue(

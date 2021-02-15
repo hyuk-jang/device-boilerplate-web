@@ -5,13 +5,41 @@ const xss = require('xss');
 const { BU } = require('base-util-jh');
 
 /**
+ * 천단위 기호 추가 함수
+ * @param {number} value 수
+ */
+exports.addComma = value => {
+  try {
+    if (value == null || value === '') {
+      return value;
+    }
+
+    // 소수점 분리
+    const valueArr = value.toString().split('.');
+
+    let str = valueArr[0].toString();
+    str = str.replace(/,/g, '');
+    let retValue = '';
+
+    for (let i = 1; i <= str.length; i += 1) {
+      if (i > 1 && i % 3 === 1) retValue = `${str.charAt(str.length - i)},${retValue}`;
+      else retValue = str.charAt(str.length - i) + retValue;
+    }
+
+    return retValue + (valueArr.length > 1 ? `.${valueArr[1]}` : '');
+  } catch (error) {
+    return '';
+  }
+};
+
+/**
  * 날짜 데이터를 UTC 날짜로 변환 후 반환
  * @param {string|Date} date
  */
 function convertDateToUTC(date) {
-  // date = date instanceof Date ? date : moment(date).toDate();
-  date = date instanceof Date ? date : BU.convertTextToDate(date);
-  return Date.parse(date.addHours(9));
+  date = date instanceof Date ? date : new Date(date).toISOString();
+  return Date.parse(date);
+  // return Date.parse(date.addHours(9));
 }
 exports.convertDateToUTC = convertDateToUTC;
 
@@ -259,9 +287,9 @@ async function getDynamicChartDom(dynamicChartInfo) {
 
   // 모든 센서 정보가 없다면 표시 하지 않음
   chartList.forEach(chartInfo => {
-    chartInfo.series.every(seriesInfo => {
-      return _.get(seriesInfo, 'data', []).length === 0;
-    }) && (chartInfo.series = []);
+    const { series = [] } = chartInfo;
+    series.every(seriesInfo => _.get(seriesInfo, 'data', []).length === 0) &&
+      (chartInfo.series = []);
   });
 
   const chartDomList = chartList
