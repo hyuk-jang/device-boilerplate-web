@@ -71,7 +71,6 @@ module.exports = {
     const { wf, temp } = currWeatherCastInfo;
     const weatherCastTemplate = _.template(
       `<span><%= currDate %></span>
-      <span class="weacast_txt">날씨</span>
       <img src="/image/weather/weather_<%= wf %>.png">
       <input type="text" class="weathercast_temp" readonly value="<%= temp %>">
       <span class="weathercast_data_unit">℃</span>`,

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="navigation">
+      <ul>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-link" aria-hidden="true"></i>
+            </span>
+            <span class="title">link</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-search-plus" aria-hidden="true"></i>
+            </span>
+            <span class="title">확대</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-search-minus" aria-hidden="true"></i>
+            </span>
+            <span class="title">minus</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-refresh" aria-hidden="true"></i>
+            </span>
+            <span class="title">refresh</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-arrow-up" aria-hidden="true"></i>
+            </span>
+            <span class="title">arrow-up</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="icon">
+              <i class="fa fa-arrows-alt" aria-hidden="true"></i>
+            </span>
+            <span class="title">full</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="toggle"></div>
+    <script>
+      const toggleMenu = e => {
+        console.log(e);
+        let navigation = document.querySelector('.navigation');
+        let toggle = document.querySelector('.toggle');
+
+        navigation.classList.toggle('active');
+        toggle.classList.toggle('active');
+      };
+
+      document.querySelector('.toggle').addEventListener('click', toggleMenu);
+    </script>
+  </body>
+</html>
+<!-- https://www.youtube.com/watch?v=DvpSKoCyN5Q&feature=emb_logo -->

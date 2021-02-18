@@ -22,6 +22,13 @@
     <!-- 제어 표 구현을 위한 Library -->
     <link rel="stylesheet" href="/css/bootstrap/bootstrap-table.min.css" />
     <script src="/js/bootstrap/bootstrap-table.min.js"></script>
+
+    <!-- FIXME: -->
+    <script
+      src="https://kit.fontawesome.com/03372b7b51.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/css/style.css" />
   </head>
 
   <!-- 서버사이드 데이터 정의 -->
@@ -58,7 +65,6 @@
             >
               <span class="glyphicon glyphicon-link"></span>
             </button>
-            <div></div>
             <div id="contentTypeCategory" class="ml_2rem">
               <input
                 type="button"
@@ -90,11 +96,20 @@
         <div id="controlContent">
           <!-- Svg Map -->
           <div class="" id="structure">
-            <%- include("./plugInMapControlBox.ejs") %>
-            <!-- SVG canvas -->
-            <div class="svg_area" id="canvas">
-              <%- include('../master/filter.ejs') %> <%-
-              include('../master/filter.btn.ejs') %>
+            <div class="flex">
+              <%- include("./sidebar.ejs") %>
+              <!-- SVG canvas -->
+              <div class="svg-contents-area">
+                <div
+                  class="toggle btn btn-default"
+                  name="sidebar-toggle"
+                  title="사이드바 열기"
+                ></div>
+                <div class="svg_area" id="canvas">
+                  <%- include('../master/filter.ejs') %> <%-
+                  include('../master/filter.btn.ejs') %>
+                </div>
+              </div>
             </div>
             <div class="flex_dir_col hidden" id="chartDom">
               <p class="table_desc_area">트렌드</p>
@@ -175,6 +190,97 @@
       <!--하단1-->
       <%- include("../master/footer.ejs") %>
     </div>
+
+    <!-- panzoom & 맵 제어 박스 세팅 -->
+    <script>
+      // 맵 제어 박스 스크롤에 반응하여 상단 고정
+      $(document).ready(() => {
+        var filter = 'win16|win32|win64|mac|macintel';
+        var canvas = document.getElementById('svgCanvas');
+        var startScale = 1;
+
+        // 캔버스 실행에 실패할 경우 (Map이 존재하지 않을 경우)
+        if (canvas === null) {
+          document.querySelector('#canvas').remove();
+          document.querySelector('#commandStatus').remove();
+          return false;
+        }
+
+        var canvasPanzoom = Panzoom(canvas, {
+          cursor: 'default',
+          startScale: startScale,
+          // maxScale: 0.5,
+          minScale: 0.5,
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', canvasPanzoom.zoomIn);
+        document
+          .getElementById('zoomOut')
+          .addEventListener('click', canvasPanzoom.zoomOut);
+        document.getElementById('reset').addEventListener('click', canvasPanzoom.reset);
+        canvas.addEventListener('wheel', canvasPanzoom.zoomWithWheel); // 마우스 휠 확대/축소 이벤트
+      });
+    </script>
+
+    <!-- SVG 제어 UI 컨트롤 -->
+    <script>
+      (function () {
+        // 모니터링 모드 Ele
+        const monitoringMode = document.querySelector('#monitoring-mode');
+
+        const sidebarToggleList = document
+          .querySelector('#structure')
+          .querySelectorAll('[name="sidebar-toggle"]');
+
+        const navigation = document.querySelector('.navigation');
+
+        const svgContentsArea = document.querySelector('.svg-contents-area');
+
+        // 사이드바 토글 제어
+        const toggleMenu = e => {
+          navigation.classList.toggle('active');
+
+          svgContentsArea.classList.toggle('active');
+
+          sidebarToggleList.forEach(ele => {
+            ele.classList.toggle('active');
+          });
+        };
+        // 사이드바 토글 제어 엘리먼트에 Click 이벤트 부여
+        sidebarToggleList.forEach(ele => {
+          ele.addEventListener('click', toggleMenu);
+        });
+
+        // 모니터링 버튼 이벤트 처리
+        const fullScreenI = monitoringMode.querySelector('i');
+        const fullScreenToggleClassList = ['fa-arrows-alt', 'fa-compress-arrows-alt'];
+
+        monitoringMode.addEventListener('click', mouseEvent => {
+          monitoringMode.classList.toggle('active');
+
+          // 최대화 활성화 일 경우
+          const isFullScreen = monitoringMode.classList.contains('active');
+          if (isFullScreen) {
+            fullScreenI.classList.add('fa-compress-arrows-alt');
+            fullScreenI.classList.remove('fa-arrows-alt');
+            monitoringMode.setAttribute('title', '기본 화면');
+          } else {
+            fullScreenI.classList.remove('fa-compress-arrows-alt');
+            fullScreenI.classList.add('fa-arrows-alt');
+            monitoringMode.setAttribute('title', '전체 화면');
+          }
+
+          document
+            .querySelectorAll('.container_row')
+            .forEach(ele => ele.classList.toggle('hidden'));
+
+          document.querySelector('#wrap > header').classList.toggle('hidden');
+          document.querySelector('#wrap > footer').classList.toggle('hidden');
+
+          window.dispatchEvent(new Event('resize'));
+        });
+      })();
+    </script>
 
     <!-- Map 데이터를 기반으로 SVG를 생성 및 관리할 Module -->
     <script src="/js/drawSvg/drawSvg-base.js"></script>

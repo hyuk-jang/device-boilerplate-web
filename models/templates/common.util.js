@@ -39,7 +39,6 @@ exports.addComma = value => {
 function convertDateToUTC(date) {
   date = date instanceof Date ? date : new Date(date).toISOString();
   return Date.parse(date);
-  // return Date.parse(date.addHours(9));
 }
 exports.convertDateToUTC = convertDateToUTC;
 
