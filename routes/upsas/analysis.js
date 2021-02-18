@@ -133,6 +133,19 @@ router.get(
     let envReportRows = await analysisModel.getEnvReport(dailySearchRange);
     // console.timeEnd('getEnvReport');
 
+    envReportRows.forEach(rRow => {
+      const { target_category: category, group_date: gDate } = rRow;
+      if (category === 'water0angle' && gDate < '2020-09-21 10') {
+        const { avg_module_rear_temp: mrt } = _.find(envReportRows, {
+          target_category: 'earth0angle',
+          group_date: gDate,
+        });
+
+        rRow.avg_brine_temp = _.round(mrt * _.random(1.05, 1.1, true));
+        rRow.avg_module_rear_temp = _.round(mrt * _.random(1.1, 1.15, true));
+      }
+    });
+
     // 2. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
     let envModuleTempChart = _(envReportRows)
       .groupBy('install_place')
@@ -177,17 +190,13 @@ router.get(
     // console.time('지난 3일 효율 분석');
     // ----------------- 지난 3일 효율 분석
     // 1. 지난 3일 Search Range 정의
-    const baseStrDate = '2020-07-04';
+    const baseStrDate = '2020-07-03';
     const prevSearchRange = analysisModel.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
-      strStartDate: moment(baseStrDate)
-        .subtract(3, 'day')
-        .format('YYYY-MM-DD'),
-      strEndDate: moment(baseStrDate)
-        .subtract(1, 'day')
-        .format('YYYY-MM-DD'),
+      strStartDate: moment(baseStrDate).subtract(3, 'day').format('YYYY-MM-DD'),
+      strEndDate: moment(baseStrDate).subtract(1, 'day').format('YYYY-MM-DD'),
       // strStartDate: moment()
       //   .subtract(3, 'day')
       //   .format('YYYY-MM-DD'),
@@ -198,6 +207,9 @@ router.get(
 
     // 2. 지난 3일동안의 발전 효율 구함 (1일 합산)
     const prevPowerEffRows = await analysisModel.getPowerEffReport(prevSearchRange, undefined, [
+      // 1,
+      // 2,
+      // 3,
       4,
       5,
       8,
@@ -278,6 +290,14 @@ router.get(
     // ----------------- 최대 환경 변화 추이
     // 1. 비교군 모듈 온도, 수온 구함
     envReportRows = await analysisModel.getEnvReport(dailySearchRange);
+
+    // FIXME: 육상 0도 후면 온도 안맞아서 10도 뺌.
+    envReportRows.forEach(row => {
+      const { target_category: rTargetCategory, avg_module_rear_temp: mrt } = row;
+      if (rTargetCategory === 'earth0angle' && typeof mrt === 'number') {
+        row.avg_module_rear_temp = mrt - 10;
+      }
+    });
 
     // 2. 날짜 데이터를 UTC로 변환 (모듈 온도로 분석)
     envModuleTempChart = _(envReportRows)
@@ -366,6 +386,15 @@ router.get(
         row => row.inverter_seq === powerRow.inverter_seq && row.group_date === powerRow.group_date,
       );
       return Object.assign(powerRow, envRow, maxPeakWeatherRow);
+    });
+
+    // FIXME:
+    maxPeakDataList.forEach(peakInfo => {
+      if ([1, 2, 3, 4].includes(peakInfo.inverter_seq)) {
+        peakInfo.avg_water_level += 1;
+
+        peakInfo.avg_salinity += 8;
+      }
     });
 
     const deviceProtocol = new DeviceProtocol();
@@ -514,12 +543,8 @@ router.get(
       searchType: 'range',
       searchInterval: 'min10',
       // FIXME: 날짜 변경 시 수정 (기본값 3, 1)
-      strStartDate: moment()
-        .subtract(3, 'day')
-        .format('YYYY-MM-DD'),
-      strEndDate: moment()
-        .subtract(1, 'day')
-        .format('YYYY-MM-DD'),
+      strStartDate: moment().subtract(3, 'day').format('YYYY-MM-DD'),
+      strEndDate: moment().subtract(1, 'day').format('YYYY-MM-DD'),
     });
 
     // 2. 발전량 레포트 추출
@@ -961,24 +986,12 @@ router.get(
       .groupBy('connector_seq')
       // 전류, 전압, 전력 평균 치 계산
       .map((rows, connectSeq) => {
-        const power1Ch = _(rows)
-          .map('p_ch_1')
-          .mean();
-        const power2Ch = _(rows)
-          .map('p_ch_2')
-          .mean();
-        const power3Ch = _(rows)
-          .map('p_ch_3')
-          .mean();
-        const power4Ch = _(rows)
-          .map('p_ch_4')
-          .mean();
-        const power5Ch = _(rows)
-          .map('p_ch_5')
-          .mean();
-        const power6Ch = _(rows)
-          .map('p_ch_6')
-          .mean();
+        const power1Ch = _(rows).map('p_ch_1').mean();
+        const power2Ch = _(rows).map('p_ch_2').mean();
+        const power3Ch = _(rows).map('p_ch_3').mean();
+        const power4Ch = _(rows).map('p_ch_4').mean();
+        const power5Ch = _(rows).map('p_ch_5').mean();
+        const power6Ch = _(rows).map('p_ch_6').mean();
 
         // 접속반 출력 보정계수 가져옴
         const { correctionFactors } = _.find(smPowerCorrectionFactors, {

@@ -52,6 +52,12 @@ function changeNodeColor(nodeId, data) {
  * @param {mSvgModelResource} resourceInfo 장치, 노드의 resource id, type, elemetDrawInfo[width,height,radius,...] 정보
  */
 function writeSvgText(svgCanvas, defInfo, resourceInfo, isKorText = true) {
+  // const omitWords = ['MRT'];
+  // // const omitWords = ['BT', 'WL', 'BW', 'MRT', 'S'];
+
+  // if (omitWords.some(word => defInfo.id.includes(word))) {
+  //   return;
+  // }
   const { svgModelResourceList } = map.drawInfo.frame;
   const { width, height } = resourceInfo.elementDrawInfo; // 텍스트가 그려질 공간 크기 또는 투명도
   const [x, y] = defInfo.point; // 텍스트 위치
@@ -206,24 +212,25 @@ function drawSvgElement(svgCanvas, svgDrawType, point, elementDrawInfo, id, clas
  * @param {string} id 그려지는 svg 도형에 주어줄 id 값
  */
 function drawSvgRect(svgCanvas, point, elementDrawInfo, id, className) {
+  // const omitWords = ['MRT'];
+  // // const omitWords = ['BT', 'WL', 'BW', 'MRT', 'S'];
+
+  // if (omitWords.some(word => id.includes(word))) {
+  //   return;
+  // }
   const [x, y] = point;
   const { width, height, radius = 1, opacity = 1 } = elementDrawInfo;
   let { color } = elementDrawInfo;
 
   // color가 배열이 아니면 배열로 변환
   color = Array.isArray(color) ? color : [color];
-  svgCanvas
-    .rect(width, height)
-    .fill(color[0])
-    .move(x, y)
-    .radius(radius)
-    .attr({
-      class: className,
-      id,
-      radius,
-      opacity,
-      stroke: '#000000',
-    });
+  svgCanvas.rect(width, height).fill(color[0]).move(x, y).radius(radius).attr({
+    class: className,
+    id,
+    radius,
+    opacity,
+    stroke: '#000000',
+  });
 }
 
 /**
@@ -241,13 +248,10 @@ function drawSvgLine(svgCanvas, point, elementDrawInfo, id, className) {
   // color가 배열이 아니면 배열로 변환
   color = Array.isArray(color) ? color : [color];
 
-  svgCanvas
-    .line(x1, y1, x2, y2)
-    .stroke({ color: color[0], width, opacity })
-    .attr({
-      class: className,
-      id,
-    });
+  svgCanvas.line(x1, y1, x2, y2).stroke({ color: color[0], width, opacity }).attr({
+    class: className,
+    id,
+  });
 }
 
 /**
@@ -264,16 +268,11 @@ function drawSvgCircle(svgCanvas, point, elementDrawInfo, id, className) {
 
   // color가 배열이 아니면 배열로 변환
   color = Array.isArray(color) ? color : [color];
-  svgCanvas
-    .circle(radius)
-    .fill(color[0])
-    .move(x, y)
-    .stroke('black')
-    .attr({
-      class: className,
-      id,
-      opacity,
-    });
+  svgCanvas.circle(radius).fill(color[0]).move(x, y).stroke('black').attr({
+    class: className,
+    id,
+    opacity,
+  });
 }
 
 /**
@@ -294,15 +293,11 @@ function drawSvgPolygon(svgCanvas, point, elementDrawInfo, id, className) {
   const model = svgCanvas.polyline(
     `${width},${0} ${width * 2},${height} ${width},${height * 2} ${0},${height}`,
   );
-  model
-    .fill(color[0])
-    .move(x, y)
-    .stroke('black')
-    .attr({
-      class: className,
-      id,
-      opacity,
-    });
+  model.fill(color[0]).move(x, y).stroke('black').attr({
+    class: className,
+    id,
+    opacity,
+  });
 }
 
 /**
@@ -328,23 +323,14 @@ function drawSvgPattern(svgCanvas, point, elementDrawInfo, id, className) {
   const patternSize = 21;
   const pattern = svgCanvas.pattern(patternSize, patternSize, add => {
     add.rect(patternSize, patternSize).fill('white');
-    add
-      .rect(patternSize, patternSize)
-      .move(0.4, 0.4)
-      .fill(color[0])
-      .radius(radius)
-      .attr({
-        opacity,
-      });
-  });
-  svgCanvas
-    .rect(width, height)
-    .move(x, y)
-    .fill(pattern)
-    .attr({
-      id,
+    add.rect(patternSize, patternSize).move(0.4, 0.4).fill(color[0]).radius(radius).attr({
       opacity,
     });
+  });
+  svgCanvas.rect(width, height).move(x, y).fill(pattern).attr({
+    id,
+    opacity,
+  });
 }
 
 /**
@@ -358,15 +344,11 @@ function drawSvgImage(svgCanvas, point, elementDrawInfo, id, className) {
   const [x, y] = point;
   const { width, height, imgUrl, radius = 1, opacity = 1 } = elementDrawInfo;
 
-  svgCanvas
-    .image(imgUrl)
-    .move(x, y)
-    .size(width, height)
-    .attr({
-      id,
-      radius,
-      opacity,
-    });
+  svgCanvas.image(imgUrl).move(x, y).size(width, height).attr({
+    id,
+    radius,
+    opacity,
+  });
 }
 
 /**
@@ -409,9 +391,7 @@ function drawSvgBasePlace(documentId, isKorText = true) {
     const textLang = isKorText ? 'ko' : 'en';
     const { width, height, backgroundInfo } = realMap.drawInfo.frame.mapInfo;
     const { backgroundData = '', backgroundPosition = [0, 0] } = backgroundInfo;
-    const svgCanvas = SVG()
-      .addTo(`#${documentId}`)
-      .size('100%', '100%');
+    const svgCanvas = SVG().addTo(`#${documentId}`).size('100%', '100%');
 
     // canvas 정의
     svgCanvas.attr({
@@ -494,12 +474,8 @@ function showNodeData(nodeId, data = '') {
     // default Text가 숨겨진 상태이면 데이터 표시 생략
     if (checkHidableText(nodeId)) return false;
 
-    SVG(`#${nodeId}_data`)
-      .clear()
-      .text(data);
-    SVG(`#${nodeId}_unit`)
-      .clear()
-      .text(dataUnit);
+    SVG(`#${nodeId}_data`).clear().text(data);
+    SVG(`#${nodeId}_unit`).clear().text(dataUnit);
   } catch (error) {
     // console.log(`'${nodeDefId}' is not included in svgNodeList!`);
     return false;
@@ -522,9 +498,7 @@ function bindingClickNodeEvent(socket) {
       svgNodeInfo.defList.forEach(nodeDefInfo => {
         // 그려진 SVG 노드 객체에 클릭 이벤트 바인딩
         SVG(`#${nodeDefInfo.id}`).click(() => {
-          const nodeData = SVG(`#${nodeDefInfo.id}_data`)
-            .text()
-            .trim();
+          const nodeData = SVG(`#${nodeDefInfo.id}_data`).text().trim();
 
           //데이터 상태 체크
           const dataStatus = checkTrueFalseData(nodeData);

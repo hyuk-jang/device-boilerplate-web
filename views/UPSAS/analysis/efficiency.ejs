@@ -32,19 +32,19 @@
           </div>
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>피크 전력 발생일 발전 현황</header>
+              <header>하계철 발전 현황</header>
               <div id="peak_power_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
-          <div class="component_piece_box flex_15">
+          <!-- <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>최근 3일 피크 전력</header>
+              <header>하계철 3일 피크 전력</header>
               <div id="prev_3days_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
-          </div>
+          </div> -->
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>최근 3일 발전 시간</header>
+              <header>하계철 3일 발전 시간</header>
               <div id="prev_3days_power_time" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
@@ -58,13 +58,13 @@
           </div>
           <div class="component_piece_box flex_3">
             <article class="component_piece_area">
-              <header>피크 전력 발생일 온도 추이</header>
+              <header>하계철 온도 추이</header>
               <div id="peak_env_efficiency" class="component_piece_body p_column_rem"></div>
             </article>
           </div>
           <div class="component_piece_box flex_15">
             <article class="component_piece_area">
-              <header>피크 전력 순간 분석</header>
+              <header>하계철 최대 전력 순간 분석</header>
               <section class="component_piece_body">
                 <div class="flex flex_jus_bet" style="align-items: baseline;">
                   <p class="table_desc_area">
@@ -75,7 +75,7 @@
                   </p>
                 </div>
                 <div class="default_area text-center">
-                  <table class="table table-bordered ">
+                  <table class="table table-bordered">
                     <thead id="tableHeaderDom"></thead>
                     <tbody id="tableBodyDom"></tbody>
                   </table>
@@ -131,12 +131,10 @@
 
       // $('.container_body').height(1000);
 
-      document.querySelector('#monitoring_mode').addEventListener('click', function() {
+      document.querySelector('#monitoring_mode').addEventListener('click', function () {
         $('#wrap > header').addClass('hidden');
         $('#wrap > footer').addClass('hidden');
-        $('#subCategoryDom')
-          .parent()
-          .addClass('hidden');
+        $('#subCategoryDom').parent().addClass('hidden');
 
         $('.container_row').addClass('division');
         $('.container_body').height(window.innerHeight);
@@ -148,15 +146,13 @@
         // window.dispatchEvent(new Event('resize'));
       });
 
-      document.addEventListener('keyup', function(e) {
+      document.addEventListener('keyup', function (e) {
         if (e.keyCode === 27) {
           $('.container_row').removeClass('division');
 
           $('#wrap > header').removeClass('hidden');
           $('#wrap > footer').removeClass('hidden');
-          $('#subCategoryDom')
-            .parent()
-            .removeClass('hidden');
+          $('#subCategoryDom').parent().removeClass('hidden');
 
           $('.container_body').height('auto');
           // TODO: 데이터 자동 갱신 정지
@@ -748,7 +744,7 @@
       makeColumnChart({
         domId: 'maxPeakEfficiencyArea',
         xAxis: {
-          categories: maxPeakEnvRows.map(function(row) {
+          categories: maxPeakEnvRows.map(function (row) {
             return row.install_place + ' ' + row.serial_number;
           }),
         },
@@ -845,13 +841,13 @@
       function drawAllChart() {
         drawRtPowerEff();
         drawRtEnvEff();
-        drawPrev3DaysEff();
+        // drawPrev3DaysEff();
         drawPrev3DaysPowerTime();
         drawPeakPowerEff();
         drawPeakEnvEff();
       }
       drawAllChart();
-      $(document).ready(function() {
+      $(document).ready(function () {
         // FIXME: 1분에 한번씩 갱신 시연
         // setInterval(drawAllChart, 1000 * 60);
       });

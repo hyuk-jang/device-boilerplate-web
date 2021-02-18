@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const helmet = require('helmet');
+// const helmet = require('helmet');
 
 const app = express();
 
@@ -95,24 +95,25 @@ app.set('weatherModel', new WeatherModel(dbInfo));
 app.set('blockModel', new BlockModel(dbInfo));
 app.set('refineModel', new RefineModel(dbInfo));
 
-app.use(helmet());
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        'stackpath.bootstrapcdn.com',
-        'use.fontawesome.com',
-        'fonts.googleapis.com',
-        'fonts.gstatic.com',
-      ],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'stackpath.bootstrapcdn.com'],
-      objectSrc: ["'self'"],
-      upgradeInsecureRequests: [],
-    },
-  }),
-);
+// app.use(helmet());
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: [
+//         "'self'",
+//         "'localhost'",
+//         "'unsafe-inline'",
+//         'stackpath.bootstrapcdn.com',
+//         'use.fontawesome.com',
+//         'fonts.googleapis.com',
+//         'fonts.gstatic.com',
+//       ],
+//       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'stackpath.bootstrapcdn.com'],
+//       objectSrc: ["'self'"],
+//       upgradeInsecureRequests: [],
+//     },
+//   }),
+// );
 
 // app.use(
 //   helmet.contentSecurityPolicy({
@@ -156,8 +157,8 @@ app.use(
 //   }),
 // );
 
-app.use(helmet.noSniff());
-app.use(helmet.xssFilter());
+// app.use(helmet.noSniff());
+// app.use(helmet.xssFilter());
 // const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour
 const store = new MySQLStore(dbInfo);
 const expiryDate = new Date(Date.now() + 60 * 1000); // 1 hour

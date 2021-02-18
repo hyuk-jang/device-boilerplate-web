@@ -47,7 +47,7 @@
       <!-- Header -->
       <%- include("../master/header.ejs") %>
       <!--메인-->
-      <div class="container_body ">
+      <div class="container_body">
         <div class="container_row navi">
           <div id="subCategoryDom" class="report_category"></div>
           <div class="command_status">
@@ -90,24 +90,24 @@
           <div class="" id="structure">
             <div class="map_control_box" id="mapControlBox">
               <!-- panzoom button-->
-              <button id="zoomIn" class="btn btn-default btn-sm ">
+              <button id="zoomIn" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-zoom-in"></span>
               </button>
-              <button id="zoomOut" class="btn btn-default btn-sm ">
+              <button id="zoomOut" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-zoom-out"></span>
               </button>
-              <button id="reset" class="btn btn-default btn-sm ">
+              <button id="reset" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-refresh"></span>
               </button>
-              <button id="scrollUp" class="btn btn-default btn-sm ">
+              <button id="scrollUp" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-arrow-up"></span>
               </button>
-              <button id="monitoring_mode" class="btn btn-warning btn-sm ">
+              <button id="monitoring_mode" class="btn btn-warning btn-sm">
                 <span class="glyphicon glyphicon-fullscreen"></span>
               </button>
             </div>
             <!-- SVG canvas -->
-            <div class="svg_area " id="canvas"></div>
+            <div class="svg_area" id="canvas"></div>
           </div>
           <!-- Tables -->
           <div class="hidden" id="operStatusTable">
@@ -213,19 +213,21 @@
       var socket = io();
 
       // 접속한 사용자 Session 정보를 Socket.io 인증용으로 전송
-      socket.emit('certifySocket', {
-        sessionID: sessionID,
-        sessionUserInfo: user,
+      socket.on('certifySocket', () => {
+        socket.emit('certifySocket', {
+          sessionID: sessionID,
+          sessionUserInfo: user,
+        });
       });
 
       // 명령 요청 결과 Alert
-      socket.on('resultExecCommand', function(message) {
+      socket.on('resultExecCommand', function (message) {
         document.getElementById('resultExecCommand').innerText = message;
       });
 
       // 장치 연결 상태 반영
       var isApiClientConn = false;
-      socket.on('updateIsApiClientConn', function(isConn) {
+      socket.on('updateIsApiClientConn', function (isConn) {
         isApiClientConn = isConn;
 
         var connStatusImg =
@@ -246,7 +248,7 @@
        * @param {string} modeInfo.operationConfig.cmdStrategy 명령 전략
        * @param {operationConfig[]} modeInfo.operationConfigList 구동 모드 가능 목록
        */
-      socket.on('updateMode', function(modeInfo) {
+      socket.on('updateMode', function (modeInfo) {
         currModeInfo = modeInfo;
 
         // 현재 수행 중인 알고리즘 ID 가 존재하지 않을 경우
@@ -289,7 +291,7 @@
         });
 
         // select option 동적 생성
-        var optionDomList = _.map(currModeInfo.operationConfigList, function(oConfig) {
+        var optionDomList = _.map(currModeInfo.operationConfigList, function (oConfig) {
           // 현재 수행 중인 구동 모드와 동일한 option은 selected 처리
           // console.log(oConfig, operConfig);
           var strSelected = oConfig.algorithmId === operConfig.algorithmId ? 'selected' : '';
@@ -307,11 +309,11 @@
       // 노드 상태를 저장할 목록 {ni: NodeId, ntn: Node Target Name, d: data, pnl: Place Target Name}[]
       var currNodeList = [];
       // 갱신 노드 반영
-      socket.on('updateNode', function(wsNodeList) {
-        //   console.log('updateNode', wsNodeList);
+      socket.on('updateNode', function (wsNodeList) {
+        // console.log('updateNode', wsNodeList);
         var wsNodeList = _.isArray(wsNodeList) && wsNodeList.length > 0 ? wsNodeList : [];
 
-        _.forEach(wsNodeList, function(wsNodeInfo) {
+        _.forEach(wsNodeList, function (wsNodeInfo) {
           // SVG draw map
           showNodeData(wsNodeInfo.ni, wsNodeInfo.d);
           // 현재 Node 목록 중에 갱신된 Node가 있다면 업데이트, 아니라면 신규 push
@@ -333,7 +335,7 @@
 
       // 명령 관련 갱신 반영
       var currCommandList = [];
-      socket.on('updateCommand', function(commandList) {
+      socket.on('updateCommand', function (commandList) {
         // console.log(commandList);
         currCommandList = _.isArray(commandList) && commandList.length > 0 ? commandList : [];
 
@@ -361,12 +363,12 @@
        * @property {string} imgId 보여줄 이미지 Id
        */
       var currSvgImgList = [];
-      socket.on('updateSvgImg', function(newSvgImgList = []) {
+      socket.on('updateSvgImg', function (newSvgImgList = []) {
         // console.log('newSvgImgList', newSvgImgList);
         // 새롭게 추가되는 이미지 목록 조회
-        var appearSvgImgList = newSvgImgList.reduce(function(storage, newSvgImgInfo) {
+        var appearSvgImgList = newSvgImgList.reduce(function (storage, newSvgImgInfo) {
           // 기존에 존재하는 이미지 존재 조회
-          var findIndex = currSvgImgList.findIndex(function(currSvgImgInfo) {
+          var findIndex = currSvgImgList.findIndex(function (currSvgImgInfo) {
             return currSvgImgInfo.imgId === newSvgImgInfo.imgId;
           });
           // 존재하지 않을 경우 생성 대상
@@ -377,9 +379,9 @@
         // console.log(appearSvgImgList);
 
         // 기존에 존재하던 이미지 삭제 목록 조회
-        var disappearSvgImgList = currSvgImgList.reduce(function(storage, currSvgImgInfo) {
+        var disappearSvgImgList = currSvgImgList.reduce(function (storage, currSvgImgInfo) {
           // 기존에 존재하는 이미지 존재 조회
-          var findIndex = newSvgImgList.findIndex(function(newSvgImgInfo) {
+          var findIndex = newSvgImgList.findIndex(function (newSvgImgInfo) {
             return newSvgImgInfo.imgId === currSvgImgInfo.imgId;
           });
           // 존재하지 않을 경우 삭제 대상
@@ -390,11 +392,11 @@
         // console.log(disappearSvgImgList);
 
         // SVG Img 재생성 요청
-        appearSvgImgList.forEach(function(svgImgInfo) {
+        appearSvgImgList.forEach(function (svgImgInfo) {
           startFlowAnimation(svgImgInfo.imgId, 1);
         });
         // SVG Img 삭제 요청
-        disappearSvgImgList.forEach(function(svgImgInfo) {
+        disappearSvgImgList.forEach(function (svgImgInfo) {
           // console.log('삭제요청', startFlowAnimation);
           startFlowAnimation(svgImgInfo.imgId, 0);
         });
@@ -404,7 +406,7 @@
 
       // 서버로 명령 실행 요청
       // $('button[name="reqControlCmd"]').on('click', function(event) {
-      $('#reqCommandBtn').on('click', function(event) {
+      $('#reqCommandBtn').on('click', function (event) {
         // FIXME: 동계모드 임시
         // var modeId = $('#operationModeSel option:selected').val();
         // if ('winterMode' === modeId) {
@@ -420,16 +422,13 @@
       });
 
       // 서버로 명령 실행 요청한 결과 알림
-      socket.on('updateAlert', function(message) {
+      socket.on('updateAlert', function (message) {
         alert(message);
       });
 
       // 서버로 명령 취소 요청
       $('#cmdTableBody').on('click', 'button[name="reqCancelCmd"]', () => {
-        var cmdIndex = $('button[name="reqCancelCmd"]')
-          .parentsUntil('tr')
-          .parent()
-          .data('index');
+        var cmdIndex = $('button[name="reqCancelCmd"]').parentsUntil('tr').parent().data('index');
 
         // console.log(
         //   $('button[name="reqCancelCmd"]')
@@ -442,22 +441,20 @@
       });
 
       // FIXME: TEXT 종료 후 삭제
-      $(document).ready(function() {
+      $(document).ready(function () {
         var thisSelectValue = CF_SINGLE;
         // var thisSelectValue = CF_SET;
         // var thisSelectValue = CF_FLOW;
         // var thisSelectValue = CF_SCENARIO;
 
         // 명령 형식 변경
-        $('#cmdFormatSel')
-          .val(thisSelectValue)
-          .trigger('change');
+        $('#cmdFormatSel').val(thisSelectValue).trigger('change');
       });
     </script>
 
     <!-- 제어 관리 js 세팅 및 바인딩 -->
     <script>
-      $('#changeOperationModeBtn').on('click', function() {
+      $('#changeOperationModeBtn').on('click', function () {
         var selectedAlgorithmId = $('#operationModeSel option:selected').val();
         // var modeName = $('#operationModeSel option:selected').text();
         // alert('운영 모드(' + modeName + ')를 변경하였습니다.');
@@ -470,13 +467,13 @@
     <!-- 상단 카테고리 버튼 세팅 -->
     <script>
       // 데이터 뷰 버튼 선택에 따라 보여지는 View 분기 처리
-      $('input[name="contentTypeBtn"]').on('click', function() {
+      $('input[name="contentTypeBtn"]').on('click', function () {
         var viewType = $(this).data('view');
 
         // 버튼 색상 변경
         $('#contentTypeCategory')
           .children('input')
-          .each(function(index, inputElement) {
+          .each(function (index, inputElement) {
             var currDataView = $(inputElement).data('view');
             if (currDataView === viewType) {
               $(this).addClass('btn-danger');
@@ -490,7 +487,7 @@
         // 선택한 데이터 뷰 선택 값에 따라 hidden 설정
         $('#controlContent')
           .children('div')
-          .each(function(index, domElement) {
+          .each(function (index, domElement) {
             if (domElement.id === viewType) {
               $(`#${domElement.id}`).removeClass('hidden');
             } else {
@@ -543,12 +540,8 @@
         $('#wrap > header').toggleClass('hidden');
         $('#wrap > footer').toggleClass('hidden');
 
-        $('#monitoring_mode')
-          .children()
-          .toggleClass('glyphicon-fullscreen');
-        $('#monitoring_mode')
-          .children()
-          .toggleClass('glyphicon-remove');
+        $('#monitoring_mode').children().toggleClass('glyphicon-fullscreen');
+        $('#monitoring_mode').children().toggleClass('glyphicon-remove');
 
         $('.svg_area').height(window.innerHeight);
         window.dispatchEvent(new Event('resize'));

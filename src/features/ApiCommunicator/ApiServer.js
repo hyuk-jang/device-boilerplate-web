@@ -427,6 +427,7 @@ class ApiServer extends AbstApiServer {
    */
   compareNodeList(msInfo, fieldNodeList) {
     try {
+      // BU.CLIN(fieldNodeList);
       /** @type {nodeInfo[]} */
       const renewalList = fieldNodeList.reduce((updatedList, wsNodeInfo) => {
         const { nri: nodeRealId, d: data } = wsNodeInfo;

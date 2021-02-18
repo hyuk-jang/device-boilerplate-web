@@ -41,6 +41,7 @@ class SocketIOManager extends AbstSocketIOManager {
 
     this.io.on('connection', socket => {
       // BU.CLI('connection');
+      socket.emit('certifySocket');
       // 접속한 Socket 등록
       socket.on('certifySocket', sessionInfo => {
         /** @type {msUserInfo} */
@@ -279,7 +280,7 @@ class SocketIOManager extends AbstSocketIOManager {
       /** @type {defaultFormatToRequest} */
       const defaultFormatToRequestInfo = {
         commandId: transmitToServerCT.COMMAND,
-        uuid: uuidv4(),
+        uuid: uuid.v4(),
         contents: executeCmdInfo,
       };
 
