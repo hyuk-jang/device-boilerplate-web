@@ -10,6 +10,7 @@ const { BU } = require('base-util-jh');
 const main = require('./main');
 const inverter = require('./inverter');
 const sensor = require('./sensor');
+const analysis = require('./analysis');
 const trend = require('./trend');
 const report = require('./report');
 const control = require('./control');
@@ -20,6 +21,7 @@ const routerInfo = {
   main,
   inverter,
   sensor,
+  analysis,
   trend,
   report,
   control,

@@ -185,6 +185,61 @@ class WeatherModel extends BiModule {
   }
 
   /**
+   *
+   * @param {searchRange} searchRange
+   * @param {number[]} weatherLocationSeq
+   * @return {{group_date:string, latitude: number, avg_temp: number, avg_cloud: number}[]}
+   */
+  async getRefineWeatherCast(searchRange, weatherLocationSeq) {
+    const { strStartDate, strEndDate } = searchRange;
+
+    const dateFormat = this.convertSearchRangeToDBFormat(searchRange, 'applydate');
+
+    const sql = `
+      SELECT
+      main_tbl.weather_location_seq,
+      wl_tbl.city, wl_tbl.province, wl_tbl.town, wl_tbl.latitude, wl_tbl.longitude,
+      main_tbl.applydate,
+          ${dateFormat.selectViewDate},
+          ${dateFormat.selectGroupDate},
+          AVG(main_tbl.temp) AS avg_temp,
+          ROUND(AVG(main_tbl.cloud), 2) AS avg_cloud
+      FROM
+      (
+        SELECT 
+              weather_location_seq,
+              applydate, 
+              temp,
+              CASE
+                WHEN sky = 1
+                  THEN 0
+                WHEN sky = 2
+                  THEN 4
+                WHEN sky = 3
+                  THEN 7
+                WHEN sky = 4
+                  THEN 10
+              END cloud
+        FROM wc_kma_data AS wkd
+        WHERE applydate>= "${strStartDate}" AND applydate<"${strEndDate}"
+        AND DATE_FORMAT(applydate, '%H') > '06' AND DATE_FORMAT(applydate, '%H') < '20'
+            ${
+              weatherLocationSeq.length
+                ? ` AND wkd.weather_location_seq IN (${weatherLocationSeq})`
+                : ''
+            }
+        GROUP BY wkd.applydate, wkd.weather_location_seq
+      ) AS main_tbl
+      JOIN wc_weather_location AS wl_tbl
+       ON wl_tbl.weather_location_seq = main_tbl.weather_location_seq
+      GROUP BY ${dateFormat.firstGroupByFormat}, weather_location_seq
+      ORDER BY weather_location_seq, group_date
+    `;
+
+    return this.db.single(sql, null, false);
+  }
+
+  /**
    * 기상 관측 데이터 구해옴
    * @param {searchRange} searchRange  검색 옵션
    * @return {{view_date: string, group_date: string, avg_sm_infrared: number, avg_temp: number, avg_reh: number, avg_solar: number, total_interval_solar: number, avg_inclined_solar: number, total_interval_inclined_solar: number, avg_wd: number, avg_ws: number, avg_uv: number}[]}
@@ -242,7 +297,7 @@ class WeatherModel extends BiModule {
         ) AS result_wdd
         GROUP BY ${groupByFormat}, main_seq
         `;
-    return this.db.single(sql, '', false);
+    return this.db.single(sql, '', true);
     // AND DATE_FORMAT(writedate, '%H') >= '05' AND DATE_FORMAT(writedate, '%H') < '20'
   }
 

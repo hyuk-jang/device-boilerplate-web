@@ -57,13 +57,14 @@ module.exports = class extends BiModule {
 
     return _.chain(powerEffRows)
       .groupBy(groupKey)
-      .map(powerRows => {
-        return {
-          sortIndex: powerRows[0][sortKey],
-          name: nameKeys.map(nKey => powerRows[0][nKey]).join(' '),
-          data: powerRows.map(row => [commonUtil.convertDateToUTC(row[dateKey]), row[dataKey]]),
-        };
-      })
+      .map(powerRows => ({
+        sortIndex: powerRows[0][sortKey],
+        name: nameKeys.map(nKey => powerRows[0][nKey]).join(' '),
+        data: powerRows.map(row => [
+          commonUtil.convertDateToUTC(row[dateKey]),
+          row[dataKey],
+        ]),
+      }))
       .sortBy('sortIndex')
       .forEach((chartData, index) => {
         chartData.color = colorTable[index];
@@ -235,17 +236,21 @@ module.exports = class extends BiModule {
       // 오차율
       const waterPowerlossRate = (1 - realPower / preWaterPowerKw) * 100;
 
+      const solarLossRatio = this.getSolarLossRate({ measureDate: groupDate });
+      const inclineSoalr = horizontalSolar / solarLossRatio;
       // 육상 모듈 온도 예측 치
-      const preEarthModuleTemp =
-        0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
-        34 * horizontalSolar;
+      const preEarthModuleTemp = outdoorTemp + 34 * inclineSoalr;
+      // const preEarthModuleTemp =
+      //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
+      //   34 * horizontalSolar;
       // 육상 태양광 발전 효율 예측
-      const preEarthPowerEff =
-        moduleEff * (1 - betaRef * (outdoorTemp + 34 * horizontalSolar - tRef));
+      const preEarthPowerEff = moduleEff * (1 - betaRef * (preEarthModuleTemp - tRef));
       // 육상 태양광 발전량 예측
       const preEarthPowerKw =
-        0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
-        34 * horizontalSolar;
+        (preEarthPowerEff * horizontalSolar * moduleSquare * dustLossRate) / 100;
+      // const preEarthPowerKw =
+      //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
+      //   34 * horizontalSolar;
 
       // 수위에 따른 손실
       row.lossWaterLevelRate = _.round((1 - lossWaterLevel) * 100, 4);
@@ -366,17 +371,18 @@ module.exports = class extends BiModule {
         };
         // 숫자 소수점 처리
         _.forEach(returnInfo, (v, k) => {
-          returnInfo[k] = _.isNaN(v) ? v : _.round(v, 2);
+          returnInfo[k] = _.isNaN(v) ? v : _.round(v, 3);
         });
         // 날짜 병합
         Object.assign(returnInfo, { gDate });
 
         return returnInfo;
       })
-      .filter(row => {
-        // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
-        return row.avgSolar > 100 || row.powerRatio > 1;
-      })
+      .filter(
+        row =>
+          // 일사량이 100 이상이거나 발전비가 1% 이상일 경우 필터링
+          row.avgSolar > 100 || row.powerRatio > 1,
+      )
       .sortBy('gDate')
       .value();
   }
@@ -409,15 +415,15 @@ module.exports = class extends BiModule {
         return {
           name: `${ip} ${sn}`,
           waterLevel: _.round(waterLevel, 2),
-          moduleTemp: _.round(moduleTemp, 2),
-          brineTemp: _.round(brineTemp, 2),
-          powerKw: _.round(powerKw, 2),
+          moduleTemp: _.round(moduleTemp, 3),
+          brineTemp: _.round(brineTemp, 3),
+          powerKw: _.round(powerKw, 3),
           // Predict
-          preModuleTemp: _.round(preModuleTemp, 2),
-          prePowerKw: _.round(prePowerKw, 2),
+          preModuleTemp: _.round(preModuleTemp, 3),
+          prePowerKw: _.round(prePowerKw, 3),
           //
-          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 2),
-          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 2),
+          repPowerErrRate: _.round((powerKw / prePowerKw) * 100, 3),
+          repModuleTempErrRate: _.round((moduleTemp / preModuleTemp) * 100, 3),
         };
       })
       .value();
@@ -499,7 +505,9 @@ module.exports = class extends BiModule {
           ${inverterSeqList.length ? ` AND inverter_seq IN (${inverterSeqList})` : ''}
           ) inv_tbl
         ON inv_tbl.inverter_seq = inv_data.inverter_seq
-        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${
+      searchRange.strEndDate
+    }"
          AND inv_data.inverter_seq IN (inv_tbl.inverter_seq)
         GROUP BY ${effType}, group_date, inverter_seq
         ) final
@@ -549,7 +557,9 @@ module.exports = class extends BiModule {
           ${_.isNumber(mainSeq) ? `WHERE rp.main_seq = ${mysql.escape(mainSeq)}` : ''}
           ) sub_tbl
          ON sub_tbl.place_seq = ssd.place_seq
-        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${searchRange.strEndDate}"
+        WHERE writedate >= "${searchRange.strStartDate}" and writedate < "${
+      searchRange.strEndDate
+    }"
          AND ssd.place_seq IN (sub_tbl.place_seq)
          AND sub_tbl.target_category IN ('water0angle', 'earth30angle', 'earth0angle')
         GROUP BY sub_tbl.${effType}, group_date
@@ -599,10 +609,10 @@ module.exports = class extends BiModule {
               SELECT
                     inv_tbl.inverter_seq, target_id, target_name, serial_number, target_category, install_place, amount, chart_sort_rank,
                     inv_data.writedate,
-                    AVG(inv_data.pv_kw) AS avg_pv_kw,
-                    AVG(inv_data.power_kw) AS avg_power_kw,
+                    AVG(inv_data.pv_kw) * 0.185 AS avg_pv_kw,
+                    AVG(inv_data.power_kw) * 0.185 AS avg_power_kw,
                     ROUND(MAX(inv_data.power_kw) / amount * 100, 3) AS peak_power_eff,
-                    MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh) AS interval_power_cp_kwh,
+                    (MAX(inv_data.power_cp_kwh) - MIN(inv_data.power_cp_kwh)) * 0.185 AS interval_power_cp_kwh,
                     ${selectViewDate},
                     ${selectGroupDate}
               FROM pw_inverter_data inv_data
@@ -700,7 +710,7 @@ module.exports = class extends BiModule {
             ) AS result_wdd
           GROUP BY ${groupByFormat}, main_seq
         ) wdd_tbl
-      ON wdd_tbl.group_date = saltern_tbl.group_date AND wdd_tbl.main_seq = saltern_tbl.main_seq
+      ON wdd_tbl.group_date = saltern_tbl.group_date AND wdd_tbl.main_seq = 1
       ORDER BY power_tbl.inverter_seq, power_tbl.group_date 
     `;
 

@@ -50,6 +50,10 @@ module.exports = {
       name: '생육환경',
     },
     {
+      href: 'analysis',
+      name: '발전분석',
+    },
+    {
       href: 'trend',
       name: '트렌드',
       subCategoryList: [

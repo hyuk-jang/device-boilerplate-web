@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Default Js -->
+
+    <%- include("../master/head.ejs") %>
+    <!-- 발전 예측 관련 -->
+    <script src="/js/contents/main/powerPredictor.js"></script>
+    <script src="/js/contents/master/mainUtil.js"></script>
+    <script src="/js/hichart/dark-unica.theme.js"></script>
+
+    <!-- <script src="/js/hichart/exporting.js"></script>
+    <script src="/js/hichart/export-data.js"></script> -->
+  </head>
+
+  <body>
+    <div id="wrap" class="wrap hidden">
+      <!-- Header -->
+      <%- include("../master/header.ejs") %>
+      <!--메인-->
+      <div class="container_body">
+        <div class="container_row navi">
+          <div id="subCategoryDom" class="report_category"></div>
+          <div><button class="btn btn-warning" id="monitoring_mode">모니터링 모드</button></div>
+        </div>
+        <div class="container_row ">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>금일 발전량 트렌드</header>
+              <div id="section_1" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>금일 환경 트렌드</header>
+              <div id="section_2" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+        <div class="container_row ">
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>지난 3일간 발전량 트렌드</header>
+              <div id="section_3" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+          <div class="component_piece_box">
+            <article class="component_piece_area">
+              <header>지난 3일간 환경 트렌드</header>
+              <div id="section_4" class="component_piece_body p_column_rem"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <!--하단1-->
+      <%- include("../master/footer.ejs") %>
+    </div>
+
+    <script>
+      $('#subCategoryDom').html(<%- JSON.stringify(dom.subCategoryDom) %>);
+
+      var chartInfo =  <%- JSON.stringify(chartInfo) %>;
+
+      // 모니터링 모드 여부 0 or 1
+      var isMonitoringMode =  <%- JSON.stringify(isMonitoringMode) %>;
+    </script>
+
+    <!-- 모니터링 모드 동작 -->
+    <script>
+      document.querySelector('#monitoring_mode').addEventListener('click', function() {
+        $('#wrap > header').addClass('hidden');
+        $('#wrap > footer').addClass('hidden');
+        $('#subCategoryDom')
+          .parent()
+          .addClass('hidden');
+
+        $('.container_row').addClass('division');
+        $('.container_body').height(window.innerHeight);
+
+        window.dispatchEvent(new Event('resize'));
+        // TODO: 데이터 자동 갱신 시작
+      });
+
+      document.addEventListener('keyup', function(e) {
+        if (e.keyCode === 27) {
+          $('#wrap > header').removeClass('hidden');
+          $('#wrap > footer').removeClass('hidden');
+          $('#subCategoryDom')
+            .parent()
+            .removeClass('hidden');
+          $('.container_body').height('auto');
+
+          $('.container_row').removeClass('division');
+          // TODO: 데이터 자동 갱신 정지
+          window.dispatchEvent(new Event('resize'));
+        }
+      });
+      // 모니터링 모드로 변환 및 10분에 한번 reload
+      if (isMonitoringMode === 1) {
+        $('#monitoring_mode').trigger('click');
+        // 10분에 한번씩 갱신
+        setTimeout('location.reload()', 1000 * 60 * 10);
+      }
+
+      var mainFontSize = 15;
+      var subFontSize = 13;
+    </script>
+
+    <script src="/js/contents/report/search.js"></script>
+
+    <!-- 출력 트렌드 1 Negative Area Chart -->
+    <script>
+      function drawSection1Chart() {
+        Highcharts.chart('section_1', {
+          chart: {
+            type: 'line',
+            marginLeft: 45,
+            marginRight: 55,
+            marginTop: 35,
+          },
+          title: {
+            text: '',
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%d',
+              week: '%m-%d',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -35,
+                y: -15,
+                text: '발전량 (kW)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+            {
+              title: {
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 43,
+                y: -15,
+                text: '일사량 (W/㎡)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+          ],
+          plotOptions: {
+            series: {
+              marker: false,
+            },
+          },
+          tooltip: {
+            shared: true,
+          },
+          series: chartInfo.dailyPowerData,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
+    </script>
+
+    <!-- 출력 트렌드 2 Negative Area Chart -->
+    <script>
+      function drawSection2Chart() {
+        Highcharts.chart('section_2', {
+          chart: {
+            type: 'line',
+            marginLeft: 45,
+            marginRight: 50,
+            marginTop: 35,
+          },
+          title: {
+            text: '',
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%d',
+              week: '%m-%d',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -30,
+                y: -15,
+                text: '온도 (˚C)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+            {
+              title: {
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 35,
+                y: -15,
+                text: '수위 (cm)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+          ],
+          plotOptions: {
+            series: {
+              marker: false,
+            },
+          },
+          tooltip: {
+            shared: true,
+          },
+          series: chartInfo.dailyEnvChart,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
+    </script>
+
+    <!-- 출력 트렌드 3 Negative Area Chart -->
+    <script>
+      function drawSection3Chart() {
+        Highcharts.chart('section_3', {
+          chart: {
+            type: 'line',
+            marginLeft: 45,
+            marginRight: 55,
+            marginTop: 35,
+          },
+          title: {
+            text: '',
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%d',
+              week: '%m-%d',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -35,
+                y: -15,
+                text: '발전량 (kW)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+            {
+              title: {
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 43,
+                y: -15,
+                text: '일사량 (W/㎡)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+          ],
+          plotOptions: {
+            series: {
+              marker: false,
+            },
+          },
+          tooltip: {
+            shared: true,
+          },
+          series: chartInfo.rangePowerChart,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
+    </script>
+
+    <!-- 출력 트렌드 4 Negative Area Chart -->
+    <script>
+      function drawSection4Chart() {
+        Highcharts.chart('section_4', {
+          chart: {
+            type: 'line',
+            marginLeft: 45,
+            marginRight: 50,
+            marginTop: 35,
+          },
+          title: {
+            text: '',
+          },
+          xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%m-%d',
+              week: '%m-%d',
+              month: '%y-%m',
+              year: '%Y',
+            },
+            labels: {
+              style: {
+                fontSize: subFontSize,
+              },
+            },
+          },
+          yAxis: [
+            {
+              title: {
+                align: 'high',
+                textAlign: 'left',
+                rotation: 0,
+                offset: 0,
+                x: -30,
+                y: -15,
+                text: '온도 (˚C)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+            },
+            {
+              title: {
+                align: 'high',
+                textAlign: 'right',
+                rotation: 0,
+                offset: 0,
+                x: 35,
+                y: -15,
+                text: '수위 (cm)',
+                style: {
+                  fontSize: mainFontSize,
+                  color: Highcharts.getOptions().colors[10],
+                },
+              },
+              labels: {
+                style: {
+                  fontSize: subFontSize,
+                },
+              },
+              opposite: true,
+            },
+          ],
+          plotOptions: {
+            series: {
+              marker: false,
+            },
+          },
+          tooltip: {
+            shared: true,
+          },
+          series: chartInfo.rangeEnvChart,
+          credits: {
+            enabled: false,
+          },
+        });
+      }
+    </script>
+
+    <!-- FIXME: 시연용 1분 단위 ReDraw -->
+    <script>
+      function drawAllChart() {
+        drawSection1Chart();
+        drawSection2Chart();
+        drawSection3Chart();
+        drawSection4Chart();
+      }
+      drawAllChart();
+
+      $(document).ready(function() {
+        // FIXME: 1분에 한번씩 갱신 시연
+        // setInterval(drawAllChart, 1000 * 10);
+      });
+    </script>
+  </body>
+</html>
