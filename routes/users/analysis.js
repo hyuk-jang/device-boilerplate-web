@@ -10,6 +10,7 @@ const { BU } = require('base-util-jh');
 const defaultDom = require('../../models/domMaker/defaultDom');
 
 const commonUtil = require('../../models/templates/common.util');
+const webUtil = require('../../models/templates/web.util');
 
 const reportDom = require('../../models/domMaker/reportDom');
 const salternDom = require('../../models/domMaker/salternDom');
@@ -90,8 +91,9 @@ router.get(
     const searchRange = biModule.createSearchRange({
       searchType: 'range',
       searchInterval: 'day',
-      strStartDate: '2021-02-01',
-      strEndDate: '2021-02-18',
+      strStartDate: '2020-08-01',
+      // strEndDate: '2021-02-01',
+      strEndDate: '2020-12-31',
     });
 
     // BU.CLI(searchRange);
@@ -138,6 +140,8 @@ router.get(
     const mainRow = await weatherModel.getTableRow('main', mainWhere);
 
     // TODO: 인버터 데이터 추출
+    const inverterPowerRows = await analysisModel.getInverterPower(searchRange, [1]);
+    // BU.CLI(inverterPowerRows);
 
     // 기상청 날씨 추출(sky를 cloud로 환산처리 적용)
     const refineWeatherCastRows = await weatherModel.getRefineWeatherCast(searchRange, [
@@ -148,45 +152,133 @@ router.get(
 
     const solarPowerCalc = new SolarPowerCalc();
 
+    // BU.CLI(refineWeatherCastRows);
     // 일사량 예측
-    refineWeatherCastRows.forEach(wcRow => {
-      // wcRow.predictSolar = solarPowerCalc.getPredictSolar(wcRow);
-      solarPowerCalc.getPredictSolar(wcRow);
+    const moduleCount = 1;
+    const solarArrayCapacity = 33.3;
+    refineWeatherCastRows.forEach((wcRow, index) => {
+      // inverterPowerRows[index].predict = 'predict';
+      // inverterPowerRows[index].interval_power
+      wcRow.realDailyPowerKwh = _.get(inverterPowerRows[index], 'interval_power', '');
+      // wcRow.predict = 'predict';
+      wcRow.module_efficiency = 18.9;
+      wcRow.module_square = 1.63 * moduleCount;
+
+      const { horizontalSolar, inclinedSoalr } = solarPowerCalc.getPredictSolar(wcRow);
+
+      wcRow.horizontalSolar = horizontalSolar;
+      wcRow.inclinedSoalr = inclinedSoalr;
+
+      // _.forEach(solarPowerCalc.getPredictSolar(wcRow), (value, key) => {
+      //   wcRow[key] = value;
+      // });
+
+      // wcRow.solarRadiation = {
+      //   ...wcRow,
+      //   ...solarPowerCalc.getPredictSolar(wcRow),
+      // };
+
+      wcRow.predictDailyPower = solarPowerCalc.calcSolarPower(
+        inclinedSoalr,
+        solarArrayCapacity,
+      );
     });
 
-    // console.log(refineWeatherCastRows);
+    /** @type {lineChartConfig[]} */
+    const chartOptions = [
+      {
+        domId: 'test',
+        chartOption: {
+          // groupKey: 'predict',
+          dateKey: 'group_date',
+          selectKey: 'predictDailyPower',
+        },
+        yAxisList: [
+          {
+            yTitle: '발전량',
+            dataUnit: 'kWh',
+          },
+        ],
+        title: '실측 발전량',
+      },
+      {
+        domId: 'test2',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'realDailyPowerKwh',
+        },
+        yAxisList: [
+          {
+            yTitle: '발전량',
+            dataUnit: 'kWh',
+          },
+        ],
+        title: '계측 발전량',
+      },
+      {
+        domId: 'test2',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'inclinedSoalr',
+        },
+        yAxisList: [
+          {
+            yTitle: '실측 일사량',
+            dataUnit: 'gg',
+          },
+        ],
+      },
+    ];
 
-    /** @type {V_PW_PROFILE[]} */
-    const powerProfileRows = _.filter(viewPowerProfileRows, mainWhere);
-
-    // 인버터 사이트 목록 돔 추가
-    const inverterSiteDom = reportDom.makeInverterSiteDom(
-      powerProfileRows,
-      subCategoryId,
-      'cnt_target_name',
+    const chartList = chartOptions.map(opt =>
+      webUtil.makeDynamicLineChart(opt, refineWeatherCastRows.concat(inverterPowerRows)),
     );
 
-    _.set(req, 'locals.dom.subSelectBoxDom', inverterSiteDom);
+    // FIXME: 개좃같은 하아... 모르겟다 머하는 짓인지
+    const realChart = chartList[0];
 
-    // 인버터 Seq 목록
-    const inverterSeqList = [1];
-    // _(powerProfileRows)
-    //   .filter(_.isNumber(subCategoryId) ? { inverter_seq: subCategoryId } : null)
-    //   .map('inverter_seq')
-    //   .value();
+    realChart.series.push(chartList[1].series[0]);
 
-    /** @type {PW_INVERTER[]} */
-    const inverterRows = await analysisModel.getTable('PW_INVERTER', {
-      inverter_seq: inverterSeqList,
+    // chartList[2].series[0].yAxis = 1;
+    // realChart.series.push(chartList[2].series[0]);
+
+    // realChart.yAxis.push({
+    //   yTitle: '일사량',
+    //   dataUnit: 'Wh',
+    // });
+
+    const realCharts = [chartList[0]];
+
+    const domTemplate = _.template(`
+      <div class="lineChart_box default_area" id="<%= domId %>"></div>
+  `);
+
+    // 모든 센서 정보가 없다면 표시 하지 않음
+    realCharts.forEach(chartInfo => {
+      const { series = [] } = chartInfo;
+      series.every(seriesInfo => _.get(seriesInfo, 'data', []).length === 0) &&
+        (chartInfo.series = []);
     });
 
-    // const generalAnalysisRows = await analysisModel
-    //   .getGeneralReport(searchRange, siteId)
-    //   .filter(row => inverterSeqList.includes(row.inverter_seq));
+    const chartDomList = realCharts
+      .map(refinedChart =>
+        domTemplate({
+          domId: refinedChart.domId,
+        }),
+      )
+      .join('');
+
+    _.set(req, 'locals.dom.chartDomList', chartDomList);
+
+    _.set(req, 'locals.chartList', realCharts);
+
+    // BU.CLIN(req.locals);
+
+    res.render('./trend/trend', req.locals);
 
     // TODO: 기온, 일사량 추출
     // 효율 18.9%, 면적 1.613㎡, 개수 1EA로 하여 발전량 예측
-    res.send('hi');
+    // res.send('hi');
   }),
 );
 

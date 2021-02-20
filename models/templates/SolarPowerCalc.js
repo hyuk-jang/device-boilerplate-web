@@ -42,7 +42,7 @@ class SolarPowerCalc {
 
     testInfo.solarPower = _.multiply(solarPower, efficiency);
 
-    BU.CLI('다음날 발전 예측 ', testInfo);
+    // BU.CLI('다음날 발전 예측 ', testInfo);
   }
 
   /**
@@ -69,13 +69,7 @@ class SolarPowerCalc {
    * @param {predictSolarConfig} predictSolarConfig
    */
   getPredictSolar(predictSolarConfig) {
-    const {
-      group_date: sDate,
-      avg_cloud: cloud,
-      latitude,
-      temp,
-      windSpeed,
-    } = predictSolarConfig;
+    const { group_date: sDate, avg_cloud: cloud, latitude } = predictSolarConfig;
 
     const date = new Date(sDate);
     // 태양 적위 계산
@@ -87,31 +81,108 @@ class SolarPowerCalc {
     // 일조 시간 계산 (Duation Sunshine)
     const ds = this.calcDurationSunshine(pds, pdsScalage);
     // 일사량 계산
-    const solarRadiation = this.calcSolarRadiation(pds, ds, latitude, solarDeclination);
+    const horizontalSolar = this.calcSolarRadiation(pds, ds, latitude, solarDeclination);
 
-    return Object.assign(predictSolarConfig, {
-      pds,
-      pdsScalage,
-      ds,
-      solarRadiation,
-    });
+    const inclinedSoalr =
+      horizontalSolar *
+      this.getSolarLossRate({
+        angle: 30,
+        measureDate: sDate,
+      });
 
-    // return {
-    //   ...predictSolarConfig,
+    return {
+      horizontalSolar,
+      inclinedSoalr,
+    };
+
+    // return Object.assign(predictSolarConfig, {
     //   pds,
     //   pdsScalage,
     //   ds,
     //   solarRadiation,
-    // };
-
-    // return solarRadiation;
+    // });
   }
 
   /**
    *
-   * @param {*} predictConfig
+   * @param {Object} angleInfo
+   * @param {number=} angleInfo.angle 알고싶은 각도. Default 30도.
+   * @param {string} angleInfo.measureDate 계측 날짜
    */
-  getPredictPower(predictConfig) {}
+  getSolarLossRate(angleInfo) {
+    const { angle = 30, measureDate } = angleInfo;
+    const solarLossList = [
+      { a30: 104.2, a0: 72.41 },
+      { a30: 113.06, a0: 86.49 },
+      { a30: 142.23, a0: 123.57 },
+      { a30: 153.5, a0: 149.11 },
+      { a30: 155.78, a0: 163.97 },
+      { a30: 135.95, a0: 147.61 },
+      { a30: 130.71, a0: 139.99 },
+      { a30: 148.48, a0: 150.29 },
+      { a30: 135.97, a0: 125.12 },
+      { a30: 142.97, a0: 114.2 },
+      { a30: 107.04, a0: 76.98 },
+      { a30: 92.8, a0: 63.6 },
+    ];
+
+    const { a0, a30 } = solarLossList[BU.convertTextToDate(measureDate).getMonth()];
+
+    switch (angle) {
+      // 수평 일사량 대비 30도 일 경우 일사량 감소율
+      case 30:
+        return a30 / a0;
+      default:
+        return 1;
+    }
+  }
+
+  /**
+   * 발전량 예측
+   * @param {V_GENERAL_ANALYSIS[]} generalAnalysisRow
+   * @param {predictPowerConfig} predictPowerConfig
+   */
+  getPredictPower(generalAnalysisRow, regressionAnalysisInfo = {}) {
+    const betaRef = 0.0025;
+    const tRef = 25;
+
+    const dustLossRate = 0.95;
+
+    const {
+      avg_temp: outdoorTemp,
+      group_date: groupDate,
+      // 표준 모듈 효율(%)
+      module_efficiency: moduleEff,
+      // 모듈 총 면적
+      module_square: moduleSquare,
+      // 실측 발전량
+      t_power_kw: realPower,
+      solarRadiation: horizontalSolar,
+    } = generalAnalysisRow;
+
+    const solarLossRatio = this.getSolarLossRate({ measureDate: groupDate });
+
+    const inclineSoalr = horizontalSolar / solarLossRatio;
+
+    // 육상 모듈 온도 예측 치
+    const preEarthModuleTemp = outdoorTemp + 34 * (inclineSoalr / 1000);
+    // BU.CLIS(outdoorTemp, inclineSoalr, preEarthModuleTemp);
+    // const preEarthModuleTemp =
+    //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
+    //   34 * horizontalSolar;
+    // 육상 태양광 발전 효율 예측
+    const preEarthPowerEff = moduleEff * (1 - betaRef * (preEarthModuleTemp - tRef));
+    // 육상 태양광 발전량 예측
+    const preEarthPowerKw =
+      (preEarthPowerEff * horizontalSolar * moduleSquare * dustLossRate) / 100;
+    // const preEarthPowerKw =
+    //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
+    //   34 * horizontalSolar;
+
+    generalAnalysisRow.preEarthModuleTemp = _.round(preEarthModuleTemp, 4);
+    generalAnalysisRow.preEarthPowerEff = _.round(preEarthPowerEff, 4);
+    generalAnalysisRow.preEarthPowerKw = _.round(preEarthPowerKw, 4);
+  }
 
   // FIXME: 이름 생각
   // TODO: 발전 예측에 필요한 정보 객체 생성
@@ -141,39 +212,12 @@ class SolarPowerCalc {
   calcSolarDeclination(date) {
     const month = date.getMonth(); // 월
     const day = date.getDate();
-    // // 1월 1 일 이후로 경과 한 일수를 결정하십시오. 예를 들어, 1 월 1 일과 2 월 14 일 사이의 일 수는 44 일입니다.
-    // const startDate = moment(date);
-    // startDate.set({
-    //   month: 0,
-    //   day: 1,
-    //   hour: 0,
-    // });
 
-    // let diffDay = moment(date).diff(startDate, 'day');
-
-    // // 경과 일수에 10을 더합니다. 이 번호를 써라. 예제에 따라 44에 10을 더하면 54가됩니다.
-    // diffDay += 10;
-
-    // // 360 일을 일수로 나누십시오. 매년 윤년을 제외하고는 365 일이 걸립니다. 이 번호를 써라. 이 예에서 360을 365 = 0.9863으로 나눈 값입니다.
-    // const r1 = 0.9863;
-
-    // // 2 단계 (동지 이후 대략적인 일수)에 3 단계의 금액 (1 일 회전 수)을 곱하십시오. 결과를 기록하십시오. 이 예에서 54 배의.9863은 53.2603과 같습니다.
-    // const r2 = diffDay * r1;
-
-    // // 4 단계에서 얻은 결과의 코사인을 찾습니다. 지구 축의 기울기 인 -23.44를 곱합니다. 그 결과는 일년 중 그 날의 태양의 적위입니다. 이 예제에서 53.2603의 코사인은 0.5982입니다. -14.02도를 얻기 위해 -23.44를 곱하십시오.
-    // // console.log('18', r2, Math.cos(r2));
-    // // BU.CLIS(diffDay, r2, Math.cos(r2), this.convertToRadian(53.2603));
-    // const declination = Math.cos(this.convertToRadian(r2)) * -23.44;
-    // // const declination = Math.cos((r2 * Math.PI) / 180) * -23.44;
-
-    // 일
     // 태양적위 계산
     const solarDeclination = _.multiply(
       23.5,
-      Math.sin(this.convertToRadian(_.add(_.multiply(month - 3, 30), day - 21))),
+      Math.sin(this.convertToRadian(_.add(_.multiply(month - 2, 30), day - 21))),
     );
-
-    BU.CLIS(solarDeclination);
 
     return solarDeclination;
   }
@@ -272,8 +316,10 @@ class SolarPowerCalc {
    * @param {num} moduleCapacity  모듈 총 발전 용량 (W)
    */
   calcSolarPower(solarRadiation, moduleCapacity) {
-    const moduleDesignFactor = 0.8;
+    const moduleDesignFactor = 0.85;
     // 모듈 설계 계수 : 모듈 설계 특성으로 인해 손상되는 발전량 평균적인 계수
+
+    // BU.CLIS(solarRadiation, moduleCapacity);
 
     // 발전량(Wh) 계산
     return _.divide(

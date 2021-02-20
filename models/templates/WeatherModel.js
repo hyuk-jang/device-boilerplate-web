@@ -222,7 +222,7 @@ class WeatherModel extends BiModule {
               END cloud
         FROM wc_kma_data AS wkd
         WHERE applydate>= "${strStartDate}" AND applydate<"${strEndDate}"
-        AND DATE_FORMAT(applydate, '%H') > '06' AND DATE_FORMAT(applydate, '%H') < '20'
+        AND DATE_FORMAT(applydate, '%H') >= '06' AND DATE_FORMAT(applydate, '%H') <= '18'
             ${
               weatherLocationSeq.length
                 ? ` AND wkd.weather_location_seq IN (${weatherLocationSeq})`
