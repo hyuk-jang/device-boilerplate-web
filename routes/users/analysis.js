@@ -156,7 +156,7 @@ router.get(
     // 일사량 예측
     const moduleCount = 1;
     const solarArrayCapacity = 33.3;
-    const calcCapacity = 14;
+    const calcCapacity = 15;
     refineWeatherCastRows.forEach((wcRow, index) => {
       // inverterPowerRows[index].predict = 'predict';
       // inverterPowerRows[index].interval_power
@@ -232,36 +232,36 @@ router.get(
         ],
         title: '예측 발전량 2',
       },
-      {
-        domId: 'test3',
-        chartOption: {
-          dateKey: 'group_date',
-          selectKey: 'ds',
-        },
-        toFixed: 2,
-        yAxisList: [
-          {
-            yTitle: '발전량',
-            dataUnit: 'kWh',
-          },
-        ],
-        title: 'ds',
-      },
-      {
-        domId: 'test3',
-        chartOption: {
-          dateKey: 'group_date',
-          selectKey: 'pds',
-        },
-        toFixed: 2,
-        yAxisList: [
-          {
-            yTitle: '발전량',
-            dataUnit: 'kWh',
-          },
-        ],
-        title: 'ps',
-      },
+      // {
+      //   domId: 'test3',
+      //   chartOption: {
+      //     dateKey: 'group_date',
+      //     selectKey: 'ds',
+      //   },
+      //   toFixed: 2,
+      //   yAxisList: [
+      //     {
+      //       yTitle: '발전량',
+      //       dataUnit: 'kWh',
+      //     },
+      //   ],
+      //   title: 'ds',
+      // },
+      // {
+      //   domId: 'test3',
+      //   chartOption: {
+      //     dateKey: 'group_date',
+      //     selectKey: 'pds',
+      //   },
+      //   toFixed: 2,
+      //   yAxisList: [
+      //     {
+      //       yTitle: '발전량',
+      //       dataUnit: 'kWh',
+      //     },
+      //   ],
+      //   title: 'ps',
+      // },
       {
         domId: 'test2',
         chartOption: {
@@ -294,11 +294,11 @@ router.get(
     chartList[3].series[0].yAxis = 1;
     realChart.series.push(chartList[3].series[0]);
 
-    chartList[4].series[0].yAxis = 1;
-    realChart.series.push(chartList[4].series[0]);
+    // chartList[4].series[0].yAxis = 1;
+    // realChart.series.push(chartList[4].series[0]);
 
     // chartList[4].series[0].yAxis = 1;
-    realChart.series.push(chartList[5].series[0]);
+    // realChart.series.push(chartList[5].series[0]);
 
     // realChart.yAxis.push({
     //   yTitle: '일사량',

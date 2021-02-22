@@ -273,7 +273,9 @@ class SolarPowerCalc {
    * @param {num} pdsScalage  가조시간 감소율 (%)
    */
   calcDurationSunshine(pds, pdsScalage) {
-    return _.multiply(pds, _.divide(pdsScalage, 100));
+    const value = _.multiply(pds, _.divide(pdsScalage, 100));
+
+    return value < 0 ? 0 : value;
   }
 
   /**
