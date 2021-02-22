@@ -91,6 +91,8 @@ class SolarPowerCalc {
       });
 
     return {
+      pds,
+      ds,
       horizontalSolar,
       inclinedSoalr,
     };
@@ -155,26 +157,29 @@ class SolarPowerCalc {
       module_efficiency: moduleEff,
       // 모듈 총 면적
       module_square: moduleSquare,
-      // 실측 발전량
-      t_power_kw: realPower,
-      solarRadiation: horizontalSolar,
+      horizontalSolar,
     } = generalAnalysisRow;
 
     const solarLossRatio = this.getSolarLossRate({ measureDate: groupDate });
 
-    const inclineSoalr = horizontalSolar / solarLossRatio;
+    // const inclineSoalr = horizontalSolar;
+    const inclineSoalr = horizontalSolar * solarLossRatio;
 
     // 육상 모듈 온도 예측 치
-    const preEarthModuleTemp = outdoorTemp + 34 * (inclineSoalr / 1000);
+    const powerHour = 3.5;
+    // const preEarthModuleTemp = outdoorTemp + 34;
+    const preEarthModuleTemp = outdoorTemp + 34 * (inclineSoalr / powerHour / 1000);
+    // const preEarthModuleTemp = outdoorTemp + 34 * (inclineSoalr / 1000);
+
     // BU.CLIS(outdoorTemp, inclineSoalr, preEarthModuleTemp);
-    // const preEarthModuleTemp =
+    // const preEarthModuleTem'p =
     //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
     //   34 * horizontalSolar;
     // 육상 태양광 발전 효율 예측
     const preEarthPowerEff = moduleEff * (1 - betaRef * (preEarthModuleTemp - tRef));
     // 육상 태양광 발전량 예측
     const preEarthPowerKw =
-      (preEarthPowerEff * horizontalSolar * moduleSquare * dustLossRate) / 100;
+      (preEarthPowerEff * inclineSoalr * moduleSquare * dustLossRate) / 100 / 1000;
     // const preEarthPowerKw =
     //   0.98 * outdoorTemp * this.getSolarLossRate({ measureDate: groupDate }) +
     //   34 * horizontalSolar;
@@ -182,6 +187,8 @@ class SolarPowerCalc {
     generalAnalysisRow.preEarthModuleTemp = _.round(preEarthModuleTemp, 4);
     generalAnalysisRow.preEarthPowerEff = _.round(preEarthPowerEff, 4);
     generalAnalysisRow.preEarthPowerKw = _.round(preEarthPowerKw, 4);
+
+    // BU.CLI(preEarthPowerKw);
   }
 
   // FIXME: 이름 생각

@@ -577,6 +577,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       name: title,
       data: [],
       type: hasArea && 'area',
+      color: colorKey,
       yAxis: 0,
       tooltip: {
         valueSuffix: ` ${yAxisInfo.dataUnit}`,

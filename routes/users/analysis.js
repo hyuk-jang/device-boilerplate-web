@@ -80,21 +80,21 @@ router.get(
 
     // BU.CLI(req.query);
 
-    // // SQL 질의를 위한 검색 정보 옵션 객체 생성
-    // const searchRange = biModule.createSearchRange({
-    //   searchType,
-    //   searchInterval,
-    //   searchOption,
-    //   strStartDate: strStartDateInputValue,
-    //   strEndDate: strEndDateInputValue,
-    // });
+    // SQL 질의를 위한 검색 정보 옵션 객체 생성
     const searchRange = biModule.createSearchRange({
-      searchType: 'range',
-      searchInterval: 'day',
-      strStartDate: '2020-08-01',
-      // strEndDate: '2021-02-01',
-      strEndDate: '2020-12-31',
+      searchType,
+      searchInterval,
+      searchOption,
+      strStartDate: strStartDateInputValue,
+      strEndDate: strEndDateInputValue,
     });
+    // const searchRange = biModule.createSearchRange({
+    //   searchType: 'range',
+    //   searchInterval: 'day',
+    //   strStartDate: '2020-04-01',
+    //   strEndDate: '2020-05-30',
+    //   // strEndDate: '2020-12-31',
+    // });
 
     // BU.CLI(searchRange);
 
@@ -156,43 +156,42 @@ router.get(
     // 일사량 예측
     const moduleCount = 1;
     const solarArrayCapacity = 33.3;
+    const calcCapacity = 14;
     refineWeatherCastRows.forEach((wcRow, index) => {
       // inverterPowerRows[index].predict = 'predict';
       // inverterPowerRows[index].interval_power
-      wcRow.realDailyPowerKwh = _.get(inverterPowerRows[index], 'interval_power', '');
+      // wcRow.realDailyPowerKwh = _.get(inverterPowerRows[index], 'interval_power', '');
+      wcRow.realDailyPowerKwh =
+        (_.get(inverterPowerRows[index], 'interval_power', '') / calcCapacity) * 0.3;
       // wcRow.predict = 'predict';
       wcRow.module_efficiency = 18.9;
       wcRow.module_square = 1.63 * moduleCount;
 
-      const { horizontalSolar, inclinedSoalr } = solarPowerCalc.getPredictSolar(wcRow);
+      const { ds, pds, horizontalSolar, inclinedSoalr } = solarPowerCalc.getPredictSolar(
+        wcRow,
+      );
 
+      wcRow.ds = ds;
+      wcRow.pds = pds;
       wcRow.horizontalSolar = horizontalSolar;
       wcRow.inclinedSoalr = inclinedSoalr;
 
-      // _.forEach(solarPowerCalc.getPredictSolar(wcRow), (value, key) => {
-      //   wcRow[key] = value;
-      // });
-
-      // wcRow.solarRadiation = {
-      //   ...wcRow,
-      //   ...solarPowerCalc.getPredictSolar(wcRow),
-      // };
-
-      wcRow.predictDailyPower = solarPowerCalc.calcSolarPower(
-        inclinedSoalr,
-        solarArrayCapacity,
-      );
+      // 일사량 * 0.85 * 용량
+      wcRow.predictDailyPower = solarPowerCalc.calcSolarPower(inclinedSoalr, 0.3);
+      // 발전량 예측
+      // wcRow.predictDailyPower2 = solarPowerCalc.getPredictPower(wcRow);
+      solarPowerCalc.getPredictPower(wcRow);
     });
 
     /** @type {lineChartConfig[]} */
     const chartOptions = [
       {
-        domId: 'test',
+        domId: 'test1',
         chartOption: {
-          // groupKey: 'predict',
           dateKey: 'group_date',
-          selectKey: 'predictDailyPower',
+          selectKey: 'realDailyPowerKwh',
         },
+        toFixed: 2,
         yAxisList: [
           {
             yTitle: '발전량',
@@ -202,31 +201,82 @@ router.get(
         title: '실측 발전량',
       },
       {
-        domId: 'test2',
+        domId: 'test',
         chartOption: {
+          // groupKey: 'predict',
           dateKey: 'group_date',
-          selectKey: 'realDailyPowerKwh',
+          selectKey: 'predictDailyPower',
         },
+        toFixed: 2,
         yAxisList: [
           {
             yTitle: '발전량',
             dataUnit: 'kWh',
           },
         ],
-        title: '계측 발전량',
+        title: '예측 발전량',
+      },
+
+      {
+        domId: 'test3',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'preEarthPowerKw',
+        },
+        toFixed: 2,
+        yAxisList: [
+          {
+            yTitle: '발전량',
+            dataUnit: 'kWh',
+          },
+        ],
+        title: '예측 발전량 2',
+      },
+      {
+        domId: 'test3',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'ds',
+        },
+        toFixed: 2,
+        yAxisList: [
+          {
+            yTitle: '발전량',
+            dataUnit: 'kWh',
+          },
+        ],
+        title: 'ds',
+      },
+      {
+        domId: 'test3',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'pds',
+        },
+        toFixed: 2,
+        yAxisList: [
+          {
+            yTitle: '발전량',
+            dataUnit: 'kWh',
+          },
+        ],
+        title: 'ps',
       },
       {
         domId: 'test2',
         chartOption: {
           dateKey: 'group_date',
-          selectKey: 'inclinedSoalr',
+          selectKey: 'horizontalSolar',
+          colorKey: 'red',
         },
+        toFixed: 2,
         yAxisList: [
           {
             yTitle: '실측 일사량',
-            dataUnit: 'gg',
+            dataUnit: 'Wh/㎡',
           },
         ],
+        title: '예측 일사량',
       },
     ];
 
@@ -235,12 +285,20 @@ router.get(
     );
 
     // FIXME: 개좃같은 하아... 모르겟다 머하는 짓인지
+    chartList[0].series[0].yAxis = 0;
     const realChart = chartList[0];
 
     realChart.series.push(chartList[1].series[0]);
+    realChart.series.push(chartList[2].series[0]);
 
-    // chartList[2].series[0].yAxis = 1;
-    // realChart.series.push(chartList[2].series[0]);
+    chartList[3].series[0].yAxis = 1;
+    realChart.series.push(chartList[3].series[0]);
+
+    chartList[4].series[0].yAxis = 1;
+    realChart.series.push(chartList[4].series[0]);
+
+    // chartList[4].series[0].yAxis = 1;
+    realChart.series.push(chartList[5].series[0]);
 
     // realChart.yAxis.push({
     //   yTitle: '일사량',

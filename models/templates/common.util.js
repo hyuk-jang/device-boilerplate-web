@@ -37,8 +37,14 @@ exports.addComma = value => {
  * @param {string|Date} date
  */
 function convertDateToUTC(date) {
-  date = date instanceof Date ? date : new Date(date).toISOString();
-  return Date.parse(date);
+  date = date instanceof Date ? date : BU.convertTextToDate(date);
+  return Date.parse(date.addHours(9));
+
+  // date = date instanceof Date ? date : moment(date);
+
+  // const parseDate = Date.parse(date);
+
+  // return Date.parse(date).addHours(9);
 }
 exports.convertDateToUTC = convertDateToUTC;
 
