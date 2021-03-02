@@ -32,16 +32,16 @@ const DEFAULT_CATEGORY = 'efficiency';
 const subCategoryList = [
   {
     subCategory: 'efficiency',
-    btnName: '효율분석',
+    btnName: '발전 예측 분석',
   },
-  {
-    subCategory: 'prediction',
-    btnName: '발전분석',
-  },
-  {
-    subCategory: 'powerPrediction',
-    btnName: '발전 예측 및 분석',
-  },
+  // {
+  //   subCategory: 'prediction',
+  //   btnName: '발전분석',
+  // },
+  // {
+  //   subCategory: 'powerPrediction',
+  //   btnName: '발전 예측 및 분석',
+  // },
 ];
 
 const colorTable1 = ['greenyellow', 'violet', 'gold', 'aliceblue'];
@@ -139,14 +139,31 @@ router.get(
     /** @type {MAIN} */
     const mainRow = await weatherModel.getTableRow('main', mainWhere);
 
+    // 구하고자 하는 데이터와 실제 날짜와 매칭시킬 날짜 목록
+    const strGroupDateList = commonUtil.getGroupDateList(searchRange);
+
+    // 모든 날짜 목록을 순회하면서 빈 데이터 목록 생성
+    const emptyDataRows = _.map(strGroupDateList, strGroupDate => ({
+      group_date: strGroupDate,
+    }));
+
     // TODO: 인버터 데이터 추출
-    const inverterPowerRows = await analysisModel.getInverterPower(searchRange, [1]);
+    const inverterRows = await analysisModel.getInverterPower(searchRange, [1]);
     // BU.CLI(inverterPowerRows);
+    const inverterPowerRows = _(inverterRows)
+      .unionBy(emptyDataRows, 'group_date')
+      .sortBy('group_date')
+      .value();
 
     // 기상청 날씨 추출(sky를 cloud로 환산처리 적용)
-    const refineWeatherCastRows = await weatherModel.getRefineWeatherCast(searchRange, [
+    const weatherCastRows = await weatherModel.getRefineWeatherCast(searchRange, [
       mainRow.weather_location_seq,
     ]);
+
+    const refineWeatherCastRows = _(weatherCastRows)
+      .unionBy(emptyDataRows, 'group_date')
+      .sortBy('group_date')
+      .value();
 
     // const weatherDeviceRows = await weatherModel.getWeatherTrend(searchRange, siteId);
 
@@ -156,13 +173,29 @@ router.get(
     // 일사량 예측
     const moduleCount = 1;
     const solarArrayCapacity = 33.3;
-    const calcCapacity = 15;
+    const calcCapacity = 33.3;
+
+    // 최소 유지 전력
+    const minimumBattery = 0.9;
+    // 배터리 초기값
+    const startRemainBattery = 2.3;
+    // const realRemainBattery = _.random(1.5, 2.5, true)
+
+    // refineWeatherCastRows[0].prevRealRemainBattery = startRemainBattery;
+
     refineWeatherCastRows.forEach((wcRow, index) => {
+      let prevRealRemainBattery = 0;
+      if (index !== 0) {
+        prevRealRemainBattery = refineWeatherCastRows[index - 1].realRemainBattery;
+      } else {
+        prevRealRemainBattery = startRemainBattery;
+      }
       // inverterPowerRows[index].predict = 'predict';
       // inverterPowerRows[index].interval_power
       // wcRow.realDailyPowerKwh = _.get(inverterPowerRows[index], 'interval_power', '');
+      const intervalPower = _.get(inverterPowerRows[index], 'interval_power', '');
       wcRow.realDailyPowerKwh =
-        (_.get(inverterPowerRows[index], 'interval_power', '') / calcCapacity) * 0.3;
+        intervalPower === '' ? '' : (intervalPower / calcCapacity) * 0.3;
       // wcRow.predict = 'predict';
       wcRow.module_efficiency = 18.9;
       wcRow.module_square = 1.63 * moduleCount;
@@ -181,6 +214,29 @@ router.get(
       // 발전량 예측
       // wcRow.predictDailyPower2 = solarPowerCalc.getPredictPower(wcRow);
       solarPowerCalc.getPredictPower(wcRow);
+
+      // 예측 가용 배터리 (잔여 리얼 배터리 + 예측 배터리) - 최소 유지 배터리
+      const predictAbleBattery =
+        prevRealRemainBattery + wcRow.predictDailyPower - minimumBattery;
+
+      // 일 전력 소비 예측(kW)
+      const { mode, dailyConsumptionPower } = solarPowerCalc.getBatteryScenario(
+        predictAbleBattery,
+      );
+
+      wcRow.mode = mode;
+
+      // 예측 배터리 잔량 (이전 실측 배터리 + 예측 발전량 - 일 전력 소비 예측)
+      const predictRemainBattery =
+        prevRealRemainBattery + wcRow.predictDailyPower - dailyConsumptionPower;
+
+      // 실측 배터리 잔량(배터리 하한선 ? 배터리 잔량 소비 패턴 적용 : 예측 배터리 잔량)
+      wcRow.realRemainBattery =
+        predictRemainBattery < minimumBattery
+          ? minimumBattery - (minimumBattery - predictRemainBattery) / 7
+          : predictRemainBattery;
+
+      wcRow.realRemainBatteryPercent = (wcRow.realRemainBattery / 3) * 100;
     });
 
     /** @type {lineChartConfig[]} */
@@ -198,25 +254,8 @@ router.get(
             dataUnit: 'kWh',
           },
         ],
-        title: '실측 발전량',
+        title: '소비전력 최적화 운영',
       },
-      {
-        domId: 'test',
-        chartOption: {
-          // groupKey: 'predict',
-          dateKey: 'group_date',
-          selectKey: 'predictDailyPower',
-        },
-        toFixed: 2,
-        yAxisList: [
-          {
-            yTitle: '발전량',
-            dataUnit: 'kWh',
-          },
-        ],
-        title: '예측 발전량',
-      },
-
       {
         domId: 'test3',
         chartOption: {
@@ -230,54 +269,57 @@ router.get(
             dataUnit: 'kWh',
           },
         ],
-        title: '예측 발전량 2',
+        title: '예측 발전량',
       },
-      // {
-      //   domId: 'test3',
-      //   chartOption: {
-      //     dateKey: 'group_date',
-      //     selectKey: 'ds',
-      //   },
-      //   toFixed: 2,
-      //   yAxisList: [
-      //     {
-      //       yTitle: '발전량',
-      //       dataUnit: 'kWh',
-      //     },
-      //   ],
-      //   title: 'ds',
-      // },
-      // {
-      //   domId: 'test3',
-      //   chartOption: {
-      //     dateKey: 'group_date',
-      //     selectKey: 'pds',
-      //   },
-      //   toFixed: 2,
-      //   yAxisList: [
-      //     {
-      //       yTitle: '발전량',
-      //       dataUnit: 'kWh',
-      //     },
-      //   ],
-      //   title: 'ps',
-      // },
       {
-        domId: 'test2',
+        domId: 'test3',
         chartOption: {
           dateKey: 'group_date',
-          selectKey: 'horizontalSolar',
-          colorKey: 'red',
+          selectKey: 'mode',
+        },
+        toFixed: 0,
+        yAxisList: [
+          {
+            yTitle: '운영시나리오',
+            dataUnit: '',
+            yAxis: 1,
+          },
+        ],
+        title: '운영시나리오',
+      },
+      {
+        domId: 'test3',
+        chartOption: {
+          dateKey: 'group_date',
+          selectKey: 'realRemainBatteryPercent',
         },
         toFixed: 2,
         yAxisList: [
           {
-            yTitle: '실측 일사량',
-            dataUnit: 'Wh/㎡',
+            yTitle: '배터리 잔여량',
+            dataUnit: '%',
+            yAxis: 2,
           },
         ],
-        title: '예측 일사량',
+        title: '배터리 잔여량',
       },
+      // {
+      //   domId: 'test2',
+      //   chartOption: {
+      //     dateKey: 'group_date',
+      //     selectKey: 'horizontalSolar',
+      //     colorKey: 'red',
+      //   },
+      //   toFixed: 2,
+      //   yAxisList: [
+      //     {
+      //       yTitle: '실측 일사량',
+      //       dataUnit: 'Wh/㎡',
+      //       yAxis: 3,
+      //     },
+      //   ],
+      //   title: '예측 일사량',
+      // },
     ];
 
     const chartList = chartOptions.map(opt =>
@@ -289,8 +331,9 @@ router.get(
     const realChart = chartList[0];
 
     realChart.series.push(chartList[1].series[0]);
-    realChart.series.push(chartList[2].series[0]);
 
+    chartList[2].series[0].yAxis = 1;
+    realChart.series.push(chartList[2].series[0]);
     chartList[3].series[0].yAxis = 1;
     realChart.series.push(chartList[3].series[0]);
 

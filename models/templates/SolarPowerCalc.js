@@ -46,6 +46,53 @@ class SolarPowerCalc {
   }
 
   /**
+   *
+   * @param {number} ableBattery kW
+   */
+  getBatteryScenario(ableBattery) {
+    if (ableBattery > 3) {
+      return {
+        mode: 1,
+        dailyConsumptionPower: 2.7,
+      };
+    }
+    if (ableBattery > 2.5) {
+      return {
+        mode: 2,
+        dailyConsumptionPower: 2.41,
+      };
+    }
+    if (ableBattery > 2) {
+      return {
+        mode: 3,
+        dailyConsumptionPower: 1.98,
+      };
+    }
+    if (ableBattery > 1.5) {
+      return {
+        mode: 4,
+        dailyConsumptionPower: 1.44,
+      };
+    }
+    if (ableBattery > 1) {
+      return {
+        mode: 5,
+        dailyConsumptionPower: 1.035,
+      };
+    }
+    if (ableBattery > 0.5) {
+      return {
+        mode: 6,
+        dailyConsumptionPower: 0.48,
+      };
+    }
+    return {
+      mode: 7,
+      dailyConsumptionPower: 0.15,
+    };
+  }
+
+  /**
    * 일사량 예측 필요 정보
    * @typedef {Object} predictSolarConfig
    * @property {string} group_date 계측 일자
