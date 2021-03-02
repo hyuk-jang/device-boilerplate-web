@@ -186,6 +186,7 @@
   const CF_FLOW = 'FLOW';
   const CF_SCENARIO = 'SCENARIO';
 
+  // 명령 형식 존재 여부에 따라 Select 초기화
   function initCmdFormatSel() {
     const $cmdFormatSel = $('#cmdFormatSel');
 
@@ -248,8 +249,8 @@
       // 목표 추가 관련 이벤트 바인딩
       initAddCmdGoalEvent();
 
-      document.querySelector('#deviceCateSel').dispatchEvent(new Event('change'));
       // 초기 값 이벤트 발생 트리거
+      document.querySelector('#deviceCateSel').dispatchEvent(new Event('change'));
     }
   }
 
@@ -291,7 +292,7 @@
     }
 
     let limitTimeErrMsg = '';
-    // TODO: 달성 목표 추가 (cmdGoal)
+    // 달성 목표 추가 (cmdGoal)
     var limitTimeSec = _.chain(document.getElementById('limitTime'))
       .get('children', [])
       .filter(limitEleDom => typeof limitEleDom.dataset.limitTime === 'string')
@@ -592,7 +593,9 @@
 
 <script>
   $(document).ready(() => {
+    // 단일 명령, 설정 명령, 흐름 명령, 시나리오 명령에 관한 동적 돔 생성
     initAddControlChangeEvent();
+    // 명령 형식 존재 여부에 따라 Select 초기화
     initCmdFormatSel();
 
     // if (document.querySelector('#addCmdGoalBtn') !== null) {

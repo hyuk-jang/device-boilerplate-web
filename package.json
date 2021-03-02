@@ -20,6 +20,7 @@
     "build:win": "pkg . --out-path dist --targets node8-win-x64",
     "build:linux": "pkg . --out-path dist --targets node8-linux-x64",
     "build:macos": "pkg . --out-path dist --targets node8-macos-x64",
+    "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json",
     "fix-code": "prettier-eslint --write 'src/**/*.{js,jsx}' ",
     "fix-styles": "prettier-stylelint --write 'public/**/*.{css,scss}' ",
     "forever": "forever start --minUptime 5000 --spinSleepTime 2000 -a bin/www.js"

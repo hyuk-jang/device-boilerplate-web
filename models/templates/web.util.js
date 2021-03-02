@@ -577,7 +577,7 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       name: title,
       data: [],
       type: hasArea && 'area',
-      yAxis: 0,
+      yAxis: yAxisInfo.yAxis ?? 0,
       tooltip: {
         valueSuffix: ` ${yAxisInfo.dataUnit}`,
       },
@@ -587,16 +587,12 @@ function makeDynamicLineChart(lineChartConfig, dataRows) {
       .groupBy(dateKey)
       .toPairs() // [[date, [[data], [data], [data]]], ...]
       .sortBy() // 날짜 오름 차순 정렬
-      .map(pairList => [
-        commonUtil.convertDateToUTC(_.head(pairList)),
-        _.chain(_.nth(pairList, 1))
-          .map(selectKey)
-          .sum()
-          .multiply(scale)
-          .round(toFixed)
-          .value(),
-        // _.round(_.sum(_.map(_.nth(pairList, 1), selectKey)), 1),
-      ])
+      .map(pairList => {
+        const utc = commonUtil.convertDateToUTC(_.head(pairList));
+        const selectValues = _.chain(_.nth(pairList, 1)).map(selectKey).value();
+
+        return [utc, _.chain(selectValues).sum().multiply(scale).round(toFixed).value()];
+      })
       .value();
 
     refinedLineChart.series.push(chartSeries);
