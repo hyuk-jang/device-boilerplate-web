@@ -7,7 +7,6 @@
   },
   "pkg": {
     "assets": [
-      "node_modules/nanoid/**/*",
       "docs/**/*",
       "views/**/*",
       "maps/**/*",
@@ -17,9 +16,9 @@
   "scripts": {
     "start": "nodemon --trace-warnings --ignore \"public/*\" ./bin/www.js",
     "build": "pkg . --out-path dist",
-    "build:win": "pkg . --out-path dist --targets node8-win-x64",
-    "build:linux": "pkg . --out-path dist --targets node8-linux-x64",
-    "build:macos": "pkg . --out-path dist --targets node8-macos-x64",
+    "build:win": "pkg . --out-path dist --targets node14-win-x64",
+    "build:linux": "pkg . --out-path dist --targets node14-linux-x64",
+    "build:macos": "pkg . --out-path dist --targets node14-macos-x64",
     "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json",
     "fix-code": "prettier-eslint --write 'src/**/*.{js,jsx}' ",
     "fix-styles": "prettier-stylelint --write 'public/**/*.{css,scss}' ",
