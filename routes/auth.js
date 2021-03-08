@@ -42,9 +42,10 @@ router.get(
 
     /** @type {MAIN} */
     const mainList = await biAuth.getTable('MAIN', whereInfo);
-    const placeList = _.map(mainList, mainInfo => {
-      return { name: mainInfo.name, mainSeq: mainInfo.main_seq };
-    });
+    const placeList = _.map(mainList, mainInfo => ({
+      name: mainInfo.name,
+      mainSeq: mainInfo.main_seq,
+    }));
     // BU.CLI(placeList);
 
     _.set(req, 'locals.placeList', placeList);

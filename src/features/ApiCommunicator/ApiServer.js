@@ -59,7 +59,6 @@ class ApiServer extends AbstApiServer {
             // 2. Field -> 서버로 보내온 메시지 일 수 있음.
             /** @type {defaultFormatToRequest|defaultFormatToResponse} */
             const fieldMessage = JSON.parse(strData);
-            // BU.CLI(fieldMessage);
 
             const responseDataByServer = this.interpretData(socket, fieldMessage);
 
@@ -462,6 +461,7 @@ class ApiServer extends AbstApiServer {
    * @param {contractCmdInfo[]} fieldCmdList
    */
   async compareCommandList(msInfo, fieldCmdList = []) {
+    // BU.CLI(fieldCmdList);
     // Data Logger에서 보내온 List를 전부 적용해버림
     this.updateFieldEvent({
       key: 'currCommand',

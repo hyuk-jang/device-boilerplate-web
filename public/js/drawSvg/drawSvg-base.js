@@ -1,8 +1,3 @@
-/* eslint-disable no-restricted-globals */
-/* eslint-disable no-alert */
-var _ = _;
-var $ = $;
-var SVG = SVG;
 /** @type {mDeviceMap} */
 const realMap = map || {};
 
@@ -16,9 +11,14 @@ const BASE = {
   },
 };
 
-const DATA_RANGE = {
-  TRUE: ['OPEN', 'OPENING', 'ON', '1', 'FOLD', 'AUTO', 'A'],
-  FALSE: ['CLOSE', 'CLOSING', 'OFF', '0', 'UNFOLD', 'MANUAL', 'M'],
+/** 데이터 목표 기준치 범위  */
+const goalDR = {
+  /** 기준 값 초과 */
+  UPPER: 'UPPER',
+  /** 기준 값 동일 */
+  EQUAL: 'EQUAL',
+  /** 기준 값 이하  */
+  LOWER: 'LOWER',
 };
 
 const SENSOR_TYPE = {
@@ -83,11 +83,6 @@ const mdCmdStorage = new Map();
 /** @type {Map<string, mConvertRelationInfo>} (key: ndId) */
 const mdConvertStorage = new Map();
 
-// /** @type {Map<string, mdConvertInfo>} key: nodeDefId */
-// const mdConvertStorage = new Map();
-
-// console.log(nodeStructureList);
-
 /**
  * 장치 제어 식별 Map 생성
  * @param {mSingleMiddleCmdInfo} dCmdScenarioInfo
@@ -150,7 +145,7 @@ function setCmdStorage(cmdFormat, cmdId, cmdName, svgNodePosOpt) {
 }
 
 /**
- * Map 초기화 진행
+ * (index.html에서 호출)  Map 초기화 진행
  * Map<placeId, mdPlaceInfo>, Map<nodeId, mdNodeInfo> 생성
  * @param {boolean} isProd Map Relation 이 맞지 않더라도 진행할지 여부. (Map Position을 잡기 위해서 필요함)
  */
@@ -186,9 +181,8 @@ function initDrawSvg(isProd = true) {
           nodeList = [],
           svgPositionInfo: { point, resourceId } = {},
         } = pInfo;
-        // Place ID 정의
 
-        // // svgPositionInfo 정보가 없다면 추가하지 않음
+        // svgPositionInfo 정보가 없다면 추가하지 않음
         if (isProd && resourceId === undefined) {
           return mdPlaceRelationStorage.has(pcId) && mdPlaceRelationStorage.delete(pcId);
         }
@@ -230,12 +224,11 @@ function initDrawSvg(isProd = true) {
       target_id: ncId,
       target_name: ncName,
       data_unit: dataUnit,
+      svgViewInfo: ncSvgViewInfo,
       operationStatusList = [],
     } = nClassInfo;
 
     mdNodeClassStorage.set(ncId, []);
-
-    // console.log('ncId', ncId);
 
     nodeDefList.forEach(nDefInfo => {
       const {
@@ -243,6 +236,7 @@ function initDrawSvg(isProd = true) {
         target_id: ndId,
         target_prefix: ndPrefix,
         target_name: ndName = ncName,
+        svgViewInfo: ndSvgViewInfo = ncSvgViewInfo,
       } = nDefInfo;
 
       nodeList.forEach(nodeInfo => {
@@ -252,6 +246,7 @@ function initDrawSvg(isProd = true) {
           modbusInfo,
           svgNodePosOpt = {},
           svgNodePosOpt: { resourceId, axisScale, moveScale } = {},
+          svgViewInfo: nSvgViewInfo = ndSvgViewInfo,
         } = nodeInfo;
 
         let { svgNodePosOpt: { placeId } = {} } = nodeInfo;
@@ -302,6 +297,7 @@ function initDrawSvg(isProd = true) {
           moveScale,
           point: [],
           placeIdList,
+          svgViewInfo: nSvgViewInfo,
           operationStatusList,
           placeNameList: placeIdList.map(pId => mdPlaceStorage.get(pId).placeName),
           svgModelResource: mdMapStorage.get(resourceId),
@@ -453,6 +449,7 @@ function drawInsideElement(svgDrawInfo, drawType) {
     },
     ownerInfo,
     ownerInfo: {
+      isSensor,
       svgModelResource: {
         elementDrawInfo,
         elementDrawInfo: {
@@ -470,7 +467,7 @@ function drawInsideElement(svgDrawInfo, drawType) {
               fontSize: headerFontSize = 10,
             } = {},
             bodyInfo: {
-              fontColor: bodyFontColor = '#fff',
+              fontColor: [bodyFontColor = '#fff'],
               fontSize: bodyFontSize = 10,
               unitColor = '#fff',
               tblInfo: {
@@ -535,10 +532,10 @@ function drawInsideElement(svgDrawInfo, drawType) {
     ownerInfo.svgEleName.text(positionName);
   }
 
-  const bodyStartY = y1 + headerHeight;
+  const bodyStartY = _.round(y1 + headerHeight, 2);
   // Body 정보에 따라 Draw Rect
-  const bodyHeight = height - headerHeight;
-  // console.log('@@', positionId, height, headerHeight);
+  const bodyHeight = _.round(height - headerHeight, 2);
+
   const bodyCanvasElement = svgCanvas.rect(width, bodyHeight);
 
   const bodyOption = {
@@ -555,7 +552,7 @@ function drawInsideElement(svgDrawInfo, drawType) {
   if (drawType === DRAW_TYPE.NODE) {
     defaultColor = errColor;
     defaultColor && bodyCanvasElement.fill(defaultColor);
-    // bodyOption.cursor = 'pointer';
+    isSensor === SENSOR_TYPE.DEVICE && _.set(bodyOption, 'cursor', 'pointer');
   }
 
   // Body 영역에 Draw Text
@@ -598,10 +595,9 @@ function drawInsideElement(svgDrawInfo, drawType) {
     ownerInfo.svgEleTbls = Array(rowsCount)
       .fill(bodyStartY)
       .map((v, idx) => {
-        const yPoint = bodyStartY + lineHeight * idx;
+        const yPoint = _.round(bodyStartY + lineHeight * idx, 2);
         const yFontPoint = _.round(yPoint + lineHeight * 0.5, 2);
 
-        // console.log(yFontPoint);
         // Text 객체 생성
         const rowSvgInfo = {};
 
@@ -614,7 +610,7 @@ function drawInsideElement(svgDrawInfo, drawType) {
                 .tspan('')
                 .font({ fill: tblTitleFontColor, size: bodyFontSize });
             })
-            .move(x1 + width * tblTitleScale, yFontPoint)
+            .move(_.round(x1 + width * tblTitleScale, 2), yFontPoint)
             .font({ ...fontOption, anchor: tblTitleAnchor })
             .dy(_.round(bodyFontSize * 0.1, 2));
         }
@@ -633,12 +629,12 @@ function drawInsideElement(svgDrawInfo, drawType) {
               .dy(_.round(bodyFontSize * 0.05, 2))
               .dx(_.round(bodyFontSize * 0.4, 2));
           })
-          .move(x1 + width * tblDataScale, yFontPoint)
+          .move(_.round(x1 + width * tblDataScale, 2), yFontPoint)
           .font({ ...fontOption, anchor: tblDataAnchor });
 
         // Draw Horizontal Line (여기서 TH 라인까지 다 그어버림. 수정시 idx 1부터 처리)
         svgCanvas
-          .line(x1, yPoint, x1 + width, yPoint)
+          .line(x1, yPoint, _.round(x1 + width), yPoint)
           .stroke(strokeInfo)
           .attr(headerOption);
 
@@ -646,9 +642,9 @@ function drawInsideElement(svgDrawInfo, drawType) {
       });
     // 수직 선
     if (vStrokeScale > 0) {
-      const xPoint = x1 + width * vStrokeScale;
+      const xPoint = _.round(x1 + width * vStrokeScale, 2);
       svgCanvas
-        .line(xPoint, bodyStartY, xPoint, bodyStartY + bodyHeight)
+        .line(xPoint, bodyStartY, xPoint, _.round(bodyStartY + bodyHeight, 2))
         .stroke(strokeInfo)
         .attr(headerOption);
     }
@@ -708,6 +704,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
     },
     ownerInfo,
     ownerInfo: {
+      isSensor,
       svgModelResource: {
         type: elementType,
         elementDrawInfo,
@@ -753,17 +750,14 @@ function drawSvgElement(svgDrawInfo, drawType) {
       bgOption.class = drawType === DRAW_TYPE.NODE ? errColor : defaultSvgClass;
     }
 
+    isSensor === SENSOR_TYPE.DEVICE && _.set(bgOption, 'cursor', 'pointer');
     defaultColor = drawType === DRAW_TYPE.NODE ? errColor : defaultColor;
-  } else {
-    // defaultColor = 'transparent';
   }
 
   // 필터 정보가 있다면 Attr 추가 정의
   _.forEach(filterInfo, (attrValue, attrKey) => {
     bgOption[attrKey] = attrValue;
   });
-
-  // console.log(bgOption);
 
   let svgCanvasBgElement;
   // 기본 색상 재정의
@@ -816,7 +810,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
     strokeInfo && svgCanvasBgElement.stroke(strokeInfo);
   }
 
-  // TODO: insideInfo 정보가 있을 경우 Draw
+  // insideInfo 정보가 있을 경우 Draw
   if (insideInfo !== undefined) {
     const bodyCanvasElement = drawInsideElement(svgDrawInfo, drawType);
     return bodyCanvasElement;
@@ -824,10 +818,6 @@ function drawSvgElement(svgDrawInfo, drawType) {
 
   // mdNodeInfo|mdPlaceInfo 에 SVG BG 정의
   ownerInfo.svgEleBg = svgCanvasBgElement;
-
-  // if (positionId === 'AREA_ALA_MOD_OT') {
-  //   console.log('@@@@@@@@', ownerInfo.svgEleBg);
-  // }
 
   // tSpan을 그리기 위한 SVG 생성 정보
   const {
@@ -856,9 +846,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
   const movePointX = fontSize * tMoveScaleX;
   const movePointY = fontSize * tMoveScaleY;
   // 데이터를 [좌: 타이틀, 우: 데이터] 로 배치할 경우 배경 데이터 공간을 기준으로 text 각각 생성
-  // if (!(isTitleWrap || isHiddenTitle) && drawType !== DRAW_TYPE.PLACE) {
   if ((isTitleWrap || isHiddenTitle) && drawType !== DRAW_TYPE.PLACE) {
-    // const yAxisPoint = y1 + svgModelHeight * tAxisScaleY + fontSize * 0.1 + movePointY;
     const yAxisPoint = y1 + svgModelHeight * tAxisScaleY + movePointY;
     // Title 생성
     if (!isHiddenTitle) {
@@ -897,7 +885,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
           if (drawType === DRAW_TYPE.NODE) {
             // console.log(positionId, tAxisScaleY);
             ownerInfo.svgEleData = text
-              .tspan(' ')
+              .tspan('')
               .font({ size: fontSize, fill: TXT_DATA_COLOR });
           }
         } else {
@@ -908,7 +896,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
             yAxisPoint -= fontSize * leading * 0.5;
 
             ownerInfo.svgEleData = text
-              .tspan(' ')
+              .tspan('')
               .newLine()
               .font({ size: fontSize, fill: TXT_DATA_COLOR });
           }
@@ -956,6 +944,169 @@ function refineNodeData(mdNodeInfo, data) {
 }
 
 /**
+ * showNodeData()에서 데이터 변경이 이루어지고 SVG View 옵션이 Number 일 경우 SVG 변경 유효성 검토
+ * @param {number} data number 형식 데이터
+ * @param {mSvgNumTreholdInfo[]} tresholdList 숫자 값 변화에 따른 SVG 표현
+ */
+function isReachNumGoal(data, tresholdList = []) {
+  // console.log('isReachNumGoal');
+  const nData = Number(data);
+  const svgIdx = _.findIndex(tresholdList, threInfo => {
+    const { goalValue, goalRange, isInclusionGoal = 0 } = threInfo;
+
+    switch (goalRange) {
+      case goalDR.EQUAL:
+        return nData === goalValue;
+      case goalDR.LOWER:
+        return isInclusionGoal ? nData <= goalValue : nData < goalValue;
+      case goalDR.UPPER:
+        return isInclusionGoal ? nData >= goalValue : nData > goalValue;
+      default:
+        break;
+    }
+  });
+
+  return {
+    // 데이터 유효성이 검증되지 않더라도 유효한 데이터로 처리
+    isValid: 1,
+    svgIndex: svgIdx,
+  };
+}
+
+/**
+ * showNodeData()에서 데이터 변경이 이루어지고 SVG View 옵션이 String 일 경우 SVG 변경 유효성 검토
+ * @param {string} data string 형식 데이터
+ * @param {string[][]} tresholdList string 형식 데이터
+ */
+function isReachStrGoal(data, tresholdList) {
+  data = typeof data === 'string' ? data : data.toString();
+  const svgIdx = _.findIndex(tresholdList, strThreList => strThreList.includes(data));
+
+  return {
+    // 데이터 유효성이 검증되지 않더라도 유효한 데이터로 처리
+    isValid: 1,
+    svgIndex: svgIdx,
+  };
+}
+
+/**
+ * 기본 형태의 데이터 변화가 생길 경우
+ * @param {mdNodeInfo} mdNodeInfo
+ * @param {boolean} isValidError
+ */
+function changeSvgViewNormal(mdNodeInfo, isValidError) {
+  const {
+    nodeData,
+    svgViewInfo,
+    svgModelResource: {
+      elementDrawInfo: {
+        color: bgColor,
+        color: [baseColor],
+        errColor = 'red',
+        svgClass = [],
+        svgClass: [baseClass] = [],
+      },
+      textStyleInfo: { dataColor = [], dataColor: [baseTxtColor] = [] } = {},
+    },
+  } = mdNodeInfo;
+
+  let selBgClass = '';
+  let selBgColor = '';
+  let selDataColor = '';
+
+  // 데이터 임계치에 따른 SVG 변화 옵션이 없을 경우 (기본)
+  if (_.isEmpty(svgViewInfo)) {
+    selBgClass = isValidError && svgClass[0] ? 'red' : '';
+    selBgColor = isValidError ? errColor : baseColor;
+  } else {
+    const { isStrType = 1, thresholdList } = svgViewInfo;
+
+    // SVG 임계 옵션 flag에 따라 검토. 값의 유효성과 표현해야 할 SVG Index 추출
+    const { isValid, svgIndex } =
+      isStrType === 1
+        ? isReachStrGoal(nodeData, thresholdList)
+        : isReachNumGoal(nodeData, thresholdList);
+
+    isValidError = !isValid;
+
+    // 값이 유효할 경우에만 정의
+    if (isValid) {
+      selBgClass = svgClass[svgIndex] ?? baseClass;
+      selBgColor = bgColor[svgIndex] ?? baseColor;
+      selDataColor = dataColor[svgIndex] ?? baseTxtColor;
+    }
+  }
+
+  return {
+    isValidError,
+    selBgClass,
+    selBgColor,
+    selDataColor,
+  };
+}
+
+/**
+ * 테이블 형태의 데이터 변화가 생길 경우
+ * @param {mdNodeInfo} mdNodeInfo
+ * @param {boolean} isValidError
+ */
+function changeSvgViewInsideTbl(mdNodeInfo, isValidError) {
+  const {
+    nodeData,
+    svgViewInfo,
+    svgModelResource: {
+      elementDrawInfo: {
+        color: bgColor,
+        color: [baseColor],
+        errColor = 'red',
+        svgClass = [],
+        svgClass: [baseClass] = [],
+        insideInfo: {
+          bodyInfo: {
+            fontColor,
+            fontColor: [baseTxtColor],
+          },
+        },
+      },
+    },
+  } = mdNodeInfo;
+
+  let selBgClass = '';
+  let selBgColor = '';
+  let selDataColor = '';
+
+  // 데이터 임계치에 따른 SVG 변화 옵션이 없을 경우 (기본)
+  if (_.isEmpty(svgViewInfo)) {
+    selBgClass = isValidError && svgClass[0] ? 'red' : undefined;
+    selBgColor = isValidError ? errColor : baseColor;
+  } else {
+    const { isStrType = 1, thresholdList } = svgViewInfo;
+
+    // SVG 임계 옵션 flag에 따라 검토. 값의 유효성과 표현해야 할 SVG Index 추출
+    const { isValid, svgIndex } =
+      isStrType === 1
+        ? isReachStrGoal(nodeData, thresholdList)
+        : isReachNumGoal(nodeData, thresholdList);
+
+    isValidError = !isValid;
+
+    // 값이 유효할 경우에만 정의
+    if (isValid) {
+      selBgClass = svgClass[svgIndex] ?? baseClass;
+      selBgColor = bgColor[svgIndex] ?? baseColor;
+      selDataColor = fontColor[svgIndex] ?? baseTxtColor;
+    }
+  }
+
+  return {
+    isValidError,
+    selBgClass,
+    selBgColor,
+    selDataColor,
+  };
+}
+
+/**
  * 노드 또는 센서에 데이터 표시
  * @param {string} nodeId
  * @param {number|string} data 데이터 값
@@ -969,15 +1120,9 @@ function showNodeData(nodeId, data = '') {
 
     const {
       nodeData,
-      isSensor,
       dataUnit = '',
       svgModelResource: {
-        elementDrawInfo: {
-          color: [baseColor, actionColor],
-          errColor = 'red',
-          svgClass = [],
-        },
-        textStyleInfo: { dataColor: [txtBaseColor, txtActionColor] = [] } = {},
+        elementDrawInfo: { insideInfo },
       },
       svgEleBg,
       svgEleData,
@@ -998,64 +1143,36 @@ function showNodeData(nodeId, data = '') {
     // 현재 데이터와 수신 받은 데이터가 같다면 종료
     if (nodeData === cData) return false;
 
-    // data의 상태에 따라 tspan(data, dataUnit) 색상 및 Visible 변경
-    let isValidData = 0;
-    let selectedColor = baseColor;
-    let selectedIndex = 0;
-    let selectedTxtColor = txtBaseColor;
+    // if (nodeId === 'ST_006') {
+    //   console.log('showNodeData', nodeId, data, cData, insideInfo);
+    // }
 
-    // node 타입이 Sensor 일 경우에는 Number 형식이 와야함. 아닐 경우 에러
-    if (isSensor === 1 || typeof cData === 'number') {
-      if (cData === '' || cData === undefined) {
-        selectedColor = errColor;
-      } else {
-        isValidData = 1;
+    const errDataList = ['', null, undefined];
 
-        // string 형식일 경우에는 dataRange 체크
-        if (typeof cData === 'string' && DATA_RANGE.TRUE.includes(cData.toUpperCase())) {
-          selectedTxtColor = txtActionColor;
-        }
-      }
-    } else {
-      // node 타입이 Device 일 경우에는 DATA_RANGE 범위 측정. 아닐 경우 에러
-      const strData = _.toString(cData);
-      const strUpperData = strData.toUpperCase();
+    // 기본적인 데이터 검증 => Error 범위에 들어 올 경우
+    // const isValidError = errDataList.includes(data);
 
-      // 데이터가 들어오면 유효한 데이터
-      if (strData.length) {
-        isValidData = 1;
-        selectedIndex = 1;
-        selectedColor = actionColor;
-        // False 영역일 경우
-        if (DATA_RANGE.FALSE.includes(strUpperData)) {
-          selectedColor = baseColor;
-          selectedIndex = 0;
-        }
-      } else {
-        selectedColor = errColor;
-        selectedIndex = -1;
-      }
-    }
+    const { isValidError, selBgClass, selBgColor, selDataColor } =
+      insideInfo === undefined
+        ? changeSvgViewNormal(mdNodeInfo, errDataList.includes(data))
+        : changeSvgViewInsideTbl(mdNodeInfo, errDataList.includes(data));
 
-    // 배경 색상 변경
-    selectedColor && svgEleBg && svgEleBg.fill(selectedColor);
+    // if (nodeId === 'ST_006') {
+    //   console.log(isValidError, selBgClass, selBgColor, selDataColor);
+    // }
 
-    // 데이터가 용이하고 class 가 존재할 경우 대체
-    if (svgClass.length) {
-      isValidData
-        ? svgEleBg.attr('class', svgClass[selectedIndex])
-        : svgEleBg.attr('class', errColor);
-    }
-    // 데이터 색상 변경
-    svgEleData.font({ fill: selectedTxtColor });
+    // 변경하고자 하는 값이 유효하고 SVG Element가 존재할 경우에 적용
+    selBgClass && svgEleBg && svgEleBg.attr('class', selBgClass);
+    selBgColor && svgEleBg && svgEleBg.fill(selBgColor);
+    selDataColor && svgEleData && svgEleData.font({ fill: selDataColor });
 
-    if (isValidData) {
-      svgEleData.text(cData);
-      svgEleDataUnit.text(dataUnit);
-    } else {
-      // data가 유효범위가 아닐 경우
+    // data가 유효범위가 아닐 경우
+    if (isValidError) {
       svgEleData.clear();
       svgEleDataUnit.clear();
+    } else {
+      svgEleData.text(cData);
+      svgEleDataUnit.text(` ${dataUnit}`);
     }
 
     return false;
@@ -1253,36 +1370,31 @@ function confirmCommand(mdCmdInfo) {
  */
 function drawSvgBasePlace(svgCanvas) {
   const {
-    backgroundData = 'yellowgreen',
+    backgroundData = '#3C4854',
     coverData = '',
     backgroundPosition: [bgPosX, bgPosY] = [0, 0],
   } = backgroundInfo;
 
   // 브라우저 크기에 반응하기 위한 뷰박스 세팅
   svgCanvas.viewbox(0, 0, mapWidth, mapHeight);
+  // console.log(typeof backgroundData, backgroundData);
 
   // 백그라운드 정보가 있을 경우
-  if (backgroundData.length > 0) {
-    if (backgroundData.includes('map')) {
-      // map에 배경의 데이터가 있을경우 배경 이미지 지정
-      svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
-    } else {
-      // 일반 색상으로 표현하고자 할 경우
-      const bgColor = backgroundData.length === 0 ? '#fff3bf' : backgroundData;
+  if (backgroundData.includes('map')) {
+    // map에 배경의 데이터가 있을경우 배경 이미지 지정
+    svgCanvas.image(backgroundData).move(bgPosX, bgPosY);
+  } else {
+    // 일반 색상으로 표현하고자 할 경우
+    const bgColor = backgroundData.length === 0 ? '#3C4854' : backgroundData;
 
-      svgCanvas
-        .rect(mapWidth, mapHeight)
-        .fill(bgColor)
-        .stroke({
-          width: 1,
-          color: '#ccc',
-        })
-        .opacity(0.1);
-    }
+    svgCanvas.rect(mapWidth, mapHeight).fill(bgColor).stroke({
+      width: 1,
+      color: '#ccc',
+    });
+    // .opacity(0.1);
   }
 
   // 트리거 이미지 생성 불러옴
-  // eslint-disable-next-line no-undef
   initTriggerImg(svgCanvas, mdNodeStorage, imgTriggerList);
 
   // 이미지 커버가 존재할 경우
@@ -1359,15 +1471,28 @@ function drawSvgBasePlace(svgCanvas) {
  * Simulator 데이터 입력
  */
 function runSimulator() {
+  const DATA_RANGE = {
+    TRUE: ['OPEN', 'OPENING', 'ON', '1', 'FOLD', 'AUTO', 'A'],
+    FALSE: ['CLOSE', 'CLOSING', 'OFF', '0', 'UNFOLD', 'MANUAL', 'M'],
+  };
   // SVG('#IVT_PW_G_KW_1_title').clear().text('TEST');
 
   mdNodeStorage.forEach(mdNodeInfo => {
-    const { nodeId, isSensor, modbusInfo } = mdNodeInfo;
+    const { nodeId, isSensor, modbusInfo, ncId, svgViewInfo } = mdNodeInfo;
 
     let nodeData;
-    // 모드버스 형태일 경우
+    // 모드버스가 아닐 경우
     if (modbusInfo === undefined) {
-      if (isSensor) {
+      if (svgViewInfo) {
+        const { isStrType = 1, thresholdList: tresholdList = [] } = svgViewInfo;
+        if (isStrType === 1) {
+          const strThreList = tresholdList[_.random(0, tresholdList.length - 1)];
+
+          nodeData = strThreList[_.random(strThreList[(0, strThreList.length - 1)])];
+        } else {
+          nodeData = _.round(_.random(-1000, 1000, true), 2);
+        }
+      } else if (isSensor === 1) {
         nodeData = _.round(_.random(0, 1000, true), 2);
       } else {
         const isDataType = _.random(0, 2);

@@ -56,6 +56,8 @@ router.get(
     // 인버터 현재 상태 데이터 동적 생성 돔
     const invStatusBodyDom = domMakerInverter.makeInverterStatusList(inverterStatusList);
 
+    // BU.CLI(invStatusBodyDom);
+
     _.set(req, 'locals.dom.invStatusBodyDom', invStatusBodyDom);
 
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
