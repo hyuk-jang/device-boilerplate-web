@@ -20,7 +20,14 @@ const AWAITER = 'awaiter';
 let selectedRouter;
 switch (process.env.PJ_MAIN_ID) {
   case 'UPSAS':
-    selectedRouter = upsas;
+    switch (process.env.PJ_SUB_ID) {
+      case 'smRooftop':
+        selectedRouter = users;
+        break;
+      default:
+        selectedRouter = upsas;
+        break;
+    }
     break;
   case 'FP':
     selectedRouter = users;

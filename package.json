@@ -67,7 +67,7 @@
     "request": "^2.88.2",
     "rtsp-ffmpeg": "0.0.15",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^3.1.2",
+    "socket.io": "^4.0.0",
     "split": "^1.0.1",
     "uuid": "^8.3.2",
     "weather-cast": "^0.3.1",
