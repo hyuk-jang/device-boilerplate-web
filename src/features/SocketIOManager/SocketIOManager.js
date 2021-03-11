@@ -37,7 +37,7 @@ class SocketIOManager extends AbstSocketIOManager {
    * @param {httpServer} httpServer
    */
   setSocketIO(httpServer) {
-    this.io = new SocketIO(httpServer);
+    this.io = SocketIO(httpServer);
 
     this.io.on('connection', socket => {
       // BU.CLI('connection', socket.id);
@@ -229,18 +229,19 @@ class SocketIOManager extends AbstSocketIOManager {
           }
 
           // // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
-          const foundReqCmd = _.find(reqCmdList, reqCmd => {
-            return _.isEqual(reqCmd.reqCmdInfo.contents, algorithmId);
-          });
+          const foundReqCmd = _.find(reqCmdList, reqCmd =>
+            _.isEqual(reqCmd.reqCmdInfo.contents, algorithmId),
+          );
 
           if (foundReqCmd) {
             throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
           }
 
           // 요청한 사용자 정보 추출
-          const userInfo = _.find(msUserList, msUserInfo => {
-            return msUserInfo.socketClient === socket;
-          });
+          const userInfo = _.find(
+            msUserList,
+            msUserInfo => msUserInfo.socketClient === socket,
+          );
 
           if (userInfo === undefined) {
             throw new Error('사용자 정보를 찾을 수 없습니다. 관리자에게 문의해주십시오.');
@@ -287,18 +288,19 @@ class SocketIOManager extends AbstSocketIOManager {
       }
 
       // 동일한 명령이 이미 사용자로부터 요청되었는지 체크
-      const foundReqCmd = _.find(reqCmdList, reqCmd => {
-        return _.isEqual(reqCmd.reqCmdInfo.contents, executeCmdInfo);
-      });
+      const foundReqCmd = _.find(reqCmdList, reqCmd =>
+        _.isEqual(reqCmd.reqCmdInfo.contents, executeCmdInfo),
+      );
 
       if (foundReqCmd) {
         throw new Error('다른 사용자가 동일한 명령 요청중입니다.');
       }
 
       // 요청한 사용자 정보 추출
-      const userInfo = _.find(msUserList, msUserInfo => {
-        return msUserInfo.socketClient === socket;
-      });
+      const userInfo = _.find(
+        msUserList,
+        msUserInfo => msUserInfo.socketClient === socket,
+      );
 
       if (userInfo === undefined) {
         throw new Error('사용자 정보를 찾을 수 없습니다. 관리자에게 문의해주십시오.');
@@ -346,8 +348,8 @@ class SocketIOManager extends AbstSocketIOManager {
     // BU.CLIN(renewalList)
 
     return _.chain(renewalList)
-      .map(nodeInfo => {
-        return _.chain(nodePickKey.FOR_USER)
+      .map(nodeInfo =>
+        _.chain(nodePickKey.FOR_USER)
           .reduce((result, value, key) => {
             result[value] = _.get(nodeInfo, key, '');
             return result;
@@ -363,8 +365,8 @@ class SocketIOManager extends AbstSocketIOManager {
               [[nodePickKey.FOR_USER.place_name_list]]: placeNameList,
             });
           })
-          .value();
-      })
+          .value(),
+      )
       .sortBy(nodePickKey.FOR_USER.node_id)
       .value();
   }

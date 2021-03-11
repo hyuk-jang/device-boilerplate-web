@@ -21,3 +21,4 @@ ecosystem.config.js
 *.log
 ~$*.*
 .env
+ecosystem.config
