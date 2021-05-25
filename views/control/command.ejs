@@ -11,23 +11,19 @@
     <!-- SVG Map을 생성하고 관리하기 위한 Core Library -->
     <script src="/socket.io/socket.io.js"></script>
 
-    <!-- Custom 제어 Confirm 창 구현을 위한 Library -->
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
-    <script
-      src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-      crossorigin="anonymous"
-    ></script>
-
     <!-- 제어 표 구현을 위한 Library -->
     <link rel="stylesheet" href="/css/bootstrap/bootstrap-table.min.css" />
     <script src="/js/bootstrap/bootstrap-table.min.js"></script>
 
     <!-- FIXME: -->
-    <script
+    <!-- <script
       src="https://kit.fontawesome.com/03372b7b51.js"
       crossorigin="anonymous"
-    ></script>
+    ></script> -->
+
+    <link rel="stylesheet" href="/css/fontawesome/v4-shims.css" />
+    <link rel="stylesheet" href="/css/fontawesome/all.min.css" />
+
     <link rel="stylesheet" href="/css/style.css" />
   </head>
 
@@ -46,6 +42,11 @@
     var chartDomList = <%- JSON.stringify(dom.chartDomList) %>;
     // 생성하고자 하는 차트 목록
     var chartList = <%- JSON.stringify(chartList) %>;
+
+    const CF_SINGLE = 'SINGLE';
+    const CF_SET = 'SET';
+    const CF_FLOW = 'FLOW';
+    const CF_SCENARIO = 'SCENARIO';
   </script>
 
   <body>
@@ -91,7 +92,7 @@
             </div>
           </div>
         </div>
-        <%- include("./addCommand.ejs") %> <%- include("./confirmCommand.ejs") %>
+        <%- include("./confirmCommand.ejs") %>
         <!-- Content -->
         <div id="controlContent">
           <!-- Svg Map -->
@@ -100,11 +101,18 @@
               <%- include("./sidebar.ejs") %>
               <!-- SVG canvas -->
               <div class="svg-contents-area">
+                <!-- FIXME: 조개 껍데기 -->
                 <div
                   class="toggle btn btn-default"
                   name="sidebar-toggle"
                   title="사이드바 열기"
-                ></div>
+                  style="font-size: 2.5rem; color: white"
+                >
+                  <span class="icon">
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                  </span>
+                  <!-- <span class="title">link</span> -->
+                </div>
                 <div class="svg_area" id="canvas">
                   <%- include('../master/filter.ejs') %> <%-
                   include('../master/filter.btn.ejs') %>
@@ -468,6 +476,7 @@
 
       // SVG Device click을 통한 제어
       function reqSingleControl(nodeId, singleControlType, controlSetValue) {
+        // console.log(nodeId, singleControlType, controlSetValue);
         socket.emit('executeCommand', {
           // 기본 값은 명령 요청
           nodeId,
@@ -478,7 +487,32 @@
 
       // 명령 요청
       function reqCommandControl(wsGenerateControlCmdAPI) {
-        socket.emit('executeCommand', wsGenerateControlCmdAPI);
+        // console.log(wsGenerateControlCmdAPI);
+
+        // FIXME: 조개 껍데기
+        const cctvHref = <%- JSON.stringify(cctv) %>;
+        const perWeight = Number(<%- JSON.stringify(perWeight) %>);
+        const cntData = mdNodeStorage.get('CNT').nodeData;
+
+        switch (wsGenerateControlCmdAPI.cmdId) {
+          case 'ADD_COUNT':
+            showNodeData('CNT', cntData + 1);
+            showNodeData('CUM_WEI', (cntData + 1) *  perWeight);
+            break;
+          case 'RESET_COUNT':
+            showNodeData('CNT', 0);
+            showNodeData('CUM_WEI', 0);
+            break;
+          case 'CONN_CCTV':
+            window.open('about:blank').location.href = cctvHref;
+            // location.href = '';
+            break;
+
+          default:
+            break;
+        }
+
+        // socket.emit('executeCommand', wsGenerateControlCmdAPI);
       }
 
       // Browser >>> Server 이벤트 바인딩
@@ -529,6 +563,10 @@
 
         threImgManager.handleThresholdClear();
         // Trigger 이미지 임계치 확인
+
+        // FIXME: 조개 껍데기 더미 데이터 세팅
+        showNodeData('CNT', 0);
+        showNodeData('CUM_WEI', 0);
 
         // FIXME: TEST 용
         // setTimeout(() => {

@@ -181,11 +181,6 @@
   // 명령 Select Dom Template
   const cmdTemplate = _.template('<option value="${ cmdId }"> ${ cmdName }</option>');
 
-  const CF_SINGLE = 'SINGLE';
-  const CF_SET = 'SET';
-  const CF_FLOW = 'FLOW';
-  const CF_SCENARIO = 'SCENARIO';
-
   // 명령 형식 존재 여부에 따라 Select 초기화
   function initCmdFormatSel() {
     const $cmdFormatSel = $('#cmdFormatSel');

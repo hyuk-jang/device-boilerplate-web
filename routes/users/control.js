@@ -67,6 +67,10 @@ router.get(
 
     req.locals.map = JSON.parse(baseMap);
 
+    // FIXME: 조개 껍데기
+    req.locals.perWeight = process.env.PER_WEIGHT;
+    req.locals.cctv = process.env.CCTV_HREF;
+
     const { chartDomList, chartList } = await commonUtil.getDynamicChartDom({
       searchRange,
       siteId,

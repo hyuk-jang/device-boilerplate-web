@@ -1,12 +1,12 @@
-<div id="dialog-dynamic" title="" style="display: none;"></div>
+<div id="dialog-dynamic" title="" style="display: none"></div>
 <script id="dialog-dynamic-template" type="template">
   <p>{{ confirmMsg }}</p>
   {{#if isSetValue}}
-  <p>{{ setMsg }} <input type="number" min="{{ min }}" max="{{ max }}" name="" placeholder="{{ min }} ~ {{ max }}" id="dialog-dynamic-input" class="ui-widget-content ui-corner-all" /></p>
+  <p>{{ setMsg }} <input type="number" min="{{ min }}" max="{{ max }}" name="" placeholder="{{ min }} ~ {{ max }}" id="dialog-dynamic-input" class="ui-widget-content ui-corner-all" value="{{ defaultValue }}" /></p>
   {{/if}}
 </script>
 
-<script>
+<!-- <script>
   function showDynamicDialog(title, buttonFn) {
     $('#dialog-dynamic').dialog({
       width: 300,
@@ -20,5 +20,69 @@
       closeText: 'Close',
       buttons: buttonFn,
     });
+  }
+</script> -->
+
+<!-- FIXME: 모달 창 크기 변경 필요시 수정 -->
+<style>
+  .ui-dialog-titlebar span {
+    font-size: 3vw;
+  }
+  .ui-dialog-titlebar button {
+    display: none;
+  }
+
+  #dialog-dynamic {
+    font-size: 4vw;
+  }
+  #dialog-dynamic h2 {
+    font-size: larger;
+  }
+  #dialog-dynamic div {
+    font-size: 4vw;
+  }
+  #dialog-dynamic div.bigger {
+    font-size: 150%;
+  }
+  #dialog-dynamic input {
+    width: 50%;
+  }
+</style>
+
+<script>
+  function showDynamicDialog(title, buttonFn) {
+    $('#dialog-dynamic').dialog({
+      width: '70%',
+      modal: true,
+      position: {
+        my: 'center',
+        at: 'top',
+        of: '#canvas',
+        collision: 'fit',
+      },
+      title,
+      open: function () {
+        $('.ui-widget-overlay').bind('click', function () {
+          $('#dialog-dynamic').dialog('close');
+        });
+      },
+      closeText: 'Close',
+      buttons: buttonFn,
+    });
+
+    // FIXME: 모달 창 크기 변경 필요시 수정
+    const btnClassList = ['blue', 'red', 'green', 'black', 'pink', 'orange', 'gray'];
+    const btnFontSize = 4;
+
+    document
+      .querySelector('.ui-dialog-buttonset')
+      .querySelectorAll('button')
+      .forEach((ele, idx) => {
+        ele.classList.add(btnClassList[idx]);
+        ele.style.fontSize = `${btnFontSize}vw`;
+        ele.style.marginLeft = `${btnFontSize / 2}vw`;
+      });
+
+    // .css('font-size', '20px');
   }
 </script>

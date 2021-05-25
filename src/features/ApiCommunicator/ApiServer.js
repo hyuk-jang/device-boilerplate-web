@@ -43,10 +43,8 @@ class ApiServer extends AbstApiServer {
           try {
             // Parser 가 EOT 까지 삭제하므로 끝에 붙임
             data += EOT;
-            // BU.CLI(data);
             // 수신받은 데이터의 CRC 계산 및 본 데이터 추출
             const strData = decodingMsg(data).toString();
-            // BU.CLI(strData);
 
             // JSON 형태로만 데이터를 받아 들임.
             if (!BU.IsJsonString(strData)) {
@@ -65,7 +63,6 @@ class ApiServer extends AbstApiServer {
             // 응답할 데이터가 존재하지 않을 경우 무시
             if (_.isEmpty(responseDataByServer)) return false;
 
-            // BU.CLI(responseDataByServer);
             socket.write(encodingMsg(responseDataByServer));
           } catch (error) {
             socket.write(encodingMsg(CAN));

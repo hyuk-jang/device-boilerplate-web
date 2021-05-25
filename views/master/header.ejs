@@ -109,6 +109,9 @@
     location.href = window.location.origin + '/' + naviId + '/' + $(this).val();
   });
 
+  // FIXME: '조개 껍데기
+  document.querySelector('header').style.display = 'none';
+
   // 페이지 동적 바인딩이 완료되었을 경우 View 처리
   window.onload = function () {
     document.getElementById('wrap').classList.remove('hidden');

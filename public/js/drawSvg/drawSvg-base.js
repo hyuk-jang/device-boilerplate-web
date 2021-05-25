@@ -221,6 +221,8 @@ function initDrawSvg(isProd = true) {
     const {
       defList: nodeDefList = [],
       is_sensor: isSensor = 1,
+      is_submit_api: isSubmitApi = 1,
+      isRealDevice = 1,
       target_id: ncId,
       target_name: ncName,
       data_unit: dataUnit,
@@ -292,6 +294,8 @@ function initDrawSvg(isProd = true) {
           nodeData: undefined,
           modbusInfo,
           isSensor,
+          isSubmitApi,
+          isRealDevice,
           dataUnit,
           axisScale,
           moveScale,
@@ -450,6 +454,7 @@ function drawInsideElement(svgDrawInfo, drawType) {
     ownerInfo,
     ownerInfo: {
       isSensor,
+      isSubmitApi,
       svgModelResource: {
         elementDrawInfo,
         elementDrawInfo: {
@@ -543,14 +548,17 @@ function drawInsideElement(svgDrawInfo, drawType) {
     id: positionId,
   };
 
+  // 데이터가 존재하는 노드인지 여부
+  const isDataNode = drawType === DRAW_TYPE.NODE && isSubmitApi === 1;
+
   // 클래스를 지정한다면 Attr 추가
   if (defaultSvgClass) {
-    bodyOption.class = errColor;
+    bodyOption.class = isDataNode ? errColor : defaultSvgClass;
     bodyCanvasElement.attr('class', errColor);
   }
   // 노드일 경우
   if (drawType === DRAW_TYPE.NODE) {
-    defaultColor = errColor;
+    defaultColor = isDataNode ? errColor : defaultColor;
     defaultColor && bodyCanvasElement.fill(defaultColor);
     isSensor === SENSOR_TYPE.DEVICE && _.set(bodyOption, 'cursor', 'pointer');
   }
@@ -705,6 +713,7 @@ function drawSvgElement(svgDrawInfo, drawType) {
     ownerInfo,
     ownerInfo: {
       isSensor,
+      isSubmitApi,
       svgModelResource: {
         type: elementType,
         elementDrawInfo,
@@ -745,13 +754,16 @@ function drawSvgElement(svgDrawInfo, drawType) {
   if (insideInfo === undefined) {
     bgOption.id = positionId;
 
+    // 데이터가 존재하는 노드인지 여부
+    const isDataNode = drawType === DRAW_TYPE.NODE && isSubmitApi === 1;
+
     // 클래스를 지정한다면 Attr 추가
     if (defaultSvgClass) {
-      bgOption.class = drawType === DRAW_TYPE.NODE ? errColor : defaultSvgClass;
+      bgOption.class = isDataNode ? errColor : defaultSvgClass;
     }
 
     isSensor === SENSOR_TYPE.DEVICE && _.set(bgOption, 'cursor', 'pointer');
-    defaultColor = drawType === DRAW_TYPE.NODE ? errColor : defaultColor;
+    defaultColor = isDataNode ? errColor : defaultColor;
   }
 
   // 필터 정보가 있다면 Attr 추가 정의
@@ -949,7 +961,7 @@ function refineNodeData(mdNodeInfo, data) {
  * @param {mSvgNumTreholdInfo[]} tresholdList 숫자 값 변화에 따른 SVG 표현
  */
 function isReachNumGoal(data, tresholdList = []) {
-  // console.log('isReachNumGoal');
+  // console.log('isReachNumGoal', data, tresholdList);
   const nData = Number(data);
   const svgIdx = _.findIndex(tresholdList, threInfo => {
     const { goalValue, goalRange, isInclusionGoal = 0 } = threInfo;
@@ -1246,7 +1258,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
   const {
     scenarioMsg = '제어 동작을 선택하세요.',
     isSetValue = false,
-    setValueInfo: { msg = '', min = 0, max = 100 } = {},
+    setValueInfo: { msg = '', min = 0, max = 100, defaultValue = '' } = {},
     subCmdList: confirmList = [
       {
         enName: 'On/Open',
@@ -1268,9 +1280,9 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
 
   // 동적 다이어로그 구성
   const btnFn = confirmList.reduce((btnFnInfo, dConfirmInfo) => {
-    const { krName, controlValue, nextStepInfo } = dConfirmInfo;
+    const { krName, controlValue, controlSetValue, nextStepInfo } = dConfirmInfo;
 
-    let deviceSetValue = '';
+    let deviceSetValue;
     if (nextStepInfo === undefined) {
       // 다음 스텝이 없으면 즉시 실행
       // eslint-disable-next-line func-names
@@ -1295,9 +1307,20 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
           }
         }
 
+        // Control할 값이 존재할 경우
+        if (controlSetValue) {
+          // Modbus 요청일 경우
+          if (_.has(controlSetValue, 'fnCode')) {
+            deviceSetValue && _.set(controlSetValue, 'cmd', deviceSetValue);
+            deviceSetValue = JSON.stringify(controlSetValue);
+          } else {
+            deviceSetValue = controlSetValue;
+          }
+        }
+
         $(this).dialog('close');
 
-        // console.log('Execute', deviceSetValue, controlValue);
+        // console.log('Execute', controlValue, deviceSetValue);
         typeof reqSingleControl === 'function' &&
           reqSingleControl(nodeId, controlValue, deviceSetValue);
       };
@@ -1320,6 +1343,7 @@ function confirmDeviceControl(mdNodeInfo, dCmdScenarioInfo = {}) {
     setMsg: msg,
     min,
     max,
+    defaultValue,
   });
 
   const $dynamicDialog = $('#dialog-dynamic');
@@ -1359,7 +1383,6 @@ function confirmCommand(mdCmdInfo) {
   const confirmMsg = `명령('${cmdName}')을 ${reqMsg}하시겠습니까?`;
   // 명령을 수행할 경우
   if (confirm(confirmMsg)) {
-    console.log(wsGenerateControlCmdAPI);
     typeof reqCommandControl === 'function' && reqCommandControl(wsGenerateControlCmdAPI);
   }
 }
@@ -1438,6 +1461,7 @@ function drawSvgBasePlace(svgCanvas) {
     );
 
     // 노드 타입이 장치라면 클릭 이벤트 바인딩
+    // if (mdNodeInfo.isSensor === SENSOR_TYPE.DEVICE || mdNodeInfo.isRealDevice === 0) {
     if (mdNodeInfo.isSensor === SENSOR_TYPE.DEVICE) {
       svgCanvasBgElement.click(() => {
         confirmDeviceControl(mdNodeInfo);
@@ -1482,7 +1506,7 @@ function runSimulator() {
 
     let nodeData;
     // 모드버스가 아닐 경우
-    if (modbusInfo === undefined) {
+    if (modbusInfo === undefined || svgViewInfo) {
       if (svgViewInfo) {
         const { isStrType = 1, thresholdList: tresholdList = [] } = svgViewInfo;
         if (isStrType === 1) {

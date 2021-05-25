@@ -86,7 +86,8 @@
 }
 
 .toggle:before {
-  content: '\f101';
+  /* FIXME: 조개껍데기 */
+  /* content: '\f101'; */
   font-family: fontAwesome;
   font-size: 24px;
   color: #fff;
