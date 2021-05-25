@@ -1,3 +1,4 @@
+const clamConfig = require('./ETC/clam.config');
 const solarIotConfig = require('./ETC/solarIot.config');
 const fpConfig = require('./FarmParallel/fp.config');
 const hsConfig = require('./S2W/hs.config');
@@ -9,6 +10,9 @@ module.exports = (mainId, subId) => {
   switch (mainId) {
     case 'ETC':
       switch (subId) {
+        case 'CLAM':
+          projectConfig = clamConfig;
+          break;
         default:
           projectConfig = solarIotConfig;
           break;

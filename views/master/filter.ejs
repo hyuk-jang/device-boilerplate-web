@@ -19,7 +19,7 @@
 
   <filter id="deviceShadow" height="130%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2"> </feGaussianBlur>
-    <feOffset dx="1" dy="1" result="offsetblur"> </feOffset>
+    <feOffset dx="2" dy="2" result="offsetblur"> </feOffset>
     <feComponentTransfer>
       <feFuncA type="linear" slope="0.5"> </feFuncA>
     </feComponentTransfer>
@@ -28,6 +28,13 @@
       <feMergeNode in="SourceGraphic"> </feMergeNode>
     </feMerge>
   </filter>
+
+  <linearGradient id="bg-black-1" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0a0a0a"></stop>
+    <stop offset="33%" stop-color="#080808"></stop>
+    <stop offset="66%" stop-color="#040404"></stop>
+    <stop offset="100%" stop-color="#000"></stop>
+  </linearGradient>
 
   <linearGradient id="bg-sky-1" x2="100%" y2="100%">
     <stop offset="0%" stop-color="#dbe4ff"></stop>
@@ -49,9 +56,23 @@
     <stop offset="100%" stop-color="#a1a6a3"></stop>
   </linearGradient>
 
+  <linearGradient id="bg-gray-2" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#888"></stop>
+    <stop offset="100%" stop-color="#575757"></stop>
+  </linearGradient>
+
   <linearGradient id="bg-green-1" x2="0%" y2="100%">
     <stop offset="0%" stop-color="#18ff55"></stop>
-    <stop offset="50%" stop-color="#0be343"></stop>
     <stop offset="100%" stop-color="#0bc33b"></stop>
+  </linearGradient>
+
+  <linearGradient id="bg-green-2" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#7db72f"></stop>
+    <stop offset="100%" stop-color="#4e7d0e"></stop>
+  </linearGradient>
+
+  <linearGradient id="bg-orange-1" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#faa51a"></stop>
+    <stop offset="100%" stop-color="#f47a20"></stop>
   </linearGradient>
 </defs>
